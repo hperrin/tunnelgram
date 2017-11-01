@@ -1,0 +1,18 @@
+#ARG PHP_VERSION=7.1
+#ARG POSTGRES_VERSION=10
+#ARG POSTGRES_PASSWORD=n8bhrtw578b
+#ARG POSTGRES_USER=nymph
+#ARG POSTGRES_DB=nymph_db
+
+### Postgres Database Server
+#FROM postgres:${POSTGRES_VERSION}
+#ENV POSTGRES_PASSWORD ${POSTGRES_PASSWORD}
+#ENV POSTGRES_USER ${POSTGRES_USER}
+#ENV POSTGRES_DB ${POSTGRES_DB}
+#ENV PGDATA /var/lib/postgresql/data/pgdata
+
+### Nymph REST Server
+#FROM php:${PHP_VERSION}-apache
+
+### Nymph PubSub Server
+#FROM php:${PHP_VERSION}-apache

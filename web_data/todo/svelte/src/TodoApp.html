@@ -1,0 +1,177 @@
+<div>
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="list-group" style="clear: both;">
+        {{#each todos as todo}}
+          <TodoEl bind:todo="todo" archived="{{uiShowArchived}}"></TodoEl>
+        {{/each}}
+      </div>
+    </div>
+    <div class="col-sm-4" style="text-align: center; margin-bottom: 1em;">
+      <small class="alert alert-info" style="display: block;">
+        {{#if uiShowArchived}}
+          <span>{{todos.length}} archived todos</span>
+        {{else}}
+          <span>
+            {{#if todos.length == 0}}
+              <span>0 todos</span>
+            {{else}}
+              <span>{{remaining}} of {{todos.length}} remaining</span>
+            {{/if}}
+          </span>
+        {{/if}}
+        {{#if todos.length > 0}}
+          <span>
+            [
+            {{#if uiShowArchived}}
+              <a href="javascript:void(0)" on:click="deleteTodos()">delete</a>
+            {{else}}
+              <a href="javascript:void(0)" on:click="archive()">archive done</a>
+            {{/if}}
+            ]
+          </span>
+        {{/if}}
+        <br>
+        {{#if uiShowArchived}}
+          <a href="javascript:void(0)" on:click="getTodos(false)">show current</a>
+        {{else}}
+          <a href="javascript:void(0)" on:click="getTodos(true)">show archived</a>
+        {{/if}}
+      </small>
+      {{#if todos.length > 1}}
+        <div style="text-align: left;">
+          Sort: <br>
+          <label style="font-weight: normal;">
+            <input type="radio" bind:group="uiSort" on:change="sortTodos()" name="sort" value="name"> Alpha</label>
+          &nbsp;&nbsp;&nbsp;
+          <label style="font-weight: normal;">
+            <input type="radio" bind:group="uiSort" on:change="sortTodos()" name="sort" value="cdate"> Created</label>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  {{#if !uiShowArchived}}
+    <form class="todo-form" style="margin-bottom: 20px;" on:submit="addTodo(event.preventDefault())">
+      <input class="form-control" type="text" bind:value="todoText" placeholder="add new todo here">
+      <input class="btn btn-default" type="submit" value="add #{{todos.length + 1}}">
+    </form>
+  {{/if}}
+  <div class="user-count label label-default">
+    Active Users: {{userCount}}
+  </div>
+</div>
+
+<script>
+  import TodoEl from './TodoEl.html';
+  import Nymph from 'Nymph';
+  import Todo from 'Todo';
+
+  export default {
+    oncreate () {
+      this.getTodos(this.get('uiShowArchived'));
+    },
+
+    data () {
+      return {
+        todos: [],
+        uiSort: 'name',
+        uiShowArchived: false,
+        userCount: null,
+        todoText: ''
+      }
+    },
+
+    computed: {
+      remaining: (todos) => {
+        var count = 0;
+        for (var i = 0; i < todos.length; i++) {
+          count += todos[i].get('done') ? 0 : 1;
+        }
+        return count;
+      }
+    },
+
+    methods: {
+      getTodos (archived) {
+        if (this.get('__subscription')) {
+          this.get('__subscription').unsubscribe();
+        }
+        let subscription = Nymph.getEntities({"class": 'Todo'}, {"type": archived ? '&' : '!&', "tag": 'archived'}).subscribe((newTodos) => {
+          this.set({uiShowArchived: archived});
+          if (newTodos !== undefined) {
+            var todos = this.get('todos');
+            Nymph.updateArray(todos, newTodos);
+            Nymph.sort(todos, this.get('uiSort'));
+            this.set({todos: todos});
+          }
+        }, null, (count) => {
+          this.set({userCount: count});
+        });
+        this.set({__subscription: subscription});
+      },
+
+      addTodo () {
+        var todoText = this.get('todoText');
+        if (todoText === undefined || todoText === '') {
+          return;
+        }
+        var todo = new Todo();
+        todo.set('name', todoText);
+        todo.save().then(() => {
+          this.set({todoText: ''});
+        }, (errObj) => {
+          alert("Error: "+errObj.textStatus);
+        });
+      },
+
+      sortTodos () {
+        this.set({todos: Nymph.sort(this.get('todos'), this.get('uiSort'))});
+      },
+
+      save (todo) {
+        todo.save().then(null, (errObj) => {
+          alert('Error: '+errObj.textStatus);
+        });
+      },
+
+      archive () {
+        var oldTodos = this.get('todos');
+        for (var i = 0; i < oldTodos.length; i++) {
+          var todo = oldTodos[i];
+          if (todo.get('done')) {
+            todo.archive().then((success) => {
+              if (!success) {
+                alert("Couldn't save changes to "+todo.get('name'));
+              }
+            }, (errObj) => {
+              alert("Error: "+errObj.textStatus+"\nCouldn't archive "+todo.get('name'));
+            });
+          }
+        }
+      },
+
+      deleteTodos () {
+        Nymph.deleteEntities(this.get('todos'));
+      }
+    },
+
+    components: {
+      TodoEl
+    }
+  };
+</script>
+
+<style>
+  .todo-form {
+    display: flex;
+  }
+  .todo-form .form-control {
+    flex-grow: 1;
+    margin-right: 5px;
+  }
+  .user-count {
+    position: fixed;
+    right: 5px;
+    bottom: 5px;
+  }
+</style>

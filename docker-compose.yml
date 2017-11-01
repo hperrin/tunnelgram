@@ -1,0 +1,60 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: nymph
+      MYSQL_USER: nymph
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_root_password
+      - db_password
+
+  pubsub:
+    depends_on:
+      - db
+    image: php:7.1-cli
+    volumes:
+      - web_data:/var/nymph
+    ports:
+      - "8081:8080"
+    environment:
+      MYSQL_HOST: db:3306
+      MYSQL_DATABASE: nymph
+      MYSQL_USER: nymph
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+
+  web:
+    depends_on:
+      - db
+      - pubsub
+    image: php:7.1-apache
+    volumes:
+      - web_data:/var/www
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_HOST: db:3306
+      MYSQL_DATABASE: nymph
+      MYSQL_USER: nymph
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      PUBSUB_HOST: pubsub:8080
+    secrets:
+      - db_password
+
+
+secrets:
+  db_password:
+    file: db_password.txt
+  db_root_password:
+    file: db_root_password.txt
+
+volumes:
+  db_data:
+  web_data:

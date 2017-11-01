@@ -1,0 +1,15 @@
+{
+	"require": {
+		"sciactive/nymph-server": "^2.2.0",
+		"sciactive/nymph-pubsub": "^2.2.0",
+		"php": "~7.1"
+	},
+	"scripts": {
+		"post-install-cmd": [
+			"npm install"
+		],
+		"post-update-cmd": [
+			"npm install"
+		]
+	}
+}

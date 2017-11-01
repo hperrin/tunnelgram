@@ -1,0 +1,26 @@
+{
+  "name": "nymph-examples-todo",
+  "version": "1.0.0",
+  "description": "An example todo app using Nymph and various front end libraries.",
+  "main": "Todo.js",
+  "scripts": {
+    "build": "npm run build-umd && npm run build-cjs",
+    "build-umd": "BABEL_ENV=umd babel Todo.src.js -o Todo.js",
+    "build-cjs": "BABEL_ENV=cjs babel Todo.src.js -o Todo.cjs.js",
+    "watch-umd": "BABEL_ENV=umd babel Todo.src.js --watch -o Todo.js",
+    "watch-cjs": "BABEL_ENV=cjs babel Todo.src.js --watch -o Todo.cjs.js",
+    "prepublish": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hunter Perrin <hperrin@gmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "babel-watch": "^2.0.7"
+  }
+}

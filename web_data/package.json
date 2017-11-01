@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "nymph-client": "^2.2.0"
+  }
+}
