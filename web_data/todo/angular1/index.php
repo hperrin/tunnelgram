@@ -1,6 +1,4 @@
-<?php
-$clientDir = '../node_modules/nymph-client';
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html ng-app="todoApp">
 <head>
   <title>Nymph Angular Collab Todo App</title>
@@ -13,7 +11,7 @@ $clientDir = '../node_modules/nymph-client';
     })();
     NymphOptions = {
       restURL: '/rest.php',
-      pubsubURL: 'ws://<?php echo htmlspecialchars(explode(':', $_SERVER['HTTP_HOST'])[0]); ?>:8081',
+      pubsubURL: 'ws://'+window.location.hostname+':8081',
       rateLimit: 100
     };
   </script>
@@ -59,9 +57,9 @@ $clientDir = '../node_modules/nymph-client';
       flex-shrink: 1;
     }
   </style>
-  <script src="<?php echo $clientDir; ?>/lib-umd/Nymph.js"></script>
-  <script src="<?php echo $clientDir; ?>/lib-umd/Entity.js"></script>
-  <script src="<?php echo $clientDir; ?>/lib-umd/PubSub.js"></script>
+  <script src="/node_modules/nymph-client/lib-umd/Nymph.js"></script>
+  <script src="/node_modules/nymph-client/lib-umd/Entity.js"></script>
+  <script src="/node_modules/nymph-client/lib-umd/PubSub.js"></script>
   <script src="../Todo.js"></script>
 
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>

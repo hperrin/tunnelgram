@@ -6,7 +6,7 @@ $nymphConfig = [
     'host' => getenv('MYSQL_HOST'),
     'database' => getenv('MYSQL_DATABASE'),
     'user' => getenv('MYSQL_USER'),
-    'password' => file_get_contents(getenv('MYSQL_PASSWORD_FILE'))
+    'password' => trim(file_get_contents(getenv('MYSQL_PASSWORD_FILE')))
   ]
 ];
 
