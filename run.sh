@@ -1,8 +1,14 @@
 #! /bin/bash
 
-if [ ! -d "web_data/vendor" ]; then
-  cd ./web_data/
+if [ ! -d "app/vendor" ]; then
+  cd ./app/
   composer install
+  cd ..
+fi
+
+if [ ! -d "app/node_modules" ]; then
+  cd ./app/
+  npm install
   cd ..
 fi
 

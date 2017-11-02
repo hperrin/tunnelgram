@@ -21,10 +21,10 @@ services:
       - db
     build:
       context: .
-      dockerfile: Dockerfile-phpcli-mysqli
+      dockerfile: Dockerfile-pubsub
     volumes:
       - type: bind
-        source: ./web_data
+        source: ./app
         target: /var/nymph
     command: ["./wait-for-it.sh", "db:3306", "--", "php", "/var/nymph/pubsub.php"]
     ports:
@@ -43,10 +43,10 @@ services:
       - pubsub
     build:
       context: .
-      dockerfile: Dockerfile-phpapache-mysqli
+      dockerfile: Dockerfile-web
     volumes:
       - type: bind
-        source: ./web_data
+        source: ./app
         target: /var/www/html
     ports:
       - "8080:80"

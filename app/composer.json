@@ -1,0 +1,6 @@
+{
+	"require": {
+		"sciactive/nymph-server": "^2.2.0",
+		"sciactive/nymph-pubsub": "^2.2.0"
+	}
+}
