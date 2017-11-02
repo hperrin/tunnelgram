@@ -1,6 +1,5 @@
 node_modules
 vendor
-/db_data/*
-!/db_data/README.md
+/db_data
 /db_password.txt
 /db_root_password.txt
