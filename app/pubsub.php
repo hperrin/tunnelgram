@@ -7,6 +7,10 @@ error_reporting(E_ALL);
  * container.
  */
 
+if (php_sapi_name() != "cli") {
+  die("You can only run pubsub.php from the command line.");
+}
+
 require __DIR__.'/vendor/autoload.php';
 require __DIR__.'/config.php';
 
