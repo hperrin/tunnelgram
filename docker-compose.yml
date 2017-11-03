@@ -21,8 +21,8 @@ services:
       context: .
       dockerfile: Dockerfile-pubsub
     volumes:
-      - ./app:/var/nymph
-    command: ["./wait-for-it.sh", "db:3306", "--", "php", "/var/nymph/pubsub.php"]
+      - ./app:/nymph
+    command: ["./wait-for-it.sh", "db:3306", "--", "php", "/nymph/pubsub.php"]
     ports:
       - "8081:8080"
     environment:
