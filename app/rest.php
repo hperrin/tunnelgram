@@ -2,6 +2,11 @@
 
 error_reporting(E_ALL);
 
+/*
+ * You don't need to edit below here. It is set up to work inside your Docker
+ * container.
+ */
+
 require __DIR__.'/vendor/autoload.php';
 require __DIR__.'/config.php';
 
@@ -11,7 +16,9 @@ require __DIR__.'/config.php';
 
 $NymphREST = new \Nymph\REST();
 
-require 'todo/Todo.php';
+foreach (glob(__DIR__.'/entities/*.php') as $curEntity) {
+  require $curEntity;
+}
 
 try {
   if (in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'DELETE'])) {

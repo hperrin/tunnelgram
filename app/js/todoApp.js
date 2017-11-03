@@ -18,7 +18,7 @@ angular.module('todoApp', [])
     if (subscription) {
       subscription.unsubscribe();
     }
-    subscription = Nymph.getEntities({"class": 'Todo'}, {"type": archived ? '&' : '!&', "tag": 'archived'}).subscribe(function(todos){
+    subscription = Nymph.getEntities({"class": Todo.class}, {"type": archived ? '&' : '!&', "tag": 'archived'}).subscribe(function(todos){
       $scope.uiState.showArchived = archived;
       if (todos) {
         Nymph.updateArray($scope.todos, todos);

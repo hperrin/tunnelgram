@@ -1,5 +1,24 @@
 {
+  "name": "nymph-template-app",
+  "version": "0.0.1-alpha1",
+  "description": "A template app for you to build a Nymph app from.",
+  "author": "Hunter Perrin <hperrin@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "babel -d build/ entities/",
+    "watch": "babel --watch -d build/ entities/",
+    "prepublish": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "nymph-client": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-3": "^6.24.1",
+    "babel-watch": "^2.0.7"
   }
 }

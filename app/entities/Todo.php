@@ -1,5 +1,5 @@
 <?php
-// This file is a demo class that extends the Entity class.
+namespace MyApp;
 
 /**
  * @property string $name The todo's text.

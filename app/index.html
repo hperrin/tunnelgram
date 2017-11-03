@@ -15,6 +15,16 @@
       rateLimit: 100
     };
   </script>
+  <script src="/node_modules/nymph-client/lib-umd/Nymph.js"></script>
+  <script src="/node_modules/nymph-client/lib-umd/Entity.js"></script>
+  <script src="/node_modules/nymph-client/lib-umd/PubSub.js"></script>
+  <script src="build/Todo.js"></script>
+
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="js/todoApp.js"></script>
+
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <style type="text/css">
     .todo-form {
       display: flex;
@@ -57,14 +67,6 @@
       flex-shrink: 1;
     }
   </style>
-  <script src="/node_modules/nymph-client/lib-umd/Nymph.js"></script>
-  <script src="/node_modules/nymph-client/lib-umd/Entity.js"></script>
-  <script src="/node_modules/nymph-client/lib-umd/PubSub.js"></script>
-  <script src="Todo.js"></script>
-
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
-  <script src="todoApp.js"></script>
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
   <div class="container" ng-controller="TodoController">

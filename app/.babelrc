@@ -1,0 +1,10 @@
+{
+  "presets": [
+    "env",
+    "stage-3"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    "transform-es2015-modules-umd"
+  ]
+}

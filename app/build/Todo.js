@@ -112,7 +112,7 @@
   }(_NymphEntity2.default);
 
   Todo.etype = "todo";
-  Todo.class = "Todo";
+  Todo.class = "MyApp\\Todo";
   exports.default = Todo;
 
 

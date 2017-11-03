@@ -1,3 +1,5 @@
+// Remember to run `npm run build` after editing this file.
+
 import Nymph from "Nymph";
 import Entity from "NymphEntity";
 
@@ -7,7 +9,7 @@ export default class Todo extends Entity {
 
   static etype = "todo";
   // The name of the server class
-  static class = "Todo";
+  static class = "MyApp\\Todo";
 
   // === Constructor ===
 
