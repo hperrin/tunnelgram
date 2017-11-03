@@ -1,15 +1,11 @@
 #! /bin/bash
 
 if [ ! -d "app/vendor" ]; then
-  cd ./app/
-  composer install
-  cd ..
+  ./composer.sh install
 fi
 
 if [ ! -d "app/node_modules" ]; then
-  cd ./app/
-  npm install
-  cd ..
+  ./npm.sh install
 fi
 
 if [ ! -f "db_password.txt" ]; then
