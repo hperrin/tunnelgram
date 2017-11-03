@@ -1,12 +1,10 @@
-version: '3.3'
+version: '3.1'
 
 services:
   db:
     image: mysql:latest
     volumes:
-      - type: bind
-        source: ./db_data
-        target: /var/lib/mysql
+      - ./db_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       MYSQL_DATABASE: nymph
@@ -23,9 +21,7 @@ services:
       context: .
       dockerfile: Dockerfile-pubsub
     volumes:
-      - type: bind
-        source: ./app
-        target: /var/nymph
+      - ./app:/var/nymph
     command: ["./wait-for-it.sh", "db:3306", "--", "php", "/var/nymph/pubsub.php"]
     ports:
       - "8081:8080"
@@ -45,9 +41,7 @@ services:
       context: .
       dockerfile: Dockerfile-web
     volumes:
-      - type: bind
-        source: ./app
-        target: /var/www/html
+      - ./app:/var/www/html
     ports:
       - "8080:80"
     environment:
