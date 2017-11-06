@@ -5,11 +5,26 @@ A template for a Nymph app. Provides a Docker setup that runs MySQL, Nymph PubSu
 ## Installation
 
 1. Fork this repo.
-2. Get [Docker](https://www.docker.com/community-edition).
-  * On Ubuntu, you can run `sudo apt-get install docker.io docker-compose && sudo usermod -a -G docker $USER`, then log out and log back in.
+2. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
 3. Clone your fork: `git clone git@github.com:yourusername/yourreponame.git && cd yourreponame`
 4. Run the app: `./run.sh`
 5. Go here [http://localhost:8080/](http://localhost:8080/)
+
+### Getting Docker and Docker Compose on Ubuntu
+
+The Docker package in Ubuntu requires the user to be added to the "docker" group after installation. To install, run this command:
+
+```sh
+sudo apt-get install docker.io && sudo usermod -a -G docker $USER
+```
+
+Then log out and log back in, so the group modification can take effect.
+
+The Docker Compose version in the Ubuntu repositories isn't new enough, so you'll need to install Docker Compose manually. To install, run this command:
+
+```sh
+sudo wget -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` && sudo chmod +x /usr/local/bin/docker-compose
+```
 
 ### Regarding NPM and Composer
 
