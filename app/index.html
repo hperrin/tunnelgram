@@ -88,7 +88,7 @@
                 <input class="todo-input done-{{todo.data.done}}" ng-model="todo.data.name" ng-change="save(todo)" ng-model-options="{updateOn: 'blur'}" />
               </span>
               <span class="todo-date todo-flex">
-                {{todo.cdate * 1000 | date:'yyyy-MM-dd HH:MM'}}
+                {{todo.cdate * 1000 | date:'yyyy-MM-dd HH:mm'}}
               </span>
             </span>
           </label>
