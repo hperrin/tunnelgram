@@ -7,12 +7,7 @@ error_reporting(E_ALL);
  * container.
  */
 
-require __DIR__.'/vendor/autoload.php';
 require __DIR__.'/config.php';
-
-\Nymph\PubSub\Server::configure(
-    ['entries' => ['ws://'.getenv('PUBSUB_HOST').'/']]
-);
 
 $NymphREST = new \Nymph\REST();
 

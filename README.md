@@ -1,6 +1,6 @@
 # Nymph App Template
 
-A template for a Nymph app. Provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, and serves your static HTML/JS.
+A template for a Nymph app. Provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, and serves your static HTML/JS.
 
 ## Installation
 

@@ -24,4 +24,12 @@ class Todo extends \Nymph\Entity {
     $this->addTag('archived');
     return $this->save();
   }
+
+  public function save() {
+    if (!\Tilmeld\Tilmeld::gatekeeper()) {
+      // Only allow logged in users to save.
+      return false;
+    }
+    return parent::save();
+  }
 }

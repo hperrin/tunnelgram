@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="todoApp">
 <head>
-  <title>Nymph Angular Collab Todo App</title>
+  <title>Todo Template App</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript">
@@ -15,9 +15,14 @@
       rateLimit: 100
     };
   </script>
-  <script src="/node_modules/nymph-client/lib-umd/Nymph.js"></script>
-  <script src="/node_modules/nymph-client/lib-umd/Entity.js"></script>
-  <script src="/node_modules/nymph-client/lib-umd/PubSub.js"></script>
+  <script src="/node_modules/nymph-client/lib/Nymph.js"></script>
+  <script src="/node_modules/nymph-client/lib/Entity.js"></script>
+  <script src="/node_modules/nymph-client/lib/PubSub.js"></script>
+  <script src="/node_modules/tilmeld/lib/Entities/User.js"></script>
+  <script src="/node_modules/tilmeld/lib/Entities/Group.js"></script>
+  <script src="/node_modules/tilmeld/lib/Components/TilmeldRecover.js"></script>
+  <script src="/node_modules/tilmeld/lib/Components/TilmeldLogin.js"></script>
+  <script src="/node_modules/tilmeld/lib/Components/TilmeldChangePassword.js"></script>
   <script src="build/Todo.js"></script>
 
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
@@ -73,7 +78,7 @@
     <div class="page-header">
       <h2 style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap;">
         <span>
-          Collaborative Todo List
+          Todo Template App
         </span>
       </h2>
     </div>
