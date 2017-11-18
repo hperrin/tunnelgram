@@ -47,7 +47,7 @@
       </div>
     </div>
   </div>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary" ng-if="currentUser !== false">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark" ng-if="currentUser !== false">
     <div class="container">
       <span class="navbar-brand mb-0 h1">Todo Template App</span>
       <button class="navbar-toggler" ng-if="currentUser" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,6 +78,13 @@
               <a class="dropdown-item" href="javascript:void(0)" ng-click="logout()">
                 Log Out
               </a>
+              <div class="dropdown-divider" ng-if="uiState.isTilmeldAdmin"></div>
+              <h6 class="dropdown-header" ng-if="uiState.isTilmeldAdmin">
+                Admin
+              </h6>
+              <a class="dropdown-item" href="/user/" target="_blank" ng-if="uiState.isTilmeldAdmin">
+                User Admin App
+              </a>
             </div>
           </li>
         </ul>
@@ -92,9 +99,9 @@
       <div class="col-sm-8 order-sm-1">
         <div class="jumbotron">
           <h1 class="display-4">Nymph Template App!</h1>
-          <p class="lead">This is a template app for you to use to build a Nymph app. It's built in Angular 1, but you can use whichever framework you prefer.</p>
+          <p class="lead">This is a template for you to use to build an app with Nymph and Tilmeld.</p>
           <hr class="my-4">
-          <p>It provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, and serves your static HTML/JS. When you're ready to start developing, check out the API docs.</p>
+          <p>It provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, Postfix for account emails, and serves your static HTML/JS. When you're ready to start developing, check out the API docs.</p>
           <p class="lead">
             <a class="btn btn-primary btn-lg" href="https://github.com/sciactive/nymph/wiki/API-Docs" role="button">API docs</a>
           </p>

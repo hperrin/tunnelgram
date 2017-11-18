@@ -21,7 +21,8 @@ angular.module('todoApp', [])
     'sort': 'name',
     'showArchived': false,
     'userAvatar': null,
-    'userCount': null
+    'userCount': null,
+    'isTilmeldAdmin': false
   };
   $scope.currentUser = false;
   $scope.clientConfig = {};
@@ -91,9 +92,15 @@ angular.module('todoApp', [])
         $scope.uiState.userAvatar = avatar;
         $scope.$apply();
       });
+      // Is the user a Tilmeld admin?
+      user.gatekeeper('tilmeld/admin').then(function(pass){
+        $scope.uiState.isTilmeldAdmin = pass;
+        $scope.$apply();
+      });
     } else {
       $scope.todos = [];
       $scope.uiState.userAvatar = null;
+      $scope.uiState.isTilmeldAdmin = false;
     }
   });
 
