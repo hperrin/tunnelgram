@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "nymph-client": "^3.0.1",
-    "tilmeld": "^1.0.0-beta.4"
+    "tilmeld": "^1.0.0-beta.7"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

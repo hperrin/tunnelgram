@@ -17,4 +17,8 @@ if [ ! -d "db_data" ]; then
   mkdir db_data
 fi
 
+if [ ! -d "mail" ]; then
+  mkdir mail
+fi
+
 docker-compose up

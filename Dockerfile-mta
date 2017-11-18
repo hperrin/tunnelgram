@@ -1,0 +1,6 @@
+FROM tozd/postfix:latest
+
+RUN echo "root:nymph_template_password" | chpasswd
+
+COPY container-conf-files/postfix-main.cf /etc/postfix/main.cf
+COPY container-conf-files/mailname /etc/mailname

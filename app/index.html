@@ -23,115 +23,176 @@
   <script src="/node_modules/tilmeld/lib/Components/TilmeldRecover.js"></script>
   <script src="/node_modules/tilmeld/lib/Components/TilmeldLogin.js"></script>
   <script src="/node_modules/tilmeld/lib/Components/TilmeldChangePassword.js"></script>
+  <link rel="stylesheet" href="/node_modules/pform/css/pform.css">
+  <link rel="stylesheet" href="/node_modules/pform/css/pform-bootstrap.css">
   <script src="build/Todo.js"></script>
 
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
   <script src="js/todoApp.js"></script>
 
-
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <style type="text/css">
-    .todo-form {
-      display: flex;
-    }
-    .todo-form .form-control {
-      flex-grow: 1;
-      margin-right: 5px;
-    }
-    .user-count {
-      position: fixed;
-      right: 5px;
-      bottom: 5px;
-    }
-    label.list-group-item {
-      font-weight: normal;
-      cursor: pointer;
-    }
-    label.list-group-item > .todo-row {
-      display: flex;
-      justify-content: space-between;
-    }
-    .todo-flex {
-      display: flex;
-    }
-    .todo-controls {
-      flex-grow: 1;
-    }
-    .todo-input {
-      display: inline;
-      background-color: transparent;
-      border: 0;
-      flex-grow: 1;
-    }
-    .todo-input.done-true {
-      text-decoration: line-through;
-      color: grey;
-    }
-    .todo-date {
-      margin-left: 5px;
-      flex-shrink: 1;
-    }
-  </style>
+  <script src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
 </head>
-<body>
-  <div class="container" ng-controller="TodoController">
-    <div class="page-header">
-      <h2 style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap;">
-        <span>
-          Todo Template App
-        </span>
-      </h2>
+<body ng-controller="TodoController">
+  <div class="container" style="height: 100vh;" ng-if="currentUser === false">
+    <div class="row align-items-center justify-content-center" style="height: 100vh;">
+      <div class="col-auto">
+        <svg width="200px"  height="200px"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-dual-ring" style="background: none;">
+          <circle cx="50" cy="50" fill="none" stroke-linecap="round" r="40" stroke-width="4" stroke="#337ab7" stroke-dasharray="62.83185307179586 62.83185307179586" transform="rotate(99 50 50)">
+            <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="2s" begin="0s" repeatCount="indefinite"></animateTransform>
+          </circle>
+        </svg>
+      </div>
     </div>
+  </div>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary" ng-if="currentUser !== false">
+    <div class="container">
+      <span class="navbar-brand mb-0 h1">Todo Template App</span>
+      <button class="navbar-toggler" ng-if="currentUser" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav" ng-if="currentUser">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item" ng-class="{'active': !uiState.showArchived}">
+            <a class="nav-link" href="javascript:void(0)" ng-click="getTodos(false);">Pending <span class="sr-only" ng-if="!uiState.showArchived">(current)</span></a>
+          </li>
+          <li class="nav-item" ng-class="{'active': uiState.showArchived}">
+            <a class="nav-link" href="javascript:void(0)" ng-click="getTodos(true);">Archived <span class="sr-only" ng-if="uiState.showArchived">(current)</span></a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <img class="rounded-circle" ng-src="{{uiState.userAvatar}}" alt="{{currentUser.data.nameFirst}}" />
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+              <h6 class="dropdown-header">
+                {{currentUser.data.name}}
+              </h6>
+              <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#accountInfoModal">
+                Account Info
+              </a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="javascript:void(0)" ng-click="logout()">
+                Log Out
+              </a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-3" ng-if="currentUser === null">
     <div class="row">
-      <div class="col-sm-8">
-        <div class="list-group" style="clear: both;">
-          <div class="well" ng-if="!todos.length">You have no todos yet.</div>
-          <label ng-repeat="todo in todos track by todo.guid" class="list-group-item list-group-item-{{todo.data.done ? 'success' : 'warning'}}">
-            <span class="todo-row">
-              <span class="todo-controls todo-flex">
-                <input ng-if="!uiState.showArchived" type="checkbox" ng-model="todo.data.done" ng-change="save(todo)" style="margin-right: 5px;">
-                <input class="todo-input done-{{todo.data.done}}" ng-model="todo.data.name" ng-change="save(todo)" ng-model-options="{updateOn: 'blur'}" />
+      <div class="col-sm-4 order-sm-2">
+        <div id="login"></div>
+      </div>
+      <div class="col-sm-8 order-sm-1">
+        <div class="jumbotron">
+          <h1 class="display-4">Nymph Template App!</h1>
+          <p class="lead">This is a template app for you to use to build a Nymph app. It's built in Angular 1, but you can use whichever framework you prefer.</p>
+          <hr class="my-4">
+          <p>It provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, and serves your static HTML/JS. When you're ready to start developing, check out the API docs.</p>
+          <p class="lead">
+            <a class="btn btn-primary btn-lg" href="https://github.com/sciactive/nymph/wiki/API-Docs" role="button">API docs</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-3" ng-if="currentUser">
+    <div class="row">
+      <div class="col-sm-8 mb-3">
+        <div class="list-group">
+          <div class="alert alert-secondary" ng-if="!todos.length">You have no todos yet.</div>
+          <label ng-repeat="todo in todos track by todo.guid" class="list-group-item font-weight-normal {{todo.data.done ? 'disabled' : ''}}" style="cursor: pointer;">
+            <span class="d-flex justify-content-between">
+              <span class="d-flex form-check-label" style="flex-grow: 1;">
+                <input class="form-check-input mr-2" ng-if="!uiState.showArchived" type="checkbox" ng-model="todo.data.done" ng-change="save(todo)" />
+                <input class="d-inline border-0 bg-white {{todo.data.done ? 'text-secondary' : ''}}" style="flex-grow: 1;" ng-model="todo.data.name" ng-change="save(todo)" ng-model-options="{updateOn: 'blur'}" />
               </span>
-              <span class="todo-date todo-flex">
+              <span class="d-flex ml-2" style="flex-shrink: 1;">
                 {{todo.cdate * 1000 | date:'yyyy-MM-dd HH:mm'}}
               </span>
             </span>
           </label>
         </div>
       </div>
-      <div class="col-sm-4" style="text-align: center; margin-bottom: 1em;">
-        <small class="alert alert-info" style="display: block;">
+      <div class="col-sm-4 mb-3">
+        <small class="alert alert-info d-block text-center">
           <span ng-if="!uiState.showArchived">
             <span ng-if="todos.length > 0">{{remaining()}} of {{todos.length}} remaining</span>
             <span ng-if="todos.length == 0">0 todos</span>
           </span>
           <span ng-if="uiState.showArchived">{{todos.length}} archived todos</span>
-          <span ng-if="todos.length > 0">
-            [
-            <a href="javascript:void(0)" ng-if="!uiState.showArchived" ng-click="archive()">archive done</a>
-            <a href="javascript:void(0)" ng-if="uiState.showArchived" ng-click="delete()">delete</a>
-            ]
+          <span ng-if="todos.length > 0" class="d-block mt-2">
+            <button type="button" class="btn btn-success btn-sm" ng-if="!uiState.showArchived" ng-click="archive()">archive completed todos</button>
+            <button type="button" class="btn btn-danger btn-sm" ng-if="uiState.showArchived" ng-click="delete()">delete archived todos</button>
           </span>
-          <br>
-          <a href="javascript:void(0)" ng-click="getTodos(true);" ng-if="!uiState.showArchived">show archived</a>
-          <a href="javascript:void(0)" ng-click="getTodos(false);" ng-if="uiState.showArchived">show current</a>
         </small>
-        <div ng-if="todos.length > 1" style="text-align: left;">
+        <div ng-if="todos.length > 1">
           Sort: <br>
-          <label style="font-weight: normal;">
+          <label clas="font-weight-normal">
             <input type="radio" ng-model="uiState.sort" ng-change="sortTodos()" name="sort" value="name"> Alpha</label>
           &nbsp;&nbsp;&nbsp;
-          <label style="font-weight: normal;">
+          <label class="font-weight-normal">
             <input type="radio" ng-model="uiState.sort" ng-change="sortTodos()" name="sort" value="cdate"> Created</label>
         </div>
       </div>
     </div>
-    <form class="todo-form" ng-show="!uiState.showArchived" ng-submit="addTodo()" style="margin-bottom: 20px;">
-      <input class="form-control" type="text" ng-model="todoText" placeholder="add new todo here">
-      <input class="btn btn-default" type="submit" value="add #{{todos.length + 1}}">
+    <form class="d-flex my-3" ng-show="!uiState.showArchived" ng-submit="addTodo()">
+      <input class="form-control mr-2" style="flex-grow: 1;" type="text" ng-model="uiState.todoText" placeholder="add new todo here">
+      <input class="btn btn-primary" type="submit" value="add #{{todos.length + 1}}">
     </form>
-    <div class="user-count label label-default">
-      Active Users: {{uiState.userCount}}
+    <div class="user-count badge badge-secondary position-fixed" style="right: 5px; bottom: 5px;" title="How many open sessions you have.">
+      Active Sessions: {{uiState.userCount}}
+    </div>
+  </div>
+  <div class="modal fade" id="accountInfoModal" tabindex="-1" role="dialog" aria-labelledby="accountInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="accountInfoModalLabel">Account info</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="accountDetailsEmail">Email address</label>
+            <input type="email" class="form-control" id="accountDetailsEmail" ng-model="currentUser.data.username" placeholder="Enter email">
+          </div>
+          <div class="form-group">
+            <label for="accountDetailsFirstName">First name</label>
+            <input type="text" class="form-control" id="accountDetailsFirstName" ng-model="currentUser.data.nameFirst" placeholder="Enter name">
+          </div>
+          <div class="form-group">
+            <label for="accountDetailsLastName">Last name</label>
+            <input type="text" class="form-control" id="accountDetailsLastName" ng-model="currentUser.data.nameLast" placeholder="Enter name">
+          </div>
+          <div class="form-group">
+            <label for="accountDetailsPhone">Phone</label>
+            <input type="tel" class="form-control" id="accountDetailsPhone" ng-model="currentUser.data.phone" placeholder="Enter phone number">
+          </div>
+          <div class="form-group">
+            <label for="accountDetailsTimezone">Timezone</label>
+            <select class="form-control" id="accountDetailsTimezone" ng-model="currentUser.data.timezone">
+              <option value="">--Default--</option>
+              <option ng-repeat="tz in clientConfig.timezones" value="{{tz}}">{{tz}}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <span>Password</span>
+            <div id="changePassword"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="saveUser()">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>

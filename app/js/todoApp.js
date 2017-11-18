@@ -5,20 +5,124 @@ angular.module('todoApp', [])
 .service('Todo', function() {
   return Todo.default;
 })
-.controller('TodoController', ['$scope', 'Nymph', 'Todo', function($scope, Nymph, Todo) {
+.service('User', function() {
+  return User.default;
+})
+.service('TilmeldLogin', function() {
+  return TilmeldLogin.default;
+})
+.service('TilmeldChangePassword', function() {
+  return TilmeldChangePassword.default;
+})
+.controller('TodoController', ['$scope', 'Nymph', 'Todo', 'User', 'TilmeldLogin', 'TilmeldChangePassword', function($scope, Nymph, Todo, User, TilmeldLogin, TilmeldChangePassword) {
   $scope.todos = [];
   $scope.uiState = {
+    'todoText': '',
     'sort': 'name',
     'showArchived': false,
+    'userAvatar': null,
     'userCount': null
   };
+  $scope.currentUser = false;
+  $scope.clientConfig = {};
+  $scope.loginComponent = null;
 
+  // Get the current user.
+  User.current().then(function(user){
+    $scope.currentUser = user;
+    $scope.$apply();
+    if ($scope.currentUser === null) {
+      createLoginComponent();
+    }
+  }, function(errObj) {
+    alert("Error: "+errObj.textStatus);
+  });
+
+  // Handle logins and logouts.
+  User.on('login', function(user){
+    $scope.currentUser = user;
+    destroyLoginComponent();
+    $scope.$apply();
+  });
+  User.on('logout', function(){
+    $scope.currentUser = null;
+    $scope.$apply();
+    createLoginComponent();
+  });
+  function createLoginComponent(){
+    if (!$scope.loginComponent) {
+      $scope.loginComponent = new TilmeldLogin({
+        target: document.getElementById('login'),
+        data: {
+          layout: 'small',
+          classInput: 'form-control',
+          classSelect: 'form-control',
+          classTextarea: 'form-control',
+          classSubmit: 'btn btn-primary',
+          classButton: 'btn btn-secondary'
+        }
+      });
+    }
+  }
+  function destroyLoginComponent(){
+    if ($scope.loginComponent) {
+      $scope.loginComponent.destroy();
+      $scope.loginComponent = null;
+    }
+  }
+
+  // Change password prompt.
+  new TilmeldChangePassword({
+    target: document.getElementById('changePassword'),
+    data: {
+      layout: 'compact',
+      classInput: 'form-control',
+      classSubmit: 'btn btn-primary',
+      classButton: 'btn btn-secondary'
+    }
+  });
+
+  $scope.$watch('currentUser', function(user){
+    if (user) {
+      // Get the current todos.
+      $scope.getTodos(false);
+      // Get the user's avatar.
+      user.getAvatar().then(function(avatar){
+        $scope.uiState.userAvatar = avatar;
+        $scope.$apply();
+      });
+    } else {
+      $scope.todos = [];
+      $scope.uiState.userAvatar = null;
+    }
+  });
+
+  // Get the client config (for timezones).
+  User.getClientConfig().then(function(clientConfig){
+    $scope.clientConfig = clientConfig;
+    $scope.$apply();
+  });
+
+  // User functions
+  $scope.saveUser = function(){
+    $scope.currentUser.save().then(function(){
+      $scope.$apply();
+    }, function(errObj){
+      alert('Error: '+errObj.textStatus);
+    });
+  };
+
+  $scope.logout = function(){
+    $scope.currentUser.logout();
+  };
+
+  // Subscribe to the todos query.
   var subscription;
   $scope.getTodos = function(archived){
     if (subscription) {
       subscription.unsubscribe();
     }
-    subscription = Nymph.getEntities({"class": Todo.class}, {"type": archived ? '&' : '!&', "tag": 'archived'}).subscribe(function(todos){
+    subscription = Nymph.getEntities({"class": Todo.class}, {"type": archived ? '&' : '!&', "tag": 'archived'}, {'type': '&', 'ref': ['user', $scope.currentUser]}).subscribe(function(todos){
       $scope.uiState.showArchived = archived;
       if (todos) {
         Nymph.updateArray($scope.todos, todos);
@@ -30,15 +134,14 @@ angular.module('todoApp', [])
       $scope.$apply();
     });
   };
-  $scope.getTodos(false);
 
   $scope.addTodo = function(){
-    if (typeof $scope.todoText === 'undefined' || $scope.todoText === '')
+    if (typeof $scope.uiState.todoText === 'undefined' || $scope.uiState.todoText === '')
       return;
     var todo = new Todo();
-    todo.set('name', $scope.todoText);
+    todo.set('name', $scope.uiState.todoText);
     todo.save().then(function(){
-      $scope.todoText = '';
+      $scope.uiState.todoText = '';
       $scope.$apply();
     }, function(errObj){
       alert("Error: "+errObj.textStatus);

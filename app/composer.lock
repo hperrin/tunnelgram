@@ -810,16 +810,16 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.0-beta.1",
+            "version": "3.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "8711fabb5e92527efac9315b8800dff030613385"
+                "reference": "edb248e4cc217489c1cc2245028ea7857b6a6242"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/8711fabb5e92527efac9315b8800dff030613385",
-                "reference": "8711fabb5e92527efac9315b8800dff030613385",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/edb248e4cc217489c1cc2245028ea7857b6a6242",
+                "reference": "edb248e4cc217489c1cc2245028ea7857b6a6242",
                 "shasum": ""
             },
             "require": {
@@ -859,7 +859,7 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2017-11-16T00:00:00+00:00"
+            "time": "2017-11-17T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
@@ -916,16 +916,16 @@
         },
         {
             "name": "sciactive/tilmeld",
-            "version": "1.0.0-beta.5",
+            "version": "1.0.0-beta.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld.git",
-                "reference": "9ffde25bd78ec5684dd66c755fbf6f99a79cbd87"
+                "reference": "4301e880d4ded0a9d9c9dee4d7eb0949ef827d83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld/zipball/9ffde25bd78ec5684dd66c755fbf6f99a79cbd87",
-                "reference": "9ffde25bd78ec5684dd66c755fbf6f99a79cbd87",
+                "url": "https://api.github.com/repos/sciactive/tilmeld/zipball/4301e880d4ded0a9d9c9dee4d7eb0949ef827d83",
+                "reference": "4301e880d4ded0a9d9c9dee4d7eb0949ef827d83",
                 "shasum": ""
             },
             "require": {
@@ -967,7 +967,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2017-11-16T00:00:00+00:00"
+            "time": "2017-11-17T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",

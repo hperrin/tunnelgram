@@ -14,6 +14,13 @@ services:
       - db_root_password
       - db_password
 
+  mta:
+    build:
+      context: .
+      dockerfile: Dockerfile-mta
+    volumes:
+      - ./mail:/var/spool/postfix
+
   pubsub:
     depends_on:
       - db
@@ -36,6 +43,7 @@ services:
   web:
     depends_on:
       - db
+      - mta
       - pubsub
     build:
       context: .
