@@ -1,6 +1,8 @@
 # Nymph App Template
 
-A template for a Nymph app. Provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, and serves your static HTML/JS.
+This is a template for you to use to build an app with Nymph and Tilmeld.
+
+It provides a Docker setup that runs MySQL, Postfix, Nymph PubSub, and Apache. It presents a usable app as a starting point. When you're ready to start developing, check out the [API docs](https://github.com/sciactive/nymph/wiki/API-Docs).
 
 ## Installation
 

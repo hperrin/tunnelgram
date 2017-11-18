@@ -29,7 +29,7 @@ $nymphConfig = [
 
 // uMailPHP's configuration.
 \uMailPHP\Mail::configure([
-  'site_name' => 'Todo Template App',
+  'site_name' => 'Nymph App Template',
   'site_link' => 'http://localhost:8080/',
   'master_address' => 'noreply@example.com',
   'testing_mode' => true,

@@ -1,20 +1,15 @@
 angular.module('todoApp', [])
-.service('Nymph', function() {
+.service('Nymph', function(){
   return Nymph.default;
-})
-.service('Todo', function() {
+}).service('Todo', function(){
   return Todo.default;
-})
-.service('User', function() {
+}).service('User', function(){
   return User.default;
-})
-.service('TilmeldLogin', function() {
+}).service('TilmeldLogin', function(){
   return TilmeldLogin.default;
-})
-.service('TilmeldChangePassword', function() {
+}).service('TilmeldChangePassword', function(){
   return TilmeldChangePassword.default;
-})
-.controller('TodoController', ['$scope', 'Nymph', 'Todo', 'User', 'TilmeldLogin', 'TilmeldChangePassword', function($scope, Nymph, Todo, User, TilmeldLogin, TilmeldChangePassword) {
+}).controller('TodoController', ['$scope', 'Nymph', 'Todo', 'User', 'TilmeldLogin', 'TilmeldChangePassword', function($scope, Nymph, Todo, User, TilmeldLogin, TilmeldChangePassword) {
   $scope.todos = [];
   $scope.uiState = {
     'todoText': '',
