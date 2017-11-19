@@ -98,7 +98,7 @@
       </div>
       <div class="col-sm-8 order-sm-1">
         <div class="jumbotron">
-          <h1 class="display-4">Nymph Template App!</h1>
+          <h1 class="display-4">Nymph App Template!</h1>
           <p class="lead">This is a template for you to use to build an app with Nymph and Tilmeld.</p>
           <hr class="my-4">
           <p>It provides a Docker setup that runs MySQL, Nymph PubSub, a Nymph REST endpoint, Tilmeld for user management, Postfix for account emails, and serves your static HTML/JS. When you're ready to start developing, check out the API docs.</p>
@@ -114,13 +114,11 @@
       <div class="col-sm-8 mb-3">
         <div class="list-group">
           <div class="alert alert-secondary" ng-if="!todos.length">You have no todos yet.</div>
-          <label ng-repeat="todo in todos track by todo.guid" class="list-group-item font-weight-normal {{todo.data.done ? 'disabled' : ''}}" style="cursor: pointer;">
-            <span class="d-flex justify-content-between">
-              <span class="d-flex form-check-label" style="flex-grow: 1;">
-                <input class="form-check-input mr-2" ng-if="!uiState.showArchived" type="checkbox" ng-model="todo.data.done" ng-change="save(todo)" />
-                <input class="d-inline border-0 bg-white {{todo.data.done ? 'text-secondary' : ''}}" style="flex-grow: 1;" ng-model="todo.data.name" ng-change="save(todo)" ng-model-options="{updateOn: 'blur'}" />
-              </span>
-              <span class="d-flex ml-2" style="flex-shrink: 1;">
+          <label ng-repeat="todo in todos track by todo.guid" class="list-group-item list-group-item-action font-weight-normal {{todo.data.done ? 'list-group-item-success' : ''}}" style="cursor: pointer;">
+            <span class="d-flex align-items-center justify-content-between">
+              <input class="mr-2" ng-if="!uiState.showArchived" type="checkbox" ng-model="todo.data.done" ng-change="save(todo)" />
+              <input class="d-inline border-0 {{todo.data.done ? 'text-secondary' : ''}}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" ng-model="todo.data.name" ng-change="save(todo)" ng-model-options="{updateOn: 'blur'}" />
+              <span class="d-flex ml-2 {{todo.data.done ? 'text-secondary' : ''}}" style="flex-shrink: 1;">
                 {{todo.cdate * 1000 | date:'yyyy-MM-dd HH:mm'}}
               </span>
             </span>
@@ -135,8 +133,8 @@
           </span>
           <span ng-if="uiState.showArchived">{{todos.length}} archived todos</span>
           <span ng-if="todos.length > 0" class="d-block mt-2">
-            <button type="button" class="btn btn-success btn-sm" ng-if="!uiState.showArchived" ng-click="archive()">archive completed todos</button>
-            <button type="button" class="btn btn-danger btn-sm" ng-if="uiState.showArchived" ng-click="delete()">delete archived todos</button>
+            <button type="button" class="btn btn-success btn-sm" ng-if="!uiState.showArchived" ng-click="archive()" style="white-space: normal;">archive completed todos</button>
+            <button type="button" class="btn btn-danger btn-sm" ng-if="uiState.showArchived" ng-click="delete()" style="white-space: normal;">delete archived todos</button>
           </span>
         </small>
         <div ng-if="todos.length > 1">
