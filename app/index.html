@@ -4,6 +4,8 @@
   <title>Nymph App Template</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Nymph Config -->
   <script type="text/javascript">
     (function(){
       var s = document.createElement("script"); s.setAttribute("src", "https://www.promisejs.org/polyfills/promise-5.0.0.min.js");
@@ -15,24 +17,36 @@
       rateLimit: 100
     };
   </script>
+
+  <!-- Nymph JS -->
   <script src="/node_modules/nymph-client/lib/Nymph.js"></script>
   <script src="/node_modules/nymph-client/lib/Entity.js"></script>
   <script src="/node_modules/nymph-client/lib/PubSub.js"></script>
+
+  <!-- Tilmeld JS -->
   <script src="/node_modules/tilmeld/lib/Entities/User.js"></script>
   <script src="/node_modules/tilmeld/lib/Entities/Group.js"></script>
   <script src="/node_modules/tilmeld/lib/Components/TilmeldRecover.js"></script>
   <script src="/node_modules/tilmeld/lib/Components/TilmeldLogin.js"></script>
   <script src="/node_modules/tilmeld/lib/Components/TilmeldChangePassword.js"></script>
+
+  <!-- PForm CSS -->
   <link rel="stylesheet" href="/node_modules/pform/css/pform.css">
   <link rel="stylesheet" href="/node_modules/pform/css/pform-bootstrap.css">
+
+  <!-- Entity JS -->
   <script src="build/Todo.js"></script>
 
+  <!-- App JS -->
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
   <script src="js/todoApp.js"></script>
 
+  <!-- Bootstrap JS -->
   <script src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+
+  <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
 </head>
 <body ng-controller="TodoController">

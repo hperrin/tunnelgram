@@ -664,16 +664,16 @@
         },
         {
             "name": "react/socket",
-            "version": "v0.8.5",
+            "version": "v0.8.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/socket.git",
-                "reference": "d169d1ed24e39bf182781d72ddd224dbbd449aa8"
+                "reference": "2e8660111d14df908a913a058bce4a1786de489f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/socket/zipball/d169d1ed24e39bf182781d72ddd224dbbd449aa8",
-                "reference": "d169d1ed24e39bf182781d72ddd224dbbd449aa8",
+                "url": "https://api.github.com/repos/reactphp/socket/zipball/2e8660111d14df908a913a058bce4a1786de489f",
+                "reference": "2e8660111d14df908a913a058bce4a1786de489f",
                 "shasum": ""
             },
             "require": {
@@ -687,7 +687,7 @@
             },
             "require-dev": {
                 "clue/block-react": "^1.2",
-                "phpunit/phpunit": "^5.0 || ^4.8"
+                "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
             },
             "type": "library",
             "autoload": {
@@ -707,20 +707,20 @@
                 "reactphp",
                 "stream"
             ],
-            "time": "2017-10-23T21:45:58+00:00"
+            "time": "2017-11-18T16:47:56+00:00"
         },
         {
             "name": "react/stream",
-            "version": "v0.7.4",
+            "version": "v0.7.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/stream.git",
-                "reference": "5c7db5261b3cc7e11b8ba765bed8ba31ee745f5c"
+                "reference": "a41bbffdda5e3f4282012f8e346cef48ecb28b24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/stream/zipball/5c7db5261b3cc7e11b8ba765bed8ba31ee745f5c",
-                "reference": "5c7db5261b3cc7e11b8ba765bed8ba31ee745f5c",
+                "url": "https://api.github.com/repos/reactphp/stream/zipball/a41bbffdda5e3f4282012f8e346cef48ecb28b24",
+                "reference": "a41bbffdda5e3f4282012f8e346cef48ecb28b24",
                 "shasum": ""
             },
             "require": {
@@ -730,7 +730,7 @@
             },
             "require-dev": {
                 "clue/stream-filter": "~1.2",
-                "phpunit/phpunit": "^5.0 || ^4.8.10"
+                "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
             },
             "suggest": {
                 "react/event-loop": "^0.4"
@@ -756,7 +756,7 @@
                 "stream",
                 "writable"
             ],
-            "time": "2017-10-11T17:58:46+00:00"
+            "time": "2017-11-20T11:55:48+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -916,16 +916,16 @@
         },
         {
             "name": "sciactive/tilmeld",
-            "version": "1.0.0-beta.7",
+            "version": "1.0.0-beta.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld.git",
-                "reference": "4301e880d4ded0a9d9c9dee4d7eb0949ef827d83"
+                "reference": "11cdb19b4b66d88bd7ef8bef6a6d839b9b02c529"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld/zipball/4301e880d4ded0a9d9c9dee4d7eb0949ef827d83",
-                "reference": "4301e880d4ded0a9d9c9dee4d7eb0949ef827d83",
+                "url": "https://api.github.com/repos/sciactive/tilmeld/zipball/11cdb19b4b66d88bd7ef8bef6a6d839b9b02c529",
+                "reference": "11cdb19b4b66d88bd7ef8bef6a6d839b9b02c529",
                 "shasum": ""
             },
             "require": {
@@ -967,7 +967,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2017-11-17T00:00:00+00:00"
+            "time": "2017-11-21T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1017,16 +1017,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v3.4.0-BETA4",
+            "version": "v3.4.0-RC1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "ce3c40e528a2786453fa4154c85480ee6e9b8500"
+                "reference": "c62265478321efbd21cf6980842aef4745257808"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/ce3c40e528a2786453fa4154c85480ee6e9b8500",
-                "reference": "ce3c40e528a2786453fa4154c85480ee6e9b8500",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/c62265478321efbd21cf6980842aef4745257808",
+                "reference": "c62265478321efbd21cf6980842aef4745257808",
                 "shasum": ""
             },
             "require": {
@@ -1067,7 +1067,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-11-10T07:36:19+00:00"
+            "time": "2017-11-13T18:20:08+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1189,16 +1189,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v3.4.0-BETA4",
+            "version": "v3.4.0-RC1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "78e46a29ea0a76f8a63b5aecde17270c36542d7b"
+                "reference": "fb3865c894f5dd00e7364f2a1cf30f91bd146628"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/78e46a29ea0a76f8a63b5aecde17270c36542d7b",
-                "reference": "78e46a29ea0a76f8a63b5aecde17270c36542d7b",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/fb3865c894f5dd00e7364f2a1cf30f91bd146628",
+                "reference": "fb3865c894f5dd00e7364f2a1cf30f91bd146628",
                 "shasum": ""
             },
             "require": {
@@ -1263,7 +1263,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2017-11-07T14:20:24+00:00"
+            "time": "2017-11-19T20:09:36+00:00"
         },
         {
             "name": "textalk/websocket",

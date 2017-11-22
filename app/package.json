@@ -15,8 +15,8 @@
     "url": "git+https://github.com/hperrin/nymph-template.git"
   },
   "dependencies": {
-    "nymph-client": "^3.0.1",
-    "tilmeld": "^1.0.0-beta.7"
+    "nymph-client": "^3.0.2",
+    "tilmeld": "^1.0.0-beta.9"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

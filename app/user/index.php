@@ -12,6 +12,6 @@ require __DIR__.'/../config.php';
 //
 
 $tilmeldURL = '../node_modules/tilmeld/';
-$sciactiveBaseURL = '../node_modules/';
+$nodeModulesURL = '../node_modules/';
 $restEndpoint = '../rest.php';
 include '../vendor/sciactive/tilmeld/setup/setup.php';
