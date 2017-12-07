@@ -7,3 +7,6 @@ RUN apt-get update && \
   apt-get clean
 
 COPY container-conf-files/msmtprc /etc/msmtprc
+
+# Memory Limit
+RUN echo "memory_limit=1024M" > $PHP_INI_DIR/conf.d/memory-limit.ini
