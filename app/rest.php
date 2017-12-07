@@ -11,10 +11,6 @@ require __DIR__.'/config.php';
 
 $NymphREST = new \Nymph\REST();
 
-foreach (glob(__DIR__.'/entities/*.php') as $curEntity) {
-  require $curEntity;
-}
-
 try {
   if (in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'DELETE'])) {
     parse_str(file_get_contents("php://input"), $args);

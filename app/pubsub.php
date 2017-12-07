@@ -15,10 +15,6 @@ require __DIR__.'/config.php';
 
 \Nymph\Nymph::connect();
 
-foreach (glob(__DIR__.'/entities/*.php') as $curEntity) {
-  require $curEntity;
-}
-
 if (in_array('-d', $argv)) {
   function shutdown() {
     posix_kill(posix_getpid(), SIGHUP);
