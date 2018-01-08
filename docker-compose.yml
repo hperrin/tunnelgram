@@ -50,6 +50,7 @@ services:
       dockerfile: Dockerfile-web
     volumes:
       - ./app:/var/www/html
+      - ./maintenance:/maintenance
     ports:
       - "8080:80"
     environment:
