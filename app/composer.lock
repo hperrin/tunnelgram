@@ -818,16 +818,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.4",
+            "version": "3.0.0-beta.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "4efb4e6801805771ef97db913d9c6e5aa591d107"
+                "reference": "b17820e1fca19145790372a3142da6e5692ae4db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/4efb4e6801805771ef97db913d9c6e5aa591d107",
-                "reference": "4efb4e6801805771ef97db913d9c6e5aa591d107",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b17820e1fca19145790372a3142da6e5692ae4db",
+                "reference": "b17820e1fca19145790372a3142da6e5692ae4db",
                 "shasum": ""
             },
             "require-dev": {
@@ -867,7 +867,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-01-04T00:00:00+00:00"
+            "time": "2018-01-08T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld",
