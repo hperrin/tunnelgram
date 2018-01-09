@@ -818,16 +818,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.5",
+            "version": "3.0.0-beta.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "b17820e1fca19145790372a3142da6e5692ae4db"
+                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b17820e1fca19145790372a3142da6e5692ae4db",
-                "reference": "b17820e1fca19145790372a3142da6e5692ae4db",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/0d503d2be2e0298986355287dfc577e2194c07b4",
+                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4",
                 "shasum": ""
             },
             "require-dev": {
