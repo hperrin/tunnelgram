@@ -16,13 +16,13 @@
   },
   "dependencies": {
     "nymph-client": "^3.0.3",
-    "tilmeld": "^1.0.0-beta.11"
+    "tilmeld-client": "^1.0.0-beta.13"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
+    "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
     "babel-watch": "^2.0.7"
   }

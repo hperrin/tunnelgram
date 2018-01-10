@@ -11,7 +11,7 @@ require __DIR__.'/../config.php';
 // Enter the setup app.
 //
 
-$tilmeldURL = '../node_modules/tilmeld/';
+$tilmeldURL = '../vendor/sciactive/tilmeld-server/';
 $nodeModulesURL = '../node_modules/';
 $restEndpoint = '../rest.php';
-include '../vendor/sciactive/tilmeld/setup/setup.php';
+include $tilmeldURL.'/setup/setup.php';

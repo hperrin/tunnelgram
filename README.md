@@ -1,6 +1,6 @@
 # Nymph App Template
 
-This is a template for you to use to build an app with Nymph and Tilmeld.
+This is a template for you to use to build an app with [Nymph](http://nymph.io/) and [Tilmeld](http://tilmeld.org/).
 
 It provides a Docker setup that runs MySQL, Postfix, Nymph PubSub, and Apache. It presents a usable app as a starting point. When you're ready to start developing, check out the [API docs](https://github.com/sciactive/nymph/wiki/API-Docs).
 
@@ -30,7 +30,7 @@ sudo wget -O /usr/local/bin/docker-compose https://github.com/docker/compose/rel
 
 ### Regarding NPM and Composer
 
-[NPM from Node.js](https://nodejs.org/en/download/current/) and [Composer](https://getcomposer.org/download/) are used, but if they are not installed, the npm.sh and composer.sh scripts will use a Docker container to run them. If you plan on adding a lot of JavaScript and/or PHP libraries, you should probably just install them. On Ubuntu, you can run `sudo apt-get install nodejs npm composer`.
+[NPM](https://nodejs.org/en/download/current/) and [Composer](https://getcomposer.org/download/) are used, but if they are not installed, the npm.sh and composer.sh scripts will use a Docker container to run them. If you plan on adding a lot of JavaScript and/or PHP libraries, you should probably just install them. On Ubuntu, you can run `sudo apt-get install nodejs npm composer`.
 
 If you don't want to install them, you can run commands from the repository directory (not the "app" directory) using composer.sh and npm.sh. For example:
 
