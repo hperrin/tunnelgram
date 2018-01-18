@@ -435,16 +435,16 @@
         },
         {
             "name": "react/dns",
-            "version": "v0.4.11",
+            "version": "v0.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/dns.git",
-                "reference": "8558bba4f2784aa997670d15fc6f7461a8eb4e53"
+                "reference": "c74a0af0c7254e73600fd8c5c95f6bf23c5998f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/dns/zipball/8558bba4f2784aa997670d15fc6f7461a8eb4e53",
-                "reference": "8558bba4f2784aa997670d15fc6f7461a8eb4e53",
+                "url": "https://api.github.com/repos/reactphp/dns/zipball/c74a0af0c7254e73600fd8c5c95f6bf23c5998f4",
+                "reference": "c74a0af0c7254e73600fd8c5c95f6bf23c5998f4",
                 "shasum": ""
             },
             "require": {
@@ -458,7 +458,7 @@
             },
             "require-dev": {
                 "clue/block-react": "^1.2",
-                "phpunit/phpunit": "^5.0 || ^4.8.10"
+                "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
             },
             "type": "library",
             "autoload": {
@@ -477,7 +477,7 @@
                 "dns-resolver",
                 "reactphp"
             ],
-            "time": "2017-08-25T08:22:48+00:00"
+            "time": "2018-01-14T10:04:36+00:00"
         },
         {
             "name": "react/event-loop",
@@ -881,16 +881,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.6",
+            "version": "3.0.0-beta.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4"
+                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/0d503d2be2e0298986355287dfc577e2194c07b4",
-                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
+                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
                 "shasum": ""
             },
             "require-dev": {
@@ -930,20 +930,20 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-01-08T00:00:00+00:00"
+            "time": "2018-01-11T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.12",
+            "version": "1.0.0-beta.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "025e29b694a8b34302dcdb2cafae7efcc65f6a11"
+                "reference": "6e3cd017ab76ea8a34e45ad09dc5d68a3c77a73c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/025e29b694a8b34302dcdb2cafae7efcc65f6a11",
-                "reference": "025e29b694a8b34302dcdb2cafae7efcc65f6a11",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/6e3cd017ab76ea8a34e45ad09dc5d68a3c77a73c",
+                "reference": "6e3cd017ab76ea8a34e45ad09dc5d68a3c77a73c",
                 "shasum": ""
             },
             "require": {
@@ -986,7 +986,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-01-10T00:00:00+00:00"
+            "time": "2018-01-17T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
