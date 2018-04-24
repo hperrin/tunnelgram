@@ -7,8 +7,8 @@ error_reporting(E_ALL);
  * container.
  */
 
-if (php_sapi_name() != "cli") {
-  die("You can only run pubsub.php from the command line.");
+if (php_sapi_name() != 'cli') {
+  die('You can only run pubsub.php from the command line.');
 }
 
 require __DIR__.'/config.php';
@@ -16,6 +16,10 @@ require __DIR__.'/config.php';
 \Nymph\Nymph::connect();
 
 if (in_array('-d', $argv)) {
+  if (!is_callable('pcntl_fork')) {
+    die('PCNTL PHP extension is required to use daemon mode.');
+  }
+
   function shutdown() {
     posix_kill(posix_getpid(), SIGHUP);
   }

@@ -18,36 +18,23 @@
     };
   </script>
 
-  <!-- Nymph JS -->
-  <script src="/node_modules/nymph-client/lib/Nymph.js"></script>
-  <script src="/node_modules/nymph-client/lib/Entity.js"></script>
-  <script src="/node_modules/nymph-client/lib/PubSub.js"></script>
-
-  <!-- Tilmeld JS -->
-  <script src="/node_modules/tilmeld-client/lib/Entities/User.js"></script>
-  <script src="/node_modules/tilmeld-client/lib/Entities/Group.js"></script>
-  <script src="/node_modules/tilmeld-client/lib/Components/TilmeldRecover.js"></script>
-  <script src="/node_modules/tilmeld-client/lib/Components/TilmeldLogin.js"></script>
-  <script src="/node_modules/tilmeld-client/lib/Components/TilmeldChangePassword.js"></script>
-
   <!-- PForm CSS -->
   <link rel="stylesheet" href="/node_modules/pform/css/pform.css">
   <link rel="stylesheet" href="/node_modules/pform/css/pform-bootstrap.css">
 
-  <!-- Entity JS -->
-  <script src="build/Todo.js"></script>
+  <!-- AngularJS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
 
-  <!-- App JS -->
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
-  <script src="js/todoApp.js"></script>
+  <!-- Bundled JS -->
+  <script src="/dist/bundle.js"></script>
 
   <!-- Bootstrap JS -->
-  <script src="//code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
 </head>
 <body ng-controller="TodoController">
   <div class="container" style="height: 100vh;" ng-if="currentUser === false">

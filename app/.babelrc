@@ -4,7 +4,8 @@
     "stage-3"
   ],
   "plugins": [
-    "transform-class-properties",
-    "transform-es2015-modules-umd"
+    ["babel-plugin-transform-builtin-extend", {
+        "globals": ["Error", "Array"]
+    }]
   ]
 }

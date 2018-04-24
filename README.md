@@ -6,11 +6,10 @@ It provides a Docker setup that runs MySQL, Postfix, Nymph PubSub, and Apache. I
 
 ## Installation
 
-1. Fork this repo.
-2. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
-3. Clone your fork: `git clone git@github.com:yourusername/yourreponame.git && cd yourreponame`
-4. Run the app: `./run.sh`
-5. Go here [http://localhost:8080/](http://localhost:8080/)
+1. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
+2. Copy this template: `npm install -g degit && degit hperrin/nymph-template nymph-app && cd nymph-app`
+3. Run the app: `./run.sh`
+4. Go here [http://localhost:8080/](http://localhost:8080/)
 
 ### Getting Docker and Docker Compose on Ubuntu
 
@@ -25,7 +24,7 @@ Then log out and log back in, so the group modification can take effect.
 The Docker Compose version in the Ubuntu repositories isn't new enough, so you'll need to install Docker Compose manually. To install, run this command:
 
 ```sh
-sudo wget -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/1.17.0/docker-compose-`uname -s`-`uname -m` && sudo chmod +x /usr/local/bin/docker-compose
+sudo wget -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` && sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 ### Regarding NPM and Composer
@@ -44,6 +43,6 @@ If you don't want to install them, you can run commands from the repository dire
 
 To add a new entity, follow these steps:
 
-* Duplicate both Todo.php and Todo.js in the entities folder, and rename/edit them.
+* Duplicate both Todo.php and Todo.js in the src/Entities folder, and rename/edit them.
 * Run `npm run build` to build the UMD entity JS.
 * In `index.html`, add a new script tag under `<script src="build/Todo.js"></script>` for your new entity.
