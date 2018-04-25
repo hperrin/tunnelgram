@@ -21,7 +21,7 @@ It provides a Docker setup that runs MySQL (or Postgres, or SQLite3), Postfix, N
 * For SQLite3
   * use `degit hperrin/nymph-template#sqlite3 nymph-app` instead.
 
-On SQLite3, the first time you create an entity (when you register the first user), the DB will become locked. You'll need to restart the container, but then on it will be fine.
+On SQLite3, the very first time you create an entity (when you register the first user/create the first todo), the DB will become locked. You'll need to refresh the page, but then on it will be fine.
 
 ## Getting Docker and Docker Compose on Ubuntu
 
