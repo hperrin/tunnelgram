@@ -2,16 +2,28 @@
 
 This is a template for you to use to build an app with [Nymph](http://nymph.io/) and [Tilmeld](http://tilmeld.org/).
 
-It provides a Docker setup that runs MySQL, Postfix, Nymph PubSub, and Apache. It presents a usable app as a starting point. When you're ready to start developing, check out the [API docs](https://github.com/sciactive/nymph/wiki/API-Docs).
+It provides a Docker setup that runs MySQL (or Postgres, or SQLite3), Postfix, Nymph PubSub, and Apache. It presents a usable app as a starting point. When you're ready to start developing, check out the [API docs](https://github.com/sciactive/nymph/wiki/API-Docs).
 
 ## Installation
 
 1. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
-2. Copy this template: `npm install -g degit && degit hperrin/nymph-template nymph-app && cd nymph-app`
+2. Copy this template:
+  * `npm install -g degit`
+  * `degit hperrin/nymph-template nymph-app`
+  * `cd nymph-app`
 3. Run the app: `./run.sh`
 4. Go here [http://localhost:8080/](http://localhost:8080/)
 
-### Getting Docker and Docker Compose on Ubuntu
+### Postgres or SQLite3
+
+* For Postgres
+  * use `degit hperrin/nymph-template#postgres nymph-app`.
+* For SQLite3
+  * use `degit hperrin/nymph-template#sqlite3 nymph-app`.
+
+On SQLite3, the first time you create an entity (when you register the first user), the DB will become locked. You'll need to restart the container, but then on it will be fine.
+
+## Getting Docker and Docker Compose on Ubuntu
 
 The Docker package in Ubuntu requires the user to be added to the "docker" group after installation. To install, run this command:
 
