@@ -9,7 +9,7 @@ It provides a Docker setup that runs MySQL (or Postgres, or SQLite3), Postfix, N
 1. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
 2. Copy this template:
   * `npm install -g degit`
-  * `degit hperrin/nymph-template nymph-app`
+  * `degit hperrin/nymph-template nymph-app` (for MySQL)
   * `cd nymph-app`
 3. Run the app: `./run.sh`
 4. Go here [http://localhost:8080/](http://localhost:8080/)
@@ -17,9 +17,9 @@ It provides a Docker setup that runs MySQL (or Postgres, or SQLite3), Postfix, N
 ### Postgres or SQLite3
 
 * For Postgres
-  * use `degit hperrin/nymph-template#postgres nymph-app`.
+  * use `degit hperrin/nymph-template#postgres nymph-app` instead.
 * For SQLite3
-  * use `degit hperrin/nymph-template#sqlite3 nymph-app`.
+  * use `degit hperrin/nymph-template#sqlite3 nymph-app` instead.
 
 On SQLite3, the first time you create an entity (when you register the first user), the DB will become locked. You'll need to restart the container, but then on it will be fine.
 
