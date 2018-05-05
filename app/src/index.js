@@ -134,10 +134,10 @@ angular.module('todoApp', [])
           'type': '&',
           'ref': ['user', $scope.currentUser]
         }
-    ).subscribe(todos => {
+    ).subscribe(update => {
       $scope.uiState.showArchived = archived;
-      if (todos) {
-        Nymph.updateArray($scope.todos, todos);
+      if (update) {
+        PubSub.updateArray($scope.todos, update);
         Nymph.sort($scope.todos, $scope.uiState.sort);
       }
       $scope.$apply();

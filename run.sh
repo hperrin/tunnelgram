@@ -21,4 +21,8 @@ if [ ! -d "mail" ]; then
   mkdir mail
 fi
 
+if [ ! -f "tilmeld_secret.txt" ]; then
+  dd if=/dev/urandom bs=32 count=1 | base64 > ./tilmeld_secret.txt
+fi
+
 docker-compose up

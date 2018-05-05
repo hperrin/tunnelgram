@@ -39,7 +39,11 @@ $nymphConfig = [
 
 // Tilmeld's configuration.
 \Tilmeld\Tilmeld::configure([
+  'app_url' => 'http://localhost:8080/',
   'setup_url' => 'http://localhost:8080/user/',
   'email_usernames' => true,
   'verify_redirect' => 'http://localhost:8080/',
+  'jwt_secret' => base64_decode(
+      file_get_contents(getenv('TILMELD_SECRET_FILE'))
+  )
 ]);
