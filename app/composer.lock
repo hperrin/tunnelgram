@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "712c9caa64bb5c6bc400088b10636f73",
+    "content-hash": "fc6a0051b4e284d5b7548c1870f39a1a",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -940,16 +940,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.11",
+            "version": "3.0.0-beta.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "62d89f6e22b095ae99c16d746ff454b96c93bc7e"
+                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/62d89f6e22b095ae99c16d746ff454b96c93bc7e",
-                "reference": "62d89f6e22b095ae99c16d746ff454b96c93bc7e",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
+                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
                 "shasum": ""
             },
             "require-dev": {
@@ -990,27 +990,26 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-04T00:00:00+00:00"
+            "time": "2018-05-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.17",
+            "version": "1.0.0-beta.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "63292d5aaa782257d2e5c520cffa03b1c2715b14"
+                "reference": "850a2c1fc81d42325a146acea12bdd1218cdda58"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/63292d5aaa782257d2e5c520cffa03b1c2715b14",
-                "reference": "63292d5aaa782257d2e5c520cffa03b1c2715b14",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/850a2c1fc81d42325a146acea12bdd1218cdda58",
+                "reference": "850a2c1fc81d42325a146acea12bdd1218cdda58",
                 "shasum": ""
             },
             "require": {
                 "lcobucci/jwt": "^3.2",
                 "respect/validation": "^1.1",
                 "sciactive/hookphp": "^2.0",
-                "sciactive/nymph-pubsub": "~3.0@beta",
                 "sciactive/nymph-server": "~3.0@beta",
                 "sciactive/umailphp": "^2.3"
             },
@@ -1050,7 +1049,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-05-04T00:00:00+00:00"
+            "time": "2018-05-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1100,16 +1099,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.0.9",
+            "version": "v4.1.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "014487772c22d893168e5d628a13e882009fea29"
+                "reference": "7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/014487772c22d893168e5d628a13e882009fea29",
-                "reference": "014487772c22d893168e5d628a13e882009fea29",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8",
+                "reference": "7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8",
                 "shasum": ""
             },
             "require": {
@@ -1117,12 +1116,13 @@
                 "symfony/polyfill-mbstring": "~1.1"
             },
             "require-dev": {
+                "predis/predis": "~1.0",
                 "symfony/expression-language": "~3.4|~4.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -1149,7 +1149,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-04-30T01:05:59+00:00"
+            "time": "2018-05-07T07:14:12+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1212,16 +1212,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.0.9",
+            "version": "v4.1.0-BETA1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "1dfbfdf060bbc80da8dedc062050052e694cd027"
+                "reference": "ac9df6928e717e5dc1378951c5750e0a73c0235b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/1dfbfdf060bbc80da8dedc062050052e694cd027",
-                "reference": "1dfbfdf060bbc80da8dedc062050052e694cd027",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/ac9df6928e717e5dc1378951c5750e0a73c0235b",
+                "reference": "ac9df6928e717e5dc1378951c5750e0a73c0235b",
                 "shasum": ""
             },
             "require": {
@@ -1253,7 +1253,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -1286,7 +1286,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-04-20T06:20:23+00:00"
+            "time": "2018-04-27T09:21:35+00:00"
         },
         {
             "name": "textalk/websocket",

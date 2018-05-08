@@ -19,7 +19,6 @@ export class Todo extends Entity {
 
 // === Static Properties ===
 
-Todo.etype = 'todo';
 // The name of the server class
 Todo.class = 'MyApp\\Todo';
 

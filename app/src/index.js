@@ -23,6 +23,10 @@ angular.module('todoApp', [])
   $scope.clientConfig = {};
   $scope.loginComponent = null;
 
+  const errHandler = errObj => {
+    alert('Error: '+errObj.textStatus+(errObj.message ? '\n\n'+errObj.message : ''));
+  };
+
   // Get the current user.
   User.current().then(user => {
     $scope.currentUser = user;
@@ -30,9 +34,7 @@ angular.module('todoApp', [])
     if ($scope.currentUser === null) {
       createLoginComponent();
     }
-  }, errObj => {
-    alert("Error: "+errObj.textStatus);
-  });
+  }, errHandler);
 
   // Handle logins and logouts.
   User.on('login', user => {
@@ -110,9 +112,7 @@ angular.module('todoApp', [])
   $scope.saveUser = () => {
     $scope.currentUser.save().then(() => {
       $scope.$apply();
-    }, errObj => {
-      alert('Error: '+errObj.textStatus);
-    });
+    }, errHandler);
   };
 
   $scope.logout = () => {
@@ -156,9 +156,7 @@ angular.module('todoApp', [])
     todo.save().then(() => {
       $scope.uiState.todoText = '';
       $scope.$apply();
-    }, errObj => {
-      alert("Error: "+errObj.textStatus);
-    });
+    }, errHandler);
   };
 
   $scope.sortTodos = () => {
@@ -166,9 +164,7 @@ angular.module('todoApp', [])
   };
 
   $scope.save = todo => {
-    todo.save().then(null, errObj => {
-      alert('Error: '+errObj.textStatus);
-    });
+    todo.save().then(null, errHandler);
   };
 
   $scope.remaining = () => {
@@ -187,9 +183,7 @@ angular.module('todoApp', [])
           if (!success) {
             alert("Couldn't save changes to "+todo.get('name'));
           }
-        }, errObj => {
-          alert("Error: "+errObj.textStatus+"\nCouldn't archive "+todo.get('name'));
-        });
+        }, errHandler);
       }
     });
   };

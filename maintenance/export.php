@@ -4,6 +4,8 @@ if (php_sapi_name() != "cli") {
   die("You can only run export.php from the command line.");
 }
 
+set_time_limit(3600);
+
 require '/var/www/html/config.php';
 
 $filename = 'entities-export-'.date('c').'.nex';
