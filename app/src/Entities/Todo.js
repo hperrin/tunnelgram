@@ -1,5 +1,3 @@
-// Remember to run `npm run build` after editing this file.
-
 import {Nymph, Entity} from 'nymph-client';
 
 export class Todo extends Entity {

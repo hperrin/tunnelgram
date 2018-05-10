@@ -1,0 +1,39 @@
+<label class="list-group-item list-group-item-action font-weight-normal {todo.data.done ? 'list-group-item-success' : ''}" style="cursor: pointer;">
+  <span class="d-flex align-items-center justify-content-between">
+    {#if !$archived}
+      <input class="mr-2" type="checkbox" bind:checked="todo.data.done" on:change="save()" />
+    {/if}
+    <input class="d-inline border-0 {todo.data.done ? 'text-muted' : ''}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" bind:value="todo.data.name" on:change="save()" />
+    <span class="d-flex ml-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
+      {createdDate}
+    </span>
+  </span>
+</label>
+
+<script>
+  import Todo from '../Entities/Todo';
+  import ErrHandler from '../ErrHandler';
+
+  export default {
+    data () {
+      return {
+        todo: new Todo()
+      }
+    },
+
+    computed: {
+      createdDate: ({todo}) => {
+        const date = new Date(todo.cdate * 1000);
+        return `${date.getFullYear()}-${date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1}-${date.getDate() < 10 ? '0'+date.getDate() : date.getDate()} ${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+      }
+    },
+
+    methods: {
+      save () {
+        this.get().todo.save().then(todo => {
+          this.set({todo});
+        }, ErrHandler);
+      }
+    }
+  };
+</script>
