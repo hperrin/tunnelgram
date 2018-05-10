@@ -1,12 +1,26 @@
 version: '3.1'
 
 services:
+  web:
+    depends_on:
+      - fpm
+    image: nginx:1.13
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/app
+      - ./config/site.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app-network
+
   db:
     build:
-      context: .
+      context: ./config
       dockerfile: Dockerfile-mysql
     volumes:
       - ./db_data:/var/lib/mysql
+    networks:
+      - app-network
     environment:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
       MYSQL_DATABASE: nymph
@@ -18,22 +32,26 @@ services:
 
   mta:
     build:
-      context: .
+      context: ./config
       dockerfile: Dockerfile-mta
     volumes:
       - ./mail:/var/spool/postfix
+    networks:
+      - app-network
 
   pubsub:
     depends_on:
       - db
     build:
-      context: .
+      context: ./config
       dockerfile: Dockerfile-pubsub
     volumes:
-      - ./app:/nymph
-    command: ["./wait-for-it.sh", "db:3306", "-t", "120", "--", "php", "/nymph/pubsub.php"]
+      - ./app:/app
+    command: ["./wait-for-it.sh", "db:3306", "-t", "120", "--", "php", "/app/pubsub.php"]
     ports:
       - "8081:8080"
+    networks:
+      - app-network
     environment:
       MYSQL_HOST: db:3306
       MYSQL_DATABASE: nymph
@@ -44,19 +62,19 @@ services:
       - db_password
       - tilmeld_secret
 
-  web:
+  fpm:
     depends_on:
       - db
       - mta
       - pubsub
     build:
-      context: .
-      dockerfile: Dockerfile-web
+      context: ./config
+      dockerfile: Dockerfile-fpm
     volumes:
-      - ./app:/var/www/html
+      - ./app:/app
       - ./maintenance:/maintenance
-    ports:
-      - "8080:80"
+    networks:
+      - app-network
     environment:
       MYSQL_HOST: db:3306
       MYSQL_DATABASE: nymph
@@ -68,6 +86,9 @@ services:
       - db_password
       - tilmeld_secret
 
+networks:
+  app-network:
+    driver: bridge
 
 secrets:
   db_password:

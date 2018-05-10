@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:7.2-fpm
 
 RUN docker-php-ext-install mysqli
 
@@ -6,7 +6,7 @@ RUN apt-get update && \
   apt-get install -y msmtp msmtp-mta && \
   apt-get clean
 
-COPY container-conf-files/msmtprc /etc/msmtprc
+COPY msmtprc /etc/msmtprc
 
 # Memory Limit
 RUN echo "memory_limit=1024M" > $PHP_INI_DIR/conf.d/memory-limit.ini
