@@ -24,7 +24,7 @@
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
-    "nymph-client": "^4.0.0-beta.7",
+    "nymph-client": "^4.0.0-beta.8",
     "svelte": "^2.6.3",
     "svelte-loader": "^2.9.0",
     "tilmeld-client": "^1.0.0-beta.19",
