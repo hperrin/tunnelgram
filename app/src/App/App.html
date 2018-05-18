@@ -9,12 +9,13 @@
     <div class="row">
       <div class="col-sm-8 mb-3">
         <div class="list-group">
-          {#if !$todos.length}
+          {#if $todos.length}
+            {#each $todos as todo (todo.guid)}
+              <TodoEl bind:todo="todo"></TodoEl>
+            {/each}
+          {:else}
             <div class="alert alert-secondary">You have no todos yet.</div>
           {/if}
-          {#each $todos as todo (todo.guid)}
-            <TodoEl bind:todo="todo"></TodoEl>
-          {/each}
         </div>
       </div>
       <div class="col-sm-4 mb-3">
@@ -128,8 +129,11 @@
               'tag': 'archived'
             },
             {
-              'type': '&',
-              'ref': ['user', user]
+              'type': '|',
+              'ref': [
+                ['user', user.guid],
+                ['acWrite', user.guid]
+              ]
             }
         ).subscribe(update => {
           this.set({_loading: false});

@@ -15,19 +15,20 @@
     "url": "git+https://github.com/hperrin/nymph-template.git"
   },
   "dependencies": {
-    "nymph-client": "^4.0.0-beta.6",
-    "tilmeld-client": "^1.0.0-beta.18"
+    "pform": "^3.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
-    "svelte": "^2.5.0",
+    "nymph-client": "^4.0.0-beta.7",
+    "svelte": "^2.6.3",
     "svelte-loader": "^2.9.0",
-    "webpack": "^4.8.1",
+    "tilmeld-client": "^1.0.0-beta.19",
+    "webpack": "^4.8.3",
     "webpack-cli": "^2.1.3"
   }
 }

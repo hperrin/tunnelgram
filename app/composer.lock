@@ -940,16 +940,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.12",
+            "version": "3.0.0-beta.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e"
+                "reference": "b98e9b07878eb976ad711fd3551217dfc7eb1270"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
-                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b98e9b07878eb976ad711fd3551217dfc7eb1270",
+                "reference": "b98e9b07878eb976ad711fd3551217dfc7eb1270",
                 "shasum": ""
             },
             "require-dev": {
@@ -990,20 +990,20 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-07T00:00:00+00:00"
+            "time": "2018-05-14T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.19",
+            "version": "1.0.0-beta.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "a22280130e04d1a0312dd137eec5122639bcf995"
+                "reference": "b7db1a43f9d44c07bfd1897107c72bc9bdee3199"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/a22280130e04d1a0312dd137eec5122639bcf995",
-                "reference": "a22280130e04d1a0312dd137eec5122639bcf995",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/b7db1a43f9d44c07bfd1897107c72bc9bdee3199",
+                "reference": "b7db1a43f9d44c07bfd1897107c72bc9bdee3199",
                 "shasum": ""
             },
             "require": {
@@ -1011,7 +1011,7 @@
                 "respect/validation": "^1.1",
                 "sciactive/hookphp": "^2.0",
                 "sciactive/nymph-server": "~3.0@beta",
-                "sciactive/umailphp": "^2.3"
+                "sciactive/umailphp": "^2.4"
             },
             "require-dev": {
                 "squizlabs/php_codesniffer": "3.*"
@@ -1049,20 +1049,20 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-05-07T00:00:00+00:00"
+            "time": "2018-05-15T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
-            "version": "2.3.0",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/umailphp.git",
-                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188"
+                "reference": "4a2db7283e0f58e004a2261e818c3b08f45b5547"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/9e6a510b9614c0a479c7e1648d957a503803b188",
-                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188",
+                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/4a2db7283e0f58e004a2261e818c3b08f45b5547",
+                "reference": "4a2db7283e0f58e004a2261e818c3b08f45b5547",
                 "shasum": ""
             },
             "require": {
@@ -1089,13 +1089,13 @@
                     "role": "Developer"
                 }
             ],
-            "description": "A PHP email templating system.",
+            "description": "An email templating system for Nymph.",
             "homepage": "http://umailphp.org/",
             "keywords": [
                 "email",
                 "templating"
             ],
-            "time": "2018-04-23T00:00:00+00:00"
+            "time": "2018-05-14T00:00:00+00:00"
         },
         {
             "name": "symfony/http-foundation",

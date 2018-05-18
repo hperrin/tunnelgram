@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
  */
 class Todo extends \Nymph\Entity {
   const ETYPE = 'todo';
-  protected $clientEnabledMethods = ['archive'];
+  protected $clientEnabledMethods = ['archive', 'share', 'unshare'];
   protected $whitelistData = ['name', 'done'];
   protected $protectedTags = ['archived'];
   protected $whitelistTags = [];
@@ -24,6 +24,28 @@ class Todo extends \Nymph\Entity {
       return true;
     }
     $this->addTag('archived');
+    return $this->save();
+  }
+
+  public function share($username) {
+    $user = \Tilmeld\Entities\User::factory($username);
+    if (!$user->guid) {
+      return false;
+    }
+    if (!$user->inArray($this->acWrite)) {
+      $this->acWrite[] = $user;
+    }
+    return $this->save();
+  }
+
+  public function unshare($guid) {
+    $user = \Tilmeld\Entities\User::factory($guid);
+    if (!$user->guid) {
+      return false;
+    }
+    while (($index = $user->arraySearch($this->acWrite)) !== false) {
+      array_splice($this->acWrite, $index, 1);
+    }
     return $this->save();
   }
 

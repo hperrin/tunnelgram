@@ -13,6 +13,14 @@ export class Todo extends Entity {
   archive (...args) {
     return this.serverCall('archive', args);
   }
+
+  share (...args) {
+    return this.serverCall('share', args);
+  }
+
+  unshare (...args) {
+    return this.serverCall('unshare', args);
+  }
 }
 
 // === Static Properties ===

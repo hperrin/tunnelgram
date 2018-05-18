@@ -1,5 +1,6 @@
 import Container from './Container.html';
 import UserStore from './UserStore';
+import {Nymph} from 'nymph-client';
 
 const store = new UserStore({
   todos: [],
@@ -15,4 +16,6 @@ const app = new Container({
   store
 });
 
-window.store = store; // useful for debugging!
+// useful for debugging!
+window.store = store;
+window.Nymph = Nymph;
