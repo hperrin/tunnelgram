@@ -1,6 +1,6 @@
 import {Nymph, Entity} from 'nymph-client';
 
-export class Todo extends Entity {
+export class Conversation extends Entity {
   // === Constructor ===
 
   constructor (id) {
@@ -26,8 +26,8 @@ export class Todo extends Entity {
 // === Static Properties ===
 
 // The name of the server class
-Todo.class = 'MyApp\\Todo';
+Conversation.class = 'ESText\\Conversation';
 
-Nymph.setEntityClass(Todo.class, Todo);
+Nymph.setEntityClass(Conversation.class, Conversation);
 
-export default Todo;
+export default Conversation;

@@ -1,5 +1,4 @@
-<?php
-namespace MyApp;
+<?php namespace ESText;
 
 use Respect\Validation\Validator as v;
 
@@ -7,10 +6,10 @@ use Respect\Validation\Validator as v;
  * @property string $name The todo's text.
  * @property bool $done Whether it's done.
  */
-class Todo extends \Nymph\Entity {
-  const ETYPE = 'todo';
+class Message extends \Nymph\Entity {
+  const ETYPE = 'message';
   protected $clientEnabledMethods = ['archive', 'share', 'unshare'];
-  protected $whitelistData = ['name', 'done'];
+  protected $whitelistData = ['conversation', 'done'];
   protected $protectedTags = ['archived'];
   protected $whitelistTags = [];
 

@@ -41,7 +41,11 @@ $nymphConfig = [
 \Tilmeld\Tilmeld::configure([
   'app_url' => 'http://localhost:8080/',
   'setup_url' => 'http://localhost:8080/user/',
-  'email_usernames' => true,
+  'email_usernames' => false,
+  'user_fields' => ['name', 'phone'],
+  'reg_fields' => ['name'],
+  'verify_email' => false,
+  'pw_recovery' => false,
   'verify_redirect' => 'http://localhost:8080/',
   'jwt_secret' => base64_decode(
       file_get_contents(getenv('TILMELD_SECRET_FILE'))
