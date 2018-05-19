@@ -46,6 +46,9 @@ class EncryptionService {
           // And load the public key.
           const publicKeyString = publicKey.get('text');
           this.setUserPublicKey(publicKeyString);
+
+          // TODO(hperrin): Should I have this for user trust?
+          await (new Promise((resolve) => setTimeout(() => resolve(), 1000)));
         } else if (!privateKey && !publicKey) {
           // The user just registered, so save the new private key.
           privateKey = new PrivateKey();
@@ -74,13 +77,13 @@ class EncryptionService {
             console.log('Public Key: ', publicKeyString);
             return;
           }
+
+          // TODO(hperrin): Should I have this for user trust?
+          await (new Promise((resolve) => setTimeout(() => resolve(), 2000)));
         } else {
           this.reject('Server provided inconsistent keys. Please refresh the page.');
           return;
         }
-
-        // TODO(hperrin): Should I have this for user trust?
-        await (new Promise((resolve) => setTimeout(() => resolve(), 1000)));
 
         crypt.key = null;
         this.resolve();
