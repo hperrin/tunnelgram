@@ -127,13 +127,6 @@
             {
               'type': archived ? '&' : '!&',
               'tag': 'archived'
-            },
-            {
-              'type': '|',
-              'ref': [
-                ['user', user.guid],
-                ['acWrite', user.guid]
-              ]
             }
         ).subscribe(update => {
           this.set({_loading: false});
