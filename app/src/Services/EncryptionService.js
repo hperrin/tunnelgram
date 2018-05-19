@@ -4,6 +4,7 @@ import PublicKey from '../Entities/PublicKey';
 import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
 import aesjs from 'aes-js';
+import base64js from 'base64-js';
 
 class EncryptionService {
   constructor () {
@@ -39,7 +40,7 @@ class EncryptionService {
 
           // Decrypt the private key.
           const encryptedPrivateKeyString = privateKey.get('text');
-          const encryptedPrivateKeyBytes = aesjs.utils.hex.toBytes(encryptedPrivateKeyString);
+          const encryptedPrivateKeyBytes = base64js.toByteArray(encryptedPrivateKeyString);
           const privateKeyBytes = aesCtr.decrypt(encryptedPrivateKeyBytes);
           const privateKeyString = aesjs.utils.utf8.fromBytes(privateKeyBytes);
 
@@ -59,7 +60,7 @@ class EncryptionService {
           const privateKeyString = this.getUserPrivateKey();
           const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
           const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
-          const encryptedPrivateKeyString = aesjs.utils.hex.fromBytes(encryptedPrivateKeyBytes);
+          const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
 
           privateKey.set({text: encryptedPrivateKeyString});
           const privateKeySave = privateKey.save();
