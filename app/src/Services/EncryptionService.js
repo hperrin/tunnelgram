@@ -10,6 +10,7 @@ class EncryptionService {
     this.storage = window.localStorage;
     this.decryptor = null;
     this.key = null;
+    this.iv = null;
     this.encryptors = {};
     this.resolve = null;
     this.reject = null;
@@ -29,8 +30,9 @@ class EncryptionService {
         const publicPromise = PublicKey.current();
         let privateKey = await privatePromise;
         let publicKey = await publicPromise;
-        const keyBytes = aesjs.utils.utf8.toBytes(crypt.key);
-        const aesCtr = new aesjs.ModeOfOperation.ctr(keyBytes);
+        const keyBytes = aesjs.utils.hex.toBytes(crypt.key);
+        const ivBytes = aesjs.utils.hex.toBytes(crypt.iv);
+        const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
 
         if (privateKey && publicKey) {
           // The user has been here before, so get the private key from the entity.
@@ -73,7 +75,7 @@ class EncryptionService {
             await publicKeySave;
           } catch (e) {
             this.reject('Error storing encryption keys! You need to manually store them. I will print them in the console.');
-            console.log('Encrypted Private Key: ', encryptedPrivateKey);
+            console.log('Encrypted Private Key: ', encryptedPrivateKeyString);
             console.log('Public Key: ', publicKeyString);
             return;
           }
@@ -86,6 +88,7 @@ class EncryptionService {
         }
 
         crypt.key = null;
+        crypt.iv = null;
         this.resolve();
       } catch (e) {
         console.log('Error getting private key: ', e);
@@ -97,18 +100,22 @@ class EncryptionService {
       crypt.unsetUserKeys();
     });
 
+    const computeNewPassword = password => {
+      // Generate a hash of the password.
+      const hash = sha512().update(password).digest('hex');
+      // The first 32 bytes (64 hex chars) is used as the key for AES, and not sent to the server.
+      crypt.key = hash.substr(0, 64);
+      // The next 16 bytes (32 hex chars) is used as the initialization vector for Output Feedback Mode, and not sent to the server.
+      crypt.iv = hash.substr(64, 32);
+      // The rest is used as the new password, and replaces the one the user entered.
+      return hash.substr(96);
+    };
+
     // Override register to set up new user encryption.
     const _register = User.prototype.register;
     User.prototype.register = function (creds) {
       const {password} = creds;
-
-      // Generate a hash of the password.
-      const hash = sha512().update(password).digest('hex');
-      // The first 32 bytes is used as the key for AES, and not sent to the server.
-      crypt.key = hash.substr(0, 32);
-      // The rest is used as the new password, and replaces the one the user entered.
-      const newPassword = hash.substr(32);
-      creds.password = newPassword;
+      creds.password = computeNewPassword(password);
 
       // Generate a Public/Private key pair.
       // TODO(hperrin): change these to the B64 equivalents to reduce space after testing.
@@ -125,14 +132,7 @@ class EncryptionService {
     const _loginUser = User.loginUser;
     User.loginUser = function (creds) {
       const {password} = creds;
-
-      // Generate a hash of the password.
-      const hash = sha512().update(password).digest('hex');
-      // The first 32 bytes is used as the key for AES, and not sent to the server.
-      crypt.key = hash.substr(0, 32);
-      // The rest is used as the new password, and replaces the one the user entered.
-      const newPassword = hash.substr(32);
-      creds.password = newPassword;
+      creds.password = computeNewPassword(password);
 
       return _loginUser.call(this, creds);
     }
@@ -165,6 +165,7 @@ class EncryptionService {
     this.storage.removeItem('esPublicKey');
     this.decryptor = null;
     this.key = null;
+    this.iv = null;
     this.resolve = null;
     this.reject = null;
     this.ready = new Promise((resolve, reject) => {

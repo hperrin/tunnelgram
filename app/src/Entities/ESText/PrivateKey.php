@@ -14,6 +14,9 @@ class PrivateKey extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->text = '';
+    $this->acUser = \Tilmeld\Tilmeld::FULL_ACCESS;
+    $this->acGroup = \Tilmeld\Tilmeld::NO_ACCESS;
+    $this->acOther = \Tilmeld\Tilmeld::NO_ACCESS;
     parent::__construct($id);
   }
 
