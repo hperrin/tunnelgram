@@ -1,15 +1,13 @@
 import Container from './Container.html';
 import UserStore from './UserStore';
 import {Nymph} from 'nymph-client';
-import {User} from 'tilmeld-client';
-import {EncryptionService} from './App/EncryptionService.js';
-
-EncryptionService.userKeyPairWatch(User);
+import {crypt} from './Services/EncryptionService.js';
 
 const store = new UserStore({
   todos: [],
   sort: 'name',
-  archived: false
+  archived: false,
+  crypt: crypt
 });
 
 const app = new Container({

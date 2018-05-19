@@ -10,8 +10,8 @@ export class PrivateKey extends Entity {
 
   // === Static Methods ===
 
-  static getCurrent(...args) {
-    return PrivateKey.serverCallStatic('getCurrent', args);
+  static current(...args) {
+    return PrivateKey.serverCallStatic('current', args);
   }
 }
 

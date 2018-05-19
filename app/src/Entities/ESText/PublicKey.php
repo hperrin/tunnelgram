@@ -7,24 +7,27 @@ use Respect\Validation\Validator as v;
 class PublicKey extends \Nymph\Entity {
   const ETYPE = 'public_key';
   protected $clientEnabledMethods = [];
-  protected $clientEnabledStaticMethods = ['getCurrent'];
+  public static $clientEnabledStaticMethods = ['current'];
   protected $whitelistData = ['text'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
   public function __construct($id = 0) {
     $this->text = '';
+    $this->acUser = \Tilmeld\Tilmeld::FULL_ACCESS;
+    $this->acGroup = \Tilmeld\Tilmeld::FULL_ACCESS;
+    $this->acOther = \Tilmeld\Tilmeld::FULL_ACCESS;
     parent::__construct($id);
   }
 
-  public static function getCurrent() {
+  public static function current() {
     if (!Tilmeld::gatekeeper()) {
       return false;
     }
     $key = Nymph::getEntity(['class' => 'ESText\PublicKey'], ['&',
       'ref' => ['user', Tilmeld::$currentUser]
     ]);
-    if (!$key->guid) {
+    if (!isset($key) || !$key->guid) {
       return false;
     }
     return $key;
@@ -38,7 +41,7 @@ class PublicKey extends \Nymph\Entity {
     try {
       v::notEmpty()
         ->attribute('text', v::stringType()->notEmpty()->length(1, 2048))
-        ->setName('private key')
+        ->setName('public key')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());

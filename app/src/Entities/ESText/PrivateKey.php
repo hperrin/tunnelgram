@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 class PrivateKey extends \Nymph\Entity {
   const ETYPE = 'private_key';
   protected $clientEnabledMethods = [];
-  protected $clientEnabledStaticMethods = ['getCurrent'];
+  public static $clientEnabledStaticMethods = ['current'];
   protected $whitelistData = ['text'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -17,14 +17,14 @@ class PrivateKey extends \Nymph\Entity {
     parent::__construct($id);
   }
 
-  public static function getCurrent() {
+  public static function current() {
     if (!Tilmeld::gatekeeper()) {
       return false;
     }
     $key = Nymph::getEntity(['class' => 'ESText\PrivateKey'], ['&',
       'ref' => ['user', Tilmeld::$currentUser]
     ]);
-    if (!$key->guid) {
+    if (!isset($key) || !$key->guid) {
       return false;
     }
     return $key;
