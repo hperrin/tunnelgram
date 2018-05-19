@@ -4,8 +4,8 @@ import {Nymph} from 'nymph-client';
 import {crypt} from './Services/EncryptionService.js';
 
 const store = new UserStore({
-  todos: [],
-  sort: 'name',
+  conversations: [],
+  sort: 'cdate',
   archived: false,
   crypt: crypt
 });

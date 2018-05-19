@@ -9,54 +9,54 @@
     <div class="row">
       <div class="col-sm-8 mb-3">
         <div class="list-group">
-          {#if $todos.length}
-            {#each $todos as todo (todo.guid)}
-              <TodoEl bind:todo="todo"></TodoEl>
+          {#if $conversations.length}
+            {#each $conversations as conversation (conversation.guid)}
+              <ConversationSidebar bind:conversation="conversation"></ConversationSidebar>
             {/each}
           {:else}
-            <div class="alert alert-secondary">You have no todos yet.</div>
+            <div class="alert alert-secondary">You have no conversations yet.</div>
           {/if}
         </div>
       </div>
       <div class="col-sm-4 mb-3">
         <small class="alert alert-info d-block text-center">
           {#if $archived}
-            <span>{$todos.length} archived todos</span>
+            <span>{$conversations.length} archived conversations</span>
           {:else}
             <span>
-              {#if $todos.length == 0}
-                <span>0 todos</span>
+              {#if $conversations.length == 0}
+                <span>0 conversations</span>
               {:else}
-                <span>{remaining} of {$todos.length} remaining</span>
+                <span>{remaining} of {$conversations.length} remaining</span>
               {/if}
             </span>
           {/if}
-          {#if $todos.length > 0}
+          {#if $conversations.length > 0}
             <span class="d-block mt-2">
               {#if $archived}
-                <button type="button" class="btn btn-danger btn-sm" style="white-space: normal;" on:click="deleteTodos()">delete archived todos</button>
+                <button type="button" class="btn btn-danger btn-sm" style="white-space: normal;" on:click="deleteConversations()">delete archived conversations</button>
               {:else}
-                <button type="button" class="btn btn-success btn-sm" style="white-space: normal;" on:click="archive()">archive completed todos</button>
+                <button type="button" class="btn btn-success btn-sm" style="white-space: normal;" on:click="archive()">archive completed conversations</button>
               {/if}
             </span>
           {/if}
         </small>
-        {#if $todos.length > 1}
+        {#if $conversations.length > 1}
           <div>
             Sort: <br>
             <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortTodos()" name="sort" value="name"> Alpha</label>
+              <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="name"> Alpha</label>
             &nbsp;&nbsp;&nbsp;
             <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortTodos()" name="sort" value="cdate"> Created</label>
+              <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="cdate"> Created</label>
           </div>
         {/if}
       </div>
     </div>
     {#if !$archived}
-      <form class="d-flex my-3" on:submit="addTodo(event.preventDefault())">
-        <input class="form-control mr-2" style="flex-grow: 1;" type="text" bind:value="todoText" placeholder="add new todo here">
-        <input class="btn btn-primary" type="submit" value="add #{$todos.length + 1}">
+      <form class="d-flex my-3" on:submit="addConversation(event.preventDefault())">
+        <input class="form-control mr-2" style="flex-grow: 1;" type="text" bind:value="conversationText" placeholder="add new conversation here">
+        <input class="btn btn-primary" type="submit" value="add #{$conversations.length + 1}">
       </form>
     {/if}
     <div class="user-count badge badge-secondary position-fixed" style="right: 5px; bottom: 5px;" title="How many open sessions you have.">
@@ -67,9 +67,9 @@
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
-  import Todo from '../Entities/Conversation';
+  import Conversation from '../Entities/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
-  import TodoEl from './TodoEl.html';
+  import ConversationSidebar from './ConversationSidebar.html';
   import ErrHandler from '../ErrHandler';
 
   export default {
@@ -98,15 +98,15 @@
     data () {
       return {
         userCount: null,
-        todoText: ''
+        conversationText: ''
       }
     },
 
     computed: {
-      remaining: ({$todos}) => {
+      remaining: ({$conversations}) => {
         var count = 0;
-        for (var i = 0; i < $todos.length; i++) {
-          count += $todos[i].get().done ? 0 : 1;
+        for (var i = 0; i < $conversations.length; i++) {
+          count += $conversations[i].get().done ? 0 : 1;
         }
         return count;
       }
@@ -123,7 +123,7 @@
 
         const {archived, user} = this.store.get();
         _subscription = Nymph.getEntities(
-            {'class': Todo.class},
+            {'class': Conversation.class},
             {
               'type': archived ? '&' : '!&',
               'tag': 'archived'
@@ -138,10 +138,10 @@
         ).subscribe(update => {
           this.set({_loading: false});
           if (update) {
-            const {todos, sort} = this.store.get();
-            PubSub.updateArray(todos, update);
-            Nymph.sort(todos, sort);
-            this.store.set({todos});
+            const {conversations, sort} = this.store.get();
+            PubSub.updateArray(conversations, update);
+            Nymph.sort(conversations, sort);
+            this.store.set({conversations});
           }
         }, ErrHandler, (count) => {
           this.set({userCount: count});
@@ -149,49 +149,49 @@
         this.set({_subscription});
       },
 
-      addTodo () {
-        const {todoText} = this.get();
-        if (todoText === undefined || todoText === '') {
+      addConversation () {
+        const {conversationText} = this.get();
+        if (conversationText === undefined || conversationText === '') {
           return;
         }
-        const todo = new Todo();
-        todo.set('name', todoText);
-        todo.save().then(() => {
-          this.set({todoText: ''});
+        const conversation = new Conversation();
+        conversation.set('name', conversationText);
+        conversation.save().then(() => {
+          this.set({conversationText: ''});
         }, ErrHandler);
       },
 
-      sortTodos () {
-        const {todos, sort} = this.store.get();
-        this.store.set({todos: Nymph.sort(todos, sort)});
+      sortConversations () {
+        const {conversations, sort} = this.store.get();
+        this.store.set({conversations: Nymph.sort(conversations, sort)});
       },
 
-      save (todo) {
-        todo.save().then(null, ErrHandler);
+      save (conversation) {
+        conversation.save().then(null, ErrHandler);
       },
 
       archive () {
-        const oldTodos = this.store.get().todos;
-        for (let i = 0; i < oldTodos.length; i++) {
-          const todo = oldTodos[i];
-          if (todo.get().done) {
-            todo.archive().then(success => {
+        const oldConversations = this.store.get().conversations;
+        for (let i = 0; i < oldConversations.length; i++) {
+          const conversation = oldConversations[i];
+          if (conversation.get().done) {
+            conversation.archive().then(success => {
               if (!success) {
-                alert("Couldn't save changes to "+todo.get().name);
+                alert("Couldn't save changes to "+conversation.get().name);
               }
             }, ErrHandler);
           }
         }
       },
 
-      deleteTodos () {
-        Nymph.deleteEntities(this.store.get().todos);
+      deleteConversations () {
+        Nymph.deleteEntities(this.store.get().conversations);
       }
     },
 
     components: {
       LoadingIndicator,
-      TodoEl
+      ConversationSidebar
     }
   };
 </script>

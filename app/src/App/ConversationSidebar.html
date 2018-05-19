@@ -1,22 +1,22 @@
-<div class="list-group-item font-weight-normal {todo.data.done ? 'list-group-item-success' : ''}">
+<div class="list-group-item font-weight-normal {conversation.data.done ? 'list-group-item-success' : ''}">
   <span class="d-flex flex-md-row align-items-md-center flex-column align-items-start justify-content-between">
     <span class="d-flex align-items-center" style="flex-grow: 1;">
       {#if !$archived}
-        <input class="mr-2" type="checkbox" bind:checked="todo.data.done" on:change="save()" />
+        <input class="mr-2" type="checkbox" bind:checked="conversation.data.done" on:change="save()" />
       {/if}
-      <input class="d-inline border-0 {todo.data.done ? 'text-muted' : ''}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" bind:value="todo.data.name" on:change="save()" />
+      <input class="d-inline border-0 {conversation.data.done ? 'text-muted' : ''}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" bind:value="conversation.data.name" on:change="save()" />
     </span>
     {#if !isOwner}
-      <span class="ml-md-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
-        <span class="badge badge-primary">{todo.data.user.data.name || 'Loading...'}</span>
+      <span class="ml-md-2 {conversation.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
+        <span class="badge badge-primary">{conversation.data.user.data.name || 'Loading...'}</span>
       </span>
     {/if}
-    {#if todo.data.acWrite.length}
-      <span class="ml-md-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
+    {#if conversation.data.acWrite.length}
+      <span class="ml-md-2 {conversation.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
         <span class="badge badge-success">shared</span>
       </span>
     {/if}
-    <span class="ml-md-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
+    <span class="ml-md-2 {conversation.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
       {createdDate}
     </span>
     <button type="button" on:click="set({expanded: !expanded})" class="ml-md-2 btn btn-link btn-sm" style="flex-shrink: 1;">
@@ -27,7 +27,7 @@
     <div class="mt-2">
       <div>
         Owner:
-        <span class="badge badge-primary">{todo.data.user.data.name || 'Loading...'}</span>
+        <span class="badge badge-primary">{conversation.data.user.data.name || 'Loading...'}</span>
       </div>
       <div>
         Created:
@@ -40,7 +40,7 @@
       <div>
         Shared with:
         <ul class="list-group">
-          {#each todo.data.acWrite as curUser (curUser.guid)}
+          {#each conversation.data.acWrite as curUser (curUser.guid)}
             <li class="list-group-item d-flex align-items-center">
               <span style="flex-grow: 1">{curUser.data.name || 'Loading...'}</span>
               {#if isOwner}
@@ -66,39 +66,39 @@
 </div>
 
 <script>
-  import Todo from '../Entities/Conversation';
+  import Conversation from '../Entities/Conversation';
   import ErrHandler from '../ErrHandler';
 
   const formatDate = date => `${date.getFullYear()}-${date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1}-${date.getDate() < 10 ? '0'+date.getDate() : date.getDate()} ${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
 
   export default {
     onstate ({changed, current}) {
-      if (!changed.todo || !current.todo) {
+      if (!changed.conversation || !current.conversation) {
         return;
       }
-      const {todo} = current;
-      if (todo.data.user.isASleepingReference) {
-        todo.readyAll(() => this.set({todo}), ErrHandler, 1);
+      const {conversation} = current;
+      if (conversation.data.user.isASleepingReference) {
+        conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
       }
     },
 
     data () {
       return {
-        todo: new Todo(),
+        conversation: new Conversation(),
         shareUsername: ''
       }
     },
 
     computed: {
-      createdDate: ({todo}) => formatDate(new Date(todo.cdate * 1000)),
-      modifiedDate: ({todo}) => formatDate(new Date(todo.mdate * 1000)),
-      isOwner: ({todo, $user}) => $user.is(todo.data.user)
+      createdDate: ({conversation}) => formatDate(new Date(conversation.cdate * 1000)),
+      modifiedDate: ({conversation}) => formatDate(new Date(conversation.mdate * 1000)),
+      isOwner: ({conversation, $user}) => $user.is(conversation.data.user)
     },
 
     methods: {
       share () {
-        const {shareUsername, todo} = this.get();
-        todo.share(shareUsername).then(result => {
+        const {shareUsername, conversation} = this.get();
+        conversation.share(shareUsername).then(result => {
           if (result) {
             this.set({shareUsername: ''});
           } else {
@@ -108,8 +108,8 @@
       },
 
       unshare (guid) {
-        const {todo} = this.get();
-        todo.unshare(guid).then(result => {
+        const {conversation} = this.get();
+        conversation.unshare(guid).then(result => {
           if (!result) {
             alert('Invalid user.');
           }
@@ -117,7 +117,7 @@
       },
 
       save () {
-        this.get().todo.save().then(() => {}, ErrHandler);
+        this.get().conversation.save().then(() => {}, ErrHandler);
       }
     }
   };
