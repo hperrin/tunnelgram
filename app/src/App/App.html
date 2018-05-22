@@ -13,6 +13,18 @@
             <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
           </div>
         </a>
+        {#if $conversations.length > 1}
+          <div class="list-group-item d-flex justify-content-center p-0 border-0">
+            <div class="btn-group btn-group-toggle d-flex w-100">
+              <button class="btn btn-secondary flex-fill {$sort === 'name' ? 'active' : ''}" type="button" on:click="$set({sort: 'name'})">
+                Alphabetical
+              </button>
+              <button class="btn btn-secondary flex-fill {$sort === 'mdate' ? 'active' : ''}" type="button" on:click="$set({sort: 'mdate'})">
+                Newest
+              </button>
+            </div>
+          </div>
+        {/if}
         {#if $conversations.length}
           {#each $conversations as conversation (conversation.guid)}
             <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="openConversation(conversation)">
@@ -25,16 +37,6 @@
           </div>
         {/if}
       </div>
-      {#if $conversations.length > 1}
-        <div>
-          Sort: <br>
-          <label class="font-weight-normal">
-            <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="name"> Alphabetical</label>
-          &nbsp;&nbsp;&nbsp;
-          <label class="font-weight-normal">
-            <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="mdate"> Newest</label>
-        </div>
-      {/if}
     </div>
     <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
       <ConversationMain />
@@ -53,14 +55,21 @@
   export default {
     oncreate () {
       this.store.on('state', ({changed, current, previous}) => {
-        if (changed.archived ||
-            (
-              changed.user &&
-              current.user &&
-              !current.user.is(previous.user)
-            )
+        if (changed.user &&
+            current.user &&
+            !current.user.is(previous.user)
           ) {
           this.subscribe();
+        }
+
+        if (changed.sort) {
+          const {conversations, sort} = current;
+          if (sort === 'mdate') {
+            Nymph.sort(conversations, sort, null, true);
+          } else if (sort === 'name') {
+            conversations.sort((a, b) => a.getName(current.user).toLowerCase().localeCompare(b.getName(current.user).toLowerCase()));
+          }
+          this.store.set({conversations});
         }
       });
       this.subscribe();
@@ -95,16 +104,15 @@
           if (update) {
             const {conversations, sort} = this.store.get();
             PubSub.updateArray(conversations, update);
-            Nymph.sort(conversations, sort);
+            if (sort === 'mdate') {
+              Nymph.sort(conversations, sort, null, true);
+            } else if (sort === 'name') {
+              conversations.sort((a, b) => a.getName(this.store.get().user).toLowerCase().localeCompare(b.getName(this.store.get().user).toLowerCase()));
+            }
             this.store.set({conversations});
           }
         }, ErrHandler);
         this.set({_subscription});
-      },
-
-      sortConversations () {
-        const {conversations, sort} = this.store.get();
-        this.store.set({conversations: Nymph.sort(conversations, sort)});
       },
 
       newConversation () {

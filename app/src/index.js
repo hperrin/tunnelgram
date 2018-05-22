@@ -14,7 +14,7 @@ const sleepyConversationCacheService = new SleepyCacheService(Conversation);
 const store = new UserStore({
   conversations: [],
   conversation: new Conversation(),
-  sort: 'cdate',
+  sort: 'mdate',
   view: 'conversation',
   crypt: crypt
 });

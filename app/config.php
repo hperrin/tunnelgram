@@ -29,11 +29,11 @@ $nymphConfig = [
 
 // uMailPHP's configuration.
 \uMailPHP\Mail::configure([
-  'site_name' => 'Nymph App Template',
+  'site_name' => 'Tunnelgram',
   'site_link' => 'http://'.$_SERVER['HTTP_HOST'].'/',
-  'master_address' => 'noreply@example.com',
+  'master_address' => 'noreply@tunnelgram.com',
   'testing_mode' => true,
-  'testing_email' => 'hperrin@localhost', // TODO(hperrin): what should this be?
+  'testing_email' => 'hperrin@tunnelgram.com', // TODO(hperrin): what should this be?
 ]);
 
 
