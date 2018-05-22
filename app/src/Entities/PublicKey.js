@@ -10,7 +10,7 @@ export class PublicKey extends Entity {
 
   // === Static Methods ===
 
-  static current(...args) {
+  static current (...args) {
     return PublicKey.serverCallStatic('current', args);
   }
 }

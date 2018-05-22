@@ -13,6 +13,7 @@ class EncryptionService {
     this.key = null;
     this.iv = null;
     this.encryptors = {};
+    this.userPublicKeys = {};
     this.resolve = null;
     this.reject = null;
     this.ready = new Promise((resolve, reject) => {
@@ -196,6 +197,28 @@ class EncryptionService {
       this.encryptors[publicKey] = encryptor;
     }
     return encryptor.encrypt(text);
+  }
+
+  async encryptForUser(text, user) {
+    let publicKey;
+    if (this.userPublicKeys.hasOwnProperty(user.guid)) {
+      publicKey = this.userPublicKeys[user.guid];
+    } else {
+      try {
+        const publicKeyEntity = await Nymph.getEntity(
+          {'class': PublicKey.class},
+          {
+            'type': '&',
+            'ref': ['user', user.guid]
+          }
+        );
+        publicKey = publicKeyEntity.get('text');
+        this.userPublicKeys[user.guid] = publicKey;
+      } catch (e) {
+        return null;
+      }
+    }
+    return this.encrypt(text, publicKey);
   }
 }
 

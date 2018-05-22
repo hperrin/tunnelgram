@@ -1,0 +1,93 @@
+<div class="position-absolute h-100 w-100" style="overflow-y: auto;" ref:container on:scroll="handleScroll()">
+  {#if _loading}
+    <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+      <div class="col-auto">
+        <LoadingIndicator width="50px" height="50px" />
+      </div>
+    </div>
+  {:else}
+    <div class="d-flex flex-column align-items-start">
+      {#each messages as message (message.guid)}
+        <MessageView bind:message></MessageView>
+      {/each}
+    </div>
+  {/if}
+</div>
+
+<script>
+  import {Nymph, PubSub} from 'nymph-client';
+  import Message from '../Entities/Message';
+  import LoadingIndicator from './LoadingIndicator.html';
+  import MessageView from './MessageView.html';
+  import ErrHandler from '../ErrHandler';
+
+  export default {
+    oncreate () {
+      this.subscribe();
+    },
+
+    ondestroy () {
+      let {_subscription} = this.get();
+      if (_subscription) {
+        _subscription.unsubscribe();
+      }
+    },
+
+    data () {
+      return {
+        _isAtBottom: true,
+        conversation: null,
+        messages: []
+      };
+    },
+
+    methods: {
+      subscribe () {
+        let {_subscription} = this.get();
+        if (_subscription) {
+          _subscription.unsubscribe();
+        }
+
+        this.set({_loading: true});
+
+        const {conversation} = this.get();
+        _subscription = Nymph.getEntities(
+            {'class': Message.class},
+            {
+              'type': '&',
+              'ref': ['conversation', conversation.guid]
+            }
+        ).subscribe(update => {
+          this.set({_loading: false});
+          if (update) {
+            const {messages} = this.get();
+            PubSub.updateArray(messages, update);
+            Nymph.sort(messages, 'cdate');
+            this.set({messages});
+            this.handleNewMessageScroll();
+          }
+        }, ErrHandler);
+        this.set({_subscription});
+      },
+
+      handleScroll () {
+        this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
+      },
+
+      handleNewMessageScroll () {
+        if (this.get()._isAtBottom) {
+          this.scrollToBottom();
+        }
+      },
+
+      scrollToBottom () {
+        this.refs.container.scrollTop = this.refs.container.scrollHeight;
+      }
+    },
+
+    components: {
+      LoadingIndicator,
+      MessageView
+    }
+  };
+</script>

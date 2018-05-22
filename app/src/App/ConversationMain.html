@@ -1,0 +1,154 @@
+<div class="bg-dark text-light h-100" style="overflow-y: auto;">
+  {#if $conversation.guid}
+    {#if $view === 'conversation'}
+      <ConversationView bind:conversation="$conversation"></ConversationView>
+    {:elseif $view === 'settings'}
+      settings view...
+    {/if}
+  {:else}
+    <div class="d-flex flex-column align-items-center pt-3">
+      <h2>Start a New Conversation</h2>
+      <form class="d-flex flex-column justify-content-start w-100" style="max-width: 600px;" on:submit="save(event.preventDefault())">
+        <div class="d-flex">
+          <input type="text" class="form-control mr-3 flex-grow-1" id="username" ref:username placeholder="Username" on:keydown="handleKeyDown(event)" bind:value="addUsername" disabled="{_loadingUser}">
+          <button type="button" class="btn btn-success rounded-circle" on:click="addUser()" disabled="{_loadingUser}"><i class="fas fa-plus"></i></button>
+        </div>
+        {#if _addUserError != null}
+          <div class="alert alert-danger mt-3 mb-0" role="alert">
+            {_addUserError}
+          </div>
+        {/if}
+        <button type="submit" class="btn btn-primary mt-3" disabled="{usersOtherThanCurrent.length === 0}">Go</button>
+        <ul class="list-group mt-3 text-body">
+          {#each usersOtherThanCurrent as user (user.guid)}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {user.data.name}
+              <button class="btn btn-danger btn-sm rounded-circle" on:click="removeUser(user)"><i class="fas fa-minus"></i></button>
+            </li>
+          {/each}
+        </ul>
+      </form>
+    </div>
+  {/if}
+</div>
+
+<script>
+  import {Nymph} from 'nymph-client';
+  import {User} from 'tilmeld-client';
+  import ConversationView from './ConversationView.html';
+
+  export default {
+    oncreate () {
+      if (!this.store.get().conversation.guid) {
+        this.refs.username.focus();
+      }
+    },
+
+    computed: {
+      usersOtherThanCurrent: ({$conversation, $user}) => $conversation.data.acFull.filter(user => !$user.is(user))
+    },
+
+    data () {
+      return {
+        _loadingUser: false,
+        _addUserError: null,
+        addUsername: ''
+      };
+    },
+
+    methods: {
+      handleKeyDown (event) {
+        if (event.keyCode === 13) {
+          this.addUser();
+          event.preventDefault();
+        }
+      },
+
+      async addUser () {
+        this.set({
+          _loadingUser: true,
+          _addUserError: null
+        });
+
+        const {addUsername} = this.get();
+
+        if (!addUsername || addUsername.match(/^\s+$/)) {
+          this.set({
+            _loadingUser: false,
+            _addUserError: 'Looks like you didn\'t give a username.'
+          });
+          this.refs.username.focus();
+          return;
+        }
+
+        try {
+          const user = await Nymph.getEntity(
+            {'class': User.class},
+            {
+              'type': '&',
+              'strict': ['username', addUsername]
+            }
+          );
+
+          if (!user) {
+            this.set({
+              _loadingUser: false,
+              _addUserError: 'Hmm. That user couldn\'t be found.'
+            });
+            this.refs.username.focus();
+            return;
+          }
+
+          if (this.store.get().user.is(user)) {
+            this.set({
+              _loadingUser: false,
+              _addUserError: 'You\'re already in any conversation that you start.'
+            });
+            this.refs.username.focus();
+            return;
+          }
+
+          const {conversation} = this.store.get();
+
+          if (user.inArray(conversation.data.acFull)) {
+            this.set({
+              _loadingUser: false,
+              _addUserError: 'Looks like you\'ve already added that user.'
+            });
+            this.refs.username.focus();
+            return;
+          }
+
+          conversation.data.acFull.push(user);
+          this.store.set({conversation});
+          this.set({
+            _loadingUser: false,
+            addUsername: ''
+          });
+          this.refs.username.focus();
+        } catch (e) {
+          this.set({
+            _loadingUser: false,
+            _addUserError: e.textStatus
+          });
+          this.refs.username.focus();
+        }
+      },
+
+      removeUser (userToRemove) {
+        const {conversation} = this.store.get();
+        conversation.set({acFull: conversation.data.acFull.filter(user => !userToRemove.is(user))});
+        this.store.set({conversation});
+      },
+
+      save () {
+        const {conversation} = this.store.get();
+        conversation.save().then(() => this.store.set({conversation}));
+      }
+    },
+
+    components: {
+      ConversationView
+    }
+  };
+</script>

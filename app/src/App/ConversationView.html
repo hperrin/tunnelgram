@@ -1,0 +1,72 @@
+<div class="d-flex flex-column h-100">
+  <div class="flex-grow-1  position-relative">
+    <MessageList bind:conversation></MessageList>
+  </div>
+  <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
+    <textarea class="form-control bg-dark text-light" bind:value="text" on:keydown="handleKeyDown(event)" disabled="{textLoading}" ref:text></textarea>
+    <button class="btn btn-lg btn-primary" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
+  </form>
+</div>
+
+<script>
+  import Message from '../Entities/Message';
+  import MessageList from './MessageList.html';
+  import ErrHandler from '../ErrHandler';
+
+  export default {
+    oncreate () {
+      this.refs.text.focus();
+    },
+
+    computed: {
+      textIsEmpty: ({text}) => text === '' || text.match(/^\s+$/)
+    },
+
+    data () {
+      return {
+        conversation: null,
+        textLoading: false,
+        text: ''
+      };
+    },
+
+    methods: {
+      handleKeyDown (event) {
+        if (event.keyCode === 13 && !event.shiftKey) {
+          event.preventDefault();
+          this.newMessage();
+        }
+      },
+
+      newMessage () {
+        if (this.get().textIsEmpty) {
+          return;
+        }
+
+        this.set({textLoading: true});
+
+        const {text, conversation} = this.get();
+
+        const message = new Message();
+        message.decrypted.text = text;
+        message.set({
+          conversation,
+          acRead: [...conversation.data.acFull]
+        });
+
+        message.save().then(() => {
+          this.set({textLoading: false, text: ''});
+            this.refs.text.focus();
+        }, (...args) => {
+          this.set({textLoading: false});
+          this.refs.text.focus();
+          ErrHandler(...args);
+        });
+      }
+    },
+
+    components: {
+      MessageList
+    }
+  };
+</script>

@@ -1,55 +1,74 @@
 <?php namespace ESText;
 
+use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
 
 class Message extends \Nymph\Entity {
   const ETYPE = 'message';
   protected $clientEnabledMethods = [];
-  protected $whitelistData = [];
+  protected $whitelistData = ['text', 'conversation', 'acRead'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
   public function __construct($id = 0) {
-    $this->done = false;
+    $this->text = [];
+    $this->conversation = null;
     parent::__construct($id);
   }
 
-  public function share($username) {
-    $user = \Tilmeld\Entities\User::factory($username);
-    if (!$user->guid) {
-      return false;
+  public function delete() {
+    if ($this->is($this->conversation->lastMessage)) {
+      $ret = parent::delete();
+      if ($ret) {
+        $this->conversation->lastMessage = null;
+        $this->conversation->save();
+      }
+      return $ret;
+    } else {
+      return parent::delete();
     }
-    if (!$user->inArray($this->acWrite)) {
-      $this->acWrite[] = $user;
-    }
-    return $this->save();
-  }
-
-  public function unshare($guid) {
-    $user = \Tilmeld\Entities\User::factory($guid);
-    if (!$user->guid) {
-      return false;
-    }
-    while (($index = $user->arraySearch($this->acWrite)) !== false) {
-      array_splice($this->acWrite, $index, 1);
-    }
-    return $this->save();
   }
 
   public function save() {
-    if (!\Tilmeld\Tilmeld::gatekeeper()) {
+    if (!Tilmeld::gatekeeper()) {
       // Only allow logged in users to save.
       return false;
     }
+
+    if (!$this->conversation->guid) {
+      return false;
+    }
+
+    if (!Tilmeld::checkPermissions($this->conversation, Tilmeld::FULL_ACCESS)) {
+      return false;
+    }
+
     try {
+      $recipientGuids = [];
+      foreach ($this->acRead as $user) {
+        $recipientGuids[] = $user->guid;
+      }
+
       v::notEmpty()
-        ->attribute('name', v::stringType()->notEmpty()->prnt()->length(1, 2048))
-        ->attribute('done', v::boolType())
+        ->attribute(
+            'text',
+            v::arrayVal()->each(
+                v::stringType()->notEmpty()->prnt()->length(1, 4096),
+                v::intVal()->in($recipientGuids)
+            )
+        )
+        ->attribute('conversation', v::instance('ESText\Conversation'))
         ->setName('message')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
-    return parent::save();
+    $ret = parent::save();
+
+    $this->conversation->refresh();
+    $this->conversation->lastMessage = $this;
+    $this->conversation->save();
+
+    return $ret;
   }
 }

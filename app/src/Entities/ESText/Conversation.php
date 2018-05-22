@@ -11,15 +11,9 @@ class Conversation extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->name = null;
+    $this->lastMessage = null;
+    $this->acFull = [];
     parent::__construct($id);
-  }
-
-  public function archive() {
-    if ($this->hasTag('archived')) {
-      return true;
-    }
-    $this->addTag('archived');
-    return $this->save();
   }
 
   public function save() {
@@ -30,6 +24,7 @@ class Conversation extends \Nymph\Entity {
     try {
       v::notEmpty()
         ->attribute('name', v::when(v::nullType(), v::alwaysValid(), v::stringType()->notEmpty()->prnt()->length(1, 2048)))
+        ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('ESText\Message')))
         ->setName('conversation')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

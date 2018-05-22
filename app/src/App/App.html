@@ -1,75 +1,53 @@
-<div>
-  {#if _loading}
-    <div class="row align-items-center justify-content-center" style="height: 200px;">
-      <div class="col-auto">
-        <LoadingIndicator width="50px" height="50px" />
-      </div>
+{#if _loading}
+  <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+    <div class="col-auto">
+      <LoadingIndicator width="50px" height="50px" />
     </div>
-  {:else}
-    <div class="row">
-      <div class="col-sm-8 mb-3">
-        <div class="list-group">
-          {#if $conversations.length}
-            {#each $conversations as conversation (conversation.guid)}
+  </div>
+{:else}
+  <div class="d-flex flex-small-row flex-grow-1">
+    <div class="w-100 bg-light" style="max-width: 250px; max-height: 100%; overflow-y: auto;">
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="newConversation()">
+          <div class="d-flex w-100 align-items-center">
+            <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
+          </div>
+        </a>
+        {#if $conversations.length}
+          {#each $conversations as conversation (conversation.guid)}
+            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="$set({conversation: conversation})">
               <ConversationSidebar bind:conversation="conversation"></ConversationSidebar>
-            {/each}
-          {:else}
-            <div class="alert alert-secondary">You have no conversations yet.</div>
-          {/if}
-        </div>
-      </div>
-      <div class="col-sm-4 mb-3">
-        <small class="alert alert-info d-block text-center">
-          {#if $archived}
-            <span>{$conversations.length} archived conversations</span>
-          {:else}
-            <span>
-              {#if $conversations.length == 0}
-                <span>0 conversations</span>
-              {:else}
-                <span>{remaining} of {$conversations.length} remaining</span>
-              {/if}
-            </span>
-          {/if}
-          {#if $conversations.length > 0}
-            <span class="d-block mt-2">
-              {#if $archived}
-                <button type="button" class="btn btn-danger btn-sm" style="white-space: normal;" on:click="deleteConversations()">delete archived conversations</button>
-              {:else}
-                <button type="button" class="btn btn-success btn-sm" style="white-space: normal;" on:click="archive()">archive completed conversations</button>
-              {/if}
-            </span>
-          {/if}
-        </small>
-        {#if $conversations.length > 1}
-          <div>
-            Sort: <br>
-            <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="name"> Alpha</label>
-            &nbsp;&nbsp;&nbsp;
-            <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="cdate"> Created</label>
+            </a>
+          {/each}
+        {:else}
+          <div class="list-group-item flex-column align-items-start bg-transparent border-0">
+            You have no conversations yet.
           </div>
         {/if}
       </div>
+      {#if $conversations.length > 1}
+        <div>
+          Sort: <br>
+          <label class="font-weight-normal">
+            <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="name"> Alphabetical</label>
+          &nbsp;&nbsp;&nbsp;
+          <label class="font-weight-normal">
+            <input type="radio" bind:group="$sort" on:change="sortConversations()" name="sort" value="mdate"> Newest</label>
+        </div>
+      {/if}
     </div>
-    {#if !$archived}
-      <form class="d-flex my-3" on:submit="addConversation(event.preventDefault())">
-        <input class="form-control mr-2" style="flex-grow: 1;" type="text" bind:value="conversationText" placeholder="add new conversation here">
-        <input class="btn btn-primary" type="submit" value="add #{$conversations.length + 1}">
-      </form>
-    {/if}
-    <div class="user-count badge badge-secondary position-fixed" style="right: 5px; bottom: 5px;" title="How many open sessions you have.">
-      Active Sessions: {userCount}
+    <div class="flex-grow-1">
+      <ConversationMain></ConversationMain>
     </div>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
   import Conversation from '../Entities/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationSidebar from './ConversationSidebar.html';
+  import ConversationMain from './ConversationMain.html';
   import ErrHandler from '../ErrHandler';
 
   export default {
@@ -86,6 +64,8 @@
         }
       });
       this.subscribe();
+
+      this.newConversation();
     },
 
     ondestroy () {
@@ -96,20 +76,7 @@
     },
 
     data () {
-      return {
-        userCount: null,
-        conversationText: ''
-      }
-    },
-
-    computed: {
-      remaining: ({$conversations}) => {
-        var count = 0;
-        for (var i = 0; i < $conversations.length; i++) {
-          count += $conversations[i].get().done ? 0 : 1;
-        }
-        return count;
-      }
+      return {}
     },
 
     methods: {
@@ -121,13 +88,8 @@
 
         this.set({_loading: true});
 
-        const {archived, user} = this.store.get();
         _subscription = Nymph.getEntities(
-            {'class': Conversation.class},
-            {
-              'type': archived ? '&' : '!&',
-              'tag': 'archived'
-            }
+            {'class': Conversation.class}
         ).subscribe(update => {
           this.set({_loading: false});
           if (update) {
@@ -136,22 +98,8 @@
             Nymph.sort(conversations, sort);
             this.store.set({conversations});
           }
-        }, ErrHandler, (count) => {
-          this.set({userCount: count});
-        });
-        this.set({_subscription});
-      },
-
-      addConversation () {
-        const {conversationText} = this.get();
-        if (conversationText === undefined || conversationText === '') {
-          return;
-        }
-        const conversation = new Conversation();
-        conversation.set('name', conversationText);
-        conversation.save().then(() => {
-          this.set({conversationText: ''});
         }, ErrHandler);
+        this.set({_subscription});
       },
 
       sortConversations () {
@@ -159,32 +107,17 @@
         this.store.set({conversations: Nymph.sort(conversations, sort)});
       },
 
-      save (conversation) {
-        conversation.save().then(null, ErrHandler);
-      },
-
-      archive () {
-        const oldConversations = this.store.get().conversations;
-        for (let i = 0; i < oldConversations.length; i++) {
-          const conversation = oldConversations[i];
-          if (conversation.get().done) {
-            conversation.archive().then(success => {
-              if (!success) {
-                alert("Couldn't save changes to "+conversation.get().name);
-              }
-            }, ErrHandler);
-          }
-        }
-      },
-
-      deleteConversations () {
-        Nymph.deleteEntities(this.store.get().conversations);
+      newConversation () {
+        const conversation = new Conversation();
+        conversation.data.acFull.push(this.store.get().user);
+        this.store.set({conversation: conversation});
       }
     },
 
     components: {
       LoadingIndicator,
-      ConversationSidebar
+      ConversationSidebar,
+      ConversationMain
     }
   };
 </script>

@@ -1,0 +1,52 @@
+<div class="d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}">
+  <div class="card bg-transparent mx-3 my-0 {isOwner ? 'align-self-end' : 'border-info'}" style="min-width: 10rem; max-width: 80%;">
+    <div class="card-body py-1 px-2 text-light {isOwner ? 'bg-dark' : 'bg-info'}">
+      <p class="card-text">{message.decrypted.text}</p>
+    </div>
+  </div>
+  <small class="text-muted">
+    <span>{isOwner ? '' : (message.data.user.data.name || 'Loading...')}{@html isOwner ? '' : '&nbsp;'}</span>
+    <span title="{moment.unix(message.cdate).format('llll')}">{createdDate}</span>
+  </small>
+</div>
+
+<script>
+  import ErrHandler from '../ErrHandler';
+  import moment from 'moment';
+
+  export default {
+    oncreate () {
+      const updateTime = () => this.set({createdDate: moment(new Date(Math.min(this.get().message.cdate * 1000, new Date()))).fromNow()});
+      this.interval = window.setInterval(updateTime, 10000);
+      updateTime();
+    },
+
+    onstate ({changed, current}) {
+      if (!changed.message || !current.message) {
+        return;
+      }
+      const {message} = current;
+      if (message.data.user.isASleepingReference) {
+        message.readyAll(() => this.set({message}), ErrHandler, 1);
+      }
+    },
+
+		ondestroy() {
+			clearInterval(this.interval);
+		},
+
+    computed: {
+      isOwner: ({message, $user}) => $user.is(message.data.user)
+    },
+
+    data () {
+      return {
+        message: null
+      };
+    },
+
+    helpers: {
+      moment
+    }
+  };
+</script>

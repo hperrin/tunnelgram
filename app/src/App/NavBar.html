@@ -1,16 +1,31 @@
-<li class="nav-item {$archived ? '' : 'active'}">
-  <a class="nav-link" href="javascript:void(0)" on:click="$set({archived: false})">
-    Pending
-    {#if !$archived}
-      <span class="sr-only">(current)</span>
-    {/if}
-  </a>
-</li>
-<li class="nav-item {$archived ? 'active' : ''}">
-  <a class="nav-link" href="javascript:void(0)" on:click="$set({archived: true})">
-    Archived
-    {#if $archived}
-      <span class="sr-only">(current)</span>
-    {/if}
-  </a>
-</li>
+<span class="navbar-text mr-auto">
+  {name}
+</span>
+{#if $conversation.guid}
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
+      <a class="nav-link" href="javascript:void(0)" on:click="$set({view: 'conversation'})">
+        Conversation
+        {#if $view === 'conversation'}
+          <span class="sr-only">(current)</span>
+        {/if}
+      </a>
+    </li>
+    <li class="nav-item {$view === 'settings' ? 'active' : ''}">
+      <a class="nav-link" href="javascript:void(0)" on:click="$set({view: 'settings'})">
+        Settings
+        {#if $view === 'settings'}
+          <span class="sr-only">(current)</span>
+        {/if}
+      </a>
+    </li>
+  </ul>
+{/if}
+
+<script>
+  export default {
+    computed: {
+      name: ({$conversation, $user}) => $conversation.getName($user)
+    },
+  };
+</script>

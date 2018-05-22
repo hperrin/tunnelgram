@@ -5,21 +5,27 @@ export class Conversation extends Entity {
 
   constructor (id) {
     super(id);
-    this.data.done = false;
+    this.data.name = null;
+    this.data.acFull = [];
   }
 
   // === Instance Methods ===
 
-  archive (...args) {
-    return this.serverCall('archive', args);
-  }
-
-  share (...args) {
-    return this.serverCall('share', args);
-  }
-
-  unshare (...args) {
-    return this.serverCall('unshare', args);
+  getName(currentUser) {
+    if (this.guid == null) {
+      return 'New Conversation';
+    } else if (this.data.name != null) {
+      return this.data.name;
+    } else {
+      const names = [];
+      for (let i = 0; i < this.data.acFull.length; i++) {
+        const participant = this.data.acFull[i];
+        if (!currentUser.is(participant)) {
+          names.push(participant.data.name ? participant.data.name : 'Loading...');
+        }
+      }
+      return names.join(', ');
+    }
   }
 }
 
