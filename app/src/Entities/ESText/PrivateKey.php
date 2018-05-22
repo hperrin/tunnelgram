@@ -1,4 +1,4 @@
-<?php namespace ESText;
+<?php namespace Tunnelgram;
 
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
@@ -24,7 +24,7 @@ class PrivateKey extends \Nymph\Entity {
     if (!Tilmeld::gatekeeper()) {
       return false;
     }
-    $key = Nymph::getEntity(['class' => 'ESText\PrivateKey'], ['&',
+    $key = Nymph::getEntity(['class' => 'Tunnelgram\PrivateKey'], ['&',
       'ref' => ['user', Tilmeld::$currentUser]
     ]);
     if (!isset($key) || !$key->guid) {

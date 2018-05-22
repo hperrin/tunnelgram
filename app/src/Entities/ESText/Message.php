@@ -1,4 +1,4 @@
-<?php namespace ESText;
+<?php namespace Tunnelgram;
 
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
@@ -59,7 +59,7 @@ class Message extends \Nymph\Entity {
             )
         )
         ->attribute('text', v::stringType()->notEmpty()->prnt()->length(1, 4096))
-        ->attribute('conversation', v::instance('ESText\Conversation'))
+        ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
         ->setName('message')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

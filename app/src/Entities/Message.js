@@ -55,7 +55,7 @@ export class Message extends Entity {
 // === Static Properties ===
 
 // The name of the server class
-Message.class = 'ESText\\Message';
+Message.class = 'Tunnelgram\\Message';
 
 Nymph.setEntityClass(Message.class, Message);
 

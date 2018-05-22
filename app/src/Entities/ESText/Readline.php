@@ -1,4 +1,4 @@
-<?php namespace ESText;
+<?php namespace Tunnelgram;
 
 use Respect\Validation\Validator as v;
 
@@ -27,7 +27,7 @@ class Readline extends \Nymph\Entity {
     try {
       v::notEmpty()
         ->attribute('readline', v::floatType())
-        ->attribute('conversation', v::instance('ESText\Conversation'))
+        ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
         ->setName('readline')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

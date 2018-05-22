@@ -32,7 +32,7 @@ store.on('state', ({changed, current}) => {
 const app = new Container({
   target: document.querySelector('main'),
   data: {
-    brand: 'ESText'
+    brand: 'Tunnelgram'
   },
   store
 });

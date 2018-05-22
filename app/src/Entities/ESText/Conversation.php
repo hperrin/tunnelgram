@@ -1,4 +1,4 @@
-<?php namespace ESText;
+<?php namespace Tunnelgram;
 
 use Respect\Validation\Validator as v;
 
@@ -20,7 +20,7 @@ class Conversation extends \Nymph\Entity {
     $object = parent::jsonSerialize($clientClassName);
 
     $readline = \Nymph\Nymph::getEntity([
-      'class' => 'ESText\Readline'
+      'class' => 'Tunnelgram\Readline'
     ], ['&',
       'ref' => ['conversation', $this]
     ]);
@@ -35,7 +35,7 @@ class Conversation extends \Nymph\Entity {
 
   public function saveReadline($newReadline) {
     $readline = \Nymph\Nymph::getEntity([
-      'class' => 'ESText\Readline'
+      'class' => 'Tunnelgram\Readline'
     ], ['&',
       'ref' => ['conversation', $this]
     ]);
@@ -63,7 +63,7 @@ class Conversation extends \Nymph\Entity {
     try {
       v::notEmpty()
         ->attribute('name', v::when(v::nullType(), v::alwaysValid(), v::stringType()->notEmpty()->prnt()->length(1, 2048)))
-        ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('ESText\Message')))
+        ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('Tunnelgram\Message')))
         ->setName('conversation')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

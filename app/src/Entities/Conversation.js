@@ -49,7 +49,7 @@ export class Conversation extends Entity {
 // === Static Properties ===
 
 // The name of the server class
-Conversation.class = 'ESText\\Conversation';
+Conversation.class = 'Tunnelgram\\Conversation';
 
 Nymph.setEntityClass(Conversation.class, Conversation);
 
