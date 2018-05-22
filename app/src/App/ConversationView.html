@@ -1,6 +1,6 @@
 <div class="d-flex flex-column h-100">
   <div class="flex-grow-1  position-relative">
-    <MessageList bind:conversation></MessageList>
+    <MessageList />
   </div>
   <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
     <textarea class="form-control bg-light text-dark" bind:value="text" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:text></textarea>
@@ -27,7 +27,6 @@
 
     data () {
       return {
-        conversation: null,
         textLoading: false,
         text: ''
       };
@@ -56,7 +55,8 @@
 
         this.set({textLoading: true});
 
-        const {text, conversation} = this.get();
+        const {text} = this.get();
+        const {conversation} = this.store.get();
 
         const message = new Message();
         message.decrypted.text = text;

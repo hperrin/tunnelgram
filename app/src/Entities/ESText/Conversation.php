@@ -5,7 +5,7 @@ use Respect\Validation\Validator as v;
 class Conversation extends \Nymph\Entity {
   const ETYPE = 'conversation';
   protected $clientEnabledMethods = [];
-  protected $whitelistData = ['acFull'];
+  protected $whitelistData = ['name', 'acFull'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 

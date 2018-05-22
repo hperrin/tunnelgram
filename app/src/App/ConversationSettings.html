@@ -1,0 +1,29 @@
+<div class="d-flex flex-column align-items-center pt-3">
+  <h2>Conversation Settings</h2>
+  <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" bind:value="$conversation.data.name" id="name" aria-describedby="nameHelp" placeholder="Name">
+      <small id="nameHelp" class="form-text text-muted">Leave blank to use auto-generated name based on participants.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+<script>
+  export default {
+    data () {
+      return {};
+    },
+
+    methods: {
+      save () {
+        const {conversation} = this.store.get();
+        if (conversation.data.name === '') {
+          conversation.data.name = null;
+        }
+        conversation.save();
+      }
+    }
+  };
+</script>

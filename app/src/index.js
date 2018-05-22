@@ -18,6 +18,16 @@ const store = new UserStore({
   crypt: crypt
 });
 
+store.on('state', ({changed, current}) => {
+  if (!changed.conversation || !current.conversation || !current.conversation.guid) {
+    return;
+  }
+  const {conversation} = current;
+  if (conversation.data.user.isASleepingReference) {
+    conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
+  }
+});
+
 const app = new Container({
   target: document.querySelector('main'),
   data: {

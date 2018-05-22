@@ -30,7 +30,7 @@ $nymphConfig = [
 // uMailPHP's configuration.
 \uMailPHP\Mail::configure([
   'site_name' => 'Nymph App Template',
-  'site_link' => 'http://localhost:8080/',
+  'site_link' => 'http://'.$_SERVER['HTTP_HOST'].'/',
   'master_address' => 'noreply@example.com',
   'testing_mode' => true,
   'testing_email' => 'hperrin@localhost', // TODO(hperrin): what should this be?
@@ -39,14 +39,14 @@ $nymphConfig = [
 
 // Tilmeld's configuration.
 \Tilmeld\Tilmeld::configure([
-  'app_url' => 'http://localhost:8080/',
-  'setup_url' => 'http://localhost:8080/user/',
+  'app_url' => 'http://'.$_SERVER['HTTP_HOST'].'/',
+  'setup_url' => 'http://'.$_SERVER['HTTP_HOST'].'/user/',
   'email_usernames' => false,
   'user_fields' => ['name', 'phone'],
   'reg_fields' => ['name'],
   'verify_email' => false,
   'pw_recovery' => false,
-  'verify_redirect' => 'http://localhost:8080/',
+  'verify_redirect' => 'http://'.$_SERVER['HTTP_HOST'].'/',
   'jwt_secret' => base64_decode(
       file_get_contents(getenv('TILMELD_SECRET_FILE'))
   )

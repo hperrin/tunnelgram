@@ -16,7 +16,7 @@
         {#if $conversations.length}
           {#each $conversations as conversation (conversation.guid)}
             <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="$set({conversation: conversation, convosOut: false})">
-              <ConversationSidebar bind:conversation="conversation"></ConversationSidebar>
+              <ConversationSidebar bind:conversation />
             </a>
           {/each}
         {:else}
@@ -37,7 +37,7 @@
       {/if}
     </div>
     <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
-      <ConversationMain></ConversationMain>
+      <ConversationMain />
     </div>
   </div>
 {/if}

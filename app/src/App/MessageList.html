@@ -1,4 +1,4 @@
-<div class="position-absolute h-100 w-100" style="overflow-y: auto;" ref:container on:scroll="handleScroll()">
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto;" ref:container on:scroll="handleScroll()">
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
       <div class="col-auto">
@@ -7,6 +7,12 @@
     </div>
   {:else}
     <div class="d-flex flex-column align-items-start">
+      <div class="align-self-stretch text-center">
+        <h1>{name}</h1>
+        <p>
+          Started {moment.unix($conversation.cdate).format('llll')}
+        </p>
+      </div>
       {#each messages as message (message.guid)}
         <MessageView bind:message></MessageView>
       {/each}
@@ -20,6 +26,7 @@
   import LoadingIndicator from './LoadingIndicator.html';
   import MessageView from './MessageView.html';
   import ErrHandler from '../ErrHandler';
+  import moment from 'moment';
 
   export default {
     oncreate () {
@@ -33,10 +40,13 @@
       }
     },
 
+    computed: {
+      name: ({$conversation, $user}) => $conversation.getName($user)
+    },
+
     data () {
       return {
         _isAtBottom: true,
-        conversation: null,
         messages: []
       };
     },
@@ -50,7 +60,7 @@
 
         this.set({_loading: true});
 
-        const {conversation} = this.get();
+        const {conversation} = this.store.get();
         _subscription = Nymph.getEntities(
             {'class': Message.class},
             {
@@ -88,6 +98,10 @@
     components: {
       LoadingIndicator,
       MessageView
+    },
+
+    helpers: {
+      moment
     }
   };
 </script>

@@ -1,9 +1,9 @@
 <div class="bg-light text-dark h-100" style="overflow-y: auto;">
   {#if $conversation.guid}
     {#if $view === 'conversation'}
-      <ConversationView bind:conversation="$conversation"></ConversationView>
+      <ConversationView />
     {:elseif $view === 'settings'}
-      settings view...
+      <ConversationSettings />
     {/if}
   {:else}
     <div class="d-flex flex-column align-items-center pt-3">
@@ -36,6 +36,7 @@
   import {Nymph} from 'nymph-client';
   import {User} from 'tilmeld-client';
   import ConversationView from './ConversationView.html';
+  import ConversationSettings from './ConversationSettings.html';
 
   export default {
     oncreate () {
@@ -148,7 +149,8 @@
     },
 
     components: {
-      ConversationView
+      ConversationView,
+      ConversationSettings
     }
   };
 </script>

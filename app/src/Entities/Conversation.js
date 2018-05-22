@@ -7,6 +7,8 @@ export class Conversation extends Entity {
     super(id);
     this.data.name = null;
     this.data.acFull = [];
+
+    // TODO(hperrin): Encrypt conversation names.
   }
 
   // === Instance Methods ===
