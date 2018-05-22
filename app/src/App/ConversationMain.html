@@ -11,7 +11,9 @@
       <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
         <div class="d-flex">
           <input type="text" class="form-control mr-3 flex-grow-1" id="username" ref:username placeholder="Username" on:keydown="handleKeyDown(event)" bind:value="addUsername" disabled="{_loadingUser}">
-          <button type="button" class="btn btn-success rounded-circle" on:click="addUser()" disabled="{_loadingUser}"><i class="fas fa-plus"></i></button>
+          <button type="button" class="btn btn-success" on:click="addUser()" disabled="{_loadingUser}">
+            <i class="fas fa-plus"></i>
+          </button>
         </div>
         {#if _addUserError != null}
           <div class="alert alert-danger mt-3 mb-0" role="alert">
@@ -23,7 +25,9 @@
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">
               {user.data.name}
-              <button class="btn btn-danger btn-sm rounded-circle" on:click="removeUser(user)"><i class="fas fa-minus"></i></button>
+              <button class="btn btn-danger btn-sm" on:click="removeUser(user)">
+                <i class="fas fa-minus"></i>
+              </button>
             </li>
           {/each}
         </ul>
