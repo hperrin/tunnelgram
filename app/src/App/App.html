@@ -6,7 +6,7 @@
   </div>
 {:else}
   <div class="d-flex flex-small-row flex-grow-1">
-    <div class="w-100 bg-light" style="max-width: 250px; max-height: 100%; overflow-y: auto;">
+    <div class="w-100 mh-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" style="overflow-y: auto;" ref:convos>
       <div class="list-group">
         <a class="list-group-item list-group-item-action {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="newConversation()">
           <div class="d-flex w-100 align-items-center">
@@ -15,7 +15,7 @@
         </a>
         {#if $conversations.length}
           {#each $conversations as conversation (conversation.guid)}
-            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="$set({conversation: conversation})">
+            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="$set({conversation: conversation, convosOut: false})">
               <ConversationSidebar bind:conversation="conversation"></ConversationSidebar>
             </a>
           {/each}
@@ -36,7 +36,7 @@
         </div>
       {/if}
     </div>
-    <div class="flex-grow-1">
+    <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
       <ConversationMain></ConversationMain>
     </div>
   </div>
@@ -110,7 +110,7 @@
       newConversation () {
         const conversation = new Conversation();
         conversation.data.acFull.push(this.store.get().user);
-        this.store.set({conversation: conversation});
+        this.store.set({conversation: conversation, convosOut: false});
       }
     },
 
@@ -121,3 +121,11 @@
     }
   };
 </script>
+
+<style>
+  @media (min-width: 991.98px) {
+    ref:convos {
+      max-width: 250px;
+    }
+  }
+</style>

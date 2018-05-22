@@ -1,4 +1,4 @@
-<div class="bg-dark text-light h-100" style="overflow-y: auto;">
+<div class="bg-light text-dark h-100" style="overflow-y: auto;">
   {#if $conversation.guid}
     {#if $view === 'conversation'}
       <ConversationView bind:conversation="$conversation"></ConversationView>
@@ -8,7 +8,7 @@
   {:else}
     <div class="d-flex flex-column align-items-center pt-3">
       <h2>Start a New Conversation</h2>
-      <form class="d-flex flex-column justify-content-start w-100" style="max-width: 600px;" on:submit="save(event.preventDefault())">
+      <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
         <div class="d-flex">
           <input type="text" class="form-control mr-3 flex-grow-1" id="username" ref:username placeholder="Username" on:keydown="handleKeyDown(event)" bind:value="addUsername" disabled="{_loadingUser}">
           <button type="button" class="btn btn-success rounded-circle" on:click="addUser()" disabled="{_loadingUser}"><i class="fas fa-plus"></i></button>

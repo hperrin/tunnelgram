@@ -3,7 +3,7 @@
     <MessageList bind:conversation></MessageList>
   </div>
   <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
-    <textarea class="form-control bg-dark text-light" bind:value="text" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:text></textarea>
+    <textarea class="form-control bg-light text-dark" bind:value="text" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:text></textarea>
     <button class="btn btn-lg btn-primary" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
   </form>
 </div>

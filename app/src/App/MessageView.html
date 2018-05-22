@@ -1,6 +1,6 @@
 <div class="d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}">
-  <div class="card bg-transparent mx-3 my-0 {isOwner ? 'align-self-end' : 'border-info'}" style="min-width: 10rem; max-width: 80%;">
-    <div class="card-body py-1 px-2 text-light {isOwner ? 'bg-dark' : 'bg-info'}">
+  <div class="card rounded bg-transparent mx-3 my-0 {isOwner ? 'border-primary align-self-end' : 'border-info'}" style="min-width: 10rem; max-width: 80%;">
+    <div class="card-body py-1 px-2 {isOwner ? 'bg-primary text-light' : 'bg-info text-light'}">
       <p class="card-text" ref:message>{@html marked(message.decrypted.text).replace(/\n$/, '')}</p>
     </div>
   </div>
