@@ -15,7 +15,7 @@
         </a>
         {#if $conversations.length}
           {#each $conversations as conversation (conversation.guid)}
-            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="$set({conversation: conversation, convosOut: false})">
+            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="openConversation(conversation)">
               <ConversationSidebar bind:conversation />
             </a>
           {/each}
@@ -111,6 +111,12 @@
         const conversation = new Conversation();
         conversation.data.acFull.push(this.store.get().user);
         this.store.set({conversation: conversation, convosOut: false});
+      },
+
+      openConversation (conversation) {
+        this.set({_loading: true});
+        this.store.set({conversation, view: 'conversation', convosOut: false});
+        this.set({_loading: false});
       }
     },
 
