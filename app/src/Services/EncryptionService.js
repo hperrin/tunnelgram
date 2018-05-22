@@ -5,6 +5,7 @@ import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
 import aesjs from 'aes-js';
 import base64js from 'base64-js';
+import utf8 from 'utf8';
 
 class EncryptionService {
   constructor () {
@@ -176,7 +177,7 @@ class EncryptionService {
     });
   }
 
-  decrypt (text) {
+  decryptRSA (text) {
     if (!this.decryptor) {
       this.decryptor = new JSEncrypt();
       this.decryptor.setPrivateKey(this.getUserPrivateKey());
@@ -184,7 +185,7 @@ class EncryptionService {
     return this.decryptor.decrypt(text);
   }
 
-  encrypt (text, publicKey) {
+  encryptRSA (text, publicKey) {
     let encryptor;
     if (publicKey == null) {
       publicKey = this.getUserPublicKey();
@@ -199,7 +200,7 @@ class EncryptionService {
     return encryptor.encrypt(text);
   }
 
-  async encryptForUser(text, user) {
+  async encryptRSAForUser(text, user) {
     let publicKey;
     if (this.userPublicKeys.hasOwnProperty(user.guid)) {
       publicKey = this.userPublicKeys[user.guid];
@@ -218,7 +219,39 @@ class EncryptionService {
         return null;
       }
     }
-    return this.encrypt(text, publicKey);
+    return this.encryptRSA(text, publicKey);
+  }
+
+  decrypt (text, key) {
+    const cryptKey = key.substr(0, 64);
+    const cryptIV = key.substr(64, 32);
+    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
+    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
+    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+
+    // Decrypt the Text.
+    const encryptedBytes = base64js.toByteArray(text);
+    const bytes = aesCtr.decrypt(encryptedBytes);
+    return utf8.decode(aesjs.utils.utf8.fromBytes(bytes));
+  }
+
+  encrypt (text, key) {
+    const cryptKey = key.substr(0, 64);
+    const cryptIV = key.substr(64, 32);
+    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
+    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
+    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+
+    // Encrypt the Text.
+    const bytes = aesjs.utils.utf8.toBytes(utf8.encode(text));
+    const encryptedBytes = aesCtr.encrypt(bytes);
+    return base64js.fromByteArray(encryptedBytes);
+  }
+
+  generateKey () {
+    let keyArray = new Uint8Array(48);
+    window.crypto.getRandomValues(keyArray);
+    return aesjs.utils.hex.fromBytes(keyArray);
   }
 }
 

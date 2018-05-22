@@ -16,7 +16,8 @@ export class Message extends Entity {
     this.decrypted = {
       text: '[Encrypted text]'
     };
-    this.data.text = {};
+    this.data.text = null;
+    this.data.keys = {};
   }
 
   // === Instance Methods ===
@@ -25,24 +26,28 @@ export class Message extends Entity {
     super.init(...args);
 
     // Decrypt the message text.
-    this.decrypted.text = '[Encrypted text]';
     if (!currentUser) {
       return;
     }
-    this.decrypted.text = crypt.decrypt(this.data.text[currentUser.guid]);
+    const key = crypt.decryptRSA(this.data.keys[currentUser.guid]);
+    this.decrypted.text = crypt.decrypt(this.data.text, key);
 
     return this;
   }
 
   async save () {
     // Encrypt the message text for all recipients (which should include the current user).
+    const key = crypt.generateKey();
+    this.data.text = crypt.encrypt(this.decrypted.text, key);
+
     const encryptPromises = [];
     for (let user of this.data.acRead) {
-      encryptPromises.push({user, promise: crypt.encryptForUser(this.decrypted.text, user)});
+      encryptPromises.push({user, promise: crypt.encryptRSAForUser(key, user)});
     }
     for (let entry of encryptPromises) {
-      this.data.text[entry.user.guid] = await entry.promise;
+      this.data.keys[entry.user.guid] = await entry.promise;
     }
+
     return super.save();
   }
 }

@@ -6,12 +6,13 @@ use Respect\Validation\Validator as v;
 class Message extends \Nymph\Entity {
   const ETYPE = 'message';
   protected $clientEnabledMethods = [];
-  protected $whitelistData = ['text', 'conversation', 'acRead'];
+  protected $whitelistData = ['text', 'keys', 'conversation', 'acRead'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
   public function __construct($id = 0) {
-    $this->text = [];
+    $this->text = null;
+    $this->keys = [];
     $this->conversation = null;
     parent::__construct($id);
   }
@@ -51,12 +52,13 @@ class Message extends \Nymph\Entity {
 
       v::notEmpty()
         ->attribute(
-            'text',
+            'keys',
             v::arrayVal()->each(
-                v::stringType()->notEmpty()->prnt()->length(1, 4096),
+                v::stringType()->notEmpty()->prnt()->length(1, 1024),
                 v::intVal()->in($recipientGuids)
             )
         )
+        ->attribute('text', v::stringType()->notEmpty()->prnt()->length(1, 4096))
         ->attribute('conversation', v::instance('ESText\Conversation'))
         ->setName('message')
         ->assert($this->getValidatable());

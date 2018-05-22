@@ -3,7 +3,7 @@
     <MessageList bind:conversation></MessageList>
   </div>
   <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
-    <textarea class="form-control bg-dark text-light" bind:value="text" on:keydown="handleKeyDown(event)" disabled="{textLoading}" ref:text></textarea>
+    <textarea class="form-control bg-dark text-light" bind:value="text" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:text></textarea>
     <button class="btn btn-lg btn-primary" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
   </form>
 </div>
@@ -11,7 +11,10 @@
 <script>
   import Message from '../Entities/Message';
   import MessageList from './MessageList.html';
+  import EmojiConvertor from 'emoji-js';
   import ErrHandler from '../ErrHandler';
+
+  const emoji = new EmojiConvertor();
 
   export default {
     oncreate () {
@@ -35,6 +38,14 @@
         if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
           this.newMessage();
+        }
+      },
+
+      handleKeyUp (event) {
+        const {text} = this.get();
+        const emojied = emoji.replace_colons(text);
+        if (emojied !== text) {
+          this.set({text: emojied});
         }
       },
 

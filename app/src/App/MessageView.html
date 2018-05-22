@@ -1,7 +1,7 @@
 <div class="d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}">
   <div class="card bg-transparent mx-3 my-0 {isOwner ? 'align-self-end' : 'border-info'}" style="min-width: 10rem; max-width: 80%;">
     <div class="card-body py-1 px-2 text-light {isOwner ? 'bg-dark' : 'bg-info'}">
-      <p class="card-text">{message.decrypted.text}</p>
+      <p class="card-text" ref:message>{@html marked(message.decrypted.text).replace(/\n$/, '')}</p>
     </div>
   </div>
   <small class="text-muted">
@@ -13,6 +13,7 @@
 <script>
   import ErrHandler from '../ErrHandler';
   import moment from 'moment';
+  import marked from 'marked';
 
   export default {
     oncreate () {
@@ -46,7 +47,17 @@
     },
 
     helpers: {
-      moment
+      moment,
+      marked
     }
   };
 </script>
+
+<style>
+  ref:message {
+    white-space: pre-wrap;
+  }
+  ref:message > :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

@@ -3,7 +3,7 @@
   <small title="{moment.unix(conversation.mdate).format('llll')}">{modifiedDate}</small>
 </div>
 {#if conversation.data.lastMessage}
-  <small class="mt-1">{conversation.data.lastMessage.decrypted.text}</small>
+  <small class="mt-1" ref:lastmessage>{conversation.data.lastMessage.decrypted.text}</small>
 {/if}
 
 <script>
@@ -54,3 +54,13 @@
     }
   };
 </script>
+
+<style>
+  ref:lastmessage {
+    max-width: 100%;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+</style>
