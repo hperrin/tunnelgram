@@ -6,7 +6,7 @@
       </div>
     </div>
   {:else}
-    <div class="d-flex flex-column align-items-start">
+    <div class="d-flex flex-column align-items-start" ref:messageContainer>
       <div class="align-self-stretch text-center">
         <h1>{name}</h1>
         <p>
@@ -15,6 +15,13 @@
       </div>
       {#each messages as message (message.guid)}
         <MessageView bind:message></MessageView>
+        {#if showReadline && _initialReadline === message.cdate}
+          <div class="d-flex align-items-center w-100">
+            <hr class=" mx-2 flex-grow-1" />
+            <small class="text-muted">new messages</small>
+            <hr class="mx-2 flex-grow-1" />
+          </div>
+        {/if}
       {/each}
     </div>
   {/if}
@@ -31,6 +38,21 @@
   export default {
     oncreate () {
       this.subscribe();
+      const {conversation} = this.store.get();
+      this.set({
+        _initialReadline: conversation.readline,
+        _latestReadline: conversation.readline
+      });
+    },
+
+    onstate ({changed, current}) {
+      const {showReadline, _initialReadline, messages} = current;
+      if (showReadline == null && changed.messages && messages.length) {
+        this.set({
+          showReadline: _initialReadline > 0
+            && _initialReadline < messages[messages.length - 1].cdate
+        });
+      }
     },
 
     ondestroy () {
@@ -47,6 +69,8 @@
     data () {
       return {
         _isAtBottom: true,
+        _initialReadline: null,
+        _latestReadline: null,
         messages: []
       };
     },
@@ -82,6 +106,28 @@
 
       handleScroll () {
         this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
+
+        // Update readline.
+        const {_latestReadline} = this.get();
+        if (_latestReadline !== null) {
+          const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
+          const messageElsInViewport = Array.from(messageEls).filter((el) => {
+              const containerTop = this.refs.container.scrollTop;
+              const containerBottom = containerTop + this.refs.container.clientHeight;
+              const elBottom = el.offsetTop + el.offsetHeight;
+              return (elBottom >= containerTop)
+                     && (elBottom <= containerBottom);
+          });
+          if (messageElsInViewport.length) {
+            const latestReadMessageEl = messageElsInViewport[messageElsInViewport.length - 1];
+            const updateReadline = parseFloat(latestReadMessageEl.dataset.cdate);
+            if (updateReadline > _latestReadline) {
+              this.set({_latestReadline: updateReadline});
+              const {conversation} = this.store.get();
+              conversation.saveReadline(updateReadline);
+            }
+          }
+        }
       },
 
       handleNewMessageScroll () {

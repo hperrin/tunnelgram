@@ -4,7 +4,7 @@ use Respect\Validation\Validator as v;
 
 class Conversation extends \Nymph\Entity {
   const ETYPE = 'conversation';
-  protected $clientEnabledMethods = [];
+  protected $clientEnabledMethods = ['saveReadline'];
   protected $whitelistData = ['name', 'acFull'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -14,6 +14,45 @@ class Conversation extends \Nymph\Entity {
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
+  }
+
+  public function jsonSerialize($clientClassName = true) {
+    $object = parent::jsonSerialize($clientClassName);
+
+    $readline = \Nymph\Nymph::getEntity([
+      'class' => 'ESText\Readline'
+    ], ['&',
+      'ref' => ['conversation', $this]
+    ]);
+
+    if ($readline) {
+      $object->readline = (float) $readline->readline;
+    } else {
+      $object->readline = 0;
+    }
+    return $object;
+  }
+
+  public function saveReadline($newReadline) {
+    $readline = \Nymph\Nymph::getEntity([
+      'class' => 'ESText\Readline'
+    ], ['&',
+      'ref' => ['conversation', $this]
+    ]);
+
+    if ($readline) {
+      if ($readline->readline < $newReadline) {
+        $readline->readline = (float) $newReadline;
+        $readline->save();
+      }
+    } else {
+      $readline = Readline::factory();
+      $readline->conversation = $this;
+      $readline->readline = (float) $newReadline;
+      $readline->save();
+    }
+
+    return $readline->readline;
   }
 
   public function save() {

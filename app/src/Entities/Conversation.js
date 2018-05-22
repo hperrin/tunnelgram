@@ -13,7 +13,18 @@ export class Conversation extends Entity {
 
   // === Instance Methods ===
 
-  getName(currentUser) {
+  init (entityData) {
+    super.init(entityData);
+    if (entityData == null) {
+      return this;
+    }
+    if (entityData.readline != null) {
+      this.readline = entityData.readline;
+    }
+    return this;
+  }
+
+  getName (currentUser) {
     if (this.guid == null) {
       return 'New Conversation';
     } else if (this.data.name != null) {
@@ -28,6 +39,10 @@ export class Conversation extends Entity {
       }
       return names.join(', ');
     }
+  }
+
+  saveReadline (...args) {
+    return this.serverCall('saveReadline', args);
   }
 }
 

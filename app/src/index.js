@@ -5,6 +5,7 @@ import {SleepyCacheService} from './Services/SleepyCacheService.js';
 import UserStore from './UserStore';
 import Conversation from './Entities/Conversation.js';
 import Container from './Container.html';
+import ErrHandler from './ErrHandler';
 
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
@@ -24,7 +25,7 @@ store.on('state', ({changed, current}) => {
   }
   const {conversation} = current;
   if (conversation.data.user.isASleepingReference) {
-    conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
+    conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
   }
 });
 
