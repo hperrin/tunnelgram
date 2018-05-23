@@ -16,16 +16,42 @@ const store = new UserStore({
   conversation: new Conversation(),
   sort: 'mdate',
   view: 'conversation',
-  crypt: crypt
+  crypt: crypt,
+  decryption: true
 });
 
-store.on('state', ({changed, current}) => {
-  if (!changed.conversation || !current.conversation || !current.conversation.guid) {
-    return;
+store.constructor.prototype.refreshAll = function () {
+  const {conversation} = this.get();
+  if (conversation.guid) {
+    conversation.refresh().then(() => {
+      this.set({conversation: new Conversation()});
+      this.set({conversation});
+    }, ErrHandler);
   }
-  const {conversation} = current;
-  if (conversation.data.user.isASleepingReference) {
-    conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
+
+  const {conversations} = this.get();
+  for (let conversation of conversations) {
+    conversation.refresh().then(() => {
+      this.set({conversations});
+    }, ErrHandler);
+  }
+
+  sleepyUserCacheService.clear();
+  sleepyGroupCacheService.clear();
+  sleepyConversationCacheService.clear();
+};
+
+store.on('state', ({changed, current}) => {
+  if (changed.conversation && current.conversation && current.conversation.guid) {
+    const {conversation} = current;
+    if (conversation.data.user.isASleepingReference) {
+      conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
+    }
+  }
+
+  if (changed.decryption) {
+    crypt.decryption = current.decryption;
+    store.refreshAll();
   }
 });
 

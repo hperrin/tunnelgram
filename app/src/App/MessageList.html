@@ -15,7 +15,7 @@
       </div>
       {#each messages as message (message.guid)}
         <MessageView bind:message></MessageView>
-        {#if showReadline && _initialReadline === message.cdate}
+        {#if _showReadline && _initialReadline === message.cdate}
           <div class="d-flex align-items-center w-100">
             <hr class=" mx-2 flex-grow-1" />
             <small class="text-muted">new messages</small>
@@ -46,10 +46,10 @@
     },
 
     onstate ({changed, current}) {
-      const {showReadline, _initialReadline, messages} = current;
-      if (showReadline == null && changed.messages && messages.length) {
+      const {_showReadline, _initialReadline, messages} = current;
+      if (_showReadline === null && _initialReadline !== 0 && messages.length) {
         this.set({
-          showReadline: _initialReadline > 0
+          _showReadline: _initialReadline > 0
             && _initialReadline < messages[messages.length - 1].cdate
         });
       }
@@ -69,6 +69,7 @@
     data () {
       return {
         _isAtBottom: true,
+        _showReadline: null,
         _initialReadline: null,
         _latestReadline: null,
         messages: []
@@ -106,7 +107,17 @@
 
       handleScroll () {
         this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
+        this.updateReadline();
+      },
 
+      handleNewMessageScroll () {
+        if (this.get()._isAtBottom) {
+          this.scrollToBottom();
+          this.updateReadline();
+        }
+      },
+
+      updateReadline () {
         // Update readline.
         const {_latestReadline} = this.get();
         if (_latestReadline !== null) {
@@ -127,12 +138,6 @@
               conversation.saveReadline(updateReadline);
             }
           }
-        }
-      },
-
-      handleNewMessageScroll () {
-        if (this.get()._isAtBottom) {
-          this.scrollToBottom();
         }
       },
 

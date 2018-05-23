@@ -23,4 +23,8 @@ export class SleepyCacheService {
   destroy () {
     Nymph.getEntityData = this._getEntityData;
   }
+
+  clear () {
+    this.entityDataCache = {};
+  }
 };

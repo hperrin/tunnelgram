@@ -47,6 +47,10 @@
                   Account Info
                 </a>
                 <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they broke into the {brand} servers.">
+                  <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
+                </a>
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
                   Log Out
                 </a>
@@ -191,6 +195,10 @@
             storage.length !== 0;
         }
       }
+    },
+
+    actions: {
+      tooltip: node => window.$(node).tooltip()
     },
 
     oncreate () {

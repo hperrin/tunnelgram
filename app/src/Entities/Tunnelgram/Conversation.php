@@ -5,12 +5,13 @@ use Respect\Validation\Validator as v;
 class Conversation extends \Nymph\Entity {
   const ETYPE = 'conversation';
   protected $clientEnabledMethods = ['saveReadline'];
-  protected $whitelistData = ['name', 'acFull'];
+  protected $whitelistData = ['name', 'keys', 'acFull'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
   public function __construct($id = 0) {
     $this->name = null;
+    $this->keys = [];
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
@@ -28,7 +29,7 @@ class Conversation extends \Nymph\Entity {
     if ($readline) {
       $object->readline = (float) $readline->readline;
     } else {
-      $object->readline = 0;
+      $object->readline = null;
     }
     return $object;
   }
@@ -61,7 +62,19 @@ class Conversation extends \Nymph\Entity {
       return false;
     }
     try {
+      $recipientGuids = [];
+      foreach ($this->acFull as $user) {
+        $recipientGuids[] = $user->guid;
+      }
+
       v::notEmpty()
+        ->attribute(
+            'keys',
+            v::arrayVal()->each(
+                v::stringType()->notEmpty()->prnt()->length(1, 1024),
+                v::intVal()->in($recipientGuids)
+            )
+        )
         ->attribute('name', v::when(v::nullType(), v::alwaysValid(), v::stringType()->notEmpty()->prnt()->length(1, 2048)))
         ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('Tunnelgram\Message')))
         ->setName('conversation')

@@ -21,6 +21,7 @@ class EncryptionService {
       this.resolve = resolve;
       this.reject = reject;
     });
+    this.decryption = true; // Turning this off causes the decrypt function to just return what it is given.
 
     if (this.getUserPrivateKey() != null && this.getUserPublicKey() != null) {
       this.resolve();
@@ -223,6 +224,10 @@ class EncryptionService {
   }
 
   decrypt (text, key) {
+    if (!this.decryption) {
+      return text;
+    }
+
     const cryptKey = key.substr(0, 64);
     const cryptIV = key.substr(64, 32);
     const keyBytes = aesjs.utils.hex.toBytes(cryptKey);

@@ -13,9 +13,8 @@
 
   export default {
     oncreate () {
-      const updateTime = () => this.set({modifiedDate: moment(new Date(Math.min(this.get().conversation.mdate * 1000, new Date()))).fromNow(true)});
-      this.interval = window.setInterval(updateTime, 10000);
-      updateTime();
+      this.interval = window.setInterval(this.updateTime.bind(this), 10000);
+      this.updateTime();
     },
 
     onstate ({changed, current}) {
@@ -25,6 +24,7 @@
       const {conversation} = current;
       if (conversation.data.user.isASleepingReference) {
         conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
+        this.updateTime();
       }
     },
 
@@ -46,6 +46,10 @@
     methods: {
       save () {
         this.get().conversation.save().then(() => {}, ErrHandler);
+      },
+
+      updateTime () {
+        this.set({modifiedDate: moment(new Date(Math.min(this.get().conversation.mdate * 1000, new Date()))).fromNow(true)});
       }
     },
 

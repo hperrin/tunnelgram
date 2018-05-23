@@ -4,8 +4,8 @@
       {message.decrypted.text}
     </div>
   {:else}
-    <div class="card mx-3 my-0 position-relative {isOwner ? 'align-self-end border-success bg-success' : 'border-info bg-info'}" style="min-width: 10rem; max-width: 80%;">
-      <div ref:messageBackdrop class="position-absolute h-100 w-100 bg-white"></div>
+    <div class="card mx-3 my-0 position-relative rounded {isOwner ? 'align-self-end border-success bg-success' : 'border-info bg-info'}" style="min-width: 10rem; max-width: 80%;">
+      <div ref:messageBackdrop class="position-absolute h-100 w-100 bg-white rounded"></div>
       <div ref:messageContainer class="card-body py-1 px-2 m-0">
         <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
       </div>
