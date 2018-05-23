@@ -3,8 +3,11 @@
     <MessageList />
   </div>
   <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
-    <textarea class="form-control bg-light text-dark" bind:value="text" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:text></textarea>
-    <button class="btn btn-lg btn-primary" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
+    <div class="flex-grow-1" ref:textContainer>
+      <textarea class="w-100 border-primary border-top" ref:text></textarea>
+    </div>
+    <!-- <div class="w-100 border-primary border-top" use:editorAce="{value: text, disabled: textLoading}" ref:text></div> -->
+    <button class="btn btn-lg btn-primary" style="width: 80px;" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
   </form>
 </div>
 
@@ -13,12 +16,113 @@
   import MessageList from './MessageList.html';
   import EmojiConvertor from 'emoji-js';
   import ErrHandler from '../ErrHandler';
+  import SimpleMDE from 'simplemde';
+  import ace from 'brace';
+  require('brace/mode/markdown');
+  require('brace/theme/sqlserver');
 
   const emoji = new EmojiConvertor();
 
   export default {
     oncreate () {
-      this.refs.text.focus();
+      this.editor = new SimpleMDE({
+        element: this.refs.text,
+        autoDownloadFontAwesome: false,
+        autofocus: true,
+        placeholder: 'New message',
+        spellChecker: false,
+        status: false,
+        toolbar: false
+      });
+      this.editor.codemirror.on('keydown', (codemirror, event) => {
+        this.handleKeyDown(event);
+        if (this.get().textLoading) {
+          event.preventDefault();
+        }
+      });
+      this.editor.codemirror.on('keyup', (codemirror, event) => {
+        this.handleKeyUp(event);
+      });
+      this.editor.codemirror.on('change', () => {
+        const text = this.editor.value();
+        if (this.get().text !== text) {
+          this.set({text});
+        }
+      });
+      this.editor.value(this.get().text);
+      this.editor.codemirror.setOption('readOnly', this.get().textLoading);
+    },
+
+    onstate ({changed, current}) {
+      if (changed.text && this.editor) {
+        const text = this.editor.value();
+        if (text !== current.text) {
+          this.editor.value(current.text);
+          this.editor.codemirror.execCommand('goDocEnd');
+        }
+        this.editor.codemirror.setOption('readOnly', current.textLoading);
+      }
+    },
+
+    ondestroy () {
+      this.editor.toTextArea();
+    },
+
+    actions: {
+      editorAce (node, data) {
+        const editor = ace.edit(node);
+        editor.getSession().setMode('ace/mode/markdown');
+        editor.setTheme('ace/theme/sqlserver');
+        editor.setOptions({
+          fontFamily: 'Ubuntu Mono',
+          fontSize: '12pt',
+          highlightActiveLine: false,
+          readOnly: data.disabled,
+          cursorStyle: 'ace',
+          behavioursEnabled: true,
+          selectionStyle: 'text',
+          highlightActiveLine: false,
+          showInvisibles: false,
+          displayIndentGuides: true,
+          showGutter: false,
+          printMargin: false,
+          highlightSelectedWord: false,
+          mergeUndoDeltas: true,
+          scrollPastEnd: false
+        });
+        // This is to remove following warning message on console:
+        // Automatically scrolling cursor into view after selection change this
+        // will be disabled in the next version
+        // set editor.$blockScrolling = Infinity to disable this message
+        editor.$blockScrolling = Infinity;
+        editor.renderer.setScrollMargin(5, 5);
+        editor.setValue(data.value);
+        editor.focus();
+
+        const textElement = editor.textInput.getElement();
+        textElement.addEventListener('keydown', this.handleKeyDown.bind(this));
+        textElement.addEventListener('keyup', this.handleKeyUp.bind(this));
+        textElement.addEventListener('input', () => {
+          const text = editor.getSession().getValue();
+          if (this.get().text !== text) {
+            this.set({text});
+          }
+        });
+
+        return {
+          update (data) {
+            const text = editor.getSession().getValue();
+            if (text !== data.value) {
+              editor.setValue(data.value, 1);
+            }
+            editor.setOption('readOnly', data.disabled);
+          },
+
+          destroy () {
+            editor.destroy();
+          }
+        };
+      }
     },
 
     computed: {
@@ -81,3 +185,10 @@
     }
   };
 </script>
+
+<style>
+  ref:textContainer :global(.CodeMirror) {
+    min-height: 100px;
+    height: 100px;
+  }
+</style>
