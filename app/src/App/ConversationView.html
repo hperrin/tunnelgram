@@ -6,7 +6,6 @@
     <div class="flex-grow-1" ref:textContainer>
       <textarea class="w-100 border-primary border-top" ref:text></textarea>
     </div>
-    <!-- <div class="w-100 border-primary border-top" use:editorAce="{value: text, disabled: textLoading}" ref:text></div> -->
     <button class="btn btn-lg btn-primary" style="width: 80px;" disabled="{textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
   </form>
 </div>
@@ -17,9 +16,6 @@
   import EmojiConvertor from 'emoji-js';
   import ErrHandler from '../ErrHandler';
   import SimpleMDE from 'simplemde';
-  import ace from 'brace';
-  require('brace/mode/markdown');
-  require('brace/theme/sqlserver');
 
   const emoji = new EmojiConvertor();
 
@@ -66,63 +62,6 @@
 
     ondestroy () {
       this.editor.toTextArea();
-    },
-
-    actions: {
-      editorAce (node, data) {
-        const editor = ace.edit(node);
-        editor.getSession().setMode('ace/mode/markdown');
-        editor.setTheme('ace/theme/sqlserver');
-        editor.setOptions({
-          fontFamily: 'Ubuntu Mono',
-          fontSize: '12pt',
-          highlightActiveLine: false,
-          readOnly: data.disabled,
-          cursorStyle: 'ace',
-          behavioursEnabled: true,
-          selectionStyle: 'text',
-          highlightActiveLine: false,
-          showInvisibles: false,
-          displayIndentGuides: true,
-          showGutter: false,
-          printMargin: false,
-          highlightSelectedWord: false,
-          mergeUndoDeltas: true,
-          scrollPastEnd: false
-        });
-        // This is to remove following warning message on console:
-        // Automatically scrolling cursor into view after selection change this
-        // will be disabled in the next version
-        // set editor.$blockScrolling = Infinity to disable this message
-        editor.$blockScrolling = Infinity;
-        editor.renderer.setScrollMargin(5, 5);
-        editor.setValue(data.value);
-        editor.focus();
-
-        const textElement = editor.textInput.getElement();
-        textElement.addEventListener('keydown', this.handleKeyDown.bind(this));
-        textElement.addEventListener('keyup', this.handleKeyUp.bind(this));
-        textElement.addEventListener('input', () => {
-          const text = editor.getSession().getValue();
-          if (this.get().text !== text) {
-            this.set({text});
-          }
-        });
-
-        return {
-          update (data) {
-            const text = editor.getSession().getValue();
-            if (text !== data.value) {
-              editor.setValue(data.value, 1);
-            }
-            editor.setOption('readOnly', data.disabled);
-          },
-
-          destroy () {
-            editor.destroy();
-          }
-        };
-      }
     },
 
     computed: {
