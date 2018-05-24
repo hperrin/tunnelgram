@@ -13,6 +13,13 @@
           Started {moment.unix($conversation.cdate).format('llll')}
         </p>
       </div>
+      {#if _loadingEarlierMessages}
+        <div class="d-flex align-items-center justify-content-center align-self-stretch" style="height: 200px;">
+          <div class="col-auto">
+            <LoadingIndicator width="50px" height="50px" />
+          </div>
+        </div>
+      {/if}
       {#each messages as message (message.guid)}
         <MessageView bind:message readLineCDate="{_showReadline && _initialReadline}"></MessageView>
       {/each}
@@ -48,6 +55,18 @@
       }
     },
 
+    onupdate ({changed, current}) {
+      if (changed._loadingEarlierMessages) {
+        this.refs.container.scrollTop += 200 * (current._loadingEarlierMessages ? 1 : -1);
+      }
+
+      if (changed._scrollToDistanceFromBottom && current._scrollToDistanceFromBottom != null) {
+        window.requestAnimationFrame(() => {
+          this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
+        });
+      }
+    },
+
     ondestroy () {
       let {_subscription} = this.get();
       if (_subscription) {
@@ -65,6 +84,8 @@
         _showReadline: null,
         _initialReadline: null,
         _latestReadline: null,
+        _reachedEarliestMessage: false,
+        _scrollToDistanceFromBottom: null,
         messages: []
       };
     },
@@ -79,13 +100,15 @@
         this.set({_loading: true});
 
         const {conversation} = this.store.get();
-        _subscription = Nymph.getEntities(
-            {'class': Message.class},
-            {
-              'type': '&',
-              'ref': ['conversation', conversation.guid]
-            }
-        ).subscribe(update => {
+        _subscription = Nymph.getEntities({
+          'class': Message.class,
+          'sort': 'cdate',
+          'reverse': true,
+          'limit': 20
+        }, {
+          'type': '&',
+          'ref': ['conversation', conversation.guid]
+        }).subscribe(update => {
           this.set({_loading: false});
           if (update) {
             const {messages} = this.get();
@@ -99,6 +122,10 @@
       },
 
       handleScroll () {
+        if (this.refs.container.scrollTop < 100) {
+          this.loadEarlierMessages();
+        }
+
         this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
         this.updateReadline();
       },
@@ -108,6 +135,46 @@
           this.scrollToBottom();
           this.updateReadline();
         }
+      },
+
+      async loadEarlierMessages () {
+        if (this.get()._loadingEarlierMessages || this.get()._reachedEarliestMessage) {
+          return;
+        }
+
+        const {messages} = this.get();
+        const {conversation} = this.store.get();
+
+        if (!messages.length) {
+          return;
+        }
+
+        this.set({_loadingEarlierMessages: true});
+
+        try {
+          const earlierMessages = await Nymph.getEntities({
+            'class': Message.class,
+            'sort': 'cdate',
+            'reverse': true,
+            'limit': 20
+          }, {
+            'type': '&',
+            'ref': ['conversation', conversation.guid],
+            'lt': ['cdate', messages[0].cdate]
+          });
+
+          if (earlierMessages.length) {
+            const distanceFromBottom = this.refs.container.scrollHeight - this.refs.container.scrollTop;
+            Nymph.sort(earlierMessages, 'cdate');
+            this.set({messages: [...earlierMessages, ...messages], _scrollToDistanceFromBottom: distanceFromBottom});
+          } else {
+            this.set({_reachedEarliestMessage: true});
+          }
+        } catch (e) {
+          ErrHandler(e);
+        }
+
+        this.set({_loadingEarlierMessages: false});
       },
 
       updateReadline () {
