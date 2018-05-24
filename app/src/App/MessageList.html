@@ -14,15 +14,9 @@
         </p>
       </div>
       {#each messages as message (message.guid)}
-        <MessageView bind:message></MessageView>
-        {#if _showReadline && _initialReadline === message.cdate}
-          <div class="d-flex align-items-center w-100">
-            <hr class=" mx-2 flex-grow-1" />
-            <small class="text-muted">new messages</small>
-            <hr class="mx-2 flex-grow-1" />
-          </div>
-        {/if}
+        <MessageView bind:message readLineCDate="{_showReadline && _initialReadline}"></MessageView>
       {/each}
+      <!-- <VirtualList items={messages} component={MessageView} readLineCDate="{_showReadline && _initialReadline}" /> -->
     </div>
   {/if}
 </div>
@@ -34,6 +28,7 @@
   import MessageView from './MessageView.html';
   import ErrHandler from '../ErrHandler';
   import moment from 'moment';
+  // import VirtualList from '@sveltejs/svelte-virtual-list';
 
   export default {
     oncreate () {
@@ -72,7 +67,8 @@
         _showReadline: null,
         _initialReadline: null,
         _latestReadline: null,
-        messages: []
+        messages: [],
+        // MessageView
       };
     },
 
@@ -149,6 +145,7 @@
     components: {
       LoadingIndicator,
       MessageView
+      // VirtualList
     },
 
     helpers: {

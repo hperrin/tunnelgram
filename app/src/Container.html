@@ -1,6 +1,6 @@
 {#if !storageAvailable('localStorage')}
   <div class="container">
-    <h1>Your browser doesn't support the localStorage API. {brnad} will not work on this browser!</h1>
+    <h1>Your browser doesn't support the localStorage API. {brand} will not work on this browser!</h1>
   </div>
 {/if}
 {#if $user === false}
@@ -117,8 +117,8 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="accountDetailsEmail">Email address</label>
-            <input type="email" class="form-control" id="accountDetailsEmail" bind:value="$user.data.username" placeholder="Enter email">
+            <label for="accountDetailsUsername">Username</label>
+            <input type="email" class="form-control" id="accountDetailsUsername" bind:value="$user.data.username" placeholder="Enter username">
           </div>
           <div class="form-group">
             <label for="accountDetailsFirstName">First name</label>

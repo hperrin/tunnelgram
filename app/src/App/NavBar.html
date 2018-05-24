@@ -4,7 +4,7 @@
 {#if $conversation.guid}
   <ul class="navbar-nav mr-auto">
     <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
-      <a class="nav-link" href="javascript:void(0)" on:click="$set({view: 'conversation'})">
+      <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid)">
         Conversation
         {#if $view === 'conversation'}
           <span class="sr-only">(current)</span>
@@ -12,7 +12,7 @@
       </a>
     </li>
     <li class="nav-item {$view === 'settings' ? 'active' : ''}">
-      <a class="nav-link" href="javascript:void(0)" on:click="$set({view: 'settings'})">
+      <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid+'/settings')">
         Settings
         {#if $view === 'settings'}
           <span class="sr-only">(current)</span>

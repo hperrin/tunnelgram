@@ -31,6 +31,7 @@
     "hash.js": "^1.1.3",
     "jsencrypt": "^3.0.0-beta.1",
     "moment": "^2.22.1",
+    "navigo": "^7.1.2",
     "nymph-client": "^4.0.0-beta.8",
     "showdown": "^1.8.6",
     "showdown-xss-filter": "^0.2.0",
@@ -40,6 +41,6 @@
     "tilmeld-client": "^1.0.0-beta.19",
     "utf8": "^3.0.0",
     "webpack": "^4.8.3",
-    "webpack-cli": "^2.1.3"
+    "webpack-cli": "^2.1.4"
   }
 }

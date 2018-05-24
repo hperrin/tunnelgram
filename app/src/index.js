@@ -1,3 +1,4 @@
+import Navigo from 'navigo';
 import {Nymph} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
 import {crypt} from './Services/EncryptionService.js';
@@ -19,6 +20,12 @@ const store = new UserStore({
   crypt: crypt,
   decryption: true
 });
+
+const router = new Navigo(null, true, '#!');
+
+store.constructor.prototype.navigate = (...args) => {
+  router.navigate(...args);
+};
 
 store.constructor.prototype.refreshAll = function () {
   const {conversation} = this.get();
@@ -62,6 +69,57 @@ const app = new Container({
   },
   store
 });
+
+const conversationHandler = params => {
+  const {conversations} = store.get();
+  const guid = parseFloat(params.id);
+  let conversation = null;
+  for (let cur of conversations) {
+    if (cur.guid === guid) {
+      conversation = cur;
+      break;
+    }
+  }
+  if (conversation) {
+    store.set({
+      conversation: conversation,
+      view: params.view || 'conversation',
+      convosOut: false
+    });
+  } else {
+    Nymph.getEntity({
+      'class': Conversation.class
+    }, {
+      'type': '&',
+      'guid': guid
+    }).then(conversation => {
+      store.set({
+        conversation: conversation,
+        view: params.view || 'conversation',
+        convosOut: false
+      });
+    }, ErrHandler);
+  }
+};
+
+router.on({
+  'c/:id': {uses: conversationHandler},
+  'c/:id/:view': {uses: conversationHandler},
+  'c': () => {
+    const conversation = new Conversation();
+    conversation.data.acFull.push(store.get().user);
+    store.set({
+      conversation: conversation,
+      view: 'conversation',
+      convosOut: false
+    });
+  },
+  '*': () => {
+    if (store.get().user) {
+      router.navigate('/c');
+    }
+  }
+}).resolve();
 
 // useful for debugging!
 window.store = store;

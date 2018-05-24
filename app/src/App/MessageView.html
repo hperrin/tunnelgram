@@ -16,6 +16,13 @@
     <span title="{moment.unix(message.cdate).format('llll')}">{createdDate}</span>
   </small>
 </div>
+{#if readLineCDate === message.cdate}
+  <div class="d-flex align-items-center w-100">
+    <hr class=" mx-2 flex-grow-1" />
+    <small class="text-muted">new messages</small>
+    <hr class="mx-2 flex-grow-1" />
+  </div>
+{/if}
 
 <script>
   import ErrHandler from '../ErrHandler';
@@ -71,7 +78,8 @@
     data () {
       return {
         _formattedText: '',
-        message: null
+        message: null,
+        readLineCDate: false
       };
     },
 
