@@ -54,7 +54,7 @@ class Message extends \Nymph\Entity {
         ->attribute(
             'keys',
             v::arrayVal()->each(
-                v::stringType()->notEmpty()->prnt()->length(1, 1024),
+                v::stringType()->notEmpty()->prnt()->length(1, 2048),
                 v::intVal()->in($recipientGuids)
             )
         )

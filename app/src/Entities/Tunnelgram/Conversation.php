@@ -11,7 +11,6 @@ class Conversation extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->name = null;
-    $this->keys = [];
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
@@ -61,6 +60,13 @@ class Conversation extends \Nymph\Entity {
       // Only allow logged in users to save.
       return false;
     }
+
+    if (!$this->guid) {
+      if (!\Tilmeld\Tilmeld::$currentUser->inArray($this->acFull)) {
+        $this->acFull[] = \Tilmeld\Tilmeld::$currentUser;
+      }
+    }
+
     try {
       $recipientGuids = [];
       foreach ($this->acFull as $user) {
@@ -73,7 +79,8 @@ class Conversation extends \Nymph\Entity {
             v::arrayVal()->each(
                 v::stringType()->notEmpty()->prnt()->length(1, 1024),
                 v::intVal()->in($recipientGuids)
-            )
+            ),
+            false
         )
         ->attribute('name', v::when(v::nullType(), v::alwaysValid(), v::stringType()->notEmpty()->prnt()->length(1, 2048)))
         ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('Tunnelgram\Message')))

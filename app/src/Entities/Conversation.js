@@ -17,10 +17,7 @@ export class Conversation extends Entity {
       name: null
     };
     this.data.name = null;
-    this.data.keys = {};
     this.data.acFull = [];
-
-    // TODO(hperrin): Encrypt conversation names.
   }
 
   // === Instance Methods ===
@@ -61,7 +58,7 @@ export class Conversation extends Entity {
       }
     } else {
       this.data.name = null;
-      this.data.keys = {};
+      delete this.data.keys;
     }
 
     return super.save();

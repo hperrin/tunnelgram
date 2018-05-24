@@ -107,7 +107,6 @@ router.on({
   'c/:id/:view': {uses: conversationHandler},
   'c': () => {
     const conversation = new Conversation();
-    conversation.data.acFull.push(store.get().user);
     store.set({
       conversation: conversation,
       view: 'conversation',
