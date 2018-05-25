@@ -1,111 +1,115 @@
-{#if !storageAvailable('localStorage')}
-  <div class="container">
-    <h1>Your browser doesn't support the localStorage API. {brand} will not work on this browser!</h1>
-  </div>
-{/if}
-{#if $user === false}
-  <div class="container" style="height: 100vh;">
-    <div class="row align-items-center justify-content-center" style="height: 100vh;">
-      <div class="col-auto">
-        <LoadingIndicator width="200px" height="200px" />
-      </div>
+<div class="{$user ? 'd-flex flex-column' : ''}" style="height: {$user ? '100vh' : 'auto'};">
+  {#if !storageAvailable('localStorage')}
+    <div class="container">
+      <h1>Your browser doesn't support the localStorage API. {brand} will not work on this browser!</h1>
     </div>
-  </div>
-{/if}
-{#if $user !== false}
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-      <span class="navbar-brand mb-0 h1">{brand}</span>
-      {#if $user}
-        {#if !$convosOut}
-          <ul class="navbar-nav mr-auto d-lg-none">
-            <li class="nav-item">
-              <a class="nav-link" href="javascript:void(0)" on:click="$set({convosOut: true})">
-                <i class="fas fa-comments"></i>
-              </a>
-            </li>
-          </ul>
-        {/if}
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <NavBar></NavBar>
-          <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img
-                  class="rounded-circle"
-                  src="{$userAvatar ? $userAvatar : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoAgMAAADxkFD+AAAACVBMVEXMzMyWlpa3t7fI5tFIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAF0lEQVQYlWNgGOagiQPOdGQZQHdQGQAArI4A0FwgBeUAAAAASUVORK5CYII='}"
-                  alt="{$user.data.nameFirst}" />
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                <h6 class="dropdown-header">
-                  {$user.data.name}
-                </h6>
-                <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#accountInfoModal">
-                  Account Info
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
-                  <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
-                  Log Out
-                </a>
-                {#if $userIsTilmeldAdmin}
-                  <div class="dropdown-divider"></div>
-                  <h6 class="dropdown-header">
-                    Admin
-                  </h6>
-                  <a class="dropdown-item" href="/user/" target="_blank">
-                    User Admin App
-                  </a>
-                {/if}
-              </div>
-            </li>
-          </ul>
-        </div>
-      {/if}
-    </div>
-  </nav>
-{/if}
-{#if $user === null}
-  <div class="container mt-3">
-    <div class="row">
-      <div class="col-sm-4 order-sm-2">
-        <TilmeldLogin
-          layout="small"
-          classInput="form-control"
-          classSelect="form-control"
-          classTextarea="form-control"
-          classSubmit="btn btn-primary"
-          classButton="btn btn-secondary" />
-      </div>
-      <div class="col-sm-8 order-sm-1">
-        <FrontPage brand="{brand}" />
-      </div>
-    </div>
-  </div>
-{/if}
-{#if $user}
-  <div class="container-fluid p-0 m-0 d-flex flex-column flex-grow-1">
-    {#await $crypt.ready}
-      <div class="row d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
+  {/if}
+  {#if $user === false}
+    <div class="container" style="height: 100vh;">
+      <div class="row align-items-center justify-content-center" style="height: 100vh;">
         <div class="col-auto">
-          <LoadingIndicator width="100px" height="100px" />
+          <LoadingIndicator width="200px" height="200px" />
         </div>
-        <h3>Setting up encryption...</h3>
       </div>
-    {:then data}
-      <App />
-    {:catch error}
-      <div>
-        Error during encryption setup: {error}
+    </div>
+  {/if}
+  {#if $user !== false}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">{brand}</span>
+        {#if $user}
+          {#if !$convosOut}
+            <ul class="navbar-nav mr-auto d-lg-none">
+              <li class="nav-item">
+                <a class="nav-link border-secondary rounded" href="javascript:void(0)" on:click="$set({convosOut: true})">
+                  <i class="fas fa-comments"></i>
+                </a>
+              </li>
+            </ul>
+          {/if}
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <NavBar></NavBar>
+            <ul class="navbar-nav">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <img
+                    class="rounded-circle"
+                    src="{$userAvatar ? $userAvatar : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoAgMAAADxkFD+AAAACVBMVEXMzMyWlpa3t7fI5tFIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAF0lEQVQYlWNgGOagiQPOdGQZQHdQGQAArI4A0FwgBeUAAAAASUVORK5CYII='}"
+                    alt="{$user.data.nameFirst}" />
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                  <h6 class="dropdown-header">
+                    {$user.data.name}
+                  </h6>
+                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#accountInfoModal">
+                    Account Info
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
+                    <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
+                    Log Out
+                  </a>
+                  {#if $userIsTilmeldAdmin}
+                    <div class="dropdown-divider"></div>
+                    <h6 class="dropdown-header">
+                      Admin
+                    </h6>
+                    <a class="dropdown-item" href="/user/" target="_blank">
+                      User Admin App
+                    </a>
+                  {/if}
+                </div>
+              </li>
+            </ul>
+          </div>
+        {/if}
       </div>
-    {/await}
-  </div>
+    </nav>
+  {/if}
+  {#if $user === null}
+    <div class="container mt-3">
+      <div class="row">
+        <div class="col-sm-4 order-sm-2">
+          <TilmeldLogin
+            layout="small"
+            classInput="form-control"
+            classSelect="form-control"
+            classTextarea="form-control"
+            classSubmit="btn btn-primary"
+            classButton="btn btn-secondary" />
+        </div>
+        <div class="col-sm-8 order-sm-1">
+          <FrontPage brand="{brand}" />
+        </div>
+      </div>
+    </div>
+  {/if}
+  {#if $user}
+    <div class="container-fluid p-0 m-0 d-flex flex-column flex-grow-1">
+      {#await $crypt.ready}
+        <div class="row d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
+          <div class="col-auto">
+            <LoadingIndicator width="100px" height="100px" />
+          </div>
+          <h3>Setting up encryption...</h3>
+        </div>
+      {:then data}
+        <App />
+      {:catch error}
+        <div>
+          Error during encryption setup: {error}
+        </div>
+      {/await}
+    </div>
+  {/if}
+</div>
+{#if $user}
   <div class="modal fade" id="accountInfoModal" tabindex="-1" role="dialog" aria-labelledby="accountInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">

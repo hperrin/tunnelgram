@@ -5,8 +5,8 @@
     </div>
   </div>
 {:else}
-  <div class="d-flex flex-small-row flex-grow-1">
-    <div class="w-100 mh-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" style="overflow-y: auto;" ref:convos>
+  <div class="d-flex flex-small-row flex-grow-1 position-relative">
+    <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" style="overflow-y: auto;" ref:convos>
       <div class="list-group">
         <a class="list-group-item list-group-item-action {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
           <div class="d-flex w-100 align-items-center">
@@ -54,6 +54,8 @@
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
+  import PNotify from 'pnotify/dist/es/PNotify';
+  import 'pnotify/dist/es/PNotifyDesktop';
   import Conversation from '../Entities/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationSidebar from './ConversationSidebar.html';
@@ -116,6 +118,9 @@
           this.set({_loading: false});
           if (update) {
             const {conversations, sort} = this.store.get();
+            if (!Array.isArray(update)) {
+              this.handleNotification(update);
+            }
             PubSub.updateArray(conversations, update);
             if (sort === 'mdate') {
               Nymph.sort(conversations, sort, null, true);
@@ -131,6 +136,98 @@
       openConversation (conversation) {
         this.set({_loadingConversation: true});
         this.store.navigate('/c/'+conversation.guid);
+      },
+
+      async handleNotification (update) {
+        // Calculate whether the page is hidden.
+        let hidden = true;
+        if (typeof document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
+          hidden = document.hidden;
+        } else if (typeof document.msHidden !== 'undefined') {
+          hidden = document.msHidden;
+        } else if (typeof document.webkitHidden !== 'undefined') {
+          hidden = document.webkitHidden;
+        }
+
+        if (update.deleted || !update.data) {
+          return;
+        }
+
+        const conversation = new Conversation();
+        conversation.init(update.data);
+
+        if (update.updated && conversation.data.lastMessage) {
+          if (conversation.is(this.store.get().conversation) && !hidden) {
+            // Don't notify if the user is on the conversation and not hidden.
+            return;
+          }
+          await conversation.data.lastMessage.ready();
+          if (this.store.get().user.is(conversation.data.lastMessage.data.user)) {
+            // Don't notify if the user made the message.
+            return;
+          }
+          await conversation.data.lastMessage.data.user.ready();
+        } else if (update.added) {
+          if (this.store.get().user.is(conversation.data.user)) {
+            // Don't notify if the user made the conversation.
+            return;
+          }
+          await conversation.readyAll(undefined, ErrHandler, 1);
+        }
+
+        let notice;
+        let options = {};
+        if (hidden) {
+          // If the tab is hidden, display a desktop notice.
+          Object.assign(options, {
+            modules: {
+              Desktop: {
+                desktop: true,
+                icon: false
+              }
+            }
+          });
+        }
+        if (update.updated) {
+          // Notify the user of a new message.
+          notice = PNotify.info(Object.assign({
+            title: conversation.data.lastMessage.data.user.data.name
+              + (conversation.data.acFull.length > 2 || conversation.data.name != null
+                ? ' - ' + conversation.getName(this.store.get().user)
+                : ''
+              )
+              + ' - Tunnelgram',
+            text:  conversation.data.lastMessage.decrypted.text.length > 40
+              ? conversation.data.lastMessage.decrypted.text.substr(0, 40) + '...'
+              : conversation.data.lastMessage.decrypted.text
+          }, options));
+        } else if (update.added) {
+          // Notify the user of a new conversation.
+          notice = PNotify.info(Object.assign({
+            title: 'New Conversation - Tunnelgram',
+            text: conversation.data.user.data.name + ' started '
+              + (conversation.data.acFull.length > 2 || conversation.data.name != null
+                ? conversation.getName(this.store.get().user)
+                : 'a conversation'
+              )
+              + '.'
+          }, options));
+        }
+
+        notice.on('click', e => {
+          let target = e.target;
+          while (target.parentNode) {
+            if (target.classList && target.classList.contains('ui-pnotify-closer')) {
+              return;
+            }
+            target = target.parentNode;
+          }
+          if (hidden) {
+            window.focus();
+          }
+          this.openConversation(conversation);
+          notice.close();
+        })
       }
     },
 

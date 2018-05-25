@@ -1,4 +1,8 @@
 import Navigo from 'navigo';
+import PNotify from 'pnotify/dist/es/PNotify';
+import 'pnotify/dist/es/PNotifyMobile';
+import 'pnotify/dist/es/PNotifyButtons';
+import 'pnotify/dist/es/PNotifyDesktop';
 import {Nymph} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
 import {crypt} from './Services/EncryptionService.js';
@@ -7,6 +11,9 @@ import UserStore from './UserStore';
 import Conversation from './Entities/Conversation.js';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
+
+PNotify.modules.Buttons.defaults.sticker = false;
+PNotify.modules.Desktop.permission();
 
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);

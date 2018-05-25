@@ -1,3 +1,8 @@
+import PNotify from 'pnotify/dist/es/PNotify';
+
 export default function ErrHandler (errObj) {
-  alert('Error: '+errObj.textStatus+(errObj.message ? '\n\n'+errObj.message : ''));
+  PNotify.error({
+    title: 'Error',
+    text: errObj.textStatus+(errObj.message ? '\n\n'+errObj.message : '')
+  });
 }
