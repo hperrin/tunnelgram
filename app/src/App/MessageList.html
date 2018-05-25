@@ -115,6 +115,7 @@
             PubSub.updateArray(messages, update);
             Nymph.sort(messages, 'cdate');
             this.set({messages});
+            this.createNewReadlineIfNeeded();
             this.handleNewMessageScroll();
           }
         }, ErrHandler);
@@ -198,6 +199,19 @@
               conversation.saveReadline(updateReadline);
             }
           }
+        }
+      },
+
+      createNewReadlineIfNeeded () {
+        const {conversation} = this.store.get();
+        const {messages} = this.get();
+        if (conversation.readline == null && messages.length) {
+          const updateReadline = messages[messages.length - 1].cdate;
+          this.set({
+            _initialReadline: updateReadline,
+            _latestReadline: updateReadline
+          });
+          conversation.saveReadline(updateReadline);
         }
       },
 
