@@ -127,6 +127,10 @@ router.on({
   }
 }).resolve();
 
+User.on('logout', () => {
+  router.navigate('/');
+});
+
 // useful for debugging!
 window.store = store;
 window.Nymph = Nymph;
