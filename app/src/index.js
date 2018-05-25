@@ -12,6 +12,8 @@ import Conversation from './Entities/Conversation.js';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 
+PNotify.defaults.styling = 'bootstrap4';
+PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
 PNotify.modules.Desktop.permission();
 
