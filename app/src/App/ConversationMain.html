@@ -20,7 +20,7 @@
             {_addUserError}
           </div>
         {/if}
-        <button type="submit" class="btn btn-primary mt-3" disabled="{usersOtherThanCurrent.length === 0}">Go</button>
+        <button type="submit" class="btn btn-primary mt-3">{usersOtherThanCurrent.length ? 'Start Talking' : 'Just Me'}</button>
         <ul class="list-group mt-3 text-body">
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">

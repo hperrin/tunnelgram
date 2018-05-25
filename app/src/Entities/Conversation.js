@@ -69,6 +69,8 @@ export class Conversation extends Entity {
       return 'New Conversation';
     } else if (this.decrypted.name != null) {
       return this.decrypted.name;
+    } else if (this.data.acFull.length === 1) {
+      return 'Just You';
     } else {
       const names = [];
       for (let i = 0; i < this.data.acFull.length; i++) {
