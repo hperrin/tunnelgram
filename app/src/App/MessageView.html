@@ -6,10 +6,15 @@
   {:else}
     <div class="card mx-3 my-0 position-relative rounded {isOwner ? 'align-self-end border-success bg-success' : 'border-info bg-info'}" style="min-width: 10rem; max-width: 80%;">
       <div ref:messageBackdrop class="position-absolute h-100 w-100 bg-white rounded"></div>
-      <div ref:messageContainer class="card-body py-1 px-2 m-0">
+      <div ref:messageContainer class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
         <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
       </div>
-    </div>
+      {#if isOwner}
+        <div ref:messageActions class="card-footer collapse text-right py-1 px-2" id="{message.guid}_actions">
+          <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
+        </div>
+      {/if}
+  </div>
   {/if}
   <small class="text-muted">
     <span>{isOwner ? '' : (message.data.user.data.name || 'Loading...')}{@html isOwner ? '' : '&nbsp;'}</span>
@@ -83,6 +88,15 @@
       };
     },
 
+    methods: {
+      async deleteMessage () {
+        const {message} = this.get();
+        if (await message.delete()) {
+          this.fire('deleted');
+        }
+      }
+    },
+
     helpers: {
       moment,
       // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
@@ -106,7 +120,8 @@
   ref:messageBackdrop {
     opacity: .8;
   }
-  ref:messageContainer {
+  ref:messageContainer,
+  ref:messageActions {
     z-index: 1;
   }
 </style>

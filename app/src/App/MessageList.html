@@ -21,7 +21,7 @@
         </div>
       {/if}
       {#each messages as message (message.guid)}
-        <MessageView bind:message readLineCDate="{_showReadline && _initialReadline}"></MessageView>
+        <MessageView bind:message on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
       {/each}
     </div>
   {/if}
@@ -203,6 +203,15 @@
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
+      },
+
+      removeMessage (message) {
+        const {messages} = this.get();
+        const index = message.arraySearch(messages);
+        if (index !== false) {
+          messages.splice(index, 1);
+          this.set({messages});
+        }
       }
     },
 

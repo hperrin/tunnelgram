@@ -50,7 +50,7 @@
     },
 
     computed: {
-      usersOtherThanCurrent: ({$conversation, $user}) => $conversation.data.acFull.filter(user => !$user.is(user))
+      usersOtherThanCurrent: ({$conversation, $user}) => $conversation.data.acFull && $conversation.data.acFull.filter(user => !$user.is(user))
     },
 
     data () {

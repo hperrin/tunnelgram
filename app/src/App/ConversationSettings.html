@@ -1,4 +1,4 @@
-<div class="d-flex flex-column align-items-center pt-3">
+<div class="d-flex flex-column align-items-center pt-3 mb-3">
   <h2>Conversation Settings</h2>
   <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
     <div class="form-group">
@@ -6,8 +6,26 @@
       <input type="text" class="form-control" bind:value="$conversation.decrypted.name" id="name" aria-describedby="nameHelp" placeholder="Name">
       <small id="nameHelp" class="form-text text-muted">Leave blank to use auto-generated name based on participants.</small>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Save</button>
   </form>
+  <hr />
+  {#if !_confirmLeave}
+    <div class="d-flex flex-column justify-content-start w-100 px-2 mt-3" style="max-width: 600px;">
+      <div class="alert alert-danger">
+        If you leave a conversation, all of your messages in it will be deleted.
+        This process may take a while, so it may still be in your conversations list for a bit.
+        If you are the only participant, the conversation will be deleted.
+      </div>
+      <button type="button" class="btn btn-danger" on:click="confirmLeave()">Leave Conversation</button>
+    </div>
+  {:else}
+    <div class="d-flex flex-column justify-content-start w-100 px-2 mt-3" style="max-width: 600px;">
+      <div class="alert alert-danger">
+        Are you sure you want to leave? This can't be undone.
+      </div>
+      <button type="button" class="btn btn-danger" on:click="leave()">Yes, Leave Conversation</button>
+    </div>
+  {/if}
 </div>
 
 <script>
@@ -23,6 +41,16 @@
           conversation.decrypted.name = null;
         }
         conversation.save();
+      },
+
+      confirmLeave () {
+        this.set({_confirmLeave: true});
+      },
+
+      leave () {
+        const {conversation} = this.store.get();
+        this.store.navigate('/c');
+        conversation.delete();
       }
     }
   };

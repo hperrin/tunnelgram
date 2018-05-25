@@ -17,17 +17,12 @@ class Message extends \Nymph\Entity {
     parent::__construct($id);
   }
 
-  public function delete() {
+  public function handleDelete() {
     if ($this->is($this->conversation->lastMessage)) {
-      $ret = parent::delete();
-      if ($ret) {
-        $this->conversation->lastMessage = null;
-        $this->conversation->save();
-      }
-      return $ret;
-    } else {
-      return parent::delete();
+      $this->conversation->lastMessage = null;
+      $this->conversation->save();
     }
+    return true;
   }
 
   public function save() {

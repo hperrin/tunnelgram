@@ -173,6 +173,8 @@
             return;
           }
           await conversation.readyAll(undefined, ErrHandler, 1);
+        } else {
+          return;
         }
 
         let notice;
@@ -225,7 +227,11 @@
           if (hidden) {
             window.focus();
           }
-          this.openConversation(conversation);
+          if (!conversation.is(this.store.get().conversation)) {
+            window.requestAnimationFrame(() => {
+              this.openConversation(conversation);
+            });
+          }
           notice.close();
         })
       }
