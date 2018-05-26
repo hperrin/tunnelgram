@@ -192,7 +192,7 @@
           });
           if (messageElsInViewport.length) {
             const latestReadMessageEl = messageElsInViewport[messageElsInViewport.length - 1];
-            const updateReadline = parseFloat(latestReadMessageEl.dataset.cdate);
+            const updateReadline = JSON.parse(latestReadMessageEl.dataset.cdate);
             if (updateReadline > _latestReadline) {
               this.set({_latestReadline: updateReadline});
               const {conversation} = this.store.get();

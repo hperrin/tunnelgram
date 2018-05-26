@@ -59,9 +59,17 @@ store.constructor.prototype.refreshAll = function () {
 
 store.on('state', ({changed, current}) => {
   if (changed.conversation && current.conversation && current.conversation.guid) {
-    const {conversation} = current;
+    const {conversation, conversations} = current;
+
     if (conversation.data.user.isASleepingReference) {
       conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
+    }
+
+    for (let curConv of conversations) {
+      if (conversation.guid === curConv.guid && curConv.readline < conversation.readline) {
+        curConv.readline = conversation.readline;
+        store.set({conversations});
+      }
     }
   }
 

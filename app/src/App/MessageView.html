@@ -1,4 +1,4 @@
-<div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{message.cdate}">
+<div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}">
   {#if shouldEmbiggen(message.decrypted.text)}
     <div class="h1 mx-3 my-0">
       {message.decrypted.text}
@@ -78,6 +78,7 @@
 
     computed: {
       isOwner: ({message, $user}) => $user.is(message.data.user),
+      cdateJson: ({message}) => JSON.stringify(message.cdate)
     },
 
     data () {

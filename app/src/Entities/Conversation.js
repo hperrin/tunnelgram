@@ -15,6 +15,7 @@ export class Conversation extends Entity {
   constructor (id) {
     super(id);
     this.unreadCountPromise = null;
+    this.unreadCountPromiseReadline = null;
     this.decrypted = {
       name: null
     };
@@ -92,7 +93,8 @@ export class Conversation extends Entity {
       return true;
     }
 
-    if (!this.unreadCountPromise) {
+    if (!this.unreadCountPromise || this.unreadCountPromiseReadline < this.readline) {
+      this.unreadCountPromiseReadline = this.readline;
       this.unreadCountPromise = Nymph.getEntities({
         'class': Message.class,
         'return': 'guid'
@@ -107,6 +109,10 @@ export class Conversation extends Entity {
   }
 
   saveReadline (...args) {
+    if (this.readline < args[0]) {
+      this.readline = args[0];
+      this.unreadCountPromise = null;
+    }
     return this.serverCall('saveReadline', args);
   }
 }

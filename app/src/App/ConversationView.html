@@ -128,6 +128,8 @@
 
         message.save().then(() => {
           this.set({_textLoading: false, text: ''});
+          conversation.saveReadline(message.cdate);
+          this.store.set({conversation});
           this.focus();
         }, (...args) => {
           this.set({_textLoading: false});

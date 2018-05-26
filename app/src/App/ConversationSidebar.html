@@ -40,7 +40,6 @@
           this.updateTime();
         }
 
-        current.conversation.unreadCount().then(thing => console.log(thing));
         this.set({_unreadCount: current.conversation.unreadCount()});
       }
     },
