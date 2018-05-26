@@ -95,7 +95,7 @@
 
     methods: {
       handleKeyDown (event) {
-        if (event.keyCode === 13 && !event.shiftKey) {
+        if (event.keyCode === 13 && !event.shiftKey && !this.get()._textLoading) {
           event.preventDefault();
           this.newMessage();
         }

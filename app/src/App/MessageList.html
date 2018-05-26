@@ -64,7 +64,7 @@
         this.handleNewMessageScroll();
       }
 
-      if (changed._loadingEarlierMessages) {
+      if (changed._loadingEarlierMessages && !(current._isAtBottom && !changed._loadingEarlierMessages)) {
         this.refs.container.scrollTop += 200 * (current._loadingEarlierMessages ? 1 : -1);
       }
 
@@ -171,7 +171,7 @@
             'lt': ['cdate', messages[0].cdate]
           });
 
-          if (earlierMessages.length) {
+          if (earlierMessages && earlierMessages.length) {
             const distanceFromBottom = this.refs.container.scrollHeight - this.refs.container.scrollTop;
             Nymph.sort(earlierMessages, 'cdate');
             this.set({messages: [...earlierMessages, ...messages], _scrollToDistanceFromBottom: distanceFromBottom});

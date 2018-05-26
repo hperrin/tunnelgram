@@ -20,17 +20,17 @@ PNotify.modules.Desktop.permission();
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
 const sleepyConversationCacheService = new SleepyCacheService(Conversation);
+const router = new Navigo(null, true, '#!');
 
 const store = new UserStore({
   conversations: [],
   conversation: new Conversation(),
   sort: 'mdate',
   view: 'conversation',
+  router: router,
   crypt: crypt,
   decryption: true
 });
-
-const router = new Navigo(null, true, '#!');
 
 store.constructor.prototype.navigate = (...args) => {
   router.navigate(...args);

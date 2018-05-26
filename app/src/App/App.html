@@ -134,8 +134,10 @@
       },
 
       openConversation (conversation) {
-        this.set({_loadingConversation: true});
-        this.store.navigate('/c/'+conversation.guid);
+        if (this.store.get().router.lastRouteResolved().url !== '/c/'+conversation.guid) {
+          this.set({_loadingConversation: true});
+          this.store.navigate('/c/'+conversation.guid);
+        }
       },
 
       async handleNotification (update) {

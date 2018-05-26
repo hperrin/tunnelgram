@@ -18,15 +18,13 @@
       <div class="container-fluid">
         <span class="navbar-brand mb-0 h1">{brand}</span>
         {#if $user}
-          {#if !$convosOut}
-            <ul class="navbar-nav mr-auto d-lg-none">
-              <li class="nav-item">
-                <a class="nav-link border-secondary rounded" href="javascript:void(0)" on:click="$set({convosOut: true})">
-                  <i class="fas fa-comments"></i>
-                </a>
-              </li>
-            </ul>
-          {/if}
+          <ul class="navbar-nav mr-auto d-lg-none">
+            <li class="nav-item">
+              <a class="nav-link border-secondary rounded" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})">
+                <i class="fas fa-comments"></i>
+              </a>
+            </li>
+          </ul>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
