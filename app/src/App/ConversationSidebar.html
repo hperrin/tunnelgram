@@ -1,10 +1,25 @@
 <div class="d-flex w-100 justify-content-between align-items-center">
   <h5 class="mb-0">{name}</h5>
-  <small title="{moment.unix(conversation.mdate).format('llll')}">{modifiedDate}</small>
+  <small title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{modifiedDate}</small>
 </div>
-{#if conversation.data.lastMessage}
-  <small class="mt-1" ref:lastmessage>{conversation.data.lastMessage.decrypted.text}</small>
-{/if}
+<div class="d-flex w-100 justify-content-between align-items-center">
+  {#if conversation.data.lastMessage}
+    <small class="mt-1" ref:lastmessage>{conversation.data.lastMessage.decrypted.text}</small>
+  {/if}
+  {#await _unreadCount}
+    <span>&nbsp;</span>
+  {:then count}
+    {#if count === 0}
+      <span>&nbsp;</span>
+    {:elseif count === true}
+      <span class="badge badge-primary">New</span>
+    {:else}
+      <span class="badge badge-primary">{count}</span>
+    {/if}
+  {:catch e}
+    <span>&nbsp;</span>
+  {/await}
+</div>
 
 <script>
   import Conversation from '../Entities/Conversation';
@@ -18,13 +33,15 @@
     },
 
     onstate ({changed, current}) {
-      if (!changed.conversation || !current.conversation) {
-        return;
-      }
-      const {conversation} = current;
-      if (conversation.data.user.isASleepingReference) {
-        conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
-        this.updateTime();
+      if (changed.conversation && current.conversation) {
+        const {conversation} = current;
+        if (conversation.data.user.isASleepingReference) {
+          conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
+          this.updateTime();
+        }
+
+        current.conversation.unreadCount().then(thing => console.log(thing));
+        this.set({_unreadCount: current.conversation.unreadCount()});
       }
     },
 
@@ -34,6 +51,7 @@
 
     data () {
       return {
+        _unreadCount: new Promise(() => {}),
         conversation: new Conversation()
       }
     },

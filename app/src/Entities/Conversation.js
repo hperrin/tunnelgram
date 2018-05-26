@@ -1,5 +1,6 @@
 import {Nymph, Entity} from 'nymph-client';
 import {User} from 'tilmeld-client';
+import {Message} from './Message';
 import {crypt} from '../Services/EncryptionService';
 
 let currentUser = null;
@@ -13,6 +14,7 @@ export class Conversation extends Entity {
 
   constructor (id) {
     super(id);
+    this.unreadCountPromise = null;
     this.decrypted = {
       name: null
     };
@@ -38,6 +40,8 @@ export class Conversation extends Entity {
       const key = crypt.decryptRSA(this.data.keys[currentUser.guid]);
       this.decrypted.name = crypt.decrypt(this.data.name, key);
     }
+
+    this.unreadCountPromise = null;
 
     return this;
   }
@@ -81,6 +85,25 @@ export class Conversation extends Entity {
       }
       return names.join(', ');
     }
+  }
+
+  async unreadCount () {
+    if (this.readline == null) {
+      return true;
+    }
+
+    if (!this.unreadCountPromise) {
+      this.unreadCountPromise = Nymph.getEntities({
+        'class': Message.class,
+        'return': 'guid'
+      }, {
+        type: '&',
+        'ref': ['conversation', this.guid],
+        'gt': ['cdate', this.readline]
+      });
+    }
+
+    return ((await this.unreadCountPromise) || []).length;
   }
 
   saveReadline (...args) {
