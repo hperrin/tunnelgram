@@ -4,7 +4,7 @@ use Respect\Validation\Validator as v;
 
 class Conversation extends \Nymph\Entity {
   const ETYPE = 'conversation';
-  protected $clientEnabledMethods = ['saveReadline'];
+  protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations'];
   protected $whitelistData = ['name', 'keys', 'acFull'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -22,6 +22,35 @@ class Conversation extends \Nymph\Entity {
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
+  }
+
+  public function findMatchingConversations() {
+    $acFullRefs = [];
+    $acFulls = $this->acFull;
+    if (!\Tilmeld\Tilmeld::$currentUser->inArray($acFulls)) {
+      $acFulls[] = \Tilmeld\Tilmeld::$currentUser;
+    }
+
+    foreach ($acFulls as $curUser) {
+      $acFullRefs[] = ['acFull', $curUser];
+    }
+
+    $conversations = \Nymph\Nymph::getEntities([
+      'class' => 'Tunnelgram\Conversation'
+    ], ['&',
+      'ref' => $acFullRefs
+    ]);
+
+    $count = count($acFulls);
+
+    $conversations = array_values(array_filter(
+        $conversations,
+        function($conversation) use ($count) {
+          return count($conversation->acFull) === $count;
+        }
+    ));
+
+    return $conversations;
   }
 
   public function handleDelete() {

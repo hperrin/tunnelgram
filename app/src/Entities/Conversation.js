@@ -115,6 +115,10 @@ export class Conversation extends Entity {
     }
     return this.serverCall('saveReadline', args);
   }
+
+  findMatchingConversations(...args) {
+    return this.serverCall('findMatchingConversations', args);
+  }
 }
 
 // === Static Properties ===
