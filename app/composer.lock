@@ -771,16 +771,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.15",
+            "version": "1.1.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "ee9e69776a8e875ac1b5b00d8cf2d2c801c42181"
+                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/ee9e69776a8e875ac1b5b00d8cf2d2c801c42181",
-                "reference": "ee9e69776a8e875ac1b5b00d8cf2d2c801c42181",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
+                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
                 "shasum": ""
             },
             "require": {
@@ -830,7 +830,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-01-02T21:47:22+00:00"
+            "time": "2018-05-19T14:26:44+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -994,16 +994,16 @@
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.21",
+            "version": "1.0.0-beta.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "b7db1a43f9d44c07bfd1897107c72bc9bdee3199"
+                "reference": "a6e2d58ca7f1c879f954de6d152ee631f16b25fd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/b7db1a43f9d44c07bfd1897107c72bc9bdee3199",
-                "reference": "b7db1a43f9d44c07bfd1897107c72bc9bdee3199",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/a6e2d58ca7f1c879f954de6d152ee631f16b25fd",
+                "reference": "a6e2d58ca7f1c879f954de6d152ee631f16b25fd",
                 "shasum": ""
             },
             "require": {
@@ -1049,7 +1049,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-05-15T00:00:00+00:00"
+            "time": "2018-05-25T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1099,16 +1099,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.1.0-BETA1",
+            "version": "v4.1.0-BETA2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8"
+                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8",
-                "reference": "7a9804bcd7272d9758d51a5ff2da9f7681c9e5e8",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
+                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
                 "shasum": ""
             },
             "require": {
@@ -1149,7 +1149,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-05-07T07:14:12+00:00"
+            "time": "2018-05-16T14:33:22+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1212,16 +1212,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.1.0-BETA1",
+            "version": "v4.1.0-BETA2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "ac9df6928e717e5dc1378951c5750e0a73c0235b"
+                "reference": "54c81d22ee70981e77763b296b36097a6b669985"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/ac9df6928e717e5dc1378951c5750e0a73c0235b",
-                "reference": "ac9df6928e717e5dc1378951c5750e0a73c0235b",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/54c81d22ee70981e77763b296b36097a6b669985",
+                "reference": "54c81d22ee70981e77763b296b36097a6b669985",
                 "shasum": ""
             },
             "require": {
@@ -1286,7 +1286,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-04-27T09:21:35+00:00"
+            "time": "2018-05-17T10:36:03+00:00"
         },
         {
             "name": "textalk/websocket",

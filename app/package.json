@@ -24,11 +24,11 @@
     "babel-plugin-transform-builtin-extend": "^1.1.2",
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-3": "^6.24.1",
-    "nymph-client": "^4.0.0-beta.8",
-    "svelte": "^2.6.3",
-    "svelte-loader": "^2.9.0",
+    "nymph-client": "^4.0.0-beta.9",
+    "svelte": "^2.6.6",
+    "svelte-loader": "^2.9.1",
     "tilmeld-client": "^1.0.0-beta.19",
-    "webpack": "^4.8.3",
-    "webpack-cli": "^2.1.3"
+    "webpack": "^4.9.1",
+    "webpack-cli": "^2.1.4"
   }
 }
