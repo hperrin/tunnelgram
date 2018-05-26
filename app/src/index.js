@@ -66,9 +66,13 @@ store.on('state', ({changed, current}) => {
     }
 
     for (let curConv of conversations) {
-      if (conversation.guid === curConv.guid && curConv.readline < conversation.readline) {
-        curConv.readline = conversation.readline;
-        store.set({conversations});
+      if (curConv != null && conversation != null) {
+        if (conversation.guid === curConv.guid && curConv.readline < conversation.readline) {
+          curConv.readline = conversation.readline;
+          store.set({conversations});
+        } else if (conversation === curConv) {
+          store.set({conversations});
+        }
       }
     }
   }

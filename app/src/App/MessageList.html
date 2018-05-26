@@ -56,6 +56,14 @@
     },
 
     onupdate ({changed, current}) {
+      if (changed._showReadline && current._showReadline) {
+        this.scrollToReadLine();
+      }
+
+      if ((changed.messages || changed._loading) && !current._loading) {
+        this.handleNewMessageScroll();
+      }
+
       if (changed._loadingEarlierMessages) {
         this.refs.container.scrollTop += 200 * (current._loadingEarlierMessages ? 1 : -1);
       }
@@ -65,10 +73,6 @@
           this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
         });
       }
-
-      // if (changed._showReadline && current._showReadline) {
-      //   this.scrollToReadLine();
-      // }
     },
 
     ondestroy () {
@@ -120,7 +124,6 @@
             Nymph.sort(messages, 'cdate');
             this.set({messages});
             this.createNewReadlineIfNeeded();
-            this.handleNewMessageScroll();
           }
         }, ErrHandler);
         this.set({_subscription});
@@ -221,10 +224,15 @@
         }
       },
 
-      // scrollToReadLine () {
-      //   const readlineEl = this.refs.container.querySelector('.readline');
-      //   this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.scrollHeight * .2));
-      // },
+      scrollToReadLine () {
+        const readlineEl = this.refs.container.querySelector('.readline');
+        if (readlineEl) {
+          window.requestAnimationFrame(() => {
+            this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.scrollHeight * .2));
+          });
+          this.set({_isAtBottom: false});
+        }
+      },
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;

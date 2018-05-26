@@ -18,7 +18,7 @@ use SciActive\Hook;
       return;
     }
     // Run delete handler.
-    if (is_callable($entity, 'handleDelete')) {
+    if (is_callable([$entity, 'handleDelete'])) {
       if (!$entity->handleDelete()) {
         $array = false;
       }
