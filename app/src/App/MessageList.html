@@ -65,6 +65,10 @@
           this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
         });
       }
+
+      // if (changed._showReadline && current._showReadline) {
+      //   this.scrollToReadLine();
+      // }
     },
 
     ondestroy () {
@@ -197,6 +201,7 @@
               this.set({_latestReadline: updateReadline});
               const {conversation} = this.store.get();
               conversation.saveReadline(updateReadline);
+              this.store.set({conversation});
             }
           }
         }
@@ -212,8 +217,14 @@
             _latestReadline: updateReadline
           });
           conversation.saveReadline(updateReadline);
+          this.store.set({conversation});
         }
       },
+
+      // scrollToReadLine () {
+      //   const readlineEl = this.refs.container.querySelector('.readline');
+      //   this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.scrollHeight * .2));
+      // },
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
