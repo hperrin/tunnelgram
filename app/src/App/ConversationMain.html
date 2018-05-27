@@ -185,7 +185,7 @@
 
       save () {
         const {conversation} = this.store.get();
-        conversation.save().then(() => this.store.set({conversation}));
+        conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler);
       }
     },
 
