@@ -1,0 +1,27 @@
+// $primary:       #8583AA;
+$primary:       #284D86;
+$secondary:     #383030;
+$success:       #46A554;
+$info:          #91B5AA;
+// $warning:       #C69167;
+$warning:       #CE9A5B;
+$danger:        #BA4F52;
+$light:         #F5F5F2;
+$dark:          #211526;
+
+@import "~bootswatch/dist/cosmo/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/cosmo/bootswatch";
+
+// PForm
+@import "~pform/css/pform.css";
+@import "~pform/css/pform-bootstrap.css";
+
+// Simple MDE Editor
+@import "~simplemde/dist/simplemde.min.css";
+
+// Markdown GitHub Style CSS
+@import "~github-markdown-css";
+
+// Font Awesome
+@import "~@fortawesome/fontawesome/styles.css";

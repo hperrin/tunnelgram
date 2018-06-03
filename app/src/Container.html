@@ -165,6 +165,7 @@
 
 <script>
   import {User, TilmeldLogin, TilmeldChangePassword} from 'tilmeld-client';
+  import $ from 'jquery';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import NavBar from './App/NavBar.html';
   import FrontPage from './App/FrontPage.html'
@@ -200,7 +201,7 @@
     },
 
     actions: {
-      tooltip: node => window.$(node).tooltip()
+      tooltip: node => $(node).tooltip()
     },
 
     oncreate () {

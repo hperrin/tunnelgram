@@ -8,7 +8,7 @@
   <div class="d-flex flex-small-row flex-grow-1 position-relative">
     <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" style="overflow-y: auto;" ref:convos>
       <div class="list-group">
-        <a class="list-group-item list-group-item-action {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
+        <a class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
           <div class="d-flex w-100 align-items-center">
             <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
           </div>
@@ -27,12 +27,12 @@
         {/if}
         {#if $conversations.length}
           {#each $conversations as conversation (conversation.guid)}
-            <a class="list-group-item list-group-item-action flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="openConversation(conversation)">
+            <a class="list-group-item list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="openConversation(conversation)">
               <ConversationSidebar bind:conversation />
             </a>
           {/each}
         {:else}
-          <div class="list-group-item flex-column align-items-start bg-transparent border-0">
+          <div class="list-group-item rounded-0 flex-column align-items-start bg-transparent border-0">
             You have no conversations yet.
           </div>
         {/if}

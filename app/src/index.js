@@ -1,3 +1,6 @@
+import 'bootstrap';
+import '@fortawesome/fontawesome';
+import '@fortawesome/fontawesome-free-solid';
 import Navigo from 'navigo';
 import PNotify from 'pnotify/dist/es/PNotify';
 import 'pnotify/dist/es/PNotifyMobile';
@@ -11,6 +14,8 @@ import UserStore from './UserStore';
 import Conversation from './Entities/Conversation.js';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
+
+import './scss/styles.scss';
 
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
