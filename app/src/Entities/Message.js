@@ -27,7 +27,7 @@ export class Message extends Entity {
 
     // Decrypt the message text.
     if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
-      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]);
+      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
       this.decrypted.text = crypt.decrypt(this.data.text, key);
     }
 
@@ -41,7 +41,8 @@ export class Message extends Entity {
 
     const encryptPromises = [];
     for (let user of this.data.acRead) {
-      encryptPromises.push({user, promise: crypt.encryptRSAForUser(key, user)});
+      const pad = crypt.generatePad();
+      encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
     }
     this.data.keys = {};
     for (let entry of encryptPromises) {
