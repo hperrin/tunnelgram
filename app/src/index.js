@@ -12,6 +12,7 @@ import {crypt} from './Services/EncryptionService.js';
 import {SleepyCacheService} from './Services/SleepyCacheService.js';
 import UserStore from './UserStore';
 import Conversation from './Entities/Conversation.js';
+import Message from './Entities/Message.js';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 
@@ -25,6 +26,7 @@ PNotify.modules.Desktop.permission();
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
 const sleepyConversationCacheService = new SleepyCacheService(Conversation);
+const sleepyMessageCacheService = new SleepyCacheService(Message);
 const router = new Navigo(null, true, '#!');
 
 const store = new UserStore({
@@ -60,6 +62,7 @@ store.constructor.prototype.refreshAll = function () {
   sleepyUserCacheService.clear();
   sleepyGroupCacheService.clear();
   sleepyConversationCacheService.clear();
+  sleepyMessageCacheService.clear();
 };
 
 store.on('state', ({changed, current}) => {
