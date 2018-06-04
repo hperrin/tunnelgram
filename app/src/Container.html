@@ -1,7 +1,13 @@
-<div class="{$user ? 'd-flex flex-column' : ''}" style="height: {$user ? '100vh' : 'auto'}; padding-top: 56px;">
-  {#if !storageAvailable('localStorage')}
+<svelte:window on:resize="updateNavbarHeight()"></svelte:window>
+<div class="{$user ? 'd-flex flex-column' : ''}" style="height: {$user ? '100vh' : 'auto'}; padding-top: {_navbarHeight}px;">
+  {#if !_storageAvailable}
     <div class="container">
       <h1>Your browser doesn't support the localStorage API. {brand} will not work on this browser!</h1>
+    </div>
+  {/if}
+  {#if !_cryptoAvailable}
+    <div class="container">
+      <h1>Your browser doesn't support the Crypto API. {brand} will not work on this browser!</h1>
     </div>
   {/if}
   {#if $user === false}
@@ -14,7 +20,7 @@
     </div>
   {/if}
   {#if $user !== false}
-    <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
+    <nav ref:navbar class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
         <span class="navbar-brand mb-0 h1">{brand}</span>
         {#if $user}
@@ -173,33 +179,36 @@
 
   import App from './App/App.html';
 
-  export default {
-    helpers: {
-      // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
-      storageAvailable (type) {
-        try {
-          var storage = window[type];
-          var x = '__storage_test__';
-          storage.setItem(x, x);
-          storage.removeItem(x);
-          return true;
-        } catch(e) {
-          return e instanceof DOMException && (
-            // everything except Firefox
-            e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === 'QuotaExceededError' ||
-            // Firefox
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-            // acknowledge QuotaExceededError only if there's something already stored
-            storage.length !== 0;
-        }
-      }
-    },
 
+  // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+  const storageAvailable = (type) => {
+    try {
+      var storage = window[type];
+      var x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    } catch(e) {
+      return e instanceof DOMException && (
+        // everything except Firefox
+        e.code === 22 ||
+        // Firefox
+        e.code === 1014 ||
+        // test name field too, because code might not be present
+        // everything except Firefox
+        e.name === 'QuotaExceededError' ||
+        // Firefox
+        e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+        // acknowledge QuotaExceededError only if there's something already stored
+        storage.length !== 0;
+    }
+  };
+
+  const cryptoAvailable = () => {
+    return !!((window.crypto || window.msCrypto).getRandomValues);
+  };
+
+  export default {
     actions: {
       tooltip: node => $(node).tooltip()
     },
@@ -211,8 +220,15 @@
       });
     },
 
+    onupdate () {
+      this.updateNavbarHeight();
+    },
+
     data () {
       return {
+        _storageAvailable: storageAvailable('localStorage'),
+        _cryptoAvailable: cryptoAvailable(),
+        _navbarHeight: 0,
         clientConfig: {}
       };
     },
@@ -222,6 +238,16 @@
         this.store.get().user.save().then(user => {
           this.store.set({user});
         }, ErrHandler);
+      },
+
+      updateNavbarHeight () {
+        let _navbarHeight = 0;
+        if (this.refs.navbar) {
+          _navbarHeight = this.refs.navbar.getBoundingClientRect().height;
+        }
+        if (_navbarHeight !== this.get()._navbarHeight) {
+          this.set({_navbarHeight});
+        }
       }
     },
 
