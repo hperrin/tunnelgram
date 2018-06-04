@@ -94,6 +94,13 @@ export class Conversation extends Entity {
       return true;
     }
 
+    if (this.data.lastMessage) {
+      await this.data.lastMessage.ready();
+      if (this.data.lastMessage.cdate <= this.readline) {
+        return 0;
+      }
+    }
+
     if (!this.unreadCountPromise || this.unreadCountPromiseReadline < this.readline) {
       this.unreadCountPromiseReadline = this.readline;
       this.unreadCountPromise = Nymph.getEntities({
