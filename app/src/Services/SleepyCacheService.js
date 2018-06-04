@@ -18,10 +18,19 @@ export class SleepyCacheService {
       }
       return that._getEntityData.call(this, ...args);
     };
+
+    this.timeout = setTimeout(() => {
+      for (let k in this.entityDataCache) {
+        if (this.entityDataCache[k].expire <= (new Date())) {
+          delete this.entityDataCache[k];
+        }
+      }
+    }, 60000);
   }
 
   destroy () {
     Nymph.getEntityData = this._getEntityData;
+    clearTimeout(this.timeout);
   }
 
   clear () {
