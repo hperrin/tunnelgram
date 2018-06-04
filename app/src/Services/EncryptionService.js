@@ -255,13 +255,13 @@ class EncryptionService {
 
   generateKey () {
     let keyArray = new Uint8Array(48);
-    window.crypto.getRandomValues(keyArray);
+    (window.crypto || window.msCrypto).getRandomValues(keyArray);
     return aesjs.utils.hex.fromBytes(keyArray);
   }
 
   generatePad () {
     let keyArray = new Uint8Array(8);
-    window.crypto.getRandomValues(keyArray);
+    (window.crypto || window.msCrypto).getRandomValues(keyArray);
     return aesjs.utils.hex.fromBytes(keyArray);
   }
 }
