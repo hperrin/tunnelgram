@@ -1,6 +1,11 @@
 <div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}">
   {#if shouldEmbiggen}
-    <div class="h1 mx-3 my-0">
+    {#if _showEmbiggenedActions && isOwner}
+      <div class="h1 mr-3 my-0">
+        <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
+      </div>
+    {/if}
+    <div class="h1 mx-3 my-0" on:dblclick="set({_showEmbiggenedActions: isOwner && !_showEmbiggenedActions})">
       {#if message.decrypted.text != null}
         {message.decrypted.text}
       {:else}
@@ -10,6 +15,11 @@
   {:else}
     <div class="card mx-3 my-0 position-relative rounded {isOwner ? 'align-self-end border-success bg-success' : 'border-info bg-info'}" style="min-width: 10rem; max-width: 80%;">
       <div ref:messageBackdrop class="position-absolute h-100 w-100 bg-white rounded"></div>
+      {#if message.decrypted.images.length}
+        <div ref:messageImages class="card-body p-0 m-0">
+          <ImageGrid images="{message.decrypted.images}" />
+        </div>
+      {/if}
       <div ref:messageContainer class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
         <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
       </div>
@@ -18,7 +28,7 @@
           <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
         </div>
       {/if}
-  </div>
+    </div>
   {/if}
   <small class="text-muted">
     <span>{isOwner ? '' : (message.data.user.data.name || 'Loading...')}{@html isOwner ? '' : '&nbsp;'}</span>
@@ -27,7 +37,7 @@
 </div>
 {#if readLineCDate === message.cdate}
   <div class="d-flex align-items-center w-100 readline">
-    <hr class=" mx-2 flex-grow-1" />
+    <hr class="mx-2 flex-grow-1" />
     <small class="text-muted">new messages</small>
     <hr class="mx-2 flex-grow-1" />
   </div>
@@ -104,6 +114,7 @@
 
     data () {
       return {
+        _showEmbiggenedActions: false,
         _formattedText: '',
         message: null,
         readLineCDate: false
@@ -145,6 +156,7 @@
     opacity: .8;
   }
   ref:messageContainer,
+  ref:messageImages,
   ref:messageActions {
     z-index: 1;
   }

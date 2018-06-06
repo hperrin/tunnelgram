@@ -62,6 +62,9 @@
   import ErrHandler from '../ErrHandler';
   import SimpleMDE from 'simplemde';
   import PNotify from 'pnotify/dist/es/PNotify';
+  import aesjs from 'aes-js';
+  import base64js from 'base64-js';
+  import utf8 from 'utf8';
 
   const emoji = new EmojiConvertor();
 
@@ -72,7 +75,7 @@
   };
 
   // Source: https://stackoverflow.com/a/14845805
-  const resizeImage = (dataURL, maxWidth, maxHeight) => {
+  const resizeImage = (dataURL, type, maxWidth, maxHeight) => {
     // Max size for image.
     maxWidth = maxWidth || 150;
     maxHeight = maxHeight || 150;
@@ -107,7 +110,7 @@
         ctx.drawImage(canvasCopy, 0, 0, canvasCopy.width, canvasCopy.height, 0, 0, canvas.width, canvas.height);
 
         resolve({
-          data: canvas.toDataURL(),
+          data: canvas.toDataURL(type, .95),
           width: canvas.width,
           height: canvas.height
         });
@@ -315,13 +318,14 @@
             let data;
             do {
               // Resize the image repeatedly down until the size is under 2MiB.
-              dataImg = await resizeImage(e.target.result, size, size);
+              dataImg = await resizeImage(e.target.result, file.type, size, size);
               dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
               dataType = dataMatch[1];
               data = window.atob(dataMatch[2]);
-              size -= 150;
-            } while (data.length > 2097152);
-            const thumbnailImg = await resizeImage(e.target.result);
+              size -= 200;
+            } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
+            // console.log((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3));
+            const thumbnailImg = await resizeImage(e.target.result, file.type);
             const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
             const thumbnailType = thumbnailMatch[1];
             const thumbnail = window.atob(thumbnailMatch[2]);
