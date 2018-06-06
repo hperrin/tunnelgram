@@ -1,7 +1,7 @@
 <div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}">
   {#if shouldEmbiggen}
     {#if _showEmbiggenedActions && isOwner}
-      <div class="h1 mr-3 my-0">
+      <div class="h1 mr-3 my-0" style="font-size: 0;">
         <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
       </div>
     {/if}
