@@ -1,34 +1,121 @@
-<div class="d-flex flex-column h-100">
+<div class="d-flex flex-column h-100 position-relative" on:dragover="handleDrag(event, true)">
+  {#if _showDropbox}
+    <div class="position-absolute w-100 h-100" style="z-index: 200;" on:dragleave="handleDrag(event, false)" on:drop="handleDrop(event)"></div>
+    <div class="d-flex justify-content-center align-items-center position-absolute w-100 h-100 bg-white" style="opacity: .9; z-index: 100;">
+      <div class="d-flex flex-column justify-content-center align-items-center">
+        <span class="fa-layers fa-fw fa-5x">
+          <i class="fas fa-file"></i>
+          <i class="fa-inverse fas fa-plus" data-fa-transform="shrink-10"></i>
+        </span>
+
+        <div class="h1 mt-2">
+          Drop files to upload to conversation.
+        </div>
+      </div>
+    </div>
+  {/if}
   <div class="flex-grow-1  position-relative">
     <MessageList />
   </div>
-  <form class="d-flex align-items-stretch" on:submit="newMessage(event.preventDefault())">
-    {#if !_mobileBrowser}
-      <div class="flex-grow-1" ref:textContainer>
-        <textarea class="w-100 border-primary border-top" ref:textEditor disabled="{_textLoading}"></textarea>
+  <form on:submit="newMessage(event.preventDefault())">
+    {#if images.length | _imagesLoading}
+      <div class="d-flex flex-wrap justify-content-start align-items-start bg-secondary pt-2 pl-2">
+        {#each images as image, i}
+          <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
+            <img src="{image.thumbnailImg}" alt="{image.name}" title="{image.name}" />
+            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})" disabled="{_saving}">
+              <i class="fas fa-times text-white"></i>
+            </button>
+            <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px;">
+              {image.dataWidth}x{image.dataHeight}
+            </span>
+            <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px;">
+              {round(image.data.length / 1024 / 1024, 1)}MB
+            </span>
+          </div>
+        {/each}
+        {#if _imagesLoading}
+          <div class="d-flex justify-content-center align-items-center mr-2 mb-2" style="width: 152px; height: 152px;">
+            <LoadingIndicator width="50px" height="50px" />
+          </div>
+        {/if}
       </div>
-    {:else}
-      <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:textMobile></textarea>
     {/if}
-    <button class="btn btn-lg btn-primary" style="width: 80px;" disabled="{_textLoading || textIsEmpty}"><i class="fas fa-comment"></i></button>
+    <div class="d-flex align-items-stretch">
+      {#if !_mobileBrowser}
+        <div class="flex-grow-1" ref:textContainer>
+          <textarea class="w-100 border-primary border-top" ref:textEditor disabled="{_saving}"></textarea>
+        </div>
+      {:else}
+        <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{textLoading}" ref:textMobile></textarea>
+      {/if}
+      <button class="btn btn-lg btn-primary" style="width: 80px;" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
+    </div>
   </form>
 </div>
 
 <script>
   import Message from '../Entities/Message';
   import MessageList from './MessageList.html';
+  import LoadingIndicator from './LoadingIndicator.html';
   import EmojiConvertor from 'emoji-js';
   import ErrHandler from '../ErrHandler';
   import SimpleMDE from 'simplemde';
+  import PNotify from 'pnotify/dist/es/PNotify';
 
   const emoji = new EmojiConvertor();
 
-  const mobileCheck = function() {
+  const mobileCheck = () => {
     var check = false;
     (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
     return check;
   };
 
+  // Source: https://stackoverflow.com/a/14845805
+  const resizeImage = (dataURL, maxWidth, maxHeight) => {
+    // Max size for image.
+    maxWidth = maxWidth || 150;
+    maxHeight = maxHeight || 150;
+
+    // Create and initialize two canvas.
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const canvasCopy = document.createElement("canvas");
+    const copyContext = canvasCopy.getContext("2d");
+
+    // Create original image.
+    const img = new Image();
+
+    return new Promise((resolve, reject) => {
+      img.onload = () => {
+        // Determine new ratio based on max size.
+        let ratio = 1;
+        if (img.width > maxWidth) {
+          ratio = maxWidth / img.width;
+        } else if (img.height > maxHeight) {
+          ratio = maxHeight / img.height;
+        }
+
+        // Draw original image in second canvas.
+        canvasCopy.width = img.width;
+        canvasCopy.height = img.height;
+        copyContext.drawImage(img, 0, 0);
+
+        // Copy and resize second canvas to first canvas.
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        ctx.drawImage(canvasCopy, 0, 0, canvasCopy.width, canvasCopy.height, 0, 0, canvas.width, canvas.height);
+
+        resolve({
+          data: canvas.toDataURL(),
+          width: canvas.width,
+          height: canvas.height
+        });
+      };
+
+      img.src = dataURL;
+    });
+  };
 
   export default {
     oncreate () {
@@ -46,7 +133,7 @@
         });
         this.editor.codemirror.on('keydown', (codemirror, event) => {
           this.handleKeyDown(event);
-          if (this.get()._textLoading) {
+          if (this.get()._saving) {
             event.preventDefault();
           }
         });
@@ -60,7 +147,7 @@
           }
         });
         this.editor.value(this.get().text);
-        this.editor.codemirror.setOption('readOnly', this.get()._textLoading);
+        this.editor.codemirror.setOption('readOnly', this.get()._saving);
       }
     },
 
@@ -71,7 +158,7 @@
           this.editor.value(current.text);
           this.editor.codemirror.execCommand('goDocEnd');
         }
-        this.editor.codemirror.setOption('readOnly', current._textLoading);
+        this.editor.codemirror.setOption('readOnly', current._saving);
       }
     },
 
@@ -82,20 +169,23 @@
     },
 
     computed: {
-      textIsEmpty: ({text}) => text === '' || text.match(/^\s+$/)
+      messageIsEmpty: ({text, images}) => (text === '' || text.match(/^\s+$/)) && !images.length
     },
 
     data () {
       return {
+        _showDropbox: false,
         _mobileBrowser: false,
-        _textLoading: false,
-        text: ''
+        _saving: false,
+        _imagesLoading: false,
+        text: '',
+        images: []
       };
     },
 
     methods: {
       handleKeyDown (event) {
-        if (event.keyCode === 13 && !event.shiftKey && !this.get()._textLoading) {
+        if (event.keyCode === 13 && !event.shiftKey && !this.get()._saving) {
           event.preventDefault();
           this.newMessage();
         }
@@ -110,29 +200,30 @@
       },
 
       newMessage () {
-        if (this.get().textIsEmpty) {
+        if (this.get().messageIsEmpty) {
           return;
         }
 
-        this.set({_textLoading: true});
+        this.set({_saving: true});
 
-        const {text} = this.get();
+        const {text, images} = this.get();
         const {conversation} = this.store.get();
 
         const message = new Message();
-        message.decrypted.text = text;
+        message.decrypted.text = (text === '' || text.match(/^\s+$/)) ? null : text;
+        message.decrypted.images = images;
         message.set({
           conversation,
           acRead: [...conversation.data.acFull]
         });
 
         message.save().then(() => {
-          this.set({_textLoading: false, text: ''});
+          this.set({_saving: false, text: '', images: []});
           conversation.saveReadline(message.cdate);
           this.store.set({conversation});
           this.focus();
         }, (...args) => {
-          this.set({_textLoading: false});
+          this.set({_saving: false});
           this.focus();
           ErrHandler(...args);
         });
@@ -145,11 +236,132 @@
         if (this.refs.textMobile) {
           this.refs.textMobile.focus();
         }
+      },
+
+      clearTimeout () {
+        if (this.timeout) {
+          window.clearTimeout(this.timeout);
+          this.timeout = null;
+        }
+      },
+
+      showTimedDropbox () {
+        this.clearTimeout();
+
+        this.set({_showDropbox: true});
+
+        this.timeout = window.setTimeout(() => {
+          this.set({_showDropbox: false});
+          this.timeout = null;
+        }, 2000);
+      },
+
+      handleDrag (event, _showDropbox) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        if (this.get()._saving) {
+          return;
+        }
+
+        this.set({_showDropbox});
+      },
+
+      handleDrop (event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        if (this.get()._saving) {
+          return;
+        }
+
+        this.set({_showDropbox: false});
+        this.handleFiles(event.dataTransfer.files);
+      },
+
+      handleFiles (files) {
+        console.log(files);
+        let imageCount = 0;
+        const currentImageCount = this.get().images.length;
+        for (var i = 0; i < files.length; i++) {
+          const file = files[i];
+
+          if (!file.type.startsWith('image/')) {
+            PNotify.notice({
+              title: 'Only Images',
+              text: 'Right now, Tunnelgram only supports image uploads.'
+            });
+            this.set({_imagesLoading: false});
+            continue;
+          }
+
+          if (currentImageCount + imageCount === 9) {
+            PNotify.notice({
+              title: 'Max Images Reached',
+              text: 'You can put up to 9 images into a message.'
+            });
+            break;
+          }
+
+          this.set({_imagesLoading: true});
+          imageCount++;
+
+          const reader = new FileReader();
+          reader.onload = async e => {
+            let size = 1600;
+            let dataImg;
+            let dataMatch;
+            let dataType;
+            let data;
+            do {
+              // Resize the image repeatedly down until the size is under 2MiB.
+              dataImg = await resizeImage(e.target.result, size, size);
+              dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+              dataType = dataMatch[1];
+              data = window.atob(dataMatch[2]);
+              size -= 150;
+            } while (data.length > 2097152);
+            const thumbnailImg = await resizeImage(e.target.result);
+            const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+            const thumbnailType = thumbnailMatch[1];
+            const thumbnail = window.atob(thumbnailMatch[2]);
+            this.set({images: this.get().images.concat([{
+              name: file.name,
+              dataType,
+              dataWidth: '' + dataImg.width,
+              dataHeight: '' + dataImg.height,
+              data,
+              thumbnailType,
+              thumbnailWidth: '' + thumbnailImg.width,
+              thumbnailHeight: '' + thumbnailImg.height,
+              thumbnail,
+              thumbnailImg: thumbnailImg.data
+            }])});
+            imageCount--;
+            if (imageCount === 0) {
+              this.set({_imagesLoading: false});
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+
       }
     },
 
     components: {
-      MessageList
+      MessageList,
+      LoadingIndicator
+    },
+
+    helpers: {
+      removeIndex (arr, i) {
+        arr.splice(i, 1);
+        return arr;
+      },
+
+      round (value, precision) {
+        return Number.parseFloat(value.toFixed(precision));
+      }
     }
   };
 </script>

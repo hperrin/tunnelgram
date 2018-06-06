@@ -10,3 +10,6 @@ COPY msmtprc /etc/msmtprc
 
 # Memory Limit
 RUN echo "memory_limit=1024M" > $PHP_INI_DIR/conf.d/memory-limit.ini
+
+# Post Max Size
+RUN echo "post_max_size=80M" > $PHP_INI_DIR/conf.d/post-max-size.ini

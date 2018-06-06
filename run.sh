@@ -21,6 +21,15 @@ if [ ! -d "db_data" ]; then
   mkdir db_data
 fi
 
+if [ ! -d "db_blob" ]; then
+  mkdir db_blob
+fi
+
+if [ ! -f "db_blob_access_key.txt" ]; then
+  dd if=/dev/urandom bs=15 count=1 | base64 | sed -e 's/\//0/' > ./db_blob_access_key.txt
+  dd if=/dev/urandom bs=30 count=1 | base64 | sed -e 's/\//0/' > ./db_blob_secret_key.txt
+fi
+
 if [ ! -d "mail" ]; then
   mkdir mail
 fi

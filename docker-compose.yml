@@ -13,6 +13,22 @@ services:
     networks:
       - app-network
 
+  blob:
+    image: minio/minio
+    ports:
+      - "8082:9000"
+    volumes:
+      - ./db_blob:/data
+    command: ["server", "/data"]
+    networks:
+      - app-network
+    environment:
+      MINIO_ACCESS_KEY_FILE: "db_blob_access_key"
+      MINIO_SECRET_KEY_FILE: "db_blob_secret_key"
+    secrets:
+      - db_blob_access_key
+      - db_blob_secret_key
+
   db:
     build:
       context: ./config
@@ -82,9 +98,14 @@ services:
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
       PUBSUB_HOST: pubsub:8080
       TILMELD_SECRET_FILE: /run/secrets/tilmeld_secret
+      BLOB_HOST: blob:9000
+      BLOB_ACCESS_KEY_FILE: /run/secrets/db_blob_access_key
+      BLOB_SECRET_KEY_FILE: /run/secrets/db_blob_secret_key
     secrets:
       - db_password
       - tilmeld_secret
+      - db_blob_access_key
+      - db_blob_secret_key
 
 networks:
   app-network:
@@ -95,5 +116,9 @@ secrets:
     file: db_password.txt
   db_root_password:
     file: db_root_password.txt
+  db_blob_access_key:
+    file: db_blob_access_key.txt
+  db_blob_secret_key:
+    file: db_blob_secret_key.txt
   tilmeld_secret:
     file: tilmeld_secret.txt

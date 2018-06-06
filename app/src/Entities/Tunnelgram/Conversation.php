@@ -170,7 +170,14 @@ class Conversation extends \Nymph\Entity {
             ),
             false
         )
-        ->attribute('name', v::when(v::nullType(), v::alwaysValid(), v::stringType()->notEmpty()->prnt()->length(1, 2048)))
+        ->attribute('name', v::when(
+            v::nullType(),
+            v::alwaysValid(),
+            v::stringType()->notEmpty()->prnt()->length(
+                1,
+                ceil(256 * 4 / 3) // Base64 of 256B
+            )
+        ))
         ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('Tunnelgram\Message')))
         ->setName('conversation')
         ->assert($this->getValidatable());

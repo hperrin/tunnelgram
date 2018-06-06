@@ -4,7 +4,15 @@
 </div>
 <div class="d-flex w-100 mt-1 justify-content-between align-items-end">
   {#if conversation.data.lastMessage}
-    <small ref:lastmessage>{conversation.data.lastMessage.decrypted.text}</small>
+    <small ref:lastmessage>
+      {#if conversation.data.lastMessage.decrypted.text != null}
+        {conversation.data.lastMessage.decrypted.text}
+      {:elseif conversation.data.lastMessage.decrypted.images.length === 1}
+        [A photo]
+      {:elseif conversation.data.lastMessage.decrypted.images.length > 1}
+        [Photos]
+      {/if}
+    </small>
   {:else}
     <span>&nbsp;</span>
   {/if}
