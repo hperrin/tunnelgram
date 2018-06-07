@@ -22,7 +22,10 @@
   {#if $user !== false}
     <nav ref:navbar class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">{brand}</span>
+        <span class="navbar-brand d-flex align-items-center">
+          <span>{brand}</span>
+          <span class="badge badge-warning ml-1" style="font-size: .6em;">beta</span>
+        </span>
         {#if $user}
           <ul class="navbar-nav mr-auto d-lg-none">
             <li class="nav-item">
