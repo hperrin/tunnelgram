@@ -1,0 +1,189 @@
+<div style="height: 100%; overflow-y: auto;" ref:container on:scroll="handleScroll()">
+  {#if _loading}
+    <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+      <div class="col-auto">
+        <LoadingIndicator width="50px" height="50px" />
+      </div>
+    </div>
+  {:else}
+    <div class="list-group">
+      <a class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
+        <div class="d-flex w-100 align-items-center">
+          <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
+        </div>
+      </a>
+      {#if $conversations.length > 1}
+        <div class="list-group-item d-flex justify-content-center p-0 border-0">
+          <div class="btn-group btn-group-toggle d-flex w-100">
+            <button class="btn btn-secondary flex-fill {$sort === 'name' ? 'active' : ''}" type="button" on:click="$set({sort: 'name'})">
+              Alphabetical
+            </button>
+            <button class="btn btn-secondary flex-fill {$sort === 'mdate' ? 'active' : ''}" type="button" on:click="$set({sort: 'mdate'})">
+              Newest
+            </button>
+          </div>
+        </div>
+      {/if}
+      {#if $conversations.length}
+        {#each $conversations as conversation (conversation.guid)}
+          <a class="list-group-item list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="fire('tunnelgram-navigate', {conversation})">
+            <ConversationPreview bind:conversation />
+          </a>
+        {/each}
+      {:else}
+        <div class="list-group-item rounded-0 flex-column align-items-start bg-transparent border-0">
+          You have no conversations yet.
+        </div>
+      {/if}
+      {#if _loadingEarlierConversations}
+        <div class="list-group-item rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0">
+          <div class="col-auto">
+            <LoadingIndicator width="50px" height="50px" />
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
+</div>
+
+<script>
+  import {Nymph, PubSub} from 'nymph-client';
+  import Conversation from '../../Entities/Conversation';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import ConversationPreview from './ConversationPreview.html';
+  import ErrHandler from '../../ErrHandler';
+
+  const CONVERSATION_PAGE_SIZE = 20;
+
+  export default {
+    oncreate () {
+      this.store.on('state', ({changed, current, previous}) => {
+        if (changed.user &&
+            current.user &&
+            !current.user.is(previous.user)
+          ) {
+          this.subscribe();
+        }
+
+        if (changed.sort) {
+          const {conversations, sort} = current;
+          if (sort === 'mdate') {
+            Nymph.sort(conversations, sort, null, true);
+          } else if (sort === 'name') {
+            conversations.sort((a, b) => a.getName(current.user).toLowerCase().localeCompare(b.getName(current.user).toLowerCase()));
+          }
+          this.store.set({conversations});
+        }
+      });
+      this.subscribe();
+    },
+
+    ondestroy () {
+      let {_subscription} = this.get();
+      if (_subscription) {
+        _subscription.unsubscribe();
+      }
+    },
+
+    data () {
+      return {
+        _loading: true,
+        _loadingEarlierConversations: false,
+        _reachedEarliestConversation: false
+      };
+    },
+
+    methods: {
+      subscribe () {
+        let {_subscription} = this.get();
+        if (_subscription) {
+          _subscription.unsubscribe();
+        }
+
+        this.set({_loading: true});
+
+        _subscription = Nymph.getEntities({
+          'class': Conversation.class,
+          'sort': 'mdate',
+          'reverse': true,
+          'limit': CONVERSATION_PAGE_SIZE
+        }).subscribe(update => {
+          this.set({_loading: false});
+          if (update) {
+            const {conversations, sort} = this.store.get();
+            if (Array.isArray(update)) {
+              if (update.length < CONVERSATION_PAGE_SIZE) {
+                this.set({_reachedEarliestConversation: true});
+              }
+            } else {
+              this.fire('tunnelgram-notification', {update});
+            }
+            PubSub.updateArray(conversations, update);
+            this.sortConversations(conversations);
+            this.store.set({conversations});
+            this.handleScroll();
+          }
+        }, ErrHandler);
+        this.set({_subscription});
+      },
+
+      sortConversations (conversations) {
+        const {sort, user} = this.store.get();
+        if (sort === 'mdate') {
+          Nymph.sort(conversations, sort, null, true);
+        } else if (sort === 'name') {
+          conversations.sort((a, b) => a.getName(user).toLowerCase().localeCompare(b.getName(user).toLowerCase()));
+        }
+      },
+
+      handleScroll () {
+        if (this.refs.container.scrollTop > (this.refs.container.scrollHeight - this.refs.container.clientHeight - 100)) {
+          this.loadEarlierConversations();
+        }
+      },
+
+      async loadEarlierConversations () {
+        if (this.get()._loadingEarlierConversations || this.get()._reachedEarliestConversation) {
+          return;
+        }
+
+        const {conversations} = this.store.get();
+
+        if (!conversations.length) {
+          return;
+        }
+
+        this.set({_loadingEarlierConversations: true});
+
+        try {
+          const earlierConversations = await Nymph.getEntities({
+            'class': Conversation.class,
+            'sort': 'mdate',
+            'reverse': true,
+            'limit': CONVERSATION_PAGE_SIZE
+          }, {
+            'type': '&',
+            'lt': ['mdate', Math.min(...conversations.map(c => c.mdate))]
+          });
+
+          if (earlierConversations && earlierConversations.length) {
+            const newConversations = [...earlierConversations, ...conversations];
+            this.sortConversations(newConversations);
+            this.store.set({conversations: newConversations});
+          } else {
+            this.set({_reachedEarliestConversation: true});
+          }
+        } catch (e) {
+          ErrHandler(e);
+        }
+
+        this.set({_loadingEarlierConversations: false});
+      }
+    },
+
+    components: {
+      LoadingIndicator,
+      ConversationPreview
+    }
+  };
+</script>

@@ -27,7 +27,13 @@ class Message extends \Nymph\Entity {
 
   public function handleDelete() {
     if ($this->is($this->conversation->lastMessage)) {
-      $this->conversation->lastMessage = null;
+      $this->conversation->lastMessage = \Nymph\Nymph::getEntity([
+        'class' => 'Tunnelgram\Message',
+        'reverse' => true,
+        'offset' => 1
+      ], ['&',
+        'ref' => ['conversation', $this->conversation]
+      ]);
       $this->conversation->save();
     }
     return true;

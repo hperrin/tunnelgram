@@ -29,11 +29,13 @@
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
-  import Message from '../Entities/Message';
-  import LoadingIndicator from './LoadingIndicator.html';
-  import MessageView from './MessageView.html';
-  import ErrHandler from '../ErrHandler';
   import moment from 'moment';
+  import Message from '../../Entities/Message';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import MessageView from './MessageView.html';
+  import ErrHandler from '../../ErrHandler';
+
+  const MESSAGE_PAGE_SIZE = 20;
 
   export default {
     oncreate () {
@@ -48,9 +50,11 @@
     onstate ({changed, current}) {
       const {_showReadline, _initialReadline, messages} = current;
       if (_showReadline === null && _initialReadline !== 0 && messages.length) {
+        const visibleReadLine = _initialReadline > 0
+          && _initialReadline < messages[messages.length - 1].cdate;
         this.set({
-          _showReadline: _initialReadline > 0
-            && _initialReadline < messages[messages.length - 1].cdate
+          _showReadline: visibleReadLine,
+          _willScrollToReadLine: visibleReadLine
         });
       }
     },
@@ -60,11 +64,26 @@
         this.scrollToReadLine();
       }
 
-      if ((changed.messages || changed._loading) && !current._loading) {
-        this.handleNewMessageScroll();
+      if (changed._loading && !current._loading && !current._willScrollToReadLine) {
+        // Scroll to the bottom when the messages are first loaded.
+        this.scrollToBottom();
+      }
+
+      if (changed.messages && !this.scrollPending && current._isAtBottom) {
+        // Scroll to the bottom when new messages come in, if the user is at the bottom.
+        this.scrollPending = true;
+        window.requestAnimationFrame(() => {
+          this.scrollPending = false;
+          if (this.get()._willScrollToReadLine) {
+            this.set({_willScrollToReadLine: false});
+          } else {
+            this.scrollToBottom();
+          }
+        });
       }
 
       if (changed._loadingEarlierMessages && !(current._isAtBottom && !changed._loadingEarlierMessages)) {
+        // Scroll to offset the added/removed height of the loading indicator.
         this.refs.container.scrollTop += 200 * (current._loadingEarlierMessages ? 1 : -1);
       }
 
@@ -92,6 +111,7 @@
         _showReadline: null,
         _initialReadline: null,
         _latestReadline: null,
+        _loadingEarlierMessages: false,
         _reachedEarliestMessage: false,
         _scrollToDistanceFromBottom: null,
         messages: []
@@ -112,20 +132,31 @@
           'class': Message.class,
           'sort': 'cdate',
           'reverse': true,
-          'limit': 20
+          'limit': MESSAGE_PAGE_SIZE
         }, {
           'type': '&',
           'ref': ['conversation', conversation.guid]
         }).subscribe(update => {
-          this.set({_loading: false});
           if (update) {
             const {messages} = this.get();
+            if (Array.isArray(update)) {
+              if (update.length < MESSAGE_PAGE_SIZE) {
+                this.set({_reachedEarliestMessage: true});
+              }
+            }
             PubSub.updateArray(messages, update);
             Nymph.sort(messages, 'cdate');
-            this.set({messages});
+            // Setting _loading needs to go before handleScroll to scroll to the bottom on initial load.
+            this.set({messages, _loading: false});
             this.createNewReadlineIfNeeded();
+            this.handleScroll();
+          } else {
+            this.set({_loading: false});
           }
-        }, ErrHandler);
+        }, (err) => {
+          ErrHandler(err);
+          this.set({_loading: false});
+        });
         this.set({_subscription});
       },
 
@@ -136,13 +167,6 @@
 
         this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
         this.updateReadline();
-      },
-
-      handleNewMessageScroll () {
-        if (this.get()._isAtBottom) {
-          this.scrollToBottom();
-          this.updateReadline();
-        }
       },
 
       async loadEarlierMessages () {
@@ -164,7 +188,7 @@
             'class': Message.class,
             'sort': 'cdate',
             'reverse': true,
-            'limit': 20
+            'limit': MESSAGE_PAGE_SIZE
           }, {
             'type': '&',
             'ref': ['conversation', conversation.guid],
@@ -186,28 +210,30 @@
       },
 
       updateReadline () {
-        // Update readline.
-        const {_latestReadline} = this.get();
-        if (_latestReadline !== null) {
-          const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
-          const messageElsInViewport = Array.from(messageEls).filter((el) => {
-              const containerTop = this.refs.container.scrollTop;
-              const containerBottom = containerTop + this.refs.container.clientHeight;
-              const elBottom = el.offsetTop + el.offsetHeight;
-              return (elBottom >= containerTop)
-                     && (elBottom <= containerBottom);
-          });
-          if (messageElsInViewport.length) {
-            const latestReadMessageEl = messageElsInViewport[messageElsInViewport.length - 1];
-            const updateReadline = JSON.parse(latestReadMessageEl.dataset.cdate);
-            if (updateReadline > _latestReadline) {
-              this.set({_latestReadline: updateReadline});
-              const {conversation} = this.store.get();
-              conversation.saveReadline(updateReadline);
-              this.store.set({conversation});
+        // Update readline on next animation frame (so that the DOM can be updated).
+        window.requestAnimationFrame(() => {
+          const {_latestReadline} = this.get();
+          if (_latestReadline !== null) {
+            const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
+            const messageElsInViewport = Array.from(messageEls).filter((el) => {
+                const containerTop = this.refs.container.scrollTop;
+                const containerBottom = containerTop + this.refs.container.clientHeight;
+                const elBottom = el.offsetTop + el.offsetHeight;
+                return (elBottom >= containerTop)
+                       && (elBottom <= containerBottom);
+            });
+            if (messageElsInViewport.length) {
+              const latestReadMessageEl = messageElsInViewport[messageElsInViewport.length - 1];
+              const updateReadline = JSON.parse(latestReadMessageEl.dataset.cdate);
+              if (updateReadline > _latestReadline) {
+                this.set({_latestReadline: updateReadline});
+                const {conversation} = this.store.get();
+                conversation.saveReadline(updateReadline);
+                this.store.set({conversation});
+              }
             }
           }
-        }
+        });
       },
 
       createNewReadlineIfNeeded () {
@@ -236,6 +262,7 @@
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
+        this.set({_isAtBottom: true});
       },
 
       removeMessage (message) {

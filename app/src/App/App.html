@@ -1,146 +1,40 @@
-{#if _loading}
-  <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
-    <div class="col-auto">
-      <LoadingIndicator width="50px" height="50px" />
-    </div>
+<div class="d-flex flex-small-row flex-grow-1 position-relative">
+  <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" ref:convos>
+    <ConversationList
+      on:tunnelgram-notification="notification(event.update)"
+      on:tunnelgram-navigate="navigate(event.conversation)" />
   </div>
-{:else}
-  <div class="d-flex flex-small-row flex-grow-1 position-relative">
-    <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" style="overflow-y: auto;" ref:convos>
-      <div class="list-group">
-        <a class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
-          <div class="d-flex w-100 align-items-center">
-            <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
-          </div>
-        </a>
-        {#if $conversations.length > 1}
-          <div class="list-group-item d-flex justify-content-center p-0 border-0">
-            <div class="btn-group btn-group-toggle d-flex w-100">
-              <button class="btn btn-secondary flex-fill {$sort === 'name' ? 'active' : ''}" type="button" on:click="$set({sort: 'name'})">
-                Alphabetical
-              </button>
-              <button class="btn btn-secondary flex-fill {$sort === 'mdate' ? 'active' : ''}" type="button" on:click="$set({sort: 'mdate'})">
-                Newest
-              </button>
-            </div>
-          </div>
-        {/if}
-        {#if $conversations.length}
-          {#each $conversations as conversation (conversation.guid)}
-            <a class="list-group-item list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="openConversation(conversation)">
-              <ConversationSidebar bind:conversation />
-            </a>
-          {/each}
-        {:else}
-          <div class="list-group-item rounded-0 flex-column align-items-start bg-transparent border-0">
-            You have no conversations yet.
-          </div>
-        {/if}
-      </div>
-    </div>
-    <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
-      {#if _loadingConversation}
-        <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
-          <div class="col-auto">
-            <LoadingIndicator width="50px" height="50px" />
-          </div>
+  <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
+    {#if $loadingConversation}
+      <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+        <div class="col-auto">
+          <LoadingIndicator width="50px" height="50px" />
         </div>
-      {:else}
-        <ConversationMain />
-      {/if}
-    </div>
+      </div>
+    {:else}
+      <ConversationContainer />
+    {/if}
   </div>
-{/if}
+</div>
 
 <script>
-  import {Nymph, PubSub} from 'nymph-client';
   import PNotify from 'pnotify/dist/es/PNotify';
   import 'pnotify/dist/es/PNotifyDesktop';
   import Conversation from '../Entities/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
-  import ConversationSidebar from './ConversationSidebar.html';
-  import ConversationMain from './ConversationMain.html';
+  import ConversationList from './Conversations/ConversationList.html';
+  import ConversationContainer from './Conversations/ConversationContainer.html';
   import ErrHandler from '../ErrHandler';
 
   export default {
-    oncreate () {
-      this.store.on('state', ({changed, current, previous}) => {
-        if (changed.user &&
-            current.user &&
-            !current.user.is(previous.user)
-          ) {
-          this.subscribe();
-        }
-
-        if (changed.sort) {
-          const {conversations, sort} = current;
-          if (sort === 'mdate') {
-            Nymph.sort(conversations, sort, null, true);
-          } else if (sort === 'name') {
-            conversations.sort((a, b) => a.getName(current.user).toLowerCase().localeCompare(b.getName(current.user).toLowerCase()));
-          }
-          this.store.set({conversations});
-        }
-
-        if (changed.conversation) {
-          this.set({_loadingConversation: false});
-        }
-      });
-      this.subscribe();
-    },
-
-    ondestroy () {
-      let {_subscription} = this.get();
-      if (_subscription) {
-        _subscription.unsubscribe();
-      }
-    },
-
-    data () {
-      return {
-        _loading: true
-      };
-    },
-
     methods: {
-      subscribe () {
-        let {_subscription} = this.get();
-        if (_subscription) {
-          _subscription.unsubscribe();
-        }
-
-        this.set({_loading: true});
-
-        _subscription = Nymph.getEntities({
-          'class': Conversation.class,
-          'sort': 'mdate'
-        }).subscribe(update => {
-          this.set({_loading: false});
-          if (update) {
-            const {conversations, sort} = this.store.get();
-            if (!Array.isArray(update)) {
-              this.handleNotification(update);
-            }
-            PubSub.updateArray(conversations, update);
-            if (sort === 'mdate') {
-              Nymph.sort(conversations, sort, null, true);
-            } else if (sort === 'name') {
-              conversations.sort((a, b) => a.getName(this.store.get().user).toLowerCase().localeCompare(b.getName(this.store.get().user).toLowerCase()));
-            }
-            this.store.set({conversations});
-          }
-        }, ErrHandler);
-        this.set({_subscription});
-      },
-
-      openConversation (conversation) {
+      navigate (conversation) {
         if (this.store.get().router.lastRouteResolved().url !== '/c/'+conversation.guid) {
-          this.set({_loadingConversation: true});
           this.store.navigate('/c/'+conversation.guid);
         }
       },
 
-      async handleNotification (update) {
+      async notification (update) {
         // Calculate whether the page is hidden.
         let hidden = true;
         if (typeof document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support
@@ -158,7 +52,7 @@
         const conversation = new Conversation();
         conversation.init(update.data);
 
-        if (update.updated && conversation.data.lastMessage) {
+        if (conversation.data.lastMessage) {
           if (conversation.is(this.store.get().conversation) && !hidden) {
             // Don't notify if the user is on the conversation and not hidden.
             return;
@@ -168,10 +62,14 @@
             // Don't notify if the user made the message.
             return;
           }
+          if (conversation.readline >= conversation.data.lastMessage.cdate) {
+            // Don't notify when a user deletes a message (will result in earlier message becoming lastMessage).
+            return;
+          }
           await conversation.data.lastMessage.data.user.ready();
         } else if (update.added) {
           if (this.store.get().user.is(conversation.data.user)) {
-            // Don't notify if the user made the conversation.
+            // Don't notify if the user made a new conversation.
             return;
           }
           await conversation.readyAll(undefined, ErrHandler, 1);
@@ -192,7 +90,7 @@
             }
           });
         }
-        if (update.updated) {
+        if (conversation.data.lastMessage) {
           // Notify the user of a new message.
           notice = PNotify.info(Object.assign({
             title: conversation.data.lastMessage.data.user.data.name
@@ -231,18 +129,18 @@
           }
           if (!conversation.is(this.store.get().conversation)) {
             window.requestAnimationFrame(() => {
-              this.openConversation(conversation);
+              this.navigate(conversation);
             });
           }
           notice.close();
-        })
+        });
       }
     },
 
     components: {
       LoadingIndicator,
-      ConversationSidebar,
-      ConversationMain
+      ConversationList,
+      ConversationContainer
     }
   };
 </script>

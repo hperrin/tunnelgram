@@ -55,16 +55,16 @@
 </div>
 
 <script>
-  import Message from '../Entities/Message';
-  import MessageList from './MessageList.html';
-  import LoadingIndicator from './LoadingIndicator.html';
   import EmojiConvertor from 'emoji-js';
-  import ErrHandler from '../ErrHandler';
   import SimpleMDE from 'simplemde';
   import PNotify from 'pnotify/dist/es/PNotify';
   import aesjs from 'aes-js';
   import base64js from 'base64-js';
   import utf8 from 'utf8';
+  import Message from '../../Entities/Message';
+  import MessageList from '../Messages/MessageList.html';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import ErrHandler from '../../ErrHandler';
 
   const emoji = new EmojiConvertor();
 

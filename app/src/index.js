@@ -73,12 +73,15 @@ store.on('state', ({changed, current}) => {
       conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
     }
 
+    // Refresh conversations' readlines when current conversation changes.
     for (let curConv of conversations) {
       if (curConv != null && conversation != null) {
         if (conversation.guid === curConv.guid && curConv.readline < conversation.readline) {
+          // They are the same entity, but different instances.
           curConv.readline = conversation.readline;
           store.set({conversations});
         } else if (conversation === curConv) {
+          // They are the same instance, so just mark conversations as changed.
           store.set({conversations});
         }
       }
@@ -109,11 +112,13 @@ const conversationHandler = params => {
       break;
     }
   }
+  store.set({loadingConversation: true});
   if (conversation) {
     store.set({
       conversation: conversation,
       view: params.view || 'conversation',
-      convosOut: false
+      convosOut: false,
+      loadingConversation: false
     });
   } else {
     Nymph.getEntity({
@@ -125,9 +130,14 @@ const conversationHandler = params => {
       store.set({
         conversation: conversation,
         view: params.view || 'conversation',
-        convosOut: false
+        convosOut: false,
+        loadingConversation: false
       });
-    }, ErrHandler);
+    }, (err) => {
+      ErrHandler(err);
+      store.set({loadingConversation: false});
+      router.navigate('/');
+    });
   }
 };
 

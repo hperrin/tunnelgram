@@ -44,11 +44,11 @@
 {/if}
 
 <script>
-  import ImageGrid from './ImageGrid.html';
-  import ErrHandler from '../ErrHandler';
   import moment from 'moment';
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
+  import ImageGrid from './ImageGrid.html';
+  import ErrHandler from '../../ErrHandler';
 
   const converter = new showdown.Converter({
     omitExtraWLInCodeBlocks: true,
