@@ -21,7 +21,7 @@
         </div>
       {/if}
       {#each messages as message (message.guid)}
-        <MessageView bind:message on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
+        <MessageView bind:message on:rendered="set({_messagesRendered: _messagesRendered + 1})" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
       {/each}
     </div>
   {/if}
@@ -45,6 +45,8 @@
         _initialReadline: conversation.readline,
         _latestReadline: conversation.readline
       });
+      this.scrollWaitBottom = false;
+      this.scrollWaitReadline = false;
     },
 
     onstate ({changed, current}) {
@@ -53,33 +55,31 @@
         const visibleReadLine = _initialReadline > 0
           && _initialReadline < messages[messages.length - 1].cdate;
         this.set({
-          _showReadline: visibleReadLine,
-          _willScrollToReadLine: visibleReadLine
+          _showReadline: visibleReadLine
         });
+        if (visibleReadLine) {
+          this.scrollWaitReadline = window.setTimeout(() => {
+            this.scrollWaitReadline = false;
+            this.scrollToReadLine();
+          }, 500);
+          window.clearTimeout(this.scrollWaitBottom);
+          this.scrollWaitBottom = false;
+        }
       }
     },
 
     onupdate ({changed, current}) {
-      if (changed._showReadline && current._showReadline) {
-        this.scrollToReadLine();
-      }
-
-      if (changed._loading && !current._loading && !current._willScrollToReadLine) {
+      if ((
+          // Scroll to the bottom when the messages are first loaded.
+          (changed._loading && !current._loading && !this.scrollWaitReadline && !this.scrollWaitBottom) ||
+          // Scroll to the bottom when new messages come in, if the user is at the bottom.
+          (changed.messages && current._isAtBottom && !this.scrollWaitReadline && !this.scrollWaitBottom)
+        )) {
         // Scroll to the bottom when the messages are first loaded.
-        this.scrollToBottom();
-      }
-
-      if (changed.messages && !this.scrollPending && current._isAtBottom) {
-        // Scroll to the bottom when new messages come in, if the user is at the bottom.
-        this.scrollPending = true;
-        window.requestAnimationFrame(() => {
-          this.scrollPending = false;
-          if (this.get()._willScrollToReadLine) {
-            this.set({_willScrollToReadLine: false});
-          } else {
-            this.scrollToBottom();
-          }
-        });
+        this.scrollWaitBottom = window.setTimeout(() => {
+          this.scrollWaitBottom = false;
+          this.scrollToBottom();
+        }, 500);
       }
 
       if (changed._loadingEarlierMessages && !(current._isAtBottom && !changed._loadingEarlierMessages)) {
@@ -91,6 +91,20 @@
         window.requestAnimationFrame(() => {
           this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
         });
+      }
+
+      if (current._messagesRendered >= current.messages.length) {
+        // Perform any scrolls that have been waiting.
+        if (this.scrollWaitReadline) {
+          window.clearTimeout(this.scrollWaitReadline);
+          this.scrollWaitReadline = false;
+          this.scrollToReadLine();
+        }
+        if (this.scrollWaitBottom) {
+          window.clearTimeout(this.scrollWaitBottom);
+          this.scrollWaitBottom = false;
+          this.scrollToBottom();
+        }
       }
     },
 
@@ -107,6 +121,7 @@
 
     data () {
       return {
+        _messagesRendered: 0,
         _isAtBottom: true,
         _showReadline: null,
         _initialReadline: null,
@@ -165,12 +180,16 @@
           this.loadEarlierMessages();
         }
 
-        this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
+        this.setIsAtBottom();
         this.updateReadline();
       },
 
+      setIsAtBottom () {
+        this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
+      },
+
       async loadEarlierMessages () {
-        if (this.get()._loadingEarlierMessages || this.get()._reachedEarliestMessage) {
+        if (this.get()._loadingEarlierMessages || this.get()._reachedEarliestMessage || this.scrollWaitReadline || this.scrollWaitBottom) {
           return;
         }
 
@@ -212,6 +231,9 @@
       updateReadline () {
         // Update readline on next animation frame (so that the DOM can be updated).
         window.requestAnimationFrame(() => {
+          if (!this.refs.messageContainer) {
+            return;
+          }
           const {_latestReadline} = this.get();
           if (_latestReadline !== null) {
             const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
@@ -253,16 +275,16 @@
       scrollToReadLine () {
         const readlineEl = this.refs.container.querySelector('.readline');
         if (readlineEl) {
-          window.requestAnimationFrame(() => {
-            this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.scrollHeight * .2));
-          });
-          this.set({_isAtBottom: false});
+          this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.clientHeight * .5));
+          this.setIsAtBottom();
+          this.updateReadline();
         }
       },
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
         this.set({_isAtBottom: true});
+        this.updateReadline();
       },
 
       removeMessage (message) {

@@ -88,6 +88,7 @@
         if (message.decrypted.text != null) {
           this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
         }
+        this.fire('rendered');
       }
     },
 
