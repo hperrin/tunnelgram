@@ -9,6 +9,7 @@ import utf8 from 'utf8';
 
 class EncryptionService {
   constructor () {
+    const that = this;
     this.storage = window.localStorage;
     this.decryptor = null;
     this.key = null;
@@ -34,8 +35,8 @@ class EncryptionService {
         const publicPromise = PublicKey.current();
         let privateKey = await privatePromise;
         let publicKey = await publicPromise;
-        const keyBytes = aesjs.utils.hex.toBytes(crypt.key);
-        const ivBytes = aesjs.utils.hex.toBytes(crypt.iv);
+        const keyBytes = aesjs.utils.hex.toBytes(this.key);
+        const ivBytes = aesjs.utils.hex.toBytes(this.iv);
         const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
 
         if (privateKey && publicKey) {
@@ -91,8 +92,8 @@ class EncryptionService {
           return;
         }
 
-        crypt.key = null;
-        crypt.iv = null;
+        this.key = null;
+        this.iv = null;
         this.resolve();
       } catch (e) {
         console.log('Error getting private key: ', e);
@@ -101,16 +102,16 @@ class EncryptionService {
 
     // Unload the private key when the user logs out.
     User.on('logout', () => {
-      crypt.unsetUserKeys();
+      this.unsetUserKeys();
     });
 
     const computeNewPassword = password => {
       // Generate a hash of the password.
       const hash = sha512().update(password).digest('hex');
       // The first 32 bytes (64 hex chars) is used as the key for AES, and not sent to the server.
-      crypt.key = hash.substr(0, 64);
+      this.key = hash.substr(0, 64);
       // The next 16 bytes (32 hex chars) is used as the initialization vector for Output Feedback Mode, and not sent to the server.
-      crypt.iv = hash.substr(64, 32);
+      this.iv = hash.substr(64, 32);
       // The rest is used as the new password, and replaces the one the user entered.
       return hash.substr(96);
     };
@@ -125,9 +126,9 @@ class EncryptionService {
       // TODO(hperrin): change these to the B64 equivalents to reduce space after testing.
       const keyPair = new JSEncrypt({log: true});
       const privateKey = keyPair.getPrivateKey();
-      crypt.setUserPrivateKey(privateKey);
+      that.setUserPrivateKey(privateKey);
       const publicKey = keyPair.getPublicKey();
-      crypt.setUserPublicKey(publicKey);
+      that.setUserPublicKey(publicKey);
 
       return _register.call(this, creds);
     };
@@ -141,19 +142,36 @@ class EncryptionService {
       return _loginUser.call(this, creds);
     }
 
-    // TODO(hperrin): Password changes.
+    // Override changePassword to re-encrypt the key and change the password.
+    const _changePassword = User.prototype.changePassword;
+    User.prototype.changePassword = function (creds) {
+      const {password, oldPassword} = creds;
+      // Compute the old password first.
+      creds.oldPassword = computeNewPassword(oldPassword);
+      // Compute the new password second, so that.key and that.iv are current.
+      creds.password = computeNewPassword(password);
+
+      // Re-encrypt the private key.
+      const keyBytes = aesjs.utils.hex.toBytes(that.key);
+      const ivBytes = aesjs.utils.hex.toBytes(that.iv);
+      const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+      const privateKeyString = that.getUserPrivateKey();
+      const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
+      const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
+      const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
+
+      creds.encryptedPrivateKeyString = encryptedPrivateKeyString;
+
+      return _changePassword.call(this, creds);
+    }
   }
 
   setUserPrivateKey (privateKey) {
     this.storage.setItem('esPrivateKey', privateKey);
-    // TODO(hperrin): remove this after testing.
-    console.log('Private Key: ', privateKey);
   }
 
   setUserPublicKey (publicKey) {
     this.storage.setItem('esPublicKey', publicKey);
-    // TODO(hperrin): remove this after testing.
-    console.log('Public Key: ', publicKey);
   }
 
   getUserPrivateKey () {

@@ -156,5 +156,7 @@ User.on('logout', () => {
 // useful for debugging!
 window.store = store;
 window.Nymph = Nymph;
+window.User = User;
+window.Group = Group;
 window.sleepyUserCacheService = sleepyUserCacheService;
 window.sleepyGroupCacheService = sleepyGroupCacheService;

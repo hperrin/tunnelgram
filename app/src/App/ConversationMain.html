@@ -124,6 +124,7 @@
         }
 
         try {
+          // TODO(hperrin): use User.byUsername
           const user = await Nymph.getEntity(
             {'class': User.class},
             {
