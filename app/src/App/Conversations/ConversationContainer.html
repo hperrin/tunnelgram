@@ -124,14 +124,7 @@
         }
 
         try {
-          // TODO(hperrin): use User.byUsername
-          const user = await Nymph.getEntity(
-            {'class': User.class},
-            {
-              'type': '&',
-              'strict': ['username', addUsername]
-            }
-          );
+          const user = await User.byUsername(addUsername);
 
           if (!user) {
             this.set({
