@@ -35,8 +35,8 @@
           </div>
         {/each}
         {#if _imagesLoading}
-          <div class="d-flex justify-content-center align-items-center mr-2 mb-2" style="width: 152px; height: 152px;">
-            <LoadingIndicator width="50px" height="50px" />
+          <div class="d-flex justify-content-center align-items-center text-white mr-2 mb-2" style="width: 152px; height: 152px;">
+            <LoadingIndicator width="50px" height="50px" text="Resizing..." />
           </div>
         {/if}
       </div>
@@ -92,12 +92,15 @@
     return new Promise((resolve, reject) => {
       img.onload = () => {
         // Determine new ratio based on max size.
-        let ratio = 1;
+        let ratioWidth = 1;
+        let ratioHeight = 1;
         if (img.width > maxWidth) {
-          ratio = maxWidth / img.width;
-        } else if (img.height > maxHeight) {
-          ratio = maxHeight / img.height;
+          ratioWidth = maxWidth / img.width;
         }
+        if (img.height > maxHeight) {
+          ratioHeight = maxHeight / img.height;
+        }
+        let ratio = Math.min(ratioWidth, ratioHeight);
 
         // Draw original image in second canvas.
         canvasCopy.width = img.width;
@@ -311,7 +314,7 @@
 
           const reader = new FileReader();
           reader.onload = async e => {
-            let size = 1600;
+            let size = 1400;
             let dataImg;
             let dataMatch;
             let dataType;
@@ -324,7 +327,6 @@
               data = window.atob(dataMatch[2]);
               size -= 200;
             } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
-            // console.log((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3));
             const thumbnailImg = await resizeImage(e.target.result, file.type);
             const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
             const thumbnailType = thumbnailMatch[1];
