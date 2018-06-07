@@ -1,4 +1,4 @@
-<?php namespace Tunnelgram;
+<?php namespace Tunnelwire;
 
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
@@ -24,7 +24,7 @@ class PrivateKey extends \Nymph\Entity {
     if (!Tilmeld::gatekeeper()) {
       return false;
     }
-    $key = Nymph::getEntity(['class' => 'Tunnelgram\PrivateKey'], ['&',
+    $key = Nymph::getEntity(['class' => 'Tunnelwire\PrivateKey'], ['&',
       'ref' => ['user', Tilmeld::$currentUser]
     ]);
     if (!isset($key) || !$key->guid) {

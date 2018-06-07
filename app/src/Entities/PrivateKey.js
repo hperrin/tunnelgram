@@ -18,7 +18,7 @@ export class PrivateKey extends Entity {
 // === Static Properties ===
 
 // The name of the server class
-PrivateKey.class = 'Tunnelgram\\PrivateKey';
+PrivateKey.class = 'Tunnelwire\\PrivateKey';
 
 Nymph.setEntityClass(PrivateKey.class, PrivateKey);
 
