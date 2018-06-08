@@ -58,6 +58,6 @@
     "tilmeld-client": "^1.0.0-beta.19",
     "utf8": "^3.0.0",
     "webpack": "^4.9.1",
-    "webpack-cli": "^2.1.4"
+    "webpack-cli": "^3.0.3"
   }
 }
