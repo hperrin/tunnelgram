@@ -1,0 +1,4 @@
+FROM tunnelgram_fpm
+
+COPY ./app/ /app/
+COPY ./maintenance/ /maintenance/

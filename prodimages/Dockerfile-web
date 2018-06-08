@@ -1,0 +1,4 @@
+FROM nginx:1.13
+
+COPY ./app/ /app/
+COPY ./config/site.conf /etc/nginx/conf.d/default.conf
