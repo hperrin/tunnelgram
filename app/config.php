@@ -22,6 +22,29 @@ $nymphConfig = [
   ]
 ];
 
+if (getenv('MYSQL_CA_CERT')) {
+  $conn = mysqli_init();
+  mysqli_ssl_set(
+      $conn,
+      null,
+      null,
+      getenv('MYSQL_CA_CERT'),
+      null,
+      null
+  );
+  mysqli_real_connect(
+      $conn,
+      $nymphConfig['MySQL']['host'],
+      $nymphConfig['MySQL']['user'],
+      $nymphConfig['MySQL']['password'],
+      $nymphConfig['MySQL']['database'],
+      3306,
+      MYSQLI_CLIENT_SSL,
+      MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+  );
+  $nymphConfig['MySQL']['link'] = $conn;
+}
+
 \Nymph\Nymph::configure($nymphConfig);
 
 // Nymph PubSub's configuration.

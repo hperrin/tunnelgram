@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "85884bbc925ac259b93a27a66b9ea3db",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.61.0",
+            "version": "3.61.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "5dabf378a52afd357fedd290f6b1837aec15eab8"
+                "reference": "82e0865e4d54333a10121ee68f4f496b48f6b51d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5dabf378a52afd357fedd290f6b1837aec15eab8",
-                "reference": "5dabf378a52afd357fedd290f6b1837aec15eab8",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/82e0865e4d54333a10121ee68f4f496b48f6b51d",
+                "reference": "82e0865e4d54333a10121ee68f4f496b48f6b51d",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-06-04T21:48:21+00:00"
+            "time": "2018-06-08T16:08:43+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -509,16 +509,16 @@
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v2.0.12",
+            "version": "v2.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "258c89a6b97de7dfaf5b8c7607d0478e236b04fb"
+                "reference": "10bcb46e8f3d365170f6de9d05245aa066b81f09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/258c89a6b97de7dfaf5b8c7607d0478e236b04fb",
-                "reference": "258c89a6b97de7dfaf5b8c7607d0478e236b04fb",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/10bcb46e8f3d365170f6de9d05245aa066b81f09",
+                "reference": "10bcb46e8f3d365170f6de9d05245aa066b81f09",
                 "shasum": ""
             },
             "require": {
@@ -550,10 +550,11 @@
             "description": "PHP 5.x polyfill for random_bytes() and random_int() from PHP 7",
             "keywords": [
                 "csprng",
+                "polyfill",
                 "pseudorandom",
                 "random"
             ],
-            "time": "2018-04-04T21:24:14+00:00"
+            "time": "2018-06-08T15:26:40+00:00"
         },
         {
             "name": "psr/container",
@@ -1319,16 +1320,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.14",
+            "version": "3.0.0-beta.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8"
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/8caf2469a0b061d7d6ace69ccad545b8422452a8",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/12668e88327b7fbe4cc0f99db077ad63fd453f89",
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89",
                 "shasum": ""
             },
             "require-dev": {
@@ -1369,7 +1370,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-18T00:00:00+00:00"
+            "time": "2018-06-08T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
@@ -1478,16 +1479,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.1.0-BETA2",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6"
+                "reference": "a916c88390fb861ee21f12a92b107d51bb68af99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
-                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/a916c88390fb861ee21f12a92b107d51bb68af99",
+                "reference": "a916c88390fb861ee21f12a92b107d51bb68af99",
                 "shasum": ""
             },
             "require": {
@@ -1528,7 +1529,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-05-16T14:33:22+00:00"
+            "time": "2018-05-25T14:55:38+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1591,16 +1592,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.1.0-BETA2",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "54c81d22ee70981e77763b296b36097a6b669985"
+                "reference": "180b51c66d10f09e562c9ebc395b39aacb2cf8a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/54c81d22ee70981e77763b296b36097a6b669985",
-                "reference": "54c81d22ee70981e77763b296b36097a6b669985",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/180b51c66d10f09e562c9ebc395b39aacb2cf8a2",
+                "reference": "180b51c66d10f09e562c9ebc395b39aacb2cf8a2",
                 "shasum": ""
             },
             "require": {
@@ -1665,7 +1666,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-05-17T10:36:03+00:00"
+            "time": "2018-05-30T07:26:09+00:00"
         },
         {
             "name": "textalk/websocket",
