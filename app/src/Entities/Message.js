@@ -44,7 +44,9 @@ export class Message extends Entity {
             promise () {
               if (!fullSizePromise) {
                 fullSizePromise = new Promise((resolve, reject) => {
-                  window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')).then(response => {
+                  window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+                    mode: 'cors'
+                  }).then(response => {
                     return response.arrayBuffer();
                   }).then(arrayBuffer => {
                     resolve(window.btoa(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key)));
@@ -55,7 +57,9 @@ export class Message extends Entity {
             }
           }
           const thumbnail = new Promise((resolve, reject) => {
-            window.fetch(image.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')).then(response => {
+            window.fetch(image.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+              mode: 'cors'
+            }).then(response => {
               return response.arrayBuffer();
             }).then(arrayBuffer => {
               resolve(window.btoa(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key)));

@@ -5,7 +5,8 @@
     "sciactive/tilmeld-server": "^1.0@beta",
     "respect/validation": "^1.1",
     "aws/aws-sdk-php": "^3.61",
-    "ramsey/uuid": "^3.7"
+    "ramsey/uuid": "^3.7",
+    "microsoft/azure-storage-blob": "^1.1"
   },
   "minimum-stability": "beta"
 }

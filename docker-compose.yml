@@ -98,6 +98,7 @@ services:
       MYSQL_PASSWORD_FILE: /run/secrets/db_password
       PUBSUB_HOST: pubsub:8080
       TILMELD_SECRET_FILE: /run/secrets/tilmeld_secret
+      BLOB_API: s3
       BLOB_HOST: blob:9000
       BLOB_ACCESS_KEY_FILE: /run/secrets/db_blob_access_key
       BLOB_SECRET_KEY_FILE: /run/secrets/db_blob_secret_key

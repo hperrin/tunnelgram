@@ -148,22 +148,19 @@ class Message extends \Nymph\Entity {
 
       // Upload images to blob store.
       if (!isset($this->guid) && count($this->images)) {
-        $s3 = include(__DIR__.'/../../S3Client.php');
+        include(__DIR__.'/../../Blob/BlobClient.php');
+        $client = new BlobClient();
         foreach ($this->images as &$curImg) {
-          $put = $s3->putObject([
-            'ACL' => 'public-read',
-            'Bucket' => 'tunnelgram-thumbnails',
-            'Key' => $curImg['id'],
-            'Body' => base64_decode($curImg['thumbnail'])
-          ]);
-          $curImg['thumbnail'] = $put['ObjectURL'];
-          $put = $s3->putObject([
-            'ACL' => 'public-read',
-            'Bucket' => 'tunnelgram-images',
-            'Key' => $curImg['id'],
-            'Body' => base64_decode($curImg['data'])
-          ]);
-          $curImg['data'] = $put['ObjectURL'];
+          $curImg['thumbnail'] = $client->upload(
+              'tunnelgram-thumbnails',
+              $curImg['id'],
+              base64_decode($curImg['thumbnail'])
+          );
+          $curImg['data'] = $client->upload(
+              'tunnelgram-images',
+              $curImg['id'],
+              base64_decode($curImg['data'])
+          );
         }
         unset($curImg);
       }
