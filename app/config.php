@@ -18,7 +18,7 @@ $nymphConfig = [
     'host' => getenv('MYSQL_HOST'),
     'database' => getenv('MYSQL_DATABASE'),
     'user' => getenv('MYSQL_USER'),
-    'password' => trim(file_get_contents(getenv('MYSQL_PASSWORD_FILE')))
+    'password' => getenv('MYSQL_PASSWORD') ?: trim(file_get_contents(getenv('MYSQL_PASSWORD_FILE')))
   ]
 ];
 
@@ -26,7 +26,7 @@ $nymphConfig = [
 
 // Nymph PubSub's configuration.
 \Nymph\PubSub\Server::configure(
-    ['entries' => ['ws://'.getenv('PUBSUB_HOST').'/']]
+    ['entries' => [(getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/']]
 );
 
 // uMailPHP's configuration.
@@ -50,7 +50,7 @@ $nymphConfig = [
   'pw_recovery' => false,
   'verify_redirect' => 'http://'.$host.'/',
   'jwt_secret' => base64_decode(
-      file_get_contents(getenv('TILMELD_SECRET_FILE'))
+      getenv('TILMELD_SECRET') ?: file_get_contents(getenv('TILMELD_SECRET_FILE'))
   )
 ]);
 
