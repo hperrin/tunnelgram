@@ -1,7 +1,7 @@
 {
-  "name": "nymph-template-app",
-  "version": "0.0.1-alpha.1",
-  "description": "A template app for you to build a Nymph app from.",
+  "name": "tunnelgram",
+  "version": "1.0.0-beta.1",
+  "description": "An encrypted end to end messenger that doesn't suck.",
   "author": "Hunter Perrin <hperrin@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
