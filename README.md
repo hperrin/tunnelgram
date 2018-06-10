@@ -24,7 +24,7 @@ With these two key principals, Tunnelgram can use the Tunnelwire Encryption Sche
 
 ### Upon Registration
 
-1. The client hashes password that the user entered.
+1. The client hashes the password that the user entered.
 2. It removes some bytes from the hash (the first 32 bytes for Tunnelgram). These become an encryption key.
 3. The rest of the bytes are sent to server as the user's password.
 4. The client generates an RSA key pair.
@@ -54,6 +54,19 @@ With these two key principals, Tunnelgram can use the Tunnelwire Encryption Sche
 1. The client retrieves their copy of the encrypted message key.
 2. It uses the user's private key to decrypt the message key.
 3. It uses the message key to decrypt the message.
+
+# Developing for Tunnelgram
+
+If you'd like to work on Tunnelgram, follow these steps to get it up and running on your system:
+
+1. Install [Docker](https://store.docker.com/search?type=edition&offering=community). You also need Docker Compose, which is included in the Community Edition.
+2. Now run these commands:
+  ```sh
+  git clone https://github.com/hperrin/tunnelgram.git
+  cd tunnelgram
+  ./run.sh
+  ```
+3. Go to http://localhost:8080/
 
 # What's Next
 
