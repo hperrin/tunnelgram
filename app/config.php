@@ -67,6 +67,7 @@ if (getenv('MYSQL_CA_CERT')) {
   'app_url' => 'http://'.$host.'/',
   'setup_url' => 'http://'.$host.'/user/',
   'email_usernames' => false,
+  'enable_user_search' => true,
   'user_fields' => ['name', 'phone'],
   'reg_fields' => ['name'],
   'verify_email' => false,
