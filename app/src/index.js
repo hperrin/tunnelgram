@@ -1,3 +1,4 @@
+import XMLHttpRequestWrapper from './Services/XMLHttpRequestWrapper';
 import 'bootstrap';
 import '@fortawesome/fontawesome';
 import '@fortawesome/fontawesome-free-solid';
@@ -8,11 +9,11 @@ import 'pnotify/dist/es/PNotifyButtons';
 import 'pnotify/dist/es/PNotifyDesktop';
 import {Nymph} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
-import {crypt} from './Services/EncryptionService.js';
-import {SleepyCacheService} from './Services/SleepyCacheService.js';
+import {crypt} from './Services/EncryptionService';
+import {SleepyCacheService} from './Services/SleepyCacheService';
 import UserStore from './UserStore';
-import Conversation from './Entities/Conversation.js';
-import Message from './Entities/Message.js';
+import Conversation from './Entities/Conversation';
+import Message from './Entities/Message';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 

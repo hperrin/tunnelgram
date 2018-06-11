@@ -1,6 +1,7 @@
 import {User} from 'tilmeld-client';
 import PrivateKey from '../Entities/PrivateKey';
 import PublicKey from '../Entities/PublicKey';
+import StorageService from './StorageService';
 import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
 import aesjs from 'aes-js';
@@ -10,12 +11,14 @@ import utf8 from 'utf8';
 class EncryptionService {
   constructor () {
     const that = this;
-    this.storage = window.localStorage;
+    this.storage = new StorageService();
     this.decryptor = null;
     this.key = null;
     this.iv = null;
     this.encryptors = {};
     this.userPublicKeys = {};
+    this.userPrivateKey = null;
+    this.userPublicKey = null;
     this.resolve = null;
     this.reject = null;
     this.ready = new Promise((resolve, reject) => {
@@ -24,9 +27,13 @@ class EncryptionService {
     });
     this.decryption = true; // Turning this off causes the decrypt function to just return what it is given.
 
-    if (this.getUserPrivateKey() != null && this.getUserPublicKey() != null) {
-      this.resolve();
-    }
+    (async () => {
+      this.userPrivateKey = await this.getUserPrivateKey();
+      this.userPublicKey = await this.getUserPublicKey();
+      if (this.userPrivateKey != null && this.userPublicKey != null) {
+        this.resolve();
+      }
+    })();
 
     // Load the private key when the user logs in.
     User.on('login', async (user) => {
@@ -48,11 +55,11 @@ class EncryptionService {
           const privateKeyBytes = aesCtr.decrypt(encryptedPrivateKeyBytes);
           const privateKeyString = aesjs.utils.utf8.fromBytes(privateKeyBytes);
 
-          this.setUserPrivateKey(privateKeyString);
+          await this.setUserPrivateKey(privateKeyString);
 
           // And load the public key.
           const publicKeyString = publicKey.get('text');
-          this.setUserPublicKey(publicKeyString);
+          await this.setUserPublicKey(publicKeyString);
 
           // TODO(hperrin): Should I have this for user trust?
           await (new Promise((resolve) => setTimeout(() => resolve(), 1000)));
@@ -61,7 +68,7 @@ class EncryptionService {
           privateKey = new PrivateKey();
 
           // Encrypt the private key.
-          const privateKeyString = this.getUserPrivateKey();
+          const privateKeyString = this.userPrivateKey;
           const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
           const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
           const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
@@ -71,7 +78,7 @@ class EncryptionService {
 
           // And save the public key.
           const publicKey = new PublicKey();
-          const publicKeyString = this.getUserPublicKey();
+          const publicKeyString = this.userPublicKey;
           publicKey.set({text: publicKeyString});
           const publicKeySave = publicKey.save();
 
@@ -118,7 +125,7 @@ class EncryptionService {
 
     // Override register to set up new user encryption.
     const _register = User.prototype.register;
-    User.prototype.register = function (creds) {
+    User.prototype.register = async function (creds) {
       const {password} = creds;
       creds.password = computeNewPassword(password);
 
@@ -126,11 +133,11 @@ class EncryptionService {
       // TODO(hperrin): change these to the B64 equivalents to reduce space after testing.
       const keyPair = new JSEncrypt({log: true});
       const privateKey = keyPair.getPrivateKey();
-      that.setUserPrivateKey(privateKey);
+      await that.setUserPrivateKey(privateKey);
       const publicKey = keyPair.getPublicKey();
-      that.setUserPublicKey(publicKey);
+      await that.setUserPublicKey(publicKey);
 
-      return _register.call(this, creds);
+      return await _register.call(this, creds);
     };
 
     // Override loginUser to retrieve the key and change the password.
@@ -155,7 +162,7 @@ class EncryptionService {
       const keyBytes = aesjs.utils.hex.toBytes(that.key);
       const ivBytes = aesjs.utils.hex.toBytes(that.iv);
       const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
-      const privateKeyString = that.getUserPrivateKey();
+      const privateKeyString = that.userPrivateKey;
       const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
       const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
       const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
@@ -166,25 +173,27 @@ class EncryptionService {
     }
   }
 
-  setUserPrivateKey (privateKey) {
-    this.storage.setItem('esPrivateKey', privateKey);
+  async setUserPrivateKey (privateKey) {
+    this.userPrivateKey = privateKey;
+    await this.storage.setItem('esPrivateKey', privateKey);
   }
 
-  setUserPublicKey (publicKey) {
-    this.storage.setItem('esPublicKey', publicKey);
+  async setUserPublicKey (publicKey) {
+    this.userPublicKey = publicKey;
+    await this.storage.setItem('esPublicKey', publicKey);
   }
 
-  getUserPrivateKey () {
-    return this.storage.getItem('esPrivateKey');
+  async getUserPrivateKey () {
+    return await this.storage.getItem('esPrivateKey');
   }
 
-  getUserPublicKey () {
-    return this.storage.getItem('esPublicKey');
+  async getUserPublicKey () {
+    return await this.storage.getItem('esPublicKey');
   }
 
-  unsetUserKeys () {
-    this.storage.removeItem('esPrivateKey');
-    this.storage.removeItem('esPublicKey');
+  async unsetUserKeys () {
+    await this.storage.removeItem('esPrivateKey');
+    await this.storage.removeItem('esPublicKey');
     this.decryptor = null;
     this.key = null;
     this.iv = null;
@@ -199,7 +208,7 @@ class EncryptionService {
   decryptRSA (text) {
     if (!this.decryptor) {
       this.decryptor = new JSEncrypt();
-      this.decryptor.setPrivateKey(this.getUserPrivateKey());
+      this.decryptor.setPrivateKey(this.userPrivateKey);
     }
     return this.decryptor.decrypt(text);
   }
@@ -207,7 +216,7 @@ class EncryptionService {
   encryptRSA (text, publicKey) {
     let encryptor;
     if (publicKey == null) {
-      publicKey = this.getUserPublicKey();
+      publicKey = this.userPublicKey;
     }
     if (this.encryptors.hasOwnProperty(publicKey)) {
       encryptor = this.encryptors[publicKey];

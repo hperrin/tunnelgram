@@ -35,7 +35,7 @@ With these two key principals, Tunnelgram can use the Tunnelwire Encryption Sche
 
 1. When a user logs in, the client takes steps 1-3 of the registration process.
 2. Now that the user is authenticated with the server, the client downloads their encrypted private key and clear text public key.
-3. It then use the key taken from the password hash to decrypt the private key.
+3. It then uses the key taken from the password hash to decrypt the private key.
 
 * The server never knows their actual password, so it can't decrypt their private key.
 * Therefore, the server also never knows their private key.
@@ -67,6 +67,12 @@ If you'd like to work on Tunnelgram, follow these steps to get it up and running
   ./run.sh
   ```
 3. Go to http://localhost:8080/
+
+To rebuild on file changes, in the `app` directory:
+
+```sh
+npm run watch
+```
 
 # What's Next
 

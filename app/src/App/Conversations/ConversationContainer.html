@@ -112,7 +112,7 @@
           _addUserError: null
         });
 
-        const {addUsername} = this.get();
+        const addUsername = this.get().addUsername.replace(/\\\\/g, '\\\\\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
 
         if (!addUsername || addUsername.match(/^\s+$/)) {
           this.set({
@@ -124,7 +124,12 @@
         }
 
         try {
-          const user = await User.byUsername(addUsername);
+          const user = await Nymph.getEntity({
+            'class': User.class
+          }, {
+            'type': '&',
+            'ilike': ['username', addUsername]
+          });
 
           if (!user) {
             this.set({
