@@ -7,6 +7,10 @@ An end to end encrypted messenger that doesn't suck.
 * Every message is encrypted end to end. There is no way to send an unencrypted message.
 * Users can login on **multiple systems**, read all of their messages, and send new messages. In this way, it works just like any other messenger.
 
+## Support Tunnelgram
+
+[![Become a patron on Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/tunnelgram)
+
 # The Tunnelwire Encryption Scheme
 
 How is Tunnelgram able to show all your messages on any client just like a regular messaging app if it's all end to end encrypted?
