@@ -27,10 +27,16 @@
   import ErrHandler from '../ErrHandler';
 
   export default {
+    oncreate () {
+      PNotify.modules.Desktop.permission();
+    },
+
     methods: {
       navigate (conversation) {
         if (this.store.get().router.lastRouteResolved().url !== '/c/'+conversation.guid) {
           this.store.navigate('/c/'+conversation.guid);
+        } else {
+          this.store.set({convosOut: false});
         }
       },
 

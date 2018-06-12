@@ -22,7 +22,6 @@ import './scss/styles.scss';
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
-PNotify.modules.Desktop.permission();
 
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
