@@ -7,8 +7,7 @@ export default class XMLHttpRequestWrapper {
     return this;
   }
 
-  static parseAndSaveCookieHeader (setCookie) {
-    const token = setCookie.replace(/(?:(?:^|.*;\s*)TILMELDAUTH\s*=\s*([^;]*).*$)|^.*$/, '$1');
+  static parseAndSaveCookieHeader (token) {
     XMLHttpRequestWrapper.setToken(token);
     XMLHttpRequestWrapper.tilmeldAuthToken = token;
     NativeStorage.setItem('tilmeldAuthToken', token);
@@ -41,16 +40,16 @@ export default class XMLHttpRequestWrapper {
     const _onreadystatechange = this.onreadystatechange;
     this.onreadystatechange = (...args) => {
       if (this.readyState === 4) {
-        const setCookie = this.getResponseHeader('Set-Cookie');
-        if (setCookie != null) {
-          XMLHttpRequestWrapper.parseAndSaveCookieHeader(setCookie);
+        const authHeader = this.getResponseHeader('X-TILMELDAUTH');
+        if (authHeader != null) {
+          XMLHttpRequestWrapper.parseAndSaveCookieHeader(authHeader);
         }
       }
       return _onreadystatechange.apply(this, args);
     };
 
     if (XMLHttpRequestWrapper.tilmeldAuthToken != null) {
-      this.xhr.setRequestHeader('Cookie', 'TILMELDAUTH='+XMLHttpRequestWrapper.tilmeldAuthToken);
+      this.xhr.setRequestHeader('X-TILMELDAUTH', XMLHttpRequestWrapper.tilmeldAuthToken);
     }
 
     return this.xhr.send(...args);
@@ -152,7 +151,7 @@ export default class XMLHttpRequestWrapper {
 XMLHttpRequestWrapper.tilmeldAuthToken = null;
 
 // In Cordova, cookies don't persist, so we need to wrap XMLHttpRequest to look
-// for Tilmeld auth cookie and save it.
+// for Tilmeld auth token header and save it.
 if (window.hasOwnProperty('inCordova') && window.inCordova) {
   window.XMLHttpRequest = XMLHttpRequestWrapper;
 }
