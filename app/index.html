@@ -5,6 +5,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="msapplication-TileColor" content="#da532c" />
+  <meta name="theme-color" content="#ffffff" />
+
+  <!-- Open Graph -->
+  <meta property="og:image:width" content="279" />
+  <meta property="og:image:height" content="279" />
+  <meta property="og:description" content="An end to end encrypted messenger that doesn't suck. Encrypted messaging on all your devices." />
+  <meta property="og:title" content="Tunnelgram Messenger" />
+  <meta property="og:url" content="https://tunnelgram.com" />
+  <meta property="og:image" content="https://tunnelgram.com/og-image.jpg" />
+
   <!-- Nymph Config -->
   <script type="text/javascript">
     (function(){
@@ -17,7 +33,7 @@
     })();
     NymphOptions = {
       restURL: '/rest.php',
-      pubsubURL: 'ws://'+window.location.hostname+':8081',
+      pubsubURL: window.location.hostname === 'tunnelgram.com' ? 'wss://pubsub.tunnelgram.com' : 'ws://'+window.location.hostname+':8081',
       rateLimit: 100
     };
   </script>
