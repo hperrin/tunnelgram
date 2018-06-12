@@ -92,9 +92,9 @@
       }
     },
 
-		ondestroy() {
-			clearInterval(this.interval);
-		},
+    ondestroy() {
+      clearInterval(this.interval);
+    },
 
     computed: {
       isOwner: ({message, $user}) => $user.is(message.data.user),

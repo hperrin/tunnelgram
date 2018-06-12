@@ -3,7 +3,7 @@
   <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
     <div class="form-group">
       <label for="name">Name</label>
-      <input type="text" class="form-control" bind:value="$conversation.decrypted.name" id="name" aria-describedby="nameHelp" placeholder="Name">
+      <input type="text" class="form-control" bind:value="name" id="name" aria-describedby="nameHelp" placeholder="Name">
       <small id="nameHelp" class="form-text text-muted">Leave blank to use auto-generated name based on participants.</small>
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
@@ -29,17 +29,29 @@
 
 <script>
   export default {
+    oncreate () {
+      this.set({
+        name: this.store.get().conversation.decrypted.name
+      });
+    },
+
     data () {
-      return {};
+      return {
+        name: ''
+      };
     },
 
     methods: {
       save () {
+        const {name} = this.get();
         const {conversation} = this.store.get();
-        if (conversation.decrypted.name === '') {
+        if (name === '') {
           conversation.decrypted.name = null;
+        } else {
+          conversation.decrypted.name = name;
         }
         conversation.save();
+        this.store.set({conversation});
       },
 
       confirmLeave () {
