@@ -25,3 +25,8 @@ $dark:          #211526;
 
 // Font Awesome
 @import "~@fortawesome/fontawesome/styles.css";
+
+// Prevent pull to refresh
+html, body, main {
+  overscroll-behavior: none;
+}

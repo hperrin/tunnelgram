@@ -1,4 +1,4 @@
-<div style="height: 100%; overflow-y: auto;" ref:container on:scroll="handleScroll()">
+<div style="height: 100%; overflow-y: auto; overscroll-behavior: contain;" ref:container on:scroll="handleScroll()">
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
       <div class="col-auto">
