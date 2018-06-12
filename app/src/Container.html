@@ -22,7 +22,7 @@
   {#if $user !== false}
     <nav ref:navbar class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <span class="navbar-brand d-md-flex d-none align-items-center">
+        <span class="navbar-brand {$user ? 'd-md-flex d-none' : ''} align-items-center">
           <span>{brand}</span>
           <span class="badge badge-warning ml-1" style="font-size: .6em;">beta</span>
         </span>
@@ -82,13 +82,13 @@
   {#if $user === null}
     <div class="container mt-3">
       <div class="row">
-        <div class="col-md-4 order-md-2 d-flex justify-content-center align-items-start">
+        <div class="col-md-4 order-md-2 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
           <TilmeldLogin
             layout="small"
-            classInput="form-control"
-            classSelect="form-control"
-            classTextarea="form-control"
-            classSubmit="btn btn-primary"
+            classInput="form-control w-100"
+            classSelect="form-control w-100"
+            classTextarea="form-control w-100"
+            classSubmit="btn btn-primary w-100"
             classButtonGroup="btn-group d-flex"
             classButton="btn btn-secondary"
             classButtonToggle="flex-grow-1"
@@ -268,3 +268,9 @@
     }
   };
 </script>
+
+<style>
+  ref:loginContainer :global(.login-dialog-container, .login-dialog) {
+    width: 100%;
+  }
+</style>
