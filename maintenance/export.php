@@ -6,7 +6,7 @@ if (php_sapi_name() != "cli") {
 
 set_time_limit(3600);
 
-require '/var/www/html/config.php';
+require '/app/config.php';
 
 $filename = 'entities-export-'.date('c').'.nex';
 
