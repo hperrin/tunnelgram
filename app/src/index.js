@@ -9,6 +9,7 @@ import 'pnotify/dist/es/PNotifyButtons';
 import 'pnotify/dist/es/PNotifyDesktop';
 import {Nymph} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
+import './Services/OfflineServerCallsService';
 import {crypt} from './Services/EncryptionService';
 import {SleepyCacheService} from './Services/SleepyCacheService';
 import UserStore from './UserStore';
@@ -22,6 +23,15 @@ import './scss/styles.scss';
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
+
+if (navigator.serviceWorker && !navigator.serviceWorker.controller) {
+  // Register the caching ServiceWorker
+  navigator.serviceWorker.register('/service-worker.js', {
+    scope: '/'
+  }).then(function(reg) {
+    console.log('Service worker has been registered for scope: '+ reg.scope);
+  });
+}
 
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
