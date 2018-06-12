@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "fc6a0051b4e284d5b7548c1870f39a1a",
@@ -579,16 +579,16 @@
         },
         {
             "name": "react/promise",
-            "version": "v2.5.1",
+            "version": "v2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053"
+                "reference": "5e60e5596a5422287f9d2205f405bef2ae0cef4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/62785ae604c8d69725d693eb370e1d67e94c4053",
-                "reference": "62785ae604c8d69725d693eb370e1d67e94c4053",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/5e60e5596a5422287f9d2205f405bef2ae0cef4b",
+                "reference": "5e60e5596a5422287f9d2205f405bef2ae0cef4b",
                 "shasum": ""
             },
             "require": {
@@ -621,26 +621,26 @@
                 "promise",
                 "promises"
             ],
-            "time": "2017-03-25T12:08:31+00:00"
+            "time": "2018-06-11T11:05:43+00:00"
         },
         {
             "name": "react/promise-timer",
-            "version": "v1.3.0",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise-timer.git",
-                "reference": "604513e33feb96ffb0dfb3d25233d3f9f0dce356"
+                "reference": "c21781145955892900efba366ec236eb66e3ee35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise-timer/zipball/604513e33feb96ffb0dfb3d25233d3f9f0dce356",
-                "reference": "604513e33feb96ffb0dfb3d25233d3f9f0dce356",
+                "url": "https://api.github.com/repos/reactphp/promise-timer/zipball/c21781145955892900efba366ec236eb66e3ee35",
+                "reference": "c21781145955892900efba366ec236eb66e3ee35",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3",
                 "react/event-loop": "^1.0 || ^0.5 || ^0.4 || ^0.3.5",
-                "react/promise": "~2.1|~1.2"
+                "react/promise": "^2.6.0 || ^1.2.1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
@@ -674,20 +674,20 @@
                 "timeout",
                 "timer"
             ],
-            "time": "2018-04-24T14:19:26+00:00"
+            "time": "2018-06-11T14:11:05+00:00"
         },
         {
             "name": "react/socket",
-            "version": "v0.8.11",
+            "version": "v0.8.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/socket.git",
-                "reference": "94e98bb4def7054454784b330e44f73b7f6c160f"
+                "reference": "7f7e6c56ccda7418a1a264892a625f38a5bdee0c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/socket/zipball/94e98bb4def7054454784b330e44f73b7f6c160f",
-                "reference": "94e98bb4def7054454784b330e44f73b7f6c160f",
+                "url": "https://api.github.com/repos/reactphp/socket/zipball/7f7e6c56ccda7418a1a264892a625f38a5bdee0c",
+                "reference": "7f7e6c56ccda7418a1a264892a625f38a5bdee0c",
                 "shasum": ""
             },
             "require": {
@@ -695,8 +695,8 @@
                 "php": ">=5.3.0",
                 "react/dns": "^0.4.13",
                 "react/event-loop": "^1.0 || ^0.5 || ^0.4 || ^0.3.5",
-                "react/promise": "^2.1 || ^1.2",
-                "react/promise-timer": "~1.0",
+                "react/promise": "^2.6.0 || ^1.2.1",
+                "react/promise-timer": "^1.4.0",
                 "react/stream": "^1.0 || ^0.7.1"
             },
             "require-dev": {
@@ -721,7 +721,7 @@
                 "reactphp",
                 "stream"
             ],
-            "time": "2018-04-24T14:07:53+00:00"
+            "time": "2018-06-11T14:33:43+00:00"
         },
         {
             "name": "react/stream",
@@ -771,16 +771,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.16",
+            "version": "1.1.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc"
+                "reference": "700e23777ff6954babf55eed72a286792f594648"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
-                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/700e23777ff6954babf55eed72a286792f594648",
+                "reference": "700e23777ff6954babf55eed72a286792f594648",
                 "shasum": ""
             },
             "require": {
@@ -830,7 +830,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-05-19T14:26:44+00:00"
+            "time": "2018-06-06T12:57:39+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -940,16 +940,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.14",
+            "version": "3.0.0-beta.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8"
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/8caf2469a0b061d7d6ace69ccad545b8422452a8",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/12668e88327b7fbe4cc0f99db077ad63fd453f89",
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89",
                 "shasum": ""
             },
             "require-dev": {
@@ -990,20 +990,20 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-18T00:00:00+00:00"
+            "time": "2018-06-08T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.22",
+            "version": "1.0.0-beta.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "a6e2d58ca7f1c879f954de6d152ee631f16b25fd"
+                "reference": "679dd99d9c29f8aa6d37e24b2b1c0ff4737d70ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/a6e2d58ca7f1c879f954de6d152ee631f16b25fd",
-                "reference": "a6e2d58ca7f1c879f954de6d152ee631f16b25fd",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/679dd99d9c29f8aa6d37e24b2b1c0ff4737d70ef",
+                "reference": "679dd99d9c29f8aa6d37e24b2b1c0ff4737d70ef",
                 "shasum": ""
             },
             "require": {
@@ -1049,7 +1049,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-05-25T00:00:00+00:00"
+            "time": "2018-06-11T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1099,16 +1099,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.1.0-BETA2",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6"
+                "reference": "a916c88390fb861ee21f12a92b107d51bb68af99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
-                "reference": "7e7b3c05ff74dff2f049dc71e74b7f0c7ee1daf6",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/a916c88390fb861ee21f12a92b107d51bb68af99",
+                "reference": "a916c88390fb861ee21f12a92b107d51bb68af99",
                 "shasum": ""
             },
             "require": {
@@ -1149,7 +1149,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-05-16T14:33:22+00:00"
+            "time": "2018-05-25T14:55:38+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1212,16 +1212,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.1.0-BETA2",
+            "version": "v4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "54c81d22ee70981e77763b296b36097a6b669985"
+                "reference": "180b51c66d10f09e562c9ebc395b39aacb2cf8a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/54c81d22ee70981e77763b296b36097a6b669985",
-                "reference": "54c81d22ee70981e77763b296b36097a6b669985",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/180b51c66d10f09e562c9ebc395b39aacb2cf8a2",
+                "reference": "180b51c66d10f09e562c9ebc395b39aacb2cf8a2",
                 "shasum": ""
             },
             "require": {
@@ -1286,7 +1286,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-05-17T10:36:03+00:00"
+            "time": "2018-05-30T07:26:09+00:00"
         },
         {
             "name": "textalk/websocket",
