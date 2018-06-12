@@ -6,7 +6,7 @@ if (php_sapi_name() != "cli") {
 
 set_time_limit(3600);
 
-require '/var/www/html/config.php';
+require '/app/config.php';
 
 $files = glob(__DIR__.'/entities-export-*.nex');
 
