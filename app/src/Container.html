@@ -27,19 +27,22 @@
           <span class="badge badge-warning ml-1" style="font-size: .6em;">beta</span>
         </span>
         {#if $user}
-          <ul class="navbar-nav mr-auto d-lg-none">
+          <ul class="navbar-nav d-lg-none">
             <li class="nav-item">
-              <a class="nav-link border-secondary rounded" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})">
+              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})">
                 <i class="fas fa-comments"></i>
               </a>
             </li>
           </ul>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-text">
+            {name}
+          </span>
+          <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <NavBar></NavBar>
-            <ul class="navbar-nav">
+            <ul class="navbar-nav ml-auto">
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <img
@@ -229,6 +232,10 @@
 
     onupdate () {
       this.updateNavbarHeight();
+    },
+
+    computed: {
+      name: ({$conversation, $user}) => $conversation.getName($user)
     },
 
     data () {

@@ -1,8 +1,5 @@
-<span class="navbar-text mr-auto">
-  {name}
-</span>
 {#if $conversation.guid}
-  <ul class="navbar-nav mr-auto">
+  <ul class="navbar-nav ml-auto mr-auto">
     <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
       <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid)">
         Conversation
@@ -21,11 +18,3 @@
     </li>
   </ul>
 {/if}
-
-<script>
-  export default {
-    computed: {
-      name: ({$conversation, $user}) => $conversation.getName($user)
-    },
-  };
-</script>
