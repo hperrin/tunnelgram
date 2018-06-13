@@ -12,9 +12,11 @@ import {User, Group} from 'tilmeld-client';
 import './Services/OfflineServerCallsService';
 import {crypt} from './Services/EncryptionService';
 import {SleepyCacheService} from './Services/SleepyCacheService';
+import {urlBase64ToUint8Array} from './Services/urlBase64';
 import UserStore from './UserStore';
 import Conversation from './Entities/Conversation';
 import Message from './Entities/Message';
+import WebPushSubscription from './Entities/WebPushSubscription';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 
@@ -23,15 +25,6 @@ import './scss/styles.scss';
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
-
-if (navigator.serviceWorker && !navigator.serviceWorker.controller) {
-  // Register the caching ServiceWorker
-  navigator.serviceWorker.register('/service-worker.js', {
-    scope: '/'
-  }).then(function(reg) {
-    console.log('Service worker has been registered for scope: '+ reg.scope);
-  });
-}
 
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
@@ -49,6 +42,9 @@ const store = new UserStore({
   crypt: crypt,
   disconnected: !navigator.onLine,
   decryption: true,
+  requestNotificationPermission: () => {
+    PNotify.modules.Desktop.permission();
+  },
   beforeInstallPromptEvent: null,
   inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
 });
@@ -110,6 +106,74 @@ store.on('state', ({changed, current}) => {
 
 PubSub.on('connect', () => store.set({disconnected: false}));
 PubSub.on('disconnect', () => store.set({disconnected: true}));
+
+// Register the caching and pushing ServiceWorker
+(async () => {
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+
+  let registration;
+
+  if (navigator.serviceWorker.controller) {
+    registration = await navigator.serviceWorker.getRegistration('/');
+    console.log('Service worker has been retrieved for scope: '+ registration.scope);
+  } else {
+    registration = await navigator.serviceWorker.register('/service-worker.js', {
+      scope: '/'
+    });
+    console.log('Service worker has been registered for scope: '+ registration.scope);
+  }
+
+  // Support for push, notifications, and push payloads.
+  const pushSupport = 'PushManager' in window;
+  const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
+  const payloadSupport = 'getKey' in PushSubscription.prototype;
+
+  if (pushSupport && notificationSupport && payloadSupport) {
+    // Set notification permission asker.
+    store.set({requestNotificationPermission: async () => {
+      const permissionResult = await new Promise(async resolve => {
+        const promise = Notification.requestPermission(value => resolve(value));
+        if (promise) {
+          resolve(await promise);
+        }
+      });
+
+      console.log({permissionResult});
+
+      if (permissionResult === 'denied' || permissionResult === 'default') {
+        return;
+      }
+
+      const subscription = JSON.parse(JSON.stringify(await registration.pushManager.getSubscription().then(async subscription => {
+        if (subscription) {
+          return subscription;
+        }
+
+        const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        });
+      })));
+
+      console.log({subscription});
+
+      const webPushSubscription = new WebPushSubscription();
+      webPushSubscription.set({
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth
+        }
+      });
+      webPushSubscription.save(undefined, ErrHandler);
+    }});
+  }
+})();
 
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt

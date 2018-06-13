@@ -41,4 +41,73 @@ self.addEventListener('fetch', function (event) {
       });
     });
   }));
-})
+});
+
+
+// Web Push Notifications
+
+// function getEndpoint() {
+//   return self.registration.pushManager.getSubscription().then(function (subscription) {
+//     if (subscription) {
+//       return subscription.endpoint;
+//     }
+//
+//     throw new Error('User not subscribed');
+//   });
+// }
+
+function isClientFocused () {
+  return clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  }).then(function (windowClients) {
+    let clientIsFocused = false;
+
+    for (let i = 0; i < windowClients.length; i++) {
+      const windowClient = windowClients[i];
+      if (windowClient.focused) {
+        clientIsFocused = true;
+        break;
+      }
+    }
+
+    return clientIsFocused;
+  });
+}
+
+function sendNotification (body) {
+  const title = 'Tunnelgram';
+
+  return self.registration.showNotification(title, {
+    body,
+  });
+};
+
+self.addEventListener('push', function (event) {
+  if (!(self.Notification && self.Notification.permission === 'granted')) {
+    return;
+  }
+
+  if (event.data) {
+    const promiseChain = isClientFocused().then(function (clientIsFocused) {
+      if (clientIsFocused) {
+        // No need to show a notification.
+        return;
+      }
+
+      const message = event.data.text();
+      return sendNotification(message);
+    })
+    event.waitUntil(promiseChain);
+  }
+
+  // event.waitUntil(getEndpoint().then(function (endpoint) {
+  //   return fetch('./getPayload?endpoint=' + endpoint);
+  // }).then(function (response) {
+  //   return response.text();
+  // }).then(function (payload) {
+  //   self.registration.showNotification('Tunnelgram', {
+  //     body: payload,
+  //   });
+  // }));
+});

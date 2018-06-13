@@ -1,5 +1,7 @@
 <?php namespace Tunnelgram;
 
+use Tilmeld\Tilmeld;
+use Nymph\Nymph;
 use Respect\Validation\Validator as v;
 
 class Conversation extends \Nymph\Entity {
@@ -27,15 +29,15 @@ class Conversation extends \Nymph\Entity {
   public function findMatchingConversations() {
     $acFullRefs = [];
     $acFulls = $this->acFull;
-    if (!\Tilmeld\Tilmeld::$currentUser->inArray($acFulls)) {
-      $acFulls[] = \Tilmeld\Tilmeld::$currentUser;
+    if (!Tilmeld::$currentUser->inArray($acFulls)) {
+      $acFulls[] = Tilmeld::$currentUser;
     }
 
     foreach ($acFulls as $curUser) {
       $acFullRefs[] = ['acFull', $curUser];
     }
 
-    $conversations = \Nymph\Nymph::getEntities([
+    $conversations = Nymph::getEntities([
       'class' => 'Tunnelgram\Conversation'
     ], ['&',
       'ref' => $acFullRefs
@@ -56,30 +58,30 @@ class Conversation extends \Nymph\Entity {
   public function handleDelete() {
     // Delete all the user's messages.
     $this->refresh();
-    $messages = \Nymph\Nymph::getEntities([
+    $messages = Nymph::getEntities([
       'class' => 'Tunnelgram\Message',
       'return' => 'guid'
     ], ['&',
       'ref' => [
         ['conversation', $this],
-        ['user', \Tilmeld\Tilmeld::$currentUser]
+        ['user', Tilmeld::$currentUser]
       ]
     ]);
     foreach ($messages as $guid) {
-      \Nymph\Nymph::deleteEntityById($guid, 'Tunnelgram\Message');
+      Nymph::deleteEntityById($guid, 'Tunnelgram\Message');
     }
     // Delete any readlines.
-    $readlines = \Nymph\Nymph::getEntities([
+    $readlines = Nymph::getEntities([
       'class' => 'Tunnelgram\Readline',
       'return' => 'guid'
     ], ['&',
       'ref' => [
         ['conversation', $this],
-        ['user', \Tilmeld\Tilmeld::$currentUser]
+        ['user', Tilmeld::$currentUser]
       ]
     ]);
     foreach ($readlines as $guid) {
-      \Nymph\Nymph::deleteEntityById($guid, 'Tunnelgram\Readline');
+      Nymph::deleteEntityById($guid, 'Tunnelgram\Readline');
     }
 
     if (count($this->acFull) === 1) {
@@ -88,14 +90,14 @@ class Conversation extends \Nymph\Entity {
     }
 
     // Remove the user from the conversation.
-    $index = \Tilmeld\Tilmeld::$currentUser->arraySearch($this->acFull);
+    $index = Tilmeld::$currentUser->arraySearch($this->acFull);
     if ($index === false) {
       return false;
     }
     unset($this->acFull[$index]);
     $this->acFull = array_values($this->acFull);
 
-    if (\Tilmeld\Tilmeld::$currentUser->is($this->user)) {
+    if (Tilmeld::$currentUser->is($this->user)) {
       $this->user = $this->acFull[0];
       $this->group = $this->acFull[0]->group;
     }
@@ -107,7 +109,7 @@ class Conversation extends \Nymph\Entity {
   public function jsonSerialize($clientClassName = true) {
     $object = parent::jsonSerialize($clientClassName);
 
-    $readline = \Nymph\Nymph::getEntity([
+    $readline = Nymph::getEntity([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
       'ref' => ['conversation', $this]
@@ -122,7 +124,7 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function saveReadline($newReadline) {
-    $readline = \Nymph\Nymph::getEntity([
+    $readline = Nymph::getEntity([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
       'ref' => ['conversation', $this]
@@ -144,14 +146,14 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function save() {
-    if (!\Tilmeld\Tilmeld::gatekeeper()) {
+    if (!Tilmeld::gatekeeper()) {
       // Only allow logged in users to save.
       return false;
     }
 
     if (!$this->guid) {
-      if (!\Tilmeld\Tilmeld::$currentUser->inArray($this->acFull)) {
-        $this->acFull[] = \Tilmeld\Tilmeld::$currentUser;
+      if (!Tilmeld::$currentUser->inArray($this->acFull)) {
+        $this->acFull[] = Tilmeld::$currentUser;
       }
     }
 

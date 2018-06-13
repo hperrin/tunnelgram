@@ -3,6 +3,7 @@
 // You can set this to your own time zone.
 date_default_timezone_set('America/Los_Angeles');
 
+$scheme = (($_SERVER['HTTPS'] ?? 'off') !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
 
 /*
@@ -55,24 +56,24 @@ if (getenv('MYSQL_CA_CERT')) {
 // uMailPHP's configuration.
 \uMailPHP\Mail::configure([
   'site_name' => 'Tunnelgram',
-  'site_link' => 'http://'.$host.'/',
+  'site_link' => $scheme.'://'.$host.'/',
   'master_address' => 'noreply@tunnelgram.com',
   'testing_mode' => true,
-  'testing_email' => 'hperrin@tunnelgram.com', // TODO(hperrin): what should this be?
+  'testing_email' => 'hunter@sciactive.com'
 ]);
 
 
 // Tilmeld's configuration.
 \Tilmeld\Tilmeld::configure([
-  'app_url' => 'http://'.$host.'/',
-  'setup_url' => 'http://'.$host.'/user/',
+  'app_url' => $scheme.'://'.$host.'/',
+  'setup_url' => $scheme.'://'.$host.'/user/',
   'email_usernames' => false,
   'enable_user_search' => true,
   'user_fields' => ['name', 'phone'],
   'reg_fields' => ['name'],
   'verify_email' => false,
   'pw_recovery' => false,
-  'verify_redirect' => 'http://'.$host.'/',
+  'verify_redirect' => $scheme.'://'.$host.'/',
   'jwt_secret' => base64_decode(
       getenv('TILMELD_SECRET') ?: file_get_contents(getenv('TILMELD_SECRET_FILE'))
   )

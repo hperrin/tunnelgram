@@ -6,7 +6,8 @@
     "respect/validation": "^1.1",
     "aws/aws-sdk-php": "^3.61",
     "ramsey/uuid": "^3.7",
-    "microsoft/azure-storage-blob": "^1.1"
+    "microsoft/azure-storage-blob": "^1.1",
+    "minishlink/web-push": "^4.0"
   },
   "minimum-stability": "beta"
 }

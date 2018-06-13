@@ -1,4 +1,6 @@
 import {Nymph, PubSub} from 'nymph-client';
+import {urlBase64ToBase64} from './urlBase64';
+
 const _XMLHttpRequest = window.XMLHttpRequest;
 
 export default class XMLHttpRequestWrapper {
@@ -21,7 +23,7 @@ export default class XMLHttpRequestWrapper {
       }
     } else {
       const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const base64 = urlBase64ToBase64(base64Url);
       const jwt = JSON.parse(atob(base64));
       Nymph.setXsrfToken(jwt.xsrfToken);
       if (PubSub.pubsubURL != null) {

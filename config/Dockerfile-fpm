@@ -1,10 +1,15 @@
 FROM php:7.2-fpm
 
-RUN docker-php-ext-install mysqli
-
-RUN apt-get update && \
+RUN apt-get update -y && \
   apt-get install -y msmtp msmtp-mta && \
-  apt-get clean
+  apt-get install -y libgmp-dev re2c libmhash-dev libmcrypt-dev file && \
+  apt-get clean -y
+
+RUN ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/
+
+RUN docker-php-ext-install mysqli
+RUN docker-php-ext-configure gmp
+RUN docker-php-ext-install gmp
 
 COPY msmtprc /etc/msmtprc
 

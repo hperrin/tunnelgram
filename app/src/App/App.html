@@ -12,10 +12,21 @@
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
       Wanna install Tunnelgram.com to your home screen for an app-like experience?
-      <a href="javascript:void(0)" on:click="set({_hideInstallPrompt: true, _prompt: $beforeInstallPromptEvent.prompt()})">Yeah</a>
+      <a href="javascript:void(0)" on:click="set({_hideInstallPrompt: true, _nothing: $beforeInstallPromptEvent.prompt()})">Yeah</a>
     </div>
 
     <a class="ml-2" href="javascript:void(0)" on:click="set({_hideInstallPrompt: true})">
+      <i class="fas fa-times"></i>
+    </a>
+  </div>
+{:elseif !_hideNotificationPrompt}
+  <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
+    <div>
+      Do you want to get notifications for new messages?
+      <a href="javascript:void(0)" on:click="set({_hideNotificationPrompt: true, _nothing: $requestNotificationPermission.call()})">Yeah</a>
+    </div>
+
+    <a class="ml-2" href="javascript:void(0)" on:click="set({_hideNotificationPrompt: true})">
       <i class="fas fa-times"></i>
     </a>
   </div>
@@ -48,14 +59,13 @@
   import ConversationContainer from './Conversations/ConversationContainer.html';
   import ErrHandler from '../ErrHandler';
 
-  export default {
-    oncreate () {
-      PNotify.modules.Desktop.permission();
-    },
+  const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
 
+  export default {
     data () {
       return {
-        _hideInstallPrompt: false
+        _hideInstallPrompt: false,
+        _hideNotificationPrompt
       };
     },
 
@@ -118,7 +128,7 @@
           Object.assign(options, {
             modules: {
               Desktop: {
-                desktop: true,
+                desktop: Notification.permission === 'granted',
                 icon: false
               }
             }
