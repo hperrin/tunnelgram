@@ -118,6 +118,11 @@ window.addEventListener('beforeinstallprompt', (e) => {
   store.set({beforeInstallPromptEvent: e});
 });
 
+const loader = document.getElementById('initialLoader');
+if (loader) {
+  loader.parentNode.removeChild(loader);
+}
+
 const app = new Container({
   target: document.querySelector('main'),
   data: {
