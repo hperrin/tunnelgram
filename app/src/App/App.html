@@ -8,6 +8,18 @@
     </span>
   </div>
 {/if}
+{#if $beforeInstallPromptEvent && !_hideInstallPrompt}
+  <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
+    <div>
+      Wanna install Tunnelgram.com to your home screen for an app-like experience?
+      <a href="javascript:void(0)" on:click="set({_hideInstallPrompt: true, _prompt: $beforeInstallPromptEvent.prompt()})">Yeah</a>
+    </div>
+
+    <a class="ml-2" href="javascript:void(0)" on:click="set({_hideInstallPrompt: true})">
+      <i class="fas fa-times"></i>
+    </a>
+  </div>
+{/if}
 <div class="d-flex flex-small-row flex-grow-1 position-relative">
   <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" ref:convos>
     <ConversationList
@@ -39,6 +51,12 @@
   export default {
     oncreate () {
       PNotify.modules.Desktop.permission();
+    },
+
+    data () {
+      return {
+        _hideInstallPrompt: false
+      };
     },
 
     methods: {

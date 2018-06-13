@@ -104,7 +104,7 @@
     }
   ],
   "scope": "/",
-  "start_url": "/#!/",
+  "start_url": "/#!/pwa-home",
   "theme_color": "#211526",
   "background_color": "#ffffff",
   "display": "standalone",

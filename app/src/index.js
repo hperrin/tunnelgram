@@ -44,10 +44,13 @@ const store = new UserStore({
   conversation: new Conversation(),
   sort: 'mdate',
   view: 'conversation',
+  convosOut: false,
   router: router,
   crypt: crypt,
   disconnected: !navigator.onLine,
-  decryption: true
+  decryption: true,
+  beforeInstallPromptEvent: null,
+  inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
 });
 
 store.constructor.prototype.navigate = (...args) => {
@@ -108,6 +111,13 @@ store.on('state', ({changed, current}) => {
 PubSub.on('connect', () => store.set({disconnected: false}));
 PubSub.on('disconnect', () => store.set({disconnected: true}));
 
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+  // Stash the event so it can be triggered later.
+  store.set({beforeInstallPromptEvent: e});
+});
+
 const app = new Container({
   target: document.querySelector('main'),
   data: {
@@ -165,6 +175,16 @@ router.on({
       view: 'conversation',
       convosOut: false
     });
+  },
+  'pwa-home': () => {
+    if (store.get().user) {
+      const conversation = new Conversation();
+      store.set({
+        conversation: conversation,
+        view: 'conversation',
+        convosOut: true
+      });
+    }
   },
   '*': () => {
     if (store.get().user) {
