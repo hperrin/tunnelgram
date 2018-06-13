@@ -1,3 +1,13 @@
+{#if $disconnected}
+  <div class="alert alert-warning d-flex justify-content-center align-items-center m-0">
+    Waiting for network...
+    <span class="network-waiting-container">
+      <span class="network-waiting">
+        <i class="fas fa-wifi"></i>
+      </span>
+    </span>
+  </div>
+{/if}
 <div class="d-flex flex-small-row flex-grow-1 position-relative">
   <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" ref:convos>
     <ConversationList
@@ -155,6 +165,47 @@
   @media (min-width: 991.98px) {
     ref:convos {
       max-width: 250px;
+    }
+  }
+
+  .network-waiting-container {
+    display: inline-block;
+    width: auto;
+    height: 100%;
+    margin: 0 0 0 10px;
+    perspective: 1000;
+    backface-visibility: hidden;
+    background: transparent;
+  }
+
+  .network-waiting {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    text-align: center;
+    height: 1.5em;
+    width: 1.5em;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    background: #91B5AA;
+    box-shadow: 0 0 0 0 rgba(#91B5AA, .5);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(.9);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 30px rgba(#91B5AA, 0);
+    }
+    100% {
+      transform: scale(.9);
+      box-shadow: 0 0 0 0 rgba(#91B5AA, 0);
     }
   }
 </style>

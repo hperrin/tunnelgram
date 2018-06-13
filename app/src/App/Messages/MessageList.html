@@ -47,6 +47,22 @@
       });
       this.scrollWaitBottom = false;
       this.scrollWaitReadline = false;
+
+      this.onPubSubConnect = () => {
+        if (this.get()._disconnected) {
+          this.subscribe();
+          const {messages} = this.get();
+          messages.map(m => m.refresh().then(() => this.set({messages})));
+        }
+        this.set({_disconnected: false});
+      };
+
+      this.onPubSubDisconnect = () => {
+        this.set({_disconnected: true});
+      };
+
+      PubSub.on('connect', this.onPubSubConnect);
+      PubSub.on('disconnect', this.onPubSubDisconnect);
     },
 
     onstate ({changed, current}) {
@@ -113,6 +129,9 @@
       if (_subscription) {
         _subscription.unsubscribe();
       }
+
+      PubSub.off('connect', this.onPubSubConnect);
+      PubSub.off('disconnect', this.onPubSubDisconnect);
     },
 
     computed: {
@@ -121,6 +140,7 @@
 
     data () {
       return {
+        _disconnected: false,
         _messagesRendered: 0,
         _isAtBottom: true,
         _showReadline: null,

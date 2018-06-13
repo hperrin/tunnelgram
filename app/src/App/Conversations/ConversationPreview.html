@@ -41,7 +41,7 @@
       this.interval = window.setInterval(this.updateTime.bind(this), 10000);
       this.updateTime();
 
-      this.store.on('state', ({changed}) => {
+      this.storeStateListener = this.store.on('state', ({changed}) => {
         if (changed.conversations && this.get()._readline < this.get().conversation.readline) {
           this.set({
             _unreadCount: this.get().conversation.unreadCount(),
@@ -68,6 +68,7 @@
 
     ondestroy() {
       clearInterval(this.interval);
+      this.storeStateListener.cancel();
     },
 
     data () {

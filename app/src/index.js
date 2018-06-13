@@ -7,7 +7,7 @@ import PNotify from 'pnotify/dist/es/PNotify';
 import 'pnotify/dist/es/PNotifyMobile';
 import 'pnotify/dist/es/PNotifyButtons';
 import 'pnotify/dist/es/PNotifyDesktop';
-import {Nymph} from 'nymph-client';
+import {Nymph, PubSub} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
 import './Services/OfflineServerCallsService';
 import {crypt} from './Services/EncryptionService';
@@ -46,6 +46,7 @@ const store = new UserStore({
   view: 'conversation',
   router: router,
   crypt: crypt,
+  disconnected: !navigator.onLine,
   decryption: true
 });
 
@@ -103,6 +104,9 @@ store.on('state', ({changed, current}) => {
     store.refreshAll();
   }
 });
+
+PubSub.on('connect', () => store.set({disconnected: false}));
+PubSub.on('disconnect', () => store.set({disconnected: true}));
 
 const app = new Container({
   target: document.querySelector('main'),

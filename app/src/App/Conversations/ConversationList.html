@@ -57,7 +57,7 @@
 
   export default {
     oncreate () {
-      this.store.on('state', ({changed, current, previous}) => {
+      this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {
         if (changed.user &&
             current.user &&
             !current.user.is(previous.user)
@@ -75,18 +75,41 @@
           this.store.set({conversations});
         }
       });
+
       this.subscribe();
+
+      this.onPubSubConnect = () => {
+        if (this.get()._disconnected) {
+          this.subscribe();
+          const {conversations} = this.store.get();
+          conversations.map(c => c.refresh().then(() => this.store.set({conversations})));
+        }
+        this.set({_disconnected: false});
+      };
+
+      this.onPubSubDisconnect = () => {
+        this.set({_disconnected: true});
+      };
+
+      PubSub.on('connect', this.onPubSubConnect);
+      PubSub.on('disconnect', this.onPubSubDisconnect);
     },
 
     ondestroy () {
+      this.storeStateListener.cancel();
+
       let {_subscription} = this.get();
       if (_subscription) {
         _subscription.unsubscribe();
       }
+
+      PubSub.off('connect', this.onPubSubConnect);
+      PubSub.off('disconnect', this.onPubSubDisconnect);
     },
 
     data () {
       return {
+        _disconnected: false,
         _loading: true,
         _loadingEarlierConversations: false,
         _reachedEarliestConversation: false
