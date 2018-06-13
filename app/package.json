@@ -16,8 +16,7 @@
   },
   "dependencies": {
     "pform": "^3.3.0",
-    "pnotify": "^4.0.0-alpha.4",
-    "simplemde": "^1.11.2"
+    "pnotify": "^4.0.0-alpha.4"
   },
   "devDependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
