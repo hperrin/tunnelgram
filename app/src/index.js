@@ -143,8 +143,46 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
   if (pushSupport && notificationSupport && payloadSupport) {
     const setupSubscription = async () => {
+      const getSubscription = () => {
+        return navigator.serviceWorker.ready.then(registration => {
+          return registration.pushManager.getSubscription();
+        });
+      };
+
+      const subscribeFromWorker = subscriptionOptions => {
+        return new Promise((resolve, reject) => {
+          if (!navigator.serviceWorker.controller) {
+            reject(new Error('There is no service worker.'));
+            return;
+          }
+
+          navigator.serviceWorker.controller.postMessage({
+            command: 'subscribe',
+            subscriptionOptions: subscriptionOptions
+          });
+
+          const messageListenerFunction = event => {
+            navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
+            switch (event.data.command) {
+              case 'subscribe-success':
+                resolve(getSubscription());
+                break;
+              case 'subscribe-failure':
+                reject(new Error('Subscription failed: ' + event.data.message));
+                break;
+              default:
+                reject(new Error('Invalid command: ' + event.data.command));
+                break;
+            }
+          };
+
+          navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+        });
+      };
+
+
       // See if there is a subscription already.
-      const existingSubscription = await registration.pushManager.getSubscription();
+      const existingSubscription = await getSubscription();
 
       if (existingSubscription) {
         return;
@@ -152,10 +190,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
       // The vapid key from the server.
       const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+      const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
 
       // Make the subscription.
-      const subscription = JSON.parse(JSON.stringify(await registration.pushManager.subscribe({
+      const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey
       })));

@@ -57,6 +57,7 @@
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationList from './Conversations/ConversationList.html';
   import ConversationContainer from './Conversations/ConversationContainer.html';
+  import getCookieValue from '../Services/getCookieValue';
   import ErrHandler from '../ErrHandler';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
@@ -79,6 +80,10 @@
       },
 
       async notification (update) {
+        if (getCookieValue('EXPERIMENT_WEB_PUSH') === 'true') {
+          return;
+        }
+
         // Calculate whether the page is hidden.
         let hidden = true;
         if (typeof document.hidden !== 'undefined') { // Opera 12.10 and Firefox 18 and later support

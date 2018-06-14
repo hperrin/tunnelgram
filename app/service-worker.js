@@ -1,28 +1,70 @@
 // Web push notifications
 
-const pushHandler = function (event) {
+// Portions Copyright 2016 Peter Beverloo. All rights reserved.
+// Use of those portions of this source code is governed by the MIT license.
+
+// Distributes a message to all window clients controlled by the current Service Worker.
+function sendMessageToAllClients(command, message) {
+  clients.matchAll({type: 'window'}).then(function (windowClients) {
+    windowClients.forEach(function (windowClient) {
+      windowClient.postMessage({command: command, message: message || ''});
+    });
+  });
+}
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(clients.claim());
+});
+
+self.addEventListener('message', function (event) {
+  switch (event.data.command) {
+    case 'subscribe':
+      const subscriptionOptions = event.data.subscriptionOptions;
+      if (subscriptionOptions.hasOwnProperty('applicationServerKey')) {
+        subscriptionOptions.applicationServerKey = new Uint8Array(subscriptionOptions.applicationServerKey);
+      }
+
+      registration.pushManager.subscribe(subscriptionOptions).then(function (subscription) {
+        sendMessageToAllClients('subscribe-success');
+      }).catch(function (error) {
+        sendMessageToAllClients('subscribe-failure', '' + error);
+      });
+
+      break;
+
+    case 'unsubscribe':
+      registration.pushManager.getSubscription().then(function (subscription) {
+        if (subscription) {
+          return subscription.unsubscribe();
+        }
+      }).then(function () {
+        sendMessageToAllClients('unsubscribe-success');
+      }).catch(function (error) {
+        sendMessageToAllClients('unsubscribe-failure', '' + error);
+      });
+  }
+});
+
+self.addEventListener('push', function (event) {
   console.log({pushEvent: event});
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     return;
   }
 
+  let message = 'New message.';
   if (event.data) {
-    const promiseChain = isClientFocused().then(function (clientIsFocused) {
-      if (clientIsFocused) {
-        // No need to show a notification.
-        return;
-      }
-
-      const message = event.data.text();
-      return sendNotification(message);
-    })
-    event.waitUntil(promiseChain);
+    message = event.data.text();
   }
-};
-
-self.addEventListener('push', pushHandler);
-self.onpush = pushHandler;
+  const promiseChain = isClientFocused().then(function (clientIsFocused) {
+    if (clientIsFocused) {
+      // No need to show a notification.
+      return;
+    }
+    return sendNotification(message);
+  })
+  event.waitUntil(promiseChain);
+});
 
 
 // Offline copy of pages service worker
@@ -35,6 +77,8 @@ self.addEventListener('install', function (event) {
       console.log('[Content Cache] Cached index page during Install '+ response.url);
       return cache.put(indexPage, response);
     });
+  }).then(function () {
+    return skipWaiting();
   }));
 });
 
@@ -99,6 +143,6 @@ function sendNotification (body) {
     body,
     badge: '/images/badge-96x96.png',
     icon: '/images/web-192x192.png',
-    vibrate: [120,240,120,240,360]
+    vibrate: [120, 240, 120, 240, 360]
   });
 };

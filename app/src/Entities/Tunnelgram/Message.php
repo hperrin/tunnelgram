@@ -90,7 +90,7 @@ class Message extends \Nymph\Entity {
         );
       }
     }
-    $ret = $webPush->flush();
+    $webPush->flush();
   }
 
   public function save() {
