@@ -98,6 +98,10 @@ store.on('state', ({changed, current}) => {
     }
   }
 
+  if (changed.conversations && current.conversations.length === 0) {
+    router.navigate('/c');
+  }
+
   if (changed.decryption) {
     crypt.decryption = current.decryption;
     store.refreshAll();
@@ -264,14 +268,9 @@ router.on({
     });
   },
   'pwa-home': () => {
-    if (store.get().user) {
-      const conversation = new Conversation();
-      store.set({
-        conversation: conversation,
-        view: 'conversation',
-        convosOut: true
-      });
-    }
+    store.set({
+      convosOut: true
+    });
   },
   '*': () => {
     if (store.get().user) {
