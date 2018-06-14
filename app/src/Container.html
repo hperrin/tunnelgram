@@ -169,6 +169,14 @@
               classSubmit="btn btn-primary"
               classButton="btn btn-secondary" />
           </div>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Experiments
+            </button>
+            <div class="dropdown-menu" aria-labelledby="experimentsButton">
+              <a class="dropdown-item" href="javascript:void(0)" on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><input type="checkbox" checked="{EXPERIMENT_WEB_PUSH}" /> Web Push Notifications</a>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal" on:click="saveUser()">Save changes</button>
@@ -184,10 +192,10 @@
   import $ from 'jquery';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import NavBar from './App/NavBar.html';
-  import FrontPage from './App/FrontPage.html'
-  import ErrHandler from './ErrHandler';
-
+  import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
+  import getCookieValue from './Services/getCookieValue';
+  import ErrHandler from './ErrHandler';
 
 
   // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
@@ -243,7 +251,8 @@
         _storageAvailable: storageAvailable('localStorage'),
         _cryptoAvailable: cryptoAvailable(),
         _navbarHeight: 0,
-        clientConfig: {}
+        clientConfig: {},
+        EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
       };
     },
 
@@ -283,6 +292,11 @@
         } else {
           this.store.navigate('/pwa-home');
         }
+      },
+
+      setExperiment (name, value) {
+        document.cookie = `${name}=${value ? 'true' : ''}`;
+        this.set({[name]: value});
       }
     },
 

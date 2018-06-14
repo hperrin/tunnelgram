@@ -9,6 +9,7 @@ class WebPushSubscription extends \Nymph\Entity {
   protected $clientEnabledMethods = [];
   public static $clientEnabledStaticMethods = ['getVapidPublicKey'];
   protected $whitelistData = ['endpoint', 'keys'];
+  protected $protectedData = ['uaString'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
@@ -53,11 +54,15 @@ class WebPushSubscription extends \Nymph\Entity {
         // with the new keys.
         $this->keys = $keys;
       }
+
+      // Save the UA string.
+      $this->uaString = $_SERVER['HTTP_USER_AGENT'] ?? '';
     }
 
     try {
       v::notEmpty()
-        ->attribute('endpoint', v::stringType()->notEmpty()->length(1, 1024))
+      ->attribute('uaString', v::stringType()->notEmpty()->length(0, 1024))
+      ->attribute('endpoint', v::stringType()->notEmpty()->length(1, 1024))
         ->attribute(
             'keys',
             v::arrayVal()->each(

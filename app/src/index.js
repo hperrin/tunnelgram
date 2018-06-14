@@ -13,6 +13,7 @@ import './Services/OfflineServerCallsService';
 import {crypt} from './Services/EncryptionService';
 import {SleepyCacheService} from './Services/SleepyCacheService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
+import getCookieValue from './Services/getCookieValue';
 import UserStore from './UserStore';
 import Conversation from './Entities/Conversation';
 import Message from './Entities/Message';
@@ -135,10 +136,6 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   const payloadSupport = 'getKey' in PushSubscription.prototype;
 
   // TODO(hperrin): Remove this after testing...
-  const getCookieValue = a => {
-    const b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
-    return b ? b.pop() : '';
-  };
   if (getCookieValue('EXPERIMENT_WEB_PUSH') !== 'true') {
     return;
   }
