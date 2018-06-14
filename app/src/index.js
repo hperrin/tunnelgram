@@ -141,7 +141,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   // ... up to here.
 
   if (pushSupport && notificationSupport && payloadSupport) {
-    const setupSubscription = () => {
+    const setupSubscription = async () => {
       // See if there is a subscription already.
       const existingSubscription = await registration.pushManager.getSubscription();
 
