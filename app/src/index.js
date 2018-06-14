@@ -30,7 +30,7 @@ const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
 const sleepyConversationCacheService = new SleepyCacheService(Conversation);
 const sleepyMessageCacheService = new SleepyCacheService(Message);
-const router = new Navigo(null, true, '#!');
+const router = new Navigo(null, true, '#');
 
 const store = new UserStore({
   conversations: [],

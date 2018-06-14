@@ -29,7 +29,7 @@
         {#if $user}
           <ul class="navbar-nav d-lg-none">
             <li class="nav-item">
-              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})">
+              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()">
                 <i class="fas fa-comments"></i>
               </a>
             </li>
@@ -37,7 +37,7 @@
           <span class="navbar-text">
             {name}
           </span>
-          <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" on:click="updateNavbarHeightLots()">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
@@ -254,6 +254,18 @@
         }, ErrHandler);
       },
 
+      updateNavbarHeightLots () {
+        // Damn you, Bootstrap.
+        let countdown = 20;
+        const interval = window.setInterval(() => {
+          this.updateNavbarHeight();
+          countdown--;
+          if (countdown <= 0) {
+            window.clearInterval(interval);
+          }
+        }, 10);
+      },
+
       updateNavbarHeight () {
         let _navbarHeight = 0;
         if (this.refs.navbar) {
@@ -261,6 +273,15 @@
         }
         if (_navbarHeight !== this.get()._navbarHeight) {
           this.set({_navbarHeight});
+        }
+      },
+
+      handleConvoClick () {
+        const {convosOut} = this.store.get();
+        if (convosOut) {
+          window.history.back();
+        } else {
+          this.store.navigate('/pwa-home');
         }
       }
     },
