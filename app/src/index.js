@@ -130,7 +130,47 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
   const payloadSupport = 'getKey' in PushSubscription.prototype;
 
+  // TODO(hperrin): Remove this after testing...
+  const getCookieValue = a => {
+    const b = document.cookie.match('(^|;)\\s*' + a + '\\s*=\\s*([^;]+)');
+    return b ? b.pop() : '';
+  };
+  if (getCookieValue('EXPERIMENT_WEB_PUSH') !== 'true') {
+    return;
+  }
+  // ... up to here.
+
   if (pushSupport && notificationSupport && payloadSupport) {
+    const setupSubscription = () => {
+      // See if there is a subscription already.
+      const existingSubscription = await registration.pushManager.getSubscription();
+
+      if (existingSubscription) {
+        return;
+      }
+
+      // The vapid key from the server.
+      const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+      // Make the subscription.
+      const subscription = JSON.parse(JSON.stringify(await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedVapidKey
+      })));
+
+      // And push it up to the server.
+      const webPushSubscription = new WebPushSubscription();
+      webPushSubscription.set({
+        endpoint: subscription.endpoint,
+        keys: {
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth
+        }
+      });
+      webPushSubscription.save().catch(ErrHandler);
+    };
+
     // Set notification permission asker.
     store.set({requestNotificationPermission: async () => {
       const permissionResult = await new Promise(async resolve => {
@@ -140,38 +180,16 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         }
       });
 
-      console.log({permissionResult});
-
       if (permissionResult === 'denied' || permissionResult === 'default') {
         return;
       }
 
-      const subscription = JSON.parse(JSON.stringify(await registration.pushManager.getSubscription().then(async subscription => {
-        if (subscription) {
-          return subscription;
-        }
-
-        const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-
-        return registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: convertedVapidKey
-        });
-      })));
-
-      console.log({subscription});
-
-      const webPushSubscription = new WebPushSubscription();
-      webPushSubscription.set({
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.keys.p256dh,
-          auth: subscription.keys.auth
-        }
-      });
-      webPushSubscription.save(undefined, ErrHandler);
+      setupSubscription();
     }});
+
+    if (Notification.permission === 'granted') {
+      setupSubscription();
+    }
   }
 })();
 

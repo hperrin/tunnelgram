@@ -86,7 +86,7 @@ class Message extends \Nymph\Entity {
 
         $webPush->sendNotification(
             $subscription,
-            'Hello!'
+            'New message from '.Tilmeld::$currentUser->name.'.'
         );
       }
     }

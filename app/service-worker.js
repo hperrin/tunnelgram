@@ -1,4 +1,31 @@
-// This is the "Offline copy of pages" service worker
+// Web push notifications
+
+const pushHandler = function (event) {
+  console.log({pushEvent: event});
+
+  if (!(self.Notification && self.Notification.permission === 'granted')) {
+    return;
+  }
+
+  if (event.data) {
+    const promiseChain = isClientFocused().then(function (clientIsFocused) {
+      if (clientIsFocused) {
+        // No need to show a notification.
+        return;
+      }
+
+      const message = event.data.text();
+      return sendNotification(message);
+    })
+    event.waitUntil(promiseChain);
+  }
+};
+
+self.addEventListener('push', pushHandler);
+self.onpush = pushHandler;
+
+
+// Offline copy of pages service worker
 
 // Install stage sets up the index page (home page) in the cache and opens a new cache
 self.addEventListener('install', function (event) {
@@ -44,17 +71,7 @@ self.addEventListener('fetch', function (event) {
 });
 
 
-// Web Push Notifications
-
-// function getEndpoint() {
-//   return self.registration.pushManager.getSubscription().then(function (subscription) {
-//     if (subscription) {
-//       return subscription.endpoint;
-//     }
-//
-//     throw new Error('User not subscribed');
-//   });
-// }
+// Utility functions
 
 function isClientFocused () {
   return clients.matchAll({
@@ -80,34 +97,8 @@ function sendNotification (body) {
 
   return self.registration.showNotification(title, {
     body,
+    badge: '/images/badge-96x96.png',
+    icon: '/images/web-192x192.png',
+    vibrate: [120,240,120,240,360]
   });
 };
-
-self.addEventListener('push', function (event) {
-  if (!(self.Notification && self.Notification.permission === 'granted')) {
-    return;
-  }
-
-  if (event.data) {
-    const promiseChain = isClientFocused().then(function (clientIsFocused) {
-      if (clientIsFocused) {
-        // No need to show a notification.
-        return;
-      }
-
-      const message = event.data.text();
-      return sendNotification(message);
-    })
-    event.waitUntil(promiseChain);
-  }
-
-  // event.waitUntil(getEndpoint().then(function (endpoint) {
-  //   return fetch('./getPayload?endpoint=' + endpoint);
-  // }).then(function (response) {
-  //   return response.text();
-  // }).then(function (payload) {
-  //   self.registration.showNotification('Tunnelgram', {
-  //     body: payload,
-  //   });
-  // }));
-});

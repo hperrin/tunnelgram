@@ -235,7 +235,7 @@
     },
 
     computed: {
-      name: ({$conversation, $user}) => $conversation.getName($user)
+      name: ({$conversation, $user}) => $user ? $conversation.getName($user) : ''
     },
 
     data () {
