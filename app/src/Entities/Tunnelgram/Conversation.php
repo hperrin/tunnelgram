@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 class Conversation extends \Nymph\Entity {
   use SendPushNotificationsTrait;
   const ETYPE = 'conversation';
-  protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations'];
+  protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations', 'clearReadline'];
   protected $whitelistData = ['name', 'keys', 'acFull'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -125,6 +125,21 @@ class Conversation extends \Nymph\Entity {
       $object->readline = null;
     }
     return $object;
+  }
+
+  public function clearReadline() {
+    $readlines = Nymph::getEntities([
+      'class' => 'Tunnelgram\Readline'
+    ], ['&',
+      'ref' => [
+        ['user', Tilmeld::$currentUser],
+        ['conversation', $this]
+      ]
+    ]);
+
+    foreach ($readlines as $readline) {
+      $readline->delete();
+    }
   }
 
   public function saveReadline($newReadline) {

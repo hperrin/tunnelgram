@@ -124,6 +124,10 @@ export class Conversation extends Entity {
     return this.serverCall('saveReadline', args);
   }
 
+  clearReadline (...args) {
+    return this.serverCall('clearReadline', args);
+  }
+
   findMatchingConversations(...args) {
     return this.serverCall('findMatchingConversations', args);
   }
