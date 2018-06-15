@@ -5,6 +5,7 @@ use Nymph\Nymph;
 use Respect\Validation\Validator as v;
 
 class Conversation extends \Nymph\Entity {
+  use SendPushNotificationsTrait;
   const ETYPE = 'conversation';
   protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations'];
   protected $whitelistData = ['name', 'keys', 'acFull'];
@@ -124,10 +125,18 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function saveReadline($newReadline) {
+    if (!Tilmeld::$currentUser->inArray($this->acFull)) {
+      // For the admin user.
+      return false;
+    }
+
     $readline = Nymph::getEntity([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
-      'ref' => ['conversation', $this]
+      'ref' => [
+        ['user', Tilmeld::$currentUser],
+        ['conversation', $this]
+      ]
     ]);
 
     if ($readline) {
@@ -151,18 +160,20 @@ class Conversation extends \Nymph\Entity {
       return false;
     }
 
+    $newConversation = false;
     if (!$this->guid) {
+      $newConversation = true;
       if (!Tilmeld::$currentUser->inArray($this->acFull)) {
         $this->acFull[] = Tilmeld::$currentUser;
       }
     }
 
-    try {
-      $recipientGuids = [];
-      foreach ($this->acFull as $user) {
-        $recipientGuids[] = $user->guid;
-      }
+    $recipientGuids = [];
+    foreach ($this->acFull as $user) {
+      $recipientGuids[] = $user->guid;
+    }
 
+    try {
       v::notEmpty()
         ->attribute(
             'keys',
@@ -186,7 +197,17 @@ class Conversation extends \Nymph\Entity {
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
-    return parent::save();
+    $ret = parent::save();
+
+    if ($ret && $newConversation) {
+      // Send push notifications to the recipients after script execution.
+      register_shutdown_function(
+          [$this, 'sendPushNotifications'],
+          $recipientGuids
+      );
+    }
+
+    return $ret;
   }
 
   /*

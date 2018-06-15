@@ -133,7 +133,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   // Support for push, notifications, and push payloads.
   const pushSupport = 'PushManager' in window;
   const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
-  const payloadSupport = 'getKey' in PushSubscription.prototype;
+  // Maybe I'll use these if I can figure out how to get payloads to work.
+  // const payloadSupport = 'getKey' in PushSubscription.prototype;
+  // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
 
   // TODO(hperrin): Remove this after testing...
   if (getCookieValue('EXPERIMENT_WEB_PUSH') !== 'true') {
@@ -141,7 +143,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   }
   // ... up to here.
 
-  if (pushSupport && notificationSupport && payloadSupport) {
+  if (pushSupport && notificationSupport) {
     const setupSubscription = async () => {
       const getSubscription = () => {
         return navigator.serviceWorker.ready.then(registration => {
@@ -309,7 +311,7 @@ router.on({
   },
   '*': () => {
     if (store.get().user) {
-      router.navigate('/c');
+      router.navigate('/pwa-home');
     }
   }
 }).resolve();

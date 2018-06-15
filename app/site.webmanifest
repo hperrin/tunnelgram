@@ -106,7 +106,7 @@
   "scope": "/",
   "start_url": "/#/pwa-home",
   "theme_color": "#211526",
-  "background_color": "#ffffff",
+  "background_color": "#F5F5F2",
   "display": "standalone",
   "lang": "",
   "orientation": "any",

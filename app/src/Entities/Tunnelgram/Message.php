@@ -4,10 +4,9 @@ use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
 use Ramsey\Uuid\Uuid;
-use Minishlink\WebPush\WebPush;
-use Minishlink\WebPush\Subscription;
 
 class Message extends \Nymph\Entity {
+  use SendPushNotificationsTrait;
   const ETYPE = 'message';
   protected $clientEnabledMethods = [];
   protected $whitelistData = [
@@ -55,42 +54,6 @@ class Message extends \Nymph\Entity {
     }
 
     return $object;
-  }
-
-  public function sendPushNotifications($recipientGuids) {
-    $auth = [
-      'VAPID' => [
-        'subject' => Tilmeld::$config['app_url'],
-        'publicKey' => getenv('WEB_PUSH_VAPID_PUBLIC_KEY'),
-        'privateKey' => getenv('WEB_PUSH_VAPID_PRIVATE_KEY')
-      ]
-    ];
-    $webPush = new WebPush($auth);
-    $webPush->setAutomaticPadding(false);
-    foreach ($recipientGuids as $guid) {
-      $webPushSubscriptions = Nymph::getEntities([
-        'class' => 'Tunnelgram\WebPushSubscription',
-        'skip_ac' => true
-      ], ['&',
-        'ref' => ['user', $guid]
-      ]);
-      foreach ($webPushSubscriptions as $webPushSubscription) {
-        $subscription = Subscription::create([
-          'endpoint' => $webPushSubscription->endpoint,
-          'keys' => [
-            'p256dh' => $webPushSubscription->keys['p256dh'],
-            'auth' => $webPushSubscription->keys['auth']
-          ],
-          'contentEncoding' => 'aesgcm'
-        ]);
-
-        $webPush->sendNotification(
-            $subscription,
-            'New message from '.Tilmeld::$currentUser->name.'.'
-        );
-      }
-    }
-    $webPush->flush();
   }
 
   public function save() {
@@ -223,16 +186,17 @@ class Message extends \Nymph\Entity {
     }
     $ret = parent::save();
 
-    $this->conversation->refresh();
-    $this->conversation->lastMessage = $this;
-    $this->conversation->save();
+    if ($ret) {
+      $this->conversation->refresh();
+      $this->conversation->lastMessage = $this;
+      $this->conversation->save();
 
-    // Send push notifications to the recipients after script execution.
-    // register_shutdown_function(
-    //     [$this, 'sendPushNotifications'],
-    //     $recipientGuids
-    // );
-    $this->sendPushNotifications($recipientGuids);
+      // Send push notifications to the recipients after script execution.
+      register_shutdown_function(
+          [$this, 'sendPushNotifications'],
+          $recipientGuids
+      );
+    }
 
     return $ret;
   }

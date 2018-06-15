@@ -61,8 +61,8 @@ class WebPushSubscription extends \Nymph\Entity {
 
     try {
       v::notEmpty()
-      ->attribute('uaString', v::stringType()->notEmpty()->length(0, 1024))
-      ->attribute('endpoint', v::stringType()->notEmpty()->length(1, 1024))
+        ->attribute('uaString', v::stringType()->notEmpty()->length(0, 1024))
+        ->attribute('endpoint', v::stringType()->notEmpty()->length(1, 1024))
         ->attribute(
             'keys',
             v::arrayVal()->each(

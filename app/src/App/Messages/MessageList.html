@@ -88,8 +88,8 @@
       if ((
           // Scroll to the bottom when the messages are first loaded.
           (changed._loading && !current._loading && !this.scrollWaitReadline && !this.scrollWaitBottom) ||
-          // Scroll to the bottom when new messages come in, if the user is at the bottom.
-          (changed.messages && current._isAtBottom && !this.scrollWaitReadline && !this.scrollWaitBottom)
+          // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
+          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline && !this.scrollWaitBottom)
         )) {
         // Scroll to the bottom when the messages are first loaded.
         this.scrollWaitBottom = window.setTimeout(() => {
@@ -249,6 +249,10 @@
       },
 
       updateReadline () {
+        // Don't update the readline if the user doesn't have the page open.
+        if ('hasFocus' in document ? !document.hasFocus() : document.hidden) {
+          return;
+        }
         // Update readline on next animation frame (so that the DOM can be updated).
         window.requestAnimationFrame(() => {
           if (!this.refs.messageContainer) {

@@ -52,18 +52,80 @@ self.addEventListener('push', function (event) {
     return;
   }
 
-  let message = 'New message.';
-  if (event.data) {
-    message = event.data.text();
-  }
   const promiseChain = isClientFocused().then(function (clientIsFocused) {
     if (clientIsFocused) {
       // No need to show a notification.
       return;
     }
-    return sendNotification(message);
-  })
+    return getEndpoint().then(function(endpoint) {
+      return fetch('./user/pull.php', {
+        body: 'endpoint=' + encodeURIComponent(endpoint),
+        cache: 'no-cache',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        method: 'POST'
+      });
+    }).then(function(response) {
+      return response.json();
+    }).then(function(payload) {
+      let promises = payload.data.map(function (entry) {
+        const showNameProp = entry.conversation.data.acFull.length > 2
+          ? 'nameFirst'
+          : 'name';
+        const title = entry.conversation.data.acFull.length === 1
+          ? 'Just You'
+          : (
+              entry.new
+                ? 'New conversation with '
+                : (entry.conversation.data.name == null
+                    ? ''
+                    : 'Conversation with '
+                  )
+            ) + (
+              entry.conversation.data.acFull
+                .filter(function (user) {
+                  return user[1] !== payload.currentUserGuid
+                })
+                .map(function (user) {
+                  return payload.users[user[1]].data[showNameProp];
+                }).join(', ')
+            );
+
+        let users = [];
+        let messageCount = entry.messages.length;
+        entry.messages.map(function (message) {
+          if (users.indexOf(message.data.user[1]) === -1) {
+            users.push(message.data.user[1]);
+          }
+        });
+        users = users.map(function (guid) {
+          return payload.users[guid].data.name;
+        });
+        const message = (
+          messageCount === 0
+            ? payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.'
+            : (messageCount === 1
+                ? 'Message from '
+                : messageCount + ' messages from '
+              )
+        ) + (
+          users.join(', ')
+        ) + '.';
+
+        return sendNotification(title, message, entry.conversation.guid);
+      });
+      return Promise.all(promises);
+    });
+  });
   event.waitUntil(promiseChain);
+});
+
+self.addEventListener('notificationclick', function(event) {
+  const clickedNotification = event.notification;
+  clickedNotification.close();
+
+  event.waitUntil(openConversation(parseFloat(clickedNotification.tag)));
 });
 
 
@@ -117,6 +179,16 @@ self.addEventListener('fetch', function (event) {
 
 // Utility functions
 
+function getEndpoint () {
+  return self.registration.pushManager.getSubscription().then(function (subscription) {
+    if (subscription) {
+      return subscription.endpoint;
+    }
+
+    throw new Error('User not subscribed');
+  });
+}
+
 function isClientFocused () {
   return clients.matchAll({
     type: 'window',
@@ -136,13 +208,38 @@ function isClientFocused () {
   });
 }
 
-function sendNotification (body) {
-  const title = 'Tunnelgram';
-
+function sendNotification (title, body, conversationId) {
   return self.registration.showNotification(title, {
     body,
     badge: '/images/badge-96x96.png',
     icon: '/images/web-192x192.png',
+    renotify: true,
+    tag: '' + conversationId,
     vibrate: [120, 240, 120, 240, 360]
+  });
+};
+
+function openConversation (conversationId) {
+  const urlToOpen = new URL('/#/c/'+conversationId, self.location.origin).href;
+
+  return clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  }).then((windowClients) => {
+    let matchingClient = null;
+
+    for (let i = 0; i < windowClients.length; i++) {
+      const windowClient = windowClients[i];
+      if (windowClient.url === urlToOpen) {
+        matchingClient = windowClient;
+        break;
+      }
+    }
+
+    if (matchingClient) {
+      return matchingClient.focus();
+    } else {
+      return clients.openWindow(urlToOpen);
+    }
   });
 };

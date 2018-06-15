@@ -30,15 +30,15 @@ With these two key principals, Tunnelgram can use the Tunnelwire Encryption Sche
 
 1. The client hashes the password that the user entered.
 2. It removes some bytes from the hash (the first 32 bytes for Tunnelgram). These become an encryption key.
-3. The rest of the bytes are sent to server as the user's password.
+3. The rest of the bytes are sent to the server as the user's password.
 4. The client generates an RSA key pair.
 5. It encrypts the private key with the key it took from the password hash.
 6. It sends the clear text public key and the encrypted private key to server for storage.
 
 ### Upon Login
 
-1. When a user logs in, the client takes steps 1-3 of the registration process.
-2. Now that the user is authenticated with the server, the client downloads their encrypted private key and clear text public key.
+1. When a user logs in, the client completes steps 1-3 of the registration process.
+2. Now that the user is authenticated with the server, the client requests their encrypted private key and clear text public key.
 3. It then uses the key taken from the password hash to decrypt the private key.
 
 * The server never knows their actual password, so it can't decrypt their private key.
@@ -49,7 +49,7 @@ With these two key principals, Tunnelgram can use the Tunnelwire Encryption Sche
 ### Upon Message Send
 
 1. The client downloads the public keys of all of the recipients.
-2. The client generates a random, secure key, and encrypted the clear text message with it.
+2. The client generates a random, secure key, and encrypts the clear text message with it.
 3. The client encrypts the random key with each of the recipients' public keys, and the user's public key.
 4. The client sends the encrypted message, and all of the encrypted copies of the key to the server.
 
