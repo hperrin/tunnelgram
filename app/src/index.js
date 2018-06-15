@@ -87,7 +87,7 @@ store.on('state', ({changed, current}) => {
     // Refresh conversations' readlines when current conversation changes.
     for (let curConv of conversations) {
       if (curConv != null && conversation != null) {
-        if (conversation.guid === curConv.guid && curConv.readline < conversation.readline) {
+        if (conversation.guid === curConv.guid && curConv.readline !== conversation.readline) {
           // They are the same entity, but different instances.
           curConv.readline = conversation.readline;
           store.set({conversations});

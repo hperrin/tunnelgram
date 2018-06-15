@@ -254,7 +254,7 @@
           return;
         }
         // Update readline on next animation frame (so that the DOM can be updated).
-        window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(async () => {
           if (!this.refs.messageContainer) {
             return;
           }
@@ -274,7 +274,7 @@
               if (updateReadline > _latestReadline) {
                 this.set({_latestReadline: updateReadline});
                 const {conversation} = this.store.get();
-                conversation.saveReadline(updateReadline);
+                await conversation.saveReadline(updateReadline);
                 this.store.set({conversation});
               }
             }
@@ -282,7 +282,7 @@
         });
       },
 
-      createNewReadlineIfNeeded () {
+      async createNewReadlineIfNeeded () {
         const {conversation} = this.store.get();
         const {messages} = this.get();
         if (conversation.readline == null && messages.length) {
@@ -291,7 +291,7 @@
             _initialReadline: updateReadline,
             _latestReadline: updateReadline
           });
-          conversation.saveReadline(updateReadline);
+          await conversation.saveReadline(updateReadline);
           this.store.set({conversation});
         }
       },

@@ -113,7 +113,10 @@ class Conversation extends \Nymph\Entity {
     $readline = Nymph::getEntity([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
-      'ref' => ['conversation', $this]
+      'ref' => [
+        ['user', Tilmeld::$currentUser],
+        ['conversation', $this]
+      ]
     ]);
 
     if ($readline) {
