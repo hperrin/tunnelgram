@@ -125,6 +125,8 @@ export class Conversation extends Entity {
   }
 
   clearReadline (...args) {
+    this.readline = null;
+    this.unreadCountPromise = null;
     return this.serverCall('clearReadline', args);
   }
 

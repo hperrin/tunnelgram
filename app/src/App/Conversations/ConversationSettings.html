@@ -67,6 +67,7 @@
         this.set({_clearingReadline: true});
         const {conversation} = this.store.get();
         await conversation.clearReadline();
+        this.store.set({conversation});
         this.set({_clearingReadline: false});
       },
 
