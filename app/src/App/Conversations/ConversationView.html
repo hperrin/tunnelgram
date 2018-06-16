@@ -42,8 +42,10 @@
       </div>
     {/if}
     <div class="d-flex align-items-stretch">
+      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)">
+      <button class="btn btn-lg btn-info" style="width: 60px;" disabled="{_saving}" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{_saving}" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 80px;" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-primary" style="width: 60px;" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
     </div>
   </form>
 </div>
@@ -166,6 +168,10 @@
           this.set({_showDropbox: false});
           this.timeout = null;
         }, 2000);
+      },
+
+      clickFileInput () {
+        this.refs.fileInput.click();
       },
 
       handleDrag (event, _showDropbox) {
