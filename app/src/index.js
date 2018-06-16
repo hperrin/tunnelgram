@@ -13,7 +13,6 @@ import './Services/OfflineServerCallsService';
 import {crypt} from './Services/EncryptionService';
 import {SleepyCacheService} from './Services/SleepyCacheService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
-import getCookieValue from './Services/getCookieValue';
 import UserStore from './UserStore';
 import Conversation from './Entities/Conversation';
 import Message from './Entities/Message';
@@ -47,6 +46,7 @@ const store = new UserStore({
     PNotify.modules.Desktop.permission();
   },
   beforeInstallPromptEvent: null,
+  webPushSubscription: null,
   inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
 });
 
@@ -137,12 +137,6 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   // const payloadSupport = 'getKey' in PushSubscription.prototype;
   // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
 
-  // TODO(hperrin): Remove this after testing...
-  if (getCookieValue('EXPERIMENT_WEB_PUSH') !== 'true') {
-    return;
-  }
-  // ... up to here.
-
   if (pushSupport && notificationSupport) {
     const setupSubscription = async () => {
       const getSubscription = () => {
@@ -187,6 +181,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       const existingSubscription = await getSubscription();
 
       if (existingSubscription) {
+        store.set({webPushSubscription: existingSubscription});
         return;
       }
 
@@ -199,6 +194,8 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey
       })));
+
+      store.set({webPushSubscription: subscription});
 
       // And push it up to the server.
       const webPushSubscription = new WebPushSubscription();

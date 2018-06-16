@@ -174,7 +174,8 @@
               Experiments
             </button>
             <div class="dropdown-menu" aria-labelledby="experimentsButton">
-              <a class="dropdown-item" href="javascript:void(0)" on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><input type="checkbox" checked="{EXPERIMENT_WEB_PUSH}" /> Web Push Notifications</a>
+              <!-- <a class="dropdown-item" href="javascript:void(0)" on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><input type="checkbox" checked="{EXPERIMENT_WEB_PUSH}" /> Web Push Notifications</a> -->
+              <span class="dropdown-item">No experiments right now.</span>
             </div>
           </div>
         </div>
@@ -251,8 +252,8 @@
         _storageAvailable: storageAvailable('localStorage'),
         _cryptoAvailable: cryptoAvailable(),
         _navbarHeight: 0,
-        clientConfig: {},
-        EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
+        clientConfig: {}
+        // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
       };
     },
 

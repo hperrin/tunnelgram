@@ -80,12 +80,13 @@
       },
 
       async notification (update) {
-        if (getCookieValue('EXPERIMENT_WEB_PUSH') === 'true') {
-          return;
-        }
-
         // Calculate whether the page is hidden.
         let hidden = 'hasFocus' in document ? !document.hasFocus() : document.hidden;
+
+        if (hidden && this.store.get().webPushSubscription) {
+          // They will get a push notification.
+          return;
+        }
 
         if (update.deleted || !update.data) {
           return;
