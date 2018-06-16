@@ -136,13 +136,14 @@
 
         message.save().then(() => {
           this.set({_saving: false, text: '', images: []});
-          conversation.saveReadline(message.cdate);
+          conversation.readline = message.cdate;
+          conversation.unreadCountPromise = null;
           this.store.set({conversation});
           this.focus();
-        }, (...args) => {
+        }, (err) => {
           this.set({_saving: false});
           this.focus();
-          ErrHandler(...args);
+          ErrHandler(err);
         });
       },
 

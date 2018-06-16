@@ -93,7 +93,6 @@ self.addEventListener('push', function (event) {
             );
 
         let users = [];
-        let messageCount = entry.messages.length;
         entry.messages.map(function (message) {
           if (users.indexOf(message.data.user[1]) === -1) {
             users.push(message.data.user[1]);
@@ -102,11 +101,14 @@ self.addEventListener('push', function (event) {
         users = users.map(function (guid) {
           return payload.users[guid].data.name;
         });
+        const messageCount = entry.messages.length;
         const message = (
           messageCount === 0
             ? payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.'
             : (messageCount === 1
-                ? 'Message from '
+                ? entry.messages[0].data.images.length
+                  ? 'Photo from '
+                  : 'Message from '
                 : messageCount + ' messages from '
               )
         ) + (

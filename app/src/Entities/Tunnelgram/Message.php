@@ -196,6 +196,9 @@ class Message extends \Nymph\Entity {
           [$this, 'sendPushNotifications'],
           $recipientGuids
       );
+
+      // Update the user's readline.
+      $this->conversation->saveReadline($this->cdate);
     }
 
     return $ret;
