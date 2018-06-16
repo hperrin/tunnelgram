@@ -15,14 +15,16 @@
     "url": "git+https://github.com/hperrin/nymph-template.git"
   },
   "dependencies": {
-    "pform": "^3.3.0",
-    "pnotify": "^4.0.0-alpha.4"
-  },
-  "devDependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
     "@fortawesome/fontawesome-free-regular": "^5.0.13",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "github-markdown-css": "^2.10.0",
+    "pform": "^3.3.0",
+    "photoswipe": "^4.1.2",
+    "pnotify": "^4.0.0-alpha.4"
+  },
+  "devDependencies": {
     "aes-js": "^3.1.1",
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.3",
@@ -37,7 +39,6 @@
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.11",
     "emoji-js": "^3.4.0",
-    "github-markdown-css": "^2.10.0",
     "hash.js": "^1.1.4",
     "html-loader": "^0.5.5",
     "jquery": "^3.3.1",

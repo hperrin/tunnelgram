@@ -15,16 +15,6 @@ $font-size-base: 1.1rem;
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/cosmo/bootswatch";
 
-// PForm
-@import "~pform/css/pform.css";
-@import "~pform/css/pform-bootstrap.css";
-
-// Markdown GitHub Style CSS
-@import "~github-markdown-css";
-
-// Font Awesome
-@import "~@fortawesome/fontawesome/styles.css";
-
 // Prevent pull to refresh
 html, body, main {
   overscroll-behavior: none;
