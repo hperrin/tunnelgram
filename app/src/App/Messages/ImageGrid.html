@@ -13,22 +13,6 @@
     </div>
   {/each}
 </div>
-<!--
-{#if _showBigImage}
-  !-- TODO(hperrin): move this to outside the card so the z-index works --
-  <div ref:bigImageBox class="d-flex justify-content-center align-items-center bg-dark">
-    {#await _promise}
-      <LoadingIndicator width="50px" height="50px" />
-    {:then data}
-      <img src="data:{_image.dataType};base64,{data}" alt="{_image.name}" title="{_image.name}" width="{_image.dataWidth}" style="max-width: 90%; max-height: 90%; width: auto; height: auto;" />
-    {:catch e}
-      <span class="badge badge-warning">error</span>
-    {/await}
-    <button type="button" class="btn btn-lg btn-danger rounded-circle position-absolute" style="opacity: .8; right: 1vw; top: 1vw;" on:click="set({_showBigImage: false})">
-      <i class="fas fa-times text-white"></i>
-    </button>
-  </div>
-{/if} -->
 
 <div ref:photoswipe class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="pswp__bg"></div>
@@ -43,11 +27,7 @@
         <div class="pswp__counter"></div>
 
         <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-        <!-- <button class="pswp__button pswp__button--share" title="Share"></button> -->
-
         <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
         <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
 
         <div class="pswp__preloader">
@@ -64,7 +44,6 @@
       </div>
 
       <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-
       <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
 
       <div class="pswp__caption">
@@ -89,23 +68,10 @@
       }
     },
 
-    data () {
-      return {
-        _showBigImage: false
-      };
-    },
-
     methods: {
       showBigImage (index) {
-        // this.set({
-        //   _showBigImage: true,
-        //   _image,
-        //   _promise: _image.data.promise()
-        // });
+        const pswpElement = this.refs.photoswipe;
 
-        var pswpElement = this.refs.photoswipe;
-
-        // build items array
         let items = this.get().images.map(image => {
           return {
             w: image.dataWidth,
@@ -116,13 +82,12 @@
           };
         });
 
-        // define options (if needed)
         let options = {
           index,
           history: false
         };
 
-        // Initializes and opens PhotoSwipe
+        // Initializes and opens PhotoSwipe.
         const pswp = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
 
         pswp.listen('gettingData', function(index, item) {
@@ -133,9 +98,9 @@
           item._image.data.promise().then(data => {
             const newSrc = `data:${item._image.dataType};base64,${data}`;
             item.src = newSrc;
-            // sets a flag that slides should be updated
+            // Sets a flag that slides should be updated.
             pswp.invalidateCurrItems();
-            // updates the content of slides
+            // Updates the content of slides.
             pswp.updateSize(true);
           });
         });
@@ -153,15 +118,3 @@
     }
   };
 </script>
-
-<!-- <style>
-  ref:bigImageBox {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 10000;
-    width: 100vw;
-    height: 100vh;
-    overflow: auto;
-  }
-</style> -->
