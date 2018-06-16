@@ -1,3 +1,4 @@
+<svelte:window on:resize="handleWindowResize()" />
 <div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto;" ref:container on:scroll="handleScroll()">
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
@@ -202,6 +203,13 @@
 
         this.setIsAtBottom();
         this.updateReadline();
+      },
+
+      handleWindowResize () {
+        // Scroll to the bottom if the user was at the bottom.
+        if (this.get()._isAtBottom) {
+          this.scrollToBottom();
+        }
       },
 
       setIsAtBottom () {
