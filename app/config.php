@@ -19,38 +19,44 @@ $nymphConfig = [
     'host' => getenv('MYSQL_HOST'),
     'database' => getenv('MYSQL_DATABASE'),
     'user' => getenv('MYSQL_USER'),
-    'password' => getenv('MYSQL_PASSWORD') ?: trim(file_get_contents(getenv('MYSQL_PASSWORD_FILE')))
+    'password' => getenv('MYSQL_PASSWORD')
+      ?: trim(file_get_contents(getenv('MYSQL_PASSWORD_FILE')))
   ]
 ];
 
 if (getenv('MYSQL_CA_CERT')) {
-  $conn = mysqli_init();
-  mysqli_ssl_set(
-      $conn,
-      null,
-      null,
-      getenv('MYSQL_CA_CERT'),
-      null,
-      null
-  );
-  mysqli_real_connect(
-      $conn,
-      $nymphConfig['MySQL']['host'],
-      $nymphConfig['MySQL']['user'],
-      $nymphConfig['MySQL']['password'],
-      $nymphConfig['MySQL']['database'],
-      3306,
-      MYSQLI_CLIENT_SSL,
-      MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
-  );
-  $nymphConfig['MySQL']['link'] = $conn;
+  $mysqlConnect = function () use ($nymphConfig) {
+    $conn = mysqli_init();
+    mysqli_ssl_set(
+        $conn,
+        null,
+        null,
+        getenv('MYSQL_CA_CERT'),
+        null,
+        null
+    );
+    mysqli_real_connect(
+        $conn,
+        $nymphConfig['MySQL']['host'],
+        $nymphConfig['MySQL']['user'],
+        $nymphConfig['MySQL']['password'],
+        $nymphConfig['MySQL']['database'],
+        3306,
+        MYSQLI_CLIENT_SSL,
+        MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+    );
+    return $conn;
+  };
+  $nymphConfig['MySQL']['link'] = $mysqlConnect;
 }
 
 \Nymph\Nymph::configure($nymphConfig);
 
 // Nymph PubSub's configuration.
 \Nymph\PubSub\Server::configure(
-    ['entries' => [(getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/']]
+    ['entries' => [
+      (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
+    ]]
 );
 
 // uMailPHP's configuration.
@@ -75,7 +81,8 @@ if (getenv('MYSQL_CA_CERT')) {
   'pw_recovery' => false,
   'verify_redirect' => $scheme.'://'.$host.'/',
   'jwt_secret' => base64_decode(
-      getenv('TILMELD_SECRET') ?: file_get_contents(getenv('TILMELD_SECRET_FILE'))
+      getenv('TILMELD_SECRET')
+        ?: trim(file_get_contents(getenv('TILMELD_SECRET_FILE')))
   )
 ]);
 

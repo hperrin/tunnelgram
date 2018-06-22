@@ -15,3 +15,7 @@ RUN chmod 755 wait-for-it.sh
 
 # Memory Limit
 RUN echo "memory_limit=1024M" > $PHP_INI_DIR/conf.d/memory-limit.ini
+
+# MySQLi Reconnect
+RUN echo "[MySQLi]" > $PHP_INI_DIR/conf.d/mysqli-reconnect.ini
+RUN echo "mysqli.reconnect=on" >> $PHP_INI_DIR/conf.d/mysqli-reconnect.ini

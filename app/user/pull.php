@@ -63,8 +63,6 @@ try {
   $unreadReadlines = array_values(array_filter(
       $readlines,
       function ($readline) use (&$readlineConversationGuids) {
-        // TODO(hperrin): Remove this when sleeping reference waking is fixed.
-        $readline->conversation->refresh();
         if (!isset($readline->conversation)
             || !isset($readline->conversation->lastMessage)
             || !isset($readline->conversation->lastMessage->guid)
@@ -72,8 +70,6 @@ try {
           return false;
         }
         $readlineConversationGuids[] = $readline->conversation->guid;
-        // TODO(hperrin): Remove this when sleeping reference waking is fixed.
-        $readline->conversation->lastMessage->refresh();
 
         return $readline->readline
           < $readline->conversation->lastMessage->cdate;
@@ -83,8 +79,6 @@ try {
   // Get all the conversations and their unread messages.
   $conversations = [];
   $data = array_map(function ($readline) use (&$conversations) {
-    // TODO(hperrin): Remove this when sleeping reference waking is fixed.
-    $readline->conversation->refresh();
     $conversations[] = $readline->conversation;
     return [
       'new' => false,
@@ -125,8 +119,6 @@ try {
   $users = [];
   foreach ($conversations as $conversation) {
     foreach ($conversation->acFull as $user) {
-      // TODO(hperrin): Remove this when sleeping reference waking is fixed.
-      $user->refresh();
       if (!isset($users[$user->guid])) {
         $users[$user->guid] = $user;
       }
