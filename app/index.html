@@ -48,20 +48,6 @@
     };
   </script>
 
-  <!-- PForm -->
-  <link rel="stylesheet" href="/node_modules/pform/css/pform.css" />
-  <link rel="stylesheet" href="/node_modules/pform/css/pform-bootstrap.css" />
-
-  <!-- Markdown GitHub Style CSS -->
-  <link rel="stylesheet" href="/node_modules/github-markdown-css/github-markdown.css" />
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="/node_modules/@fortawesome/fontawesome/styles.css" />
-
-  <!-- PhotoSwipe -->
-  <link rel="stylesheet" href="/node_modules/photoswipe/dist/photoswipe.css" />
-  <link rel="stylesheet" href="/node_modules/photoswipe/dist/default-skin/default-skin.css" />
-
   <!-- Bundled Styles -->
   <link rel="stylesheet" href="/dist/main.css" />
 </head>
@@ -80,6 +66,29 @@
     </svg>
   </div>
   <main class="d-flex flex-column" style="min-height: 100vh;"></main>
+  <!-- Additional Stylesheets (deferred) -->
+  <script type="text/javascript">
+    (function() {
+      function include(href) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.type = 'text/css';
+        var prev = document.getElementsByTagName('link')[0];
+        prev.parentNode.insertBefore(link, prev);
+      }
+      // PForm
+      include('/node_modules/pform/css/pform.css');
+      include('/node_modules/pform/css/pform-bootstrap.css');
+      // Markdown GitHub Style CSS
+      include('/node_modules/github-markdown-css/github-markdown.css');
+      // Font Awesome
+      include('/node_modules/@fortawesome/fontawesome/styles.css');
+      // PhotoSwipe
+      include('/node_modules/photoswipe/dist/photoswipe.css');
+      include('/node_modules/photoswipe/dist/default-skin/default-skin.css');
+    })();
+  </script>
   <!-- Bundled JS -->
   <script src="/dist/bundle.js"></script>
 </body>
