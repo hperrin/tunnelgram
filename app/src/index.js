@@ -187,6 +187,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
       // The vapid key from the server.
       const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+      if (!vapidPublicKey) {
+        return;
+      }
       const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
 
       // Make the subscription.
@@ -227,6 +230,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
     if (Notification.permission === 'granted') {
       setupSubscription();
+
+      User.on('login', () => {
+        setupSubscription();
+      });
     }
   }
 })();
