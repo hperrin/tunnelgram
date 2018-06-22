@@ -60,9 +60,6 @@ class EncryptionService {
           // And load the public key.
           const publicKeyString = publicKey.get('text');
           await this.setUserPublicKey(publicKeyString);
-
-          // TODO(hperrin): Should I have this for user trust?
-          await (new Promise((resolve) => setTimeout(() => resolve(), 1000)));
         } else if (!privateKey && !publicKey) {
           // The user just registered, so save the new private key.
           privateKey = new PrivateKey();
@@ -91,9 +88,6 @@ class EncryptionService {
             console.log('Public Key: ', publicKeyString);
             return;
           }
-
-          // TODO(hperrin): Should I have this for user trust?
-          await (new Promise((resolve) => setTimeout(() => resolve(), 2000)));
         } else {
           this.reject('Server provided inconsistent keys. Please refresh the page.');
           return;
@@ -130,11 +124,10 @@ class EncryptionService {
       creds.password = computeNewPassword(password);
 
       // Generate a Public/Private key pair.
-      // TODO(hperrin): change these to the B64 equivalents to reduce space after testing.
-      const keyPair = new JSEncrypt({log: true});
-      const privateKey = keyPair.getPrivateKey();
+      const keyPair = new JSEncrypt();
+      const privateKey = keyPair.getPrivateKeyB64();
       await that.setUserPrivateKey(privateKey);
-      const publicKey = keyPair.getPublicKey();
+      const publicKey = keyPair.getPublicKeyB64();
       await that.setUserPublicKey(publicKey);
 
       return await _register.call(this, creds);
