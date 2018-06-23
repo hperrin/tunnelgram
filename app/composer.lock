@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.62.1",
+            "version": "3.62.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "2c9b27be62dce8a2b84918229d98f4eeb7f75056"
+                "reference": "8fa68de81738f851e0aa62fbc0a657f2905aa860"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/2c9b27be62dce8a2b84918229d98f4eeb7f75056",
-                "reference": "2c9b27be62dce8a2b84918229d98f4eeb7f75056",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8fa68de81738f851e0aa62fbc0a657f2905aa860",
+                "reference": "8fa68de81738f851e0aa62fbc0a657f2905aa860",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-06-21T23:31:06+00:00"
+            "time": "2018-06-22T22:41:36+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -1612,16 +1612,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.16",
+            "version": "3.0.0-beta.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "59cdc81320036aafb23908c0ae0c8862f931dcca"
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/59cdc81320036aafb23908c0ae0c8862f931dcca",
-                "reference": "59cdc81320036aafb23908c0ae0c8862f931dcca",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/cab5e46d8bcd08f842d4061de9b40f3fd456892b",
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b",
                 "shasum": ""
             },
             "require-dev": {
