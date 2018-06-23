@@ -38,8 +38,13 @@ export class Conversation extends Entity {
 
     // Decrypt the conversation name.
     if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
-      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
-      this.decrypted.name = crypt.decrypt(this.data.name, key);
+      if (this.data.name == null) {
+        delete this.data.keys;
+        this.save();
+      } else {
+        const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+        this.decrypted.name = crypt.decrypt(this.data.name, key);
+      }
     }
 
     this.unreadCountPromise = null;
