@@ -24,7 +24,7 @@
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
             <img src="{image.thumbnailImg}" alt="{image.name}" title="{image.name}" />
             <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})" disabled="{_saving}">
-              <i class="fas fa-times text-white"></i>
+              <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
             <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px;">
               {image.dataWidth}x{image.dataHeight}
