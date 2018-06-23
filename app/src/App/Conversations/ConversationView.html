@@ -18,7 +18,7 @@
     <MessageList />
   </div>
   <form on:submit="newMessage(event.preventDefault())">
-    {#if images.length | _imagesLoading}
+    {#if images.length || _imagesLoading}
       <div class="d-flex flex-wrap justify-content-start align-items-start bg-secondary pt-2 pl-2">
         {#each images as image, i}
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
@@ -43,9 +43,9 @@
     {/if}
     <div class="d-flex align-items-stretch">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)">
-      <button class="btn btn-lg btn-info" style="width: 60px;" disabled="{_saving}" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
+      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" disabled="{_saving}" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{_saving}" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 60px;" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-primary" style="width: 60px;" type="submit" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
     </div>
   </form>
 </div>
