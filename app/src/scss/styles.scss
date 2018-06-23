@@ -19,3 +19,11 @@ $font-size-base: 1.1rem;
 html, body, main {
   overscroll-behavior: none;
 }
+
+// Faded background colors
+.bg-primary-light {
+  background-color: lighten($primary, 60%);
+}
+.bg-info-light {
+  background-color: lighten($info, 30%);
+}

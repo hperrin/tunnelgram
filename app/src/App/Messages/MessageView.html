@@ -13,18 +13,17 @@
       {/if}
     </div>
   {:else}
-    <div class="card mx-3 my-0 position-relative rounded {isOwner ? 'align-self-end border-success bg-success' : 'border-info bg-info'}" style="min-width: 10rem; max-width: 80%;">
-      <div ref:messageBackdrop class="position-absolute h-100 w-100 bg-white rounded"></div>
+    <div class="card mx-3 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;">
       {#if message.decrypted.images.length}
-        <div ref:messageImages class="card-body p-0 m-0">
+        <div class="card-body p-0 m-0">
           <ImageGrid images="{message.decrypted.images}" />
         </div>
       {/if}
-      <div ref:messageContainer class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
+      <div class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
         <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
       </div>
       {#if isOwner}
-        <div ref:messageActions class="card-footer collapse text-right py-1 px-2" id="{message.guid}_actions">
+        <div class="card-footer collapse text-right py-1 px-2" id="{message.guid}_actions">
           <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
         </div>
       {/if}
@@ -152,13 +151,5 @@
     margin-bottom: 0;
     padding-bottom: 0;
     border-bottom: 0;
-  }
-  ref:messageBackdrop {
-    opacity: .8;
-  }
-  ref:messageContainer,
-  ref:messageImages,
-  ref:messageActions {
-    z-index: 1;
   }
 </style>
