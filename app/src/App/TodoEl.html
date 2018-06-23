@@ -73,12 +73,11 @@
 
   export default {
     onstate ({changed, current}) {
-      if (!changed.todo || !current.todo) {
-        return;
-      }
-      const {todo} = current;
-      if (todo.data.user.isASleepingReference) {
-        todo.readyAll(() => this.set({todo}), ErrHandler, 1);
+      if (changed.todo && !changed._todoReady && current.todo) {
+        const {todo} = current;
+        if (todo.data.user.isASleepingReference) {
+          todo.readyAll(() => this.set({todo, _todoReady: null}), ErrHandler, 1);
+        }
       }
     },
 
@@ -117,7 +116,7 @@
       },
 
       save () {
-        this.get().todo.save().then(() => {}, ErrHandler);
+        this.get().todo.save().then(todo => this.set({todo}), ErrHandler);
       }
     }
   };

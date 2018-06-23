@@ -579,16 +579,16 @@
         },
         {
             "name": "react/promise",
-            "version": "v2.6.0",
+            "version": "v2.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise.git",
-                "reference": "5e60e5596a5422287f9d2205f405bef2ae0cef4b"
+                "reference": "f4edc2581617431aea50430749db55cc3fc031b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/5e60e5596a5422287f9d2205f405bef2ae0cef4b",
-                "reference": "5e60e5596a5422287f9d2205f405bef2ae0cef4b",
+                "url": "https://api.github.com/repos/reactphp/promise/zipball/f4edc2581617431aea50430749db55cc3fc031b3",
+                "reference": "f4edc2581617431aea50430749db55cc3fc031b3",
                 "shasum": ""
             },
             "require": {
@@ -621,26 +621,26 @@
                 "promise",
                 "promises"
             ],
-            "time": "2018-06-11T11:05:43+00:00"
+            "time": "2018-06-13T15:59:06+00:00"
         },
         {
             "name": "react/promise-timer",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/promise-timer.git",
-                "reference": "c21781145955892900efba366ec236eb66e3ee35"
+                "reference": "a11206938ca2394dc7bb368f5da25cd4533fa603"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise-timer/zipball/c21781145955892900efba366ec236eb66e3ee35",
-                "reference": "c21781145955892900efba366ec236eb66e3ee35",
+                "url": "https://api.github.com/repos/reactphp/promise-timer/zipball/a11206938ca2394dc7bb368f5da25cd4533fa603",
+                "reference": "a11206938ca2394dc7bb368f5da25cd4533fa603",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3",
                 "react/event-loop": "^1.0 || ^0.5 || ^0.4 || ^0.3.5",
-                "react/promise": "^2.6.0 || ^1.2.1"
+                "react/promise": "^2.7.0 || ^1.2.1"
             },
             "require-dev": {
                 "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
@@ -665,7 +665,7 @@
                 }
             ],
             "description": "A trivial implementation of timeouts for Promises, built on top of ReactPHP.",
-            "homepage": "https://github.com/react/promise-timer",
+            "homepage": "https://github.com/reactphp/promise-timer",
             "keywords": [
                 "async",
                 "event-loop",
@@ -674,7 +674,7 @@
                 "timeout",
                 "timer"
             ],
-            "time": "2018-06-11T14:11:05+00:00"
+            "time": "2018-06-13T16:45:37+00:00"
         },
         {
             "name": "react/socket",
@@ -940,16 +940,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.15",
+            "version": "3.0.0-beta.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89"
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/12668e88327b7fbe4cc0f99db077ad63fd453f89",
-                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/cab5e46d8bcd08f842d4061de9b40f3fd456892b",
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b",
                 "shasum": ""
             },
             "require-dev": {
@@ -990,7 +990,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-06-08T00:00:00+00:00"
+            "time": "2018-06-22T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
