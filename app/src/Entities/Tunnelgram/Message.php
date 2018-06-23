@@ -38,6 +38,15 @@ class Message extends \Nymph\Entity {
       ]);
       $this->conversation->save();
     }
+    // Delete images from blob store.
+    if (count($this->images)) {
+      include(__DIR__.'/../../Blob/BlobClient.php');
+      $client = new BlobClient();
+      foreach ($this->images as $curImg) {
+        $client->delete('tunnelgram-thumbnails', $curImg['id']);
+        $client->delete('tunnelgram-images', $curImg['id']);
+      }
+    }
     return true;
   }
 
