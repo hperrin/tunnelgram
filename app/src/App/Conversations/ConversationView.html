@@ -15,7 +15,7 @@
     </div>
   {/if}
   <div class="flex-grow-1  position-relative">
-    <MessageList />
+    <MessageList bind:pending />
   </div>
   <form on:submit="newMessage(event.preventDefault())">
     {#if images.length || _imagesLoading}
@@ -23,7 +23,7 @@
         {#each images as image, i}
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
             <img src="{image.thumbnailImg}" alt="{image.name}" title="{image.name}" />
-            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})" disabled="{_saving}">
+            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})">
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
             <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px;">
@@ -43,9 +43,9 @@
     {/if}
     <div class="d-flex align-items-stretch">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)">
-      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" disabled="{_saving}" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
-      <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" disabled="{_saving}" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 60px;" type="submit" disabled="{_saving || messageIsEmpty}"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
+      <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
+      <button class="btn btn-lg btn-primary" style="width: 60px;" type="submit" disabled="{messageIsEmpty}"><i class="fas fa-comment"></i></button>
     </div>
   </form>
 </div>
@@ -93,16 +93,16 @@
     data () {
       return {
         _showDropbox: false,
-        _saving: false,
         _imagesLoading: false,
         text: '',
-        images: []
+        images: [],
+        pending: []
       };
     },
 
     methods: {
       handleKeyDown (event) {
-        if (event.keyCode === 13 && !event.shiftKey && !this.get()._saving) {
+        if (event.keyCode === 13 && !event.shiftKey) {
           event.preventDefault();
           this.newMessage();
         }
@@ -121,9 +121,7 @@
           return;
         }
 
-        this.set({_saving: true});
-
-        const {text, images} = this.get();
+        const {text, images, pending} = this.get();
         const {conversation} = this.store.get();
 
         const message = new Message();
@@ -134,17 +132,23 @@
           acRead: [...conversation.data.acFull]
         });
 
+        pending.push(message);
+
         message.save().then(() => {
-          this.set({_saving: false, text: '', images: []});
           conversation.readline = message.cdate;
           conversation.unreadCountPromise = null;
           this.store.set({conversation});
-          this.focus();
+
+          const {pending} = this.get();
+
+          pending.splice(message.arraySearch(pending), 1);
+          this.set({pending});
         }, (err) => {
-          this.set({_saving: false});
-          this.focus();
           ErrHandler(err);
         });
+
+        this.set({pending, text: '', images: []});
+        this.focus();
       },
 
       focus () {
@@ -179,10 +183,6 @@
         event.stopPropagation();
         event.preventDefault();
 
-        if (this.get()._saving) {
-          return;
-        }
-
         this.set({_showDropbox});
       },
 
@@ -190,16 +190,11 @@
         event.stopPropagation();
         event.preventDefault();
 
-        if (this.get()._saving) {
-          return;
-        }
-
         this.set({_showDropbox: false});
         this.handleFiles(event.dataTransfer.files);
       },
 
       handleFiles (files) {
-        console.log(files);
         let imageCount = 0;
         const currentImageCount = this.get().images.length;
         for (var i = 0; i < files.length; i++) {

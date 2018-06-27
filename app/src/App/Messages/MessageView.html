@@ -1,4 +1,4 @@
-<div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}">
+<div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if shouldEmbiggen}
     {#if _showEmbiggenedActions && isOwner}
       <div class="h1 mr-3 my-0" style="font-size: 0;">
@@ -31,7 +31,11 @@
   {/if}
   <small class="text-muted">
     <span>{isOwner ? '' : (message.data.user.data.name || 'Loading...')}{@html isOwner ? '' : '&nbsp;'}</span>
-    <span title="{moment.unix(message.cdate).format('llll')}">{createdDate}</span>
+    {#if pending}
+      <span><i class="fas fa-sync fa-spin"></i></span>
+    {:else}
+      <span title="{moment.unix(message.cdate).format('llll')}">{createdDate}</span>
+    {/if}
   </small>
 </div>
 {#if readLineCDate === message.cdate}
@@ -77,7 +81,7 @@
     onstate ({changed, current, previous}) {
       if (changed.message && current.message) {
         const {message} = current;
-        if (message.data.user.isASleepingReference) {
+        if (!current.pending && message.data.user.isASleepingReference) {
           message.readyAll(() => this.set({message}), ErrHandler, 1);
         }
       }
@@ -87,6 +91,11 @@
         if (message.decrypted.text != null) {
           this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
         }
+      }
+    },
+
+    onupdate ({changed, current, previous}) {
+      if (changed._formattedText || (changed.message && current.shouldEmbiggen)) {
         this.fire('rendered');
       }
     },
@@ -96,7 +105,7 @@
     },
 
     computed: {
-      isOwner: ({message, $user}) => $user.is(message.data.user),
+      isOwner: ({message, pending, $user}) => pending || $user.is(message.data.user),
       cdateJson: ({message}) => JSON.stringify(message.cdate),
       shouldEmbiggen: ({message}) => {
         // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
@@ -117,7 +126,8 @@
         _showEmbiggenedActions: false,
         _formattedText: '',
         message: null,
-        readLineCDate: false
+        readLineCDate: false,
+        pending: false
       };
     },
 

@@ -22,7 +22,10 @@
         </div>
       {/if}
       {#each messages as message (message.guid)}
-        <MessageView bind:message on:rendered="set({_messagesRendered: _messagesRendered + 1})" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
+        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
+      {/each}
+      {#each pending as message}
+        <MessageView bind:message on:rendered="rescrollToBottom()" pending="true"></MessageView>
       {/each}
     </div>
   {/if}
@@ -88,15 +91,14 @@
     onupdate ({changed, current}) {
       if ((
           // Scroll to the bottom when the messages are first loaded.
-          (changed._loading && !current._loading && !this.scrollWaitReadline && !this.scrollWaitBottom) ||
+          (changed._loading && !current._loading && !this.scrollWaitReadline) ||
           // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline && !this.scrollWaitBottom)
+          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline) ||
+          // Scroll to the bottom when the user adds a pending message.
+          (changed.pending && current.pending.length && !this.scrollWaitReadline)
         )) {
         // Scroll to the bottom when the messages are first loaded.
-        this.scrollWaitBottom = window.setTimeout(() => {
-          this.scrollWaitBottom = false;
-          this.scrollToBottom();
-        }, 500);
+        this.scrollToBottom();
       }
 
       if (changed._loadingEarlierMessages && !(current._isAtBottom && !changed._loadingEarlierMessages)) {
@@ -110,18 +112,11 @@
         });
       }
 
-      if (current._messagesRendered >= current.messages.length) {
-        // Perform any scrolls that have been waiting.
-        if (this.scrollWaitReadline) {
-          window.clearTimeout(this.scrollWaitReadline);
-          this.scrollWaitReadline = false;
-          this.scrollToReadLine();
-        }
-        if (this.scrollWaitBottom) {
-          window.clearTimeout(this.scrollWaitBottom);
-          this.scrollWaitBottom = false;
-          this.scrollToBottom();
-        }
+      // Perform any scrolls that have been waiting.
+      if (this.scrollWaitReadline) {
+        window.clearTimeout(this.scrollWaitReadline);
+        this.scrollWaitReadline = false;
+        this.scrollToReadLine();
       }
     },
 
@@ -142,7 +137,6 @@
     data () {
       return {
         _disconnected: false,
-        _messagesRendered: 0,
         _isAtBottom: true,
         _showReadline: null,
         _initialReadline: null,
@@ -150,7 +144,8 @@
         _loadingEarlierMessages: false,
         _reachedEarliestMessage: false,
         _scrollToDistanceFromBottom: null,
-        messages: []
+        messages: [],
+        pending: []
       };
     },
 
@@ -317,6 +312,12 @@
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
         this.set({_isAtBottom: true});
         this.updateReadline();
+      },
+
+      rescrollToBottom () {
+        if (this.get()._isAtBottom) {
+          this.scrollToBottom();
+        }
       },
 
       removeMessage (message) {
