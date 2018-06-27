@@ -181,6 +181,21 @@
             this.set({messages, _loading: false});
             this.createNewReadlineIfNeeded();
             this.handleScroll();
+
+            if (update.added) {
+              // Remove the message from pending messages.
+              const {pending} = this.get();
+              const {user} = this.store.get();
+              const ent = update.data;
+              for (let i = 0; i < pending.length; i++) {
+                const cur = pending[i];
+                if (ent.data.keys[user.guid] === cur.data.keys[user.guid]) {
+                  pending.splice(i, 1);
+                  this.set({pending});
+                  break;
+                }
+              }
+            }
           } else {
             this.set({_loading: false});
           }

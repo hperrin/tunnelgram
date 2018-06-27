@@ -141,8 +141,11 @@
 
           const {pending} = this.get();
 
-          pending.splice(message.arraySearch(pending), 1);
-          this.set({pending});
+          const idx = message.arraySearch(pending);
+          if (idx !== false) {
+            pending.splice(idx, 1);
+            this.set({pending});
+          }
         }, (err) => {
           ErrHandler(err);
         });
