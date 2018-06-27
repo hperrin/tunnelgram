@@ -7,6 +7,7 @@ class Readline extends \Nymph\Entity {
   const ETYPE = 'readline';
   protected $clientEnabledMethods = [];
   public static $clientEnabledStaticMethods = [];
+  protected $protectedData = ['readline', 'conversation'];
   protected $whitelistData = [];
   protected $protectedTags = [];
   protected $whitelistTags = [];

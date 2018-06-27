@@ -17,6 +17,7 @@ import UserStore from './UserStore';
 import Conversation from './Entities/Conversation';
 import Message from './Entities/Message';
 import WebPushSubscription from './Entities/WebPushSubscription';
+import Readline from './Entities/Readline';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 
