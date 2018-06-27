@@ -31,7 +31,7 @@
     </a>
   </div>
 {/if}
-<div class="d-flex flex-small-row flex-grow-1 position-relative">
+<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative">
   <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
