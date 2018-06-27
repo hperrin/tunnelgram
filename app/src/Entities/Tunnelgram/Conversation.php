@@ -148,7 +148,7 @@ class Conversation extends \Nymph\Entity {
       return false;
     }
 
-    $readline = Nymph::getEntity([
+    $readlines = Nymph::getEntities([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
       'ref' => [
@@ -156,6 +156,18 @@ class Conversation extends \Nymph\Entity {
         ['conversation', $this]
       ]
     ]);
+
+    $readline = null;
+    $count = count($readlines);
+    if ($count) {
+      $readline = $readlines[0];
+    }
+    if ($count > 1) {
+      // Only 1 readline per user per conversation.
+      for ($i = 1; $i < $count; $i++) {
+        $readlines[$i]->delete();
+      }
+    }
 
     if ($readline) {
       if ($readline->readline < $newReadline) {
