@@ -86,7 +86,7 @@
         }
       }
 
-      if (changed.message && current.message && (!previous || !previous.message || current.message.decrypted.text != previous.message.decrypted.text)) {
+      if (changed.message && current.message && current.message.decrypted.text != null && current._formattedText === null) {
         const {message} = current;
         if (message.decrypted.text != null) {
           this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
@@ -124,7 +124,7 @@
     data () {
       return {
         _showEmbiggenedActions: false,
-        _formattedText: '',
+        _formattedText: null,
         message: null,
         readLineCDate: false,
         pending: false
