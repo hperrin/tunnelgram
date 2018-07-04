@@ -101,8 +101,6 @@ export class Message extends Entity {
         thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
         thumbnail: crypt.encrypt(image.thumbnail, key)
       }));
-      // console.log(this.decrypted.images.map(img => img.data.length));
-      // console.log(this.data.images.map(img => img.data.length));
     }
 
     const encryptPromises = [];

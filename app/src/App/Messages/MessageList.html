@@ -49,7 +49,7 @@
         _initialReadline: conversation.readline,
         _latestReadline: conversation.readline
       });
-      this.scrollWaitBottom = false;
+      this.scrollWaitBottom = true;
       this.scrollWaitReadline = false;
 
       this.onPubSubConnect = () => {
@@ -82,7 +82,6 @@
             this.scrollWaitReadline = false;
             this.scrollToReadLine();
           }, 500);
-          window.clearTimeout(this.scrollWaitBottom);
           this.scrollWaitBottom = false;
         }
       }
@@ -97,7 +96,7 @@
           // Scroll to the bottom when the user adds a pending message.
           (changed.pending && current.pending.length && !this.scrollWaitReadline)
         )) {
-        // Scroll to the bottom when the messages are first loaded.
+        this.scrollWaitBottom = true;
         this.scrollToBottom();
       }
 
@@ -227,7 +226,8 @@
       },
 
       async loadEarlierMessages () {
-        if (this.get()._loadingEarlierMessages || this.get()._reachedEarliestMessage || this.scrollWaitReadline || this.scrollWaitBottom) {
+        const {_loadingEarlierMessages, _reachedEarliestMessage} = this.get();
+        if (_loadingEarlierMessages || _reachedEarliestMessage || this.scrollWaitReadline || this.scrollWaitBottom) {
           return;
         }
 
@@ -325,6 +325,7 @@
 
       scrollToBottom () {
         this.refs.container.scrollTop = this.refs.container.scrollHeight;
+        this.scrollWaitBottom = false;
         this.set({_isAtBottom: true});
         this.updateReadline();
       },

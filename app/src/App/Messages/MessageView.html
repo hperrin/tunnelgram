@@ -76,6 +76,11 @@
       const updateTime = () => this.set({createdDate: moment(new Date(Math.min(this.get().message.cdate * 1000, new Date()))).fromNow()});
       this.interval = window.setInterval(updateTime, 10000);
       updateTime();
+
+      const {message} = this.get();
+      if (message.decrypted.text != '[Encrypted text]') {
+        this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
+      }
     },
 
     onstate ({changed, current, previous}) {
@@ -86,7 +91,7 @@
         }
       }
 
-      if (changed.message && current.message && current.message.decrypted.text != null && current._formattedText === null) {
+      if (current.message && current.message.decrypted.text != null && current._formattedText === null) {
         const {message} = current;
         if (message.decrypted.text != null) {
           this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
