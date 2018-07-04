@@ -1,0 +1,12 @@
+<div class="d-flex flex-column align-items-center pt-3 mb-3">
+  <h2>People in this Conversation</h2>
+  <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
+    <ul class="list-group mt-3 text-body">
+      {#each $conversation.data.acFull as user (user.guid)}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {user.data.name}{$user.guid === user.guid ? ' (You)' : ''}
+        </li>
+      {/each}
+    </ul>
+  </div>
+</div>

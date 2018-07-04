@@ -2,6 +2,8 @@
   {#if $conversation.guid}
     {#if $view === 'conversation'}
       <ConversationView />
+    {:elseif $view === 'people'}
+      <ConversationPeople />
     {:elseif $view === 'settings'}
       <ConversationSettings />
     {/if}
@@ -11,7 +13,7 @@
       <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
         <div class="d-flex">
           <input type="text" class="form-control mr-3 flex-grow-1" id="username" ref:username placeholder="Username" on:keydown="handleKeyDown(event)" bind:value="addUsername" disabled="{_loadingUser}">
-          <button type="button" class="btn btn-success" on:click="addUser()" disabled="{_loadingUser}">
+          <button type="button" class="btn btn-success" title="Add person" on:click="addUser()" disabled="{_loadingUser}">
             <i class="fas fa-plus"></i>
           </button>
         </div>
@@ -66,6 +68,7 @@
   import {User} from 'tilmeld-client';
   import moment from 'moment';
   import ConversationView from './ConversationView.html';
+  import ConversationPeople from './ConversationPeople.html';
   import ConversationSettings from './ConversationSettings.html';
   import ErrHandler from '../../ErrHandler';
 
@@ -190,6 +193,7 @@
 
     components: {
       ConversationView,
+      ConversationPeople,
       ConversationSettings
     },
 
