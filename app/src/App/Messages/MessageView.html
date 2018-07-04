@@ -20,7 +20,9 @@
         </div>
       {/if}
       <div class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
-        <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
+        {#if _formattedText != null}
+          <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
+        {/if}
       </div>
       {#if isOwner}
         <div class="card-footer collapse text-right py-1 px-2" id="{message.guid}_actions">
