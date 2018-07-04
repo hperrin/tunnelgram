@@ -81,7 +81,8 @@
 
       const {message} = this.get();
       if (message.decrypted.text != '[Encrypted text]') {
-        this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
+        const html = converter.makeHtml(message.decrypted.text);
+        this.set({_formattedText: html == null ? null : html.replace(/\n$/, '')});
       }
     },
 
