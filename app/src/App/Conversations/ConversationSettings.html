@@ -15,7 +15,7 @@
       keep getting notified of new messages here, even though you've seen them
       all.
     </div>
-    <button type="button" class="btn btn-info" on:click="clearReadline()">Clear my Readline</button>
+    <button type="button" class="btn btn-info" on:click="clearReadline()" disabled="{_clearingReadline}">Clear my Readline</button>
   </div>
   <hr />
   {#if !_confirmLeave}
@@ -24,7 +24,7 @@
         If you leave a conversation, all of your messages in it will be deleted.
         It may take a while, so the conversation will still be in your list for a bit.
       </div>
-      <button type="button" class="btn btn-danger" on:click="confirmLeave()" disabled="{_clearingReadline}">Leave Conversation</button>
+      <button type="button" class="btn btn-danger" on:click="confirmLeave()" disabled="{_leavingConversation}">Leave Conversation</button>
     </div>
   {:else}
     <div class="d-flex flex-column justify-content-start w-100 px-2 mt-3" style="max-width: 600px;">
