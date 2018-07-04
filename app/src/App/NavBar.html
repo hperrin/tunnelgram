@@ -10,7 +10,7 @@
     </li>
     <li class="nav-item {$view === 'people' ? 'active' : ''}">
       <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid+'/people')">
-        People
+        People ({$conversation.data.acFull.length})
         {#if $view === 'people'}
           <span class="sr-only">(current)</span>
         {/if}
