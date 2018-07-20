@@ -30,7 +30,7 @@ if (!devMode) {
 }
 
 module.exports = {
-  mode: 'development',
+  mode: devMode ? 'development' : 'production',
   entry: ['babel-polyfill', path.resolve(__dirname, 'src', 'index.js')],
   output: {
     path: path.resolve(__dirname, 'dist'),

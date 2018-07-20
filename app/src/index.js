@@ -56,6 +56,11 @@ store.constructor.prototype.navigate = (...args) => {
 };
 
 store.constructor.prototype.refreshAll = function () {
+  sleepyUserCacheService.clear();
+  sleepyGroupCacheService.clear();
+  sleepyConversationCacheService.clear();
+  sleepyMessageCacheService.clear();
+
   const {conversation} = this.get();
   if (conversation.guid) {
     conversation.refresh().then(() => {
@@ -65,179 +70,14 @@ store.constructor.prototype.refreshAll = function () {
   }
 
   const {conversations} = this.get();
-  for (let conversation of conversations) {
-    conversation.refresh().then(() => {
-      this.set({conversations});
-    }, ErrHandler);
+  const promises = [];
+  for (let curConv of conversations) {
+    promises.push(curConv.refresh());
   }
-
-  sleepyUserCacheService.clear();
-  sleepyGroupCacheService.clear();
-  sleepyConversationCacheService.clear();
-  sleepyMessageCacheService.clear();
+  Promise.all(promises).then(() => {
+    this.set({conversations});
+  }, ErrHandler);
 };
-
-store.on('state', ({changed, current}) => {
-  if (changed.conversation && current.conversation && current.conversation.guid) {
-    const {conversation, conversations} = current;
-
-    if (conversation.data.user.isASleepingReference) {
-      conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
-    }
-
-    // Refresh conversations' readlines when current conversation changes.
-    for (let curConv of conversations) {
-      if (curConv != null && conversation != null) {
-        if (conversation.guid === curConv.guid && curConv.readline !== conversation.readline) {
-          // They are the same entity, but different instances.
-          curConv.readline = conversation.readline;
-          store.set({conversations});
-        } else if (conversation === curConv) {
-          // They are the same instance, so just mark conversations as changed.
-          store.set({conversations});
-        }
-      }
-    }
-  }
-
-  if (changed.conversations && current.conversations.length === 0) {
-    router.navigate('/c');
-  }
-
-  if (changed.decryption) {
-    crypt.decryption = current.decryption;
-    store.refreshAll();
-  }
-});
-
-PubSub.on('connect', () => store.set({disconnected: false}));
-PubSub.on('disconnect', () => store.set({disconnected: true}));
-
-// Register the caching and pushing ServiceWorker
-(async () => {
-  if (!('serviceWorker' in navigator)) {
-    return;
-  }
-
-  let registration;
-
-  if (navigator.serviceWorker.controller) {
-    registration = await navigator.serviceWorker.getRegistration('/');
-    console.log('Service worker has been retrieved for scope: '+ registration.scope);
-  } else {
-    registration = await navigator.serviceWorker.register('/service-worker.js', {
-      scope: '/'
-    });
-    console.log('Service worker has been registered for scope: '+ registration.scope);
-  }
-
-  // Support for push, notifications, and push payloads.
-  const pushSupport = 'PushManager' in window;
-  const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
-  // Maybe I'll use these if I can figure out how to get payloads to work.
-  // const payloadSupport = 'getKey' in PushSubscription.prototype;
-  // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
-
-  if (pushSupport && notificationSupport) {
-    const setupSubscription = async () => {
-      const getSubscription = () => {
-        return navigator.serviceWorker.ready.then(registration => {
-          return registration.pushManager.getSubscription();
-        });
-      };
-
-      const subscribeFromWorker = subscriptionOptions => {
-        return new Promise((resolve, reject) => {
-          if (!navigator.serviceWorker.controller) {
-            reject(new Error('There is no service worker.'));
-            return;
-          }
-
-          navigator.serviceWorker.controller.postMessage({
-            command: 'subscribe',
-            subscriptionOptions: subscriptionOptions
-          });
-
-          const messageListenerFunction = event => {
-            navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
-            switch (event.data.command) {
-              case 'subscribe-success':
-                resolve(getSubscription());
-                break;
-              case 'subscribe-failure':
-                reject(new Error('Subscription failed: ' + event.data.message));
-                break;
-              default:
-                reject(new Error('Invalid command: ' + event.data.command));
-                break;
-            }
-          };
-
-          navigator.serviceWorker.addEventListener('message', messageListenerFunction);
-        });
-      };
-
-
-      // See if there is a subscription already.
-      const existingSubscription = await getSubscription();
-
-      if (existingSubscription) {
-        store.set({webPushSubscription: existingSubscription});
-        return;
-      }
-
-      // The vapid key from the server.
-      const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-      if (!vapidPublicKey) {
-        return;
-      }
-      const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
-
-      // Make the subscription.
-      const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
-        userVisibleOnly: true,
-        applicationServerKey: convertedVapidKey
-      })));
-
-      store.set({webPushSubscription: subscription});
-
-      // And push it up to the server.
-      const webPushSubscription = new WebPushSubscription();
-      webPushSubscription.set({
-        endpoint: subscription.endpoint,
-        keys: {
-          p256dh: subscription.keys.p256dh,
-          auth: subscription.keys.auth
-        }
-      });
-      webPushSubscription.save().catch(ErrHandler);
-    };
-
-    // Set notification permission asker.
-    store.set({requestNotificationPermission: async () => {
-      const permissionResult = await new Promise(async resolve => {
-        const promise = Notification.requestPermission(value => resolve(value));
-        if (promise) {
-          resolve(await promise);
-        }
-      });
-
-      if (permissionResult === 'denied' || permissionResult === 'default') {
-        return;
-      }
-
-      setupSubscription();
-    }});
-
-    if (Notification.permission === 'granted') {
-      setupSubscription();
-
-      User.on('login', () => {
-        setupSubscription();
-      });
-    }
-  }
-})();
 
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
@@ -246,84 +86,266 @@ window.addEventListener('beforeinstallprompt', (e) => {
   store.set({beforeInstallPromptEvent: e});
 });
 
-const loader = document.getElementById('initialLoader');
-if (loader) {
-  loader.parentNode.removeChild(loader);
-}
+PubSub.on('connect', () => store.set({disconnected: false}));
+PubSub.on('disconnect', () => store.set({disconnected: true}));
 
-const app = new Container({
-  target: document.querySelector('main'),
-  data: {
-    brand: 'Tunnelgram'
-  },
-  store
+User.on('logout', () => {
+  router.navigate('/');
 });
 
-const conversationHandler = params => {
-  const {conversations} = store.get();
-  const guid = parseFloat(params.id);
-  let conversation = null;
-  for (let cur of conversations) {
-    if (cur.guid === guid) {
-      conversation = cur;
-      break;
+// Everything is this function requires the logged in user status to be known.
+(async () => {
+  await (store.ready);
+
+  store.on('state', ({changed, current}) => {
+    if (changed.conversation && current.conversation && current.conversation.guid) {
+      const {conversation, conversations} = current;
+
+      if (conversation.data.user.isASleepingReference) {
+        conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
+      }
+
+      // Refresh conversations' readlines when current conversation changes.
+      for (let curConv of conversations) {
+        if (curConv != null && conversation != null) {
+          if (conversation.guid === curConv.guid && curConv.readline !== conversation.readline) {
+            // They are the same entity, but different instances.
+            curConv.readline = conversation.readline;
+            store.set({conversations});
+          } else if (conversation === curConv) {
+            // They are the same instance, so just mark conversations as changed.
+            store.set({conversations});
+          }
+        }
+      }
     }
-  }
-  store.set({loadingConversation: true});
-  if (conversation) {
-    store.set({
-      conversation: conversation,
-      view: params.view || 'conversation',
-      convosOut: false,
-      loadingConversation: false
-    });
-  } else {
-    Nymph.getEntity({
-      'class': Conversation.class
-    }, {
-      'type': '&',
-      'guid': guid
-    }).then(conversation => {
+
+    if (changed.conversations && current.conversations.length === 0) {
+      router.navigate('/c');
+    }
+
+    if (changed.decryption) {
+      crypt.decryption = current.decryption;
+      store.refreshAll();
+    }
+
+    if (changed.user) {
+      router.resolve();
+    }
+  });
+
+  // Register the caching and pushing ServiceWorker
+  (async () => {
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+
+    let registration;
+
+    if (navigator.serviceWorker.controller) {
+      registration = await navigator.serviceWorker.getRegistration('/');
+      console.log('Service worker has been retrieved for scope: '+ registration.scope);
+    } else {
+      registration = await navigator.serviceWorker.register('/service-worker.js', {
+        scope: '/'
+      });
+      console.log('Service worker has been registered for scope: '+ registration.scope);
+    }
+
+    // Support for push, notifications, and push payloads.
+    const pushSupport = 'PushManager' in window;
+    const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
+    // Maybe I'll use these if I can figure out how to get payloads to work.
+    // const payloadSupport = 'getKey' in PushSubscription.prototype;
+    // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
+
+    if (pushSupport && notificationSupport) {
+      const setupSubscription = async () => {
+        const getSubscription = () => {
+          return navigator.serviceWorker.ready.then(registration => {
+            return registration.pushManager.getSubscription();
+          });
+        };
+
+        const subscribeFromWorker = subscriptionOptions => {
+          return new Promise((resolve, reject) => {
+            if (!navigator.serviceWorker.controller) {
+              reject(new Error('There is no service worker.'));
+              return;
+            }
+
+            navigator.serviceWorker.controller.postMessage({
+              command: 'subscribe',
+              subscriptionOptions: subscriptionOptions
+            });
+
+            const messageListenerFunction = event => {
+              navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
+              switch (event.data.command) {
+                case 'subscribe-success':
+                  resolve(getSubscription());
+                  break;
+                case 'subscribe-failure':
+                  reject(new Error('Subscription failed: ' + event.data.message));
+                  break;
+                default:
+                  reject(new Error('Invalid command: ' + event.data.command));
+                  break;
+              }
+            };
+
+            navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+          });
+        };
+
+
+        // See if there is a subscription already.
+        const existingSubscription = await getSubscription();
+
+        if (existingSubscription) {
+          store.set({webPushSubscription: existingSubscription});
+          return;
+        }
+
+        // The vapid key from the server.
+        const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+        if (!vapidPublicKey) {
+          return;
+        }
+        const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
+
+        // Make the subscription.
+        const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        })));
+
+        store.set({webPushSubscription: subscription});
+
+        // And push it up to the server.
+        const webPushSubscription = new WebPushSubscription();
+        webPushSubscription.set({
+          endpoint: subscription.endpoint,
+          keys: {
+            p256dh: subscription.keys.p256dh,
+            auth: subscription.keys.auth
+          }
+        });
+        webPushSubscription.save().catch(ErrHandler);
+      };
+
+      // Set notification permission asker.
+      store.set({requestNotificationPermission: async () => {
+        const permissionResult = await new Promise(async resolve => {
+          const promise = Notification.requestPermission(value => resolve(value));
+          if (promise) {
+            resolve(await promise);
+          }
+        });
+
+        if (permissionResult === 'denied' || permissionResult === 'default') {
+          return;
+        }
+
+        setupSubscription();
+      }});
+
+      if (Notification.permission === 'granted') {
+        setupSubscription();
+
+        User.on('login', () => {
+          setupSubscription();
+        });
+      }
+    }
+  })();
+
+  const conversationHandler = params => {
+    const {conversations} = store.get();
+    const guid = parseFloat(params.id);
+    let conversation = null;
+    for (let cur of conversations) {
+      if (cur.guid === guid) {
+        conversation = cur;
+        break;
+      }
+    }
+    store.set({loadingConversation: true});
+    if (conversation) {
       store.set({
         conversation: conversation,
         view: params.view || 'conversation',
         convosOut: false,
         loadingConversation: false
       });
-    }, (err) => {
-      ErrHandler(err);
-      store.set({loadingConversation: false});
-      router.navigate('/');
-    });
-  }
-};
-
-router.on({
-  'c/:id': {uses: conversationHandler},
-  'c/:id/:view': {uses: conversationHandler},
-  'c': () => {
-    const conversation = new Conversation();
-    store.set({
-      conversation: conversation,
-      view: 'conversation',
-      convosOut: false
-    });
-  },
-  'pwa-home': () => {
-    store.set({
-      convosOut: true
-    });
-  },
-  '*': () => {
-    if (store.get().user) {
-      router.navigate('/pwa-home');
+    } else {
+      Nymph.getEntity({
+        'class': Conversation.class
+      }, {
+        'type': '&',
+        'guid': guid
+      }).then(conversation => {
+        store.set({
+          conversation: conversation,
+          view: params.view || 'conversation',
+          convosOut: false,
+          loadingConversation: false
+        });
+      }, (err) => {
+        ErrHandler(err);
+        store.set({loadingConversation: false});
+        router.navigate('/');
+      });
     }
-  }
-}).resolve();
+  };
 
-User.on('logout', () => {
-  router.navigate('/');
-});
+  router.hooks({
+    before: (done, params) => {
+      if (!store.get().user) {
+        done(false);
+        console.log(router.lastRouteResolved());
+      } else {
+        done();
+      }
+    }
+  });
+
+  router.on({
+    'c/:id': {uses: conversationHandler},
+    'c/:id/:view': {uses: conversationHandler},
+    'c': () => {
+      const conversation = new Conversation();
+      store.set({
+        conversation: conversation,
+        view: 'conversation',
+        convosOut: false
+      });
+    },
+    'pwa-home': () => {
+      store.set({
+        convosOut: true
+      });
+    },
+    '*': () => {
+      if (store.get().user) {
+        router.navigate('/pwa-home');
+      }
+    }
+  }).resolve();
+
+  const loader = document.getElementById('initialLoader');
+  if (loader) {
+    loader.parentNode.removeChild(loader);
+  }
+
+  const app = new Container({
+    target: document.querySelector('main'),
+    data: {
+      brand: 'Tunnelgram'
+    },
+    store
+  });
+})();
 
 // useful for debugging!
 window.store = store;

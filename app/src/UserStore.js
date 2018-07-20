@@ -6,15 +6,19 @@ export default class UserStore extends Store {
   constructor (...args) {
     super(...args);
 
+    let ready;
+
     this.set({
       user: false,
       userAvatar: null,
-      userIsTilmeldAdmin: false
+      userIsTilmeldAdmin: false,
+      ready: new Promise(resolve => ready = resolve)
     });
 
     // Get the current user.
     User.current().then(user => {
       this.set({user});
+      ready();
     }, ErrHandler);
 
     // Handle logins and logouts.
