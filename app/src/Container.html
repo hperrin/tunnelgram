@@ -45,10 +45,7 @@
             <ul class="navbar-nav ml-auto">
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <img
-                    class="rounded-circle"
-                    src="{$userAvatar ? $userAvatar : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoAgMAAADxkFD+AAAACVBMVEXMzMyWlpa3t7fI5tFIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAF0lEQVQYlWNgGOagiQPOdGQZQHdQGQAArI4A0FwgBeUAAAAASUVORK5CYII='}"
-                    alt="{$user.data.nameFirst}" />
+                  <Avatar user="{$user}" />
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
                   <h6 class="dropdown-header">
@@ -133,6 +130,7 @@
   import NavBar from './App/NavBar.html';
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
+  import Avatar from './App/Users/Avatar.html';
 
   // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
   const storageAvailable = (type) => {
@@ -221,7 +219,8 @@
       FrontPage,
       TilmeldLogin,
       NavBar,
-      App
+      App,
+      Avatar
     }
   };
 </script>

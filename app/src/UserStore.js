@@ -10,7 +10,6 @@ export default class UserStore extends Store {
 
     this.set({
       user: false,
-      userAvatar: null,
       userIsTilmeldAdmin: false,
       ready: new Promise(resolve => ready = resolve)
     });
@@ -33,17 +32,13 @@ export default class UserStore extends Store {
       if (changed.user) {
         if (current.user) {
           if (!previous.user) {
-            // Get the user's avatar.
-            current.user.getAvatar().then(userAvatar => {
-              this.set({userAvatar});
-            });
             // Is the user a Tilmeld admin?
             current.user.gatekeeper('tilmeld/admin').then(userIsTilmeldAdmin => {
               this.set({userIsTilmeldAdmin});
             });
           }
         } else {
-          this.set({userAvatar: null, userIsTilmeldAdmin: false});
+          this.set({userIsTilmeldAdmin: false});
         }
       }
     });

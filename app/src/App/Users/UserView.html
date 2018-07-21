@@ -1,5 +1,8 @@
 <div class="h-100 w-100" style="overflow-y: auto; overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center py-3">
+    <div class="d-inline-block mb-3">
+      <Avatar user="{$viewUser}" size="160" />
+    </div>
     <h2>{$viewUser.data.name}</h2>
     <div>{$viewUser.data.username}, member since {moment.unix($viewUser.cdate).format('MMM D, YYYY')}</div>
 
@@ -100,6 +103,7 @@
   import moment from 'moment';
   import QRCode from 'qrcode';
   import Conversation from '../../Entities/Conversation';
+  import Avatar from './Avatar.html';
   import getCookieValue from '../../Services/getCookieValue';
   import ErrHandler from '../../ErrHandler';
 
@@ -186,7 +190,8 @@
     },
 
     components: {
-      TilmeldChangePassword
+      TilmeldChangePassword,
+      Avatar
     },
 
     helpers: {

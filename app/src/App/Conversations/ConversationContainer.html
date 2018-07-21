@@ -26,7 +26,7 @@
         <ul class="list-group mt-3 text-body">
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              {user.data.name}
+              <span><span class="mr-2"><Avatar user="{user}" /></span> {user.data.name}</span>
               <button class="btn btn-danger btn-sm" on:click="removeUser(user)">
                 <i class="fas fa-minus"></i>
               </button>
@@ -70,6 +70,7 @@
   import ConversationView from './ConversationView.html';
   import ConversationPeople from './ConversationPeople.html';
   import ConversationSettings from './ConversationSettings.html';
+  import Avatar from '../Users/Avatar.html';
   import ErrHandler from '../../ErrHandler';
 
   export default {
@@ -198,7 +199,8 @@
     components: {
       ConversationView,
       ConversationPeople,
-      ConversationSettings
+      ConversationSettings,
+      Avatar
     },
 
     helpers: {
