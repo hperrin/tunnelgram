@@ -54,8 +54,8 @@
                   <h6 class="dropdown-header">
                     {$user.data.name}
                   </h6>
-                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#accountInfoModal">
-                    Account Info
+                  <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/u/' + $user.data.username)">
+                    Your Account
                   </a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
@@ -111,10 +111,8 @@
   {#if $user}
     <div class="container-fluid d-flex flex-column flex-grow-1 h-100 p-0 m-0">
       {#await $crypt.ready}
-        <div class="row d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
-          <div class="col-auto">
-            <LoadingIndicator width="100px" height="100px" />
-          </div>
+        <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
+          <LoadingIndicator width="100px" height="100px" />
           <h3>Setting up encryption...</h3>
         </div>
       {:then data}
@@ -127,81 +125,14 @@
     </div>
   {/if}
 </div>
-{#if $user}
-  <div class="modal fade" id="accountInfoModal" tabindex="-1" role="dialog" aria-labelledby="accountInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="accountInfoModalLabel">Account info</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="accountDetailsUsername">Username</label>
-            <input type="email" class="form-control" id="accountDetailsUsername" bind:value="$user.data.username" placeholder="Enter username">
-          </div>
-          <div class="form-group">
-            <label for="accountDetailsFirstName">First name</label>
-            <input type="text" class="form-control" id="accountDetailsFirstName" bind:value="$user.data.nameFirst" placeholder="Enter name">
-          </div>
-          <div class="form-group">
-            <label for="accountDetailsLastName">Last name</label>
-            <input type="text" class="form-control" id="accountDetailsLastName" bind:value="$user.data.nameLast" placeholder="Enter name">
-          </div>
-          <div class="form-group">
-            <label for="accountDetailsPhone">Phone</label>
-            <input type="tel" class="form-control" id="accountDetailsPhone" bind:value="$user.data.phone" placeholder="Enter phone number">
-          </div>
-          {#if clientConfig.timezones}
-            <div class="form-group">
-              <label for="accountDetailsTimezone">Timezone</label>
-              <select class="form-control" id="accountDetailsTimezone" bind:value="$user.data.timezone">
-                <option value="">--Default--</option>
-                {#each clientConfig.timezones as tz}
-                  <option value="{tz}">{tz}</option>
-                {/each}
-              </select>
-            </div>
-          {/if}
-          <div class="form-group">
-            <span>Password</span>
-            <TilmeldChangePassword
-              layout="compact"
-              classInput="form-control"
-              classSubmit="btn btn-primary"
-              classButton="btn btn-secondary" />
-          </div>
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Experiments
-            </button>
-            <div class="dropdown-menu" aria-labelledby="experimentsButton">
-              <!-- <a class="dropdown-item" href="javascript:void(0)" on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><input type="checkbox" checked="{EXPERIMENT_WEB_PUSH}" /> Web Push Notifications</a> -->
-              <span class="dropdown-item">No experiments right now.</span>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal" on:click="saveUser()">Save changes</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-{/if}
 
 <script>
-  import {User, TilmeldLogin, TilmeldChangePassword} from 'tilmeld-client';
+  import {User, TilmeldLogin} from 'tilmeld-client';
   import $ from 'jquery';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import NavBar from './App/NavBar.html';
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
-  import getCookieValue from './Services/getCookieValue';
-  import ErrHandler from './ErrHandler';
-
 
   // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
   const storageAvailable = (type) => {
@@ -236,38 +167,23 @@
       tooltip: node => $(node).tooltip()
     },
 
-    oncreate () {
-      // Get the client config (for timezones).
-      User.getClientConfig().then(clientConfig => {
-        this.set({clientConfig});
-      });
-    },
-
     onupdate () {
       this.updateNavbarHeight();
     },
 
     computed: {
-      name: ({$conversation, $user}) => $user ? $conversation.getName($user) : ''
+      name: ({$view, $viewUser, $conversation, $user}) => $view === 'user' ? $viewUser.data.name : ($user ? $conversation.getName($user) : '')
     },
 
     data () {
       return {
         _storageAvailable: storageAvailable('localStorage'),
         _cryptoAvailable: cryptoAvailable(),
-        _navbarHeight: 0,
-        clientConfig: {}
-        // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
+        _navbarHeight: 0
       };
     },
 
     methods: {
-      saveUser () {
-        this.store.get().user.save().then(user => {
-          this.store.set({user});
-        }, ErrHandler);
-      },
-
       updateNavbarHeightLots () {
         // Damn you, Bootstrap.
         let countdown = 34;
@@ -297,11 +213,6 @@
         } else {
           this.store.navigate('/pwa-home');
         }
-      },
-
-      setExperiment (name, value) {
-        document.cookie = `${name}=${value ? 'true' : ''}`;
-        this.set({[name]: value});
       }
     },
 
@@ -309,7 +220,6 @@
       LoadingIndicator,
       FrontPage,
       TilmeldLogin,
-      TilmeldChangePassword,
       NavBar,
       App
     }

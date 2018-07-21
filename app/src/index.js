@@ -95,7 +95,7 @@ User.on('logout', () => {
 
 // Everything is this function requires the logged in user status to be known.
 (async () => {
-  await (store.ready);
+  await store.get().ready;
 
   store.on('state', ({changed, current}) => {
     if (changed.conversation && current.conversation && current.conversation.guid) {
@@ -260,6 +260,19 @@ User.on('logout', () => {
     }
   })();
 
+  const loader = document.getElementById('initialLoader');
+  if (loader) {
+    loader.parentNode.removeChild(loader);
+  }
+
+  const app = new Container({
+    target: document.querySelector('main'),
+    data: {
+      brand: 'Tunnelgram'
+    },
+    store
+  });
+
   const conversationHandler = params => {
     const {conversations} = store.get();
     const guid = parseFloat(params.id);
@@ -299,11 +312,39 @@ User.on('logout', () => {
     }
   };
 
+  const userHandler = params => {
+    const {username} = params;
+    const {user} = store.get();
+    store.set({loadingUser: true});
+    if (user.data.username === username) {
+      store.set({
+        viewUser: user,
+        viewUserIsSelf: true,
+        view: 'user',
+        convosOut: false,
+        loadingUser: false
+      });
+    } else {
+      User.byUsername(username).then(viewUser => {
+        store.set({
+          viewUser,
+          viewUserIsSelf: false,
+          view: 'user',
+          convosOut: false,
+          loadingUser: false
+        });
+      }, (err) => {
+        ErrHandler(err);
+        store.set({loadingUser: false});
+        router.navigate('/');
+      });
+    }
+  };
+
   router.hooks({
     before: (done, params) => {
       if (!store.get().user) {
         done(false);
-        console.log(router.lastRouteResolved());
       } else {
         done();
       }
@@ -321,6 +362,7 @@ User.on('logout', () => {
         convosOut: false
       });
     },
+    'u/:username': {uses: userHandler},
     'pwa-home': () => {
       store.set({
         convosOut: true
@@ -332,19 +374,6 @@ User.on('logout', () => {
       }
     }
   }).resolve();
-
-  const loader = document.getElementById('initialLoader');
-  if (loader) {
-    loader.parentNode.removeChild(loader);
-  }
-
-  const app = new Container({
-    target: document.querySelector('main'),
-    data: {
-      brand: 'Tunnelgram'
-    },
-    store
-  });
 })();
 
 // useful for debugging!

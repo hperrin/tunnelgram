@@ -22,7 +22,7 @@
             {_addUserError}
           </div>
         {/if}
-        <button type="submit" class="btn btn-primary mt-3">{usersOtherThanCurrent.length ? 'Start Talking' : 'Talk Alone'}</button>
+        <button type="submit" class="btn btn-primary mt-3" disabled="{_startingConversation}">{usersOtherThanCurrent.length ? 'Start Talking' : 'Talk Alone'}</button>
         <ul class="list-group mt-3 text-body">
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -45,14 +45,14 @@
             Looks like {usersOtherThanCurrent.length ? 'this is a new group' : 'you\'ve got no personal chats'}.
           </div>
         {:else}
-          <ul class="list-group mt-3 text-body w-100 px-2" style="max-width: 600px;">
+          <div class="list-group mt-3 text-body w-100 px-2" style="max-width: 600px;">
             {#each conversations as conversation (conversation.guid)}
               <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
                 <h5 class="mb-0">{conversation.getName($user)}</h5>
                 <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{moment.unix(conversation.mdate).fromNow(true)}</small>
               </a>
             {/each}
-          </ul>
+          </div>
         {/if}
       {:catch e}
         <div>
@@ -95,6 +95,7 @@
 
     data () {
       return {
+        _startingConversation: false,
         _loadingUser: false,
         _addUserError: null,
         addUsername: ''
@@ -187,7 +188,10 @@
 
       save () {
         const {conversation} = this.store.get();
-        conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler);
+        this.set({_startingConversation: true});
+        conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
+          this.set({_startingConversation: false});
+        });
       }
     },
 
