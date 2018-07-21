@@ -43,6 +43,7 @@
 
   export default {
     oncreate () {
+      this.destroyed = false;
       this.subscribe();
       const {conversation} = this.store.get();
       this.set({
@@ -120,6 +121,7 @@
     },
 
     ondestroy () {
+      this.destroyed = true;
       let {_subscription} = this.get();
       if (_subscription) {
         _subscription.unsubscribe();
@@ -167,6 +169,9 @@
           'type': '&',
           'ref': ['conversation', conversation.guid]
         }).subscribe(update => {
+          if (this.destroyed) {
+            return;
+          }
           if (update) {
             const {messages} = this.get();
             if (Array.isArray(update)) {
