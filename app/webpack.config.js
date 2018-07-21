@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const devMode = process.env.NODE_ENV !== 'production';
 
 const plugins = [
@@ -24,10 +23,6 @@ const plugins = [
     }
   })
 ];
-
-if (!devMode) {
-  plugins.push(new UglifyJsPlugin());
-}
 
 module.exports = {
   mode: devMode ? 'development' : 'production',

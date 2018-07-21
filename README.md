@@ -144,4 +144,4 @@ If you'd like to find me:
 * Follow me on Twitter at https://twitter.com/SciActive
 * Email me at hunter@sciactive.com.
 * Find me on GitHub at https://github.com/hperrin and https://github.com/sciactive.
-* Or send me a message on https://tunnelgram.com at the username hperrin.
+* Or send me a message on Tunnelgram at http://tngm.me/hperrin.
