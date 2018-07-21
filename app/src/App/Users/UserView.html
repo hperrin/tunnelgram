@@ -3,7 +3,7 @@
     <h2>{$viewUser.data.name}</h2>
     <div>{$viewUser.data.username}, member since {moment.unix($viewUser.cdate).format('MMM D, YYYY')}</div>
 
-    <h3>{$viewUserIsSelf ? 'Your' : $viewUser.data.nameFirst+'\'s'} Short-Link</h3>
+    <h3 class="mt-3">{$viewUserIsSelf ? 'Your' : $viewUser.data.nameFirst+'\'s'} Short-Link</h3>
     <div class="text-center">
       <a href="{shortLink}">{shortLinkPreview}</a>
       <br />
