@@ -14,20 +14,31 @@ onmessage = (e) => {
 };
 
 // Source: https://stackoverflow.com/a/14845805
-const resizeImage = (type, maxWidth, maxHeight) => {
+const resizeImage = (type, maxWidth, maxHeight, crop) => {
   const ctx = canvas.getContext("2d");
   const copyContext = canvasCopy.getContext("2d");
 
   // Determine new ratio based on max size.
-  let ratioWidth = 1;
-  let ratioHeight = 1;
-  if (img.width > maxWidth) {
-    ratioWidth = maxWidth / img.width;
+  let ratio = 1;
+  if (img.width > maxWidth || img.height > maxHeight) {
+    if (crop) {
+      if (img.width - maxWidth > img.height - maxHeight) {
+        ratio = maxWidth / img.width;
+      } else {
+        ratio = maxHeight / img.height;
+      }
+    } else {
+      let ratioWidth = 1;
+      let ratioHeight = 1;
+      if (img.width > maxWidth) {
+        ratioWidth = maxWidth / img.width;
+      }
+      if (img.height > maxHeight) {
+        ratioHeight = maxHeight / img.height;
+      }
+      ratio = Math.min(ratioWidth, ratioHeight);
+    }
   }
-  if (img.height > maxHeight) {
-    ratioHeight = maxHeight / img.height;
-  }
-  let ratio = Math.min(ratioWidth, ratioHeight);
 
   // Draw original image in second canvas.
   canvasCopy.width = img.width;

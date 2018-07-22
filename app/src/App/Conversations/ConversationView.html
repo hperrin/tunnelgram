@@ -43,7 +43,7 @@
     {/if}
     <div class="d-flex align-items-stretch">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)">
-      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" on:click="clickFileInput()"><i class="fas fa-camera"></i></button>
+      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" on:click="refs.fileInput.click()"><i class="fas fa-camera"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
       <button class="btn btn-lg btn-primary" style="width: 60px;" type="submit" disabled="{messageIsEmpty}"><i class="fas fa-comment"></i></button>
     </div>
@@ -56,6 +56,7 @@
   import aesjs from 'aes-js';
   import base64js from 'base64-js';
   import utf8 from 'utf8';
+  import ResizeImage from '../../Services/ResizeImage';
   import Message from '../../Entities/Message';
   import MessageList from '../Messages/MessageList.html';
   import LoadingIndicator from '../LoadingIndicator.html';
@@ -64,28 +65,6 @@
   const emoji = new EmojiConvertor();
 
   export default {
-    oncreate () {
-      const canvas = document.createElement("canvas");
-      this.offscreenCanvasSupport = !!canvas.transferControlToOffscreen;
-
-      if (this.offscreenCanvasSupport) {
-        this.resizeImageWorker = new Worker('dist/Workers/ResizeImage.js');
-        this.resizeImageWorkerCounter = 0;
-        this.resizeImageWorkerCallbacks = {};
-        this.resizeImageWorker.onmessage = (e) => {
-          const {counter, result} = e.data;
-          this.resizeImageWorkerCallbacks[counter](result);
-          delete this.resizeImageWorkerCallbacks[counter];
-        };
-      }
-    },
-
-    ondestroy () {
-      if (this.offscreenCanvasSupport) {
-        this.resizeImageWorker.terminate();
-      }
-    },
-
     computed: {
       messageIsEmpty: ({text, images}) => (text === '' || text.match(/^\s+$/)) && !images.length
     },
@@ -178,10 +157,6 @@
         }, 2000);
       },
 
-      clickFileInput () {
-        this.refs.fileInput.click();
-      },
-
       handleDrag (event, _showDropbox) {
         event.stopPropagation();
         event.preventDefault();
@@ -230,15 +205,17 @@
             let dataMatch;
             let dataType;
             let data;
+            let resizeImage = new ResizeImage(e.target.result, file.type);
             do {
               // Resize the image repeatedly down until the size is under 2MiB.
-              dataImg = await this.resizeImage(e.target.result, file.type, size, size);
+              dataImg = await resizeImage.resizeContain(size, size);
               dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
               dataType = dataMatch[1];
               data = window.atob(dataMatch[2]);
               size -= 200;
             } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
-            const thumbnailImg = await this.resizeImage(e.target.result, file.type);
+            const thumbnailImg = await resizeImage.resizeContain();
+            resizeImage.destroy();
             const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
             const thumbnailType = thumbnailMatch[1];
             const thumbnail = window.atob(thumbnailMatch[2]);
@@ -261,83 +238,6 @@
           };
           reader.readAsDataURL(file);
         }
-      },
-
-      // Based on: https://stackoverflow.com/a/14845805
-      resizeImage (dataURL, type, maxWidth, maxHeight) {
-        // Max size for image.
-        maxWidth = maxWidth || 150;
-        maxHeight = maxHeight || 150;
-
-        // Create two canvas.
-        const canvas = document.createElement("canvas");
-        const canvasCopy = document.createElement("canvas");
-
-        // Create original image.
-        const img = new Image();
-
-        return new Promise((resolve, reject) => {
-          if (this.offscreenCanvasSupport) {
-            img.onload = async () => {
-              const offscreenCanvas = canvas.transferControlToOffscreen();
-              const offscreenCanvasCopy = canvasCopy.transferControlToOffscreen();
-              const bitmap = await window.createImageBitmap(img, 0, 0, img.width, img.height);
-
-              this.resizeImageWorkerCounter++;
-              const counter = this.resizeImageWorkerCounter;
-              this.resizeImageWorkerCallbacks[counter] = result => {
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-                canvas.width = result.width;
-                canvas.height = result.height;
-                ctx.drawImage(result.data, 0, 0, result.width, result.height);
-                result.data = canvas.toDataURL(type, .95);
-                resolve(result);
-              };
-              this.resizeImageWorker.postMessage({
-                counter,
-                args: [type, maxWidth, maxHeight],
-                canvas: offscreenCanvas,
-                canvasCopy: offscreenCanvasCopy,
-                img: bitmap
-              }, [offscreenCanvas, offscreenCanvasCopy]);
-            };
-          } else {
-            img.onload = () => {
-              const ctx = canvas.getContext("2d");
-              const copyContext = canvasCopy.getContext("2d");
-
-              // Determine new ratio based on max size.
-              let ratioWidth = 1;
-              let ratioHeight = 1;
-              if (img.width > maxWidth) {
-                ratioWidth = maxWidth / img.width;
-              }
-              if (img.height > maxHeight) {
-                ratioHeight = maxHeight / img.height;
-              }
-              let ratio = Math.min(ratioWidth, ratioHeight);
-
-              // Draw original image in second canvas.
-              canvasCopy.width = img.width;
-              canvasCopy.height = img.height;
-              copyContext.drawImage(img, 0, 0);
-
-              // Copy and resize second canvas to first canvas.
-              canvas.width = img.width * ratio;
-              canvas.height = img.height * ratio;
-              ctx.drawImage(canvasCopy, 0, 0, canvasCopy.width, canvasCopy.height, 0, 0, canvas.width, canvas.height);
-
-              resolve({
-                data: canvas.toDataURL(type, .95),
-                width: canvas.width,
-                height: canvas.height
-              });
-            };
-          }
-
-          img.src = dataURL;
-        });
       }
     },
 
