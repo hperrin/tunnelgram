@@ -1,15 +1,19 @@
 <div class="d-flex flex-wrap bg-secondary rounded" style="max-width: 450px;">
   {#each images as image, index (image.name)}
     <div class="d-flex justify-content-center align-items-center">
-      {#await image.thumbnail}
+      {#if image.thumbnailPromise}
+        {#await image.thumbnailPromise}
+          <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" />
+        {:then thumbnail}
+          <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
+            <img src="data:{image.thumbnailType};base64,{btoa(thumbnail)}" alt="{image.name}" title="{image.name}" width="{image.thumbnailWidth}" height="{image.thumbnailHeight}" />
+          </a>
+        {:catch e}
+          <span class="badge badge-warning">error</span>
+        {/await}
+      {:else}
         <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" />
-      {:then thumbnail}
-        <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
-          <img src="data:{image.thumbnailType};base64,{thumbnail}" alt="{image.name}" title="{image.name}" width="{image.thumbnailWidth}" height="{image.thumbnailHeight}" />
-        </a>
-      {:catch e}
-        <span class="badge badge-warning">error</span>
-      {/await}
+      {/if}
     </div>
   {/each}
 </div>
@@ -62,10 +66,17 @@
     oncreate () {
       const {images} = this.get();
       for (let image of images) {
-        image.thumbnail.then(thumbnailSrc => {
-          image.thumbnailSrc = thumbnailSrc;
-        });
+        if (typeof image.thumbnail === 'string') {
+          image.thumbnailPromise = Promise.resolve(image.thumbnail);
+          image.thumbnailSrc = image.thumbnail;
+        } else {
+          image.thumbnailPromise = image.thumbnail;
+          image.thumbnail.then(thumbnailSrc => {
+            image.thumbnailSrc = thumbnailSrc;
+          });
+        }
       }
+      this.set({images});
     },
 
     methods: {
@@ -76,7 +87,7 @@
           return {
             w: image.dataWidth,
             h: image.dataHeight,
-            src: `data:${image.thumbnailType};base64,${image.thumbnailSrc}`,
+            src: `data:${image.thumbnailType};base64,${window.btoa(image.thumbnailSrc)}`,
             _loading: false,
             _image: image
           };
@@ -95,8 +106,9 @@
             return;
           }
           item._loading = true;
-          item._image.data.promise().then(data => {
-            const newSrc = `data:${item._image.dataType};base64,${data}`;
+          const imagePromise = ('promise' in item._image.data) ? item._image.data.promise() : Promise.resolve(item._image.data);
+          imagePromise.then(data => {
+            const newSrc = `data:${item._image.dataType};base64,${window.btoa(data)}`;
             item.src = newSrc;
             // Sets a flag that slides should be updated.
             pswp.invalidateCurrItems();
@@ -114,7 +126,8 @@
     },
 
     helpers: {
-      parseFloat
+      parseFloat,
+      btoa
     }
   };
 </script>

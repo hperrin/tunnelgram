@@ -49,7 +49,7 @@ export class Message extends Entity {
                   }).then(response => {
                     return response.arrayBuffer();
                   }).then(arrayBuffer => {
-                    resolve(window.btoa(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key)));
+                    resolve(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key));
                   });
                 });
               }
@@ -62,7 +62,7 @@ export class Message extends Entity {
             }).then(response => {
               return response.arrayBuffer();
             }).then(arrayBuffer => {
-              resolve(window.btoa(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key)));
+              resolve(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key));
             });
           });
           return {
