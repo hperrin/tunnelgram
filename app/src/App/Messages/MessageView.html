@@ -1,11 +1,11 @@
 <div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
+  {#if _showActions && isOwner}
+    <div class="h1 mr-3 my-0" style="font-size: 0;">
+      <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
+    </div>
+  {/if}
   {#if shouldEmbiggen}
-    {#if _showEmbiggenedActions && isOwner}
-      <div class="h1 mr-3 my-0" style="font-size: 0;">
-        <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
-      </div>
-    {/if}
-    <div class="h1 mx-3 my-0" on:dblclick="set({_showEmbiggenedActions: isOwner && !_showEmbiggenedActions})">
+    <div class="h1 mx-3 my-0" on:dblclick="set({_showActions: isOwner && !_showActions})">
       {#if message.decrypted.text != null}
         {message.decrypted.text}
       {:else}
@@ -19,16 +19,11 @@
           <ImageGrid images="{message.decrypted.images}" />
         </div>
       {/if}
-      <div class="card-body py-1 px-2 m-0" data-toggle="collapse" href="#{message.guid}_actions" tabindex="{isOwner ? '0' : '-1'}">
+      <div class="card-body py-1 px-2 m-0" tabindex="{isOwner ? '0' : '-1'}" role="{isOwner ? 'button' : ''}" on:dblclick="set({_showActions: isOwner && !_showActions})">
         {#if _formattedText != null}
           <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
         {/if}
       </div>
-      {#if isOwner}
-        <div class="card-footer collapse text-right py-1 px-2" id="{message.guid}_actions">
-          <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
-        </div>
-      {/if}
     </div>
   {/if}
   <small class="text-muted">
@@ -131,7 +126,7 @@
 
     data () {
       return {
-        _showEmbiggenedActions: false,
+        _showActions: false,
         _formattedText: null,
         message: null,
         readLineCDate: false,
