@@ -1,6 +1,6 @@
 <div class="rounded-circle d-inline-flex justify-content-center align-items-center" style="width: {size || '40'}px; height: {size || '40'}px;">
   {#if user.data.avatar}
-    <img class="rounded-circle" src="{user.data.avatar}" width="{size || '40'}" height="{size || '40'}" alt="{user.data.name}'s avatar" />
+    <img class="rounded-circle" src="{avatarUrl}" width="{size || '40'}" height="{size || '40'}" alt="{user.data.name}'s avatar" />
   {:elseif user.data.nameFirst || user.data.nameLast}
     <div class="rounded-circle d-flex justify-content-center align-items-center bg-info text-white w-100 h-100" style="font-size: {parseFloat(size || '40') * .6}px; line-height: {parseFloat(size || '40') * .6}px; pointer-events: none; user-select: none;">
       {user.data.nameFirst === '' ? '' : user.data.nameFirst.substr(0, 1).toUpperCase()}{user.data.nameLast === '' ? '' : user.data.nameLast.substr(0, 1).toUpperCase()}
@@ -14,6 +14,10 @@
 
 <script>
   export default {
+    computed: {
+      avatarUrl: ({user}) => user.data.avatar.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')
+    },
+
     helpers: {
       parseFloat
     }
