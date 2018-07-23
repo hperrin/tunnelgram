@@ -21,23 +21,15 @@ const resizeImage = (type, maxWidth, maxHeight, crop) => {
   // Determine new ratio based on max size.
   let ratio = 1;
   if (img.width > maxWidth || img.height > maxHeight) {
-    if (crop) {
-      if (img.width - maxWidth > img.height - maxHeight) {
-        ratio = maxWidth / img.width;
-      } else {
-        ratio = maxHeight / img.height;
-      }
-    } else {
-      let ratioWidth = 1;
-      let ratioHeight = 1;
-      if (img.width > maxWidth) {
-        ratioWidth = maxWidth / img.width;
-      }
-      if (img.height > maxHeight) {
-        ratioHeight = maxHeight / img.height;
-      }
-      ratio = Math.min(ratioWidth, ratioHeight);
+    let ratioWidth = 1;
+    let ratioHeight = 1;
+    if (img.width > maxWidth) {
+      ratioWidth = maxWidth / img.width;
     }
+    if (img.height > maxHeight) {
+      ratioHeight = maxHeight / img.height;
+    }
+    ratio = (crop ? Math.max : Math.min)(ratioWidth, ratioHeight);
   }
 
   // Draw original image in second canvas.
@@ -46,9 +38,19 @@ const resizeImage = (type, maxWidth, maxHeight, crop) => {
   copyContext.drawImage(img, 0, 0);
 
   // Copy and resize second canvas to first canvas.
-  canvas.width = img.width * ratio;
-  canvas.height = img.height * ratio;
-  ctx.drawImage(canvasCopy, 0, 0, canvasCopy.width, canvasCopy.height, 0, 0, canvas.width, canvas.height);
+  const ratioWidth = img.width * ratio;
+  const ratioHeight = img.height * ratio;
+  canvas.width = Math.min(ratioWidth, maxWidth);
+  canvas.height = Math.min(ratioHeight, maxHeight);
+
+  let x = 0;
+  let y = 0;
+  if (crop) {
+    x = (maxWidth - ratioWidth) / 2;
+    y = (maxHeight - ratioHeight) / 2;
+  }
+
+  ctx.drawImage(canvasCopy, 0, 0, canvasCopy.width, canvasCopy.height, x, y, ratioWidth, ratioHeight);
 
   return {
     data: canvas.transferToImageBitmap(),

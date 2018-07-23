@@ -1,6 +1,17 @@
 <div class="h-100 w-100" style="overflow-y: auto; overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center py-3">
-    <div class="d-inline-block mb-3">
+    <div class="d-inline-block position-relative mb-3" on:mouseenter="set({_mouseOverAvatar: true})" on:mouseleave="set({_mouseOverAvatar: false})">
+      {#if $viewUserIsSelf}
+        <input class="d-none" type="file" ref:avatarInput on:change="handleAvatar(event.target.files)">
+        <a class="{_mouseOverAvatar ? 'd-flex' : 'd-none'} position-absolute h-100 w-100 justify-content-center align-items-center" href="javascript:void(0)" on:click="refs.avatarInput.click()">
+          <i class="fas fa-upload fa-3x"></i>
+        </a>
+      {/if}
+      {#if _avatarLoading}
+        <div class="d-flex position-absolute h-100 w-100 justify-content-center align-items-center">
+          <LoadingIndicator width="160px" height="160px" />
+        </div>
+      {/if}
       <Avatar user="{$viewUser}" size="160" />
     </div>
     <h2>{$viewUser.data.name}</h2>
@@ -102,8 +113,11 @@
   import {TilmeldChangePassword} from 'tilmeld-client';
   import moment from 'moment';
   import QRCode from 'qrcode';
+  import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Conversation';
   import Avatar from './Avatar.html';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import ResizeImage from '../../Services/ResizeImage';
   import getCookieValue from '../../Services/getCookieValue';
   import ErrHandler from '../../ErrHandler';
 
@@ -160,6 +174,8 @@
     data () {
       return {
         _startingConversation: false,
+        _mouseOverAvatar: false,
+        _avatarLoading: false,
         clientConfig: {}
         // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
       };
@@ -186,10 +202,39 @@
       setExperiment (name, value) {
         document.cookie = `${name}=${value ? 'true' : ''}`;
         this.set({[name]: value});
+      },
+
+      handleAvatar (files) {
+        const file = files[0];
+
+        if (!file.type.startsWith('image/')) {
+          PNotify.notice({
+            title: 'Only Image',
+            text: 'What are you doing? You can only use an image as an avatar.'
+          });
+          return;
+        }
+
+        this.set({_avatarLoading: true});
+
+        const reader = new FileReader();
+        reader.onload = async e => {
+          let resizeImage = new ResizeImage(e.target.result, file.type);
+          const avatarImg = await resizeImage.resizeCrop(500, 500);
+          resizeImage.destroy();
+
+          const {viewUser} = this.store.get();
+          viewUser.set({avatar: avatarImg.data});
+
+          this.store.set({viewUser});
+          this.set({_avatarLoading: false});
+        };
+        reader.readAsDataURL(file);
       }
     },
 
     components: {
+      LoadingIndicator,
       TilmeldChangePassword,
       Avatar
     },

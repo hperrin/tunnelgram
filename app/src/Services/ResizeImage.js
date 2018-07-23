@@ -86,23 +86,15 @@ export default class ResizeImage {
       // Determine new ratio based on max size.
       let ratio = 1;
       if (this.img.width > maxWidth || this.img.height > maxHeight) {
-        if (crop) {
-          if (this.img.width - maxWidth > this.img.height - maxHeight) {
-            ratio = maxWidth / this.img.width;
-          } else {
-            ratio = maxHeight / this.img.height;
-          }
-        } else {
-          let ratioWidth = 1;
-          let ratioHeight = 1;
-          if (this.img.width > maxWidth) {
-            ratioWidth = maxWidth / this.img.width;
-          }
-          if (this.img.height > maxHeight) {
-            ratioHeight = maxHeight / this.img.height;
-          }
-          ratio = Math.min(ratioWidth, ratioHeight);
+        let ratioWidth = 1;
+        let ratioHeight = 1;
+        if (this.img.width > maxWidth) {
+          ratioWidth = maxWidth / this.img.width;
         }
+        if (this.img.height > maxHeight) {
+          ratioHeight = maxHeight / this.img.height;
+        }
+        ratio = (crop ? Math.max : Math.min)(ratioWidth, ratioHeight);
       }
 
       // Draw original image in second canvas.
@@ -111,9 +103,19 @@ export default class ResizeImage {
       copyContext.drawImage(this.img, 0, 0);
 
       // Copy and resize second canvas to first canvas.
-      this.canvas.width = this.img.width * ratio;
-      this.canvas.height = this.img.height * ratio;
-      ctx.drawImage(this.canvasCopy, 0, 0, this.canvasCopy.width, this.canvasCopy.height, 0, 0, this.canvas.width, this.canvas.height);
+      const ratioWidth = this.img.width * ratio;
+      const ratioHeight = this.img.height * ratio;
+      this.canvas.width = Math.min(ratioWidth, maxWidth);
+      this.canvas.height = Math.min(ratioHeight, maxHeight);
+
+      let x = 0;
+      let y = 0;
+      if (crop && (this.img.width > maxWidth || this.img.height > maxHeight)) {
+        x = (maxWidth - ratioWidth) / 2;
+        y = (maxHeight - ratioHeight) / 2;
+      }
+
+      ctx.drawImage(this.canvasCopy, 0, 0, this.canvasCopy.width, this.canvasCopy.height, x, y, ratioWidth, ratioHeight);
 
       return {
         data: this.canvas.toDataURL(this.type, .95),

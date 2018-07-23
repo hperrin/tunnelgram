@@ -1,5 +1,6 @@
 <?php
 
+use Ramsey\Uuid\Uuid;
 use SciActive\Hook;
 
 // Hook Nymph and Tilmeld methods.
@@ -75,4 +76,51 @@ use SciActive\Hook;
 
   Hook::addCallback('Tilmeld\Entities\User->changePassword', -50, $PasswordUpdateHookBefore);
   Hook::addCallback('Tilmeld\Entities\User->changePassword', 50, $PasswordUpdateHookAfter);
+
+  // Upload new avatars.
+  $AvatarUpdateHookBefore = function (&$array, $name, &$object, &$function, &$data) {
+    if (isset($object->avatar) && substr($object->avatar, 0, 5) === 'data:') {
+      try {
+        // First resize the avatar to 250x250.
+        $handle = fopen($object->avatar, 'rb');
+        $image = new Imagick();
+        if (!$image->readImageFile($handle)) throw new Exception();
+        if (!$image->cropThumbnailImage(250, 250)) throw new Exception();
+        if (!$image->setImageFormat('jpeg')) throw new Exception();
+        $newAvatar = $image->getImageBlob();
+        if (empty($newAvatar)) throw new Exception();
+
+        // Save any previous avatar for deletion.
+        if (isset($object->guid)) {
+          $user = \Tilmeld\Entities\User::factory($object->guid);
+          if (isset($user->avatarId)) {
+            $data['oldAvatarId'] = $user->avatarId;
+          }
+        }
+
+        // Upload avatar to blob store.
+        $object->avatarId = Uuid::uuid4()->toString();
+        include_once(__DIR__.'/Blob/BlobClient.php');
+        $client = new \Tunnelgram\BlobClient();
+        $object->avatar = $client->upload(
+            'tunnelgram-avatars',
+            $object->avatarId,
+            $newAvatar
+        );
+      } catch (\Exception $e) {
+        $array = false;
+      }
+    }
+  };
+  $AvatarUpdateHookAfter = function (&$return, $name, &$object, &$function, &$data) {
+    if (isset($data['oldAvatarId'])) {
+      // Delete images from blob store.
+      include_once(__DIR__.'/Blob/BlobClient.php');
+      $client = new \Tunnelgram\BlobClient();
+      $client->delete('tunnelgram-avatars', $data['oldAvatarId']);
+    }
+  };
+
+  Hook::addCallback('Tilmeld\Entities\User->save', -50, $AvatarUpdateHookBefore);
+  Hook::addCallback('Tilmeld\Entities\User->save', 50, $AvatarUpdateHookAfter);
 })();
