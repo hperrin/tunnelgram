@@ -21,11 +21,11 @@
           </div>
         </div>
       {/if}
-      {#each messages as message (message.guid)}
-        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}"></MessageView>
+      {#each messages as message, i (message.guid)}
+        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showTime="{i > 0 && showTime(messages[i - 1].cdate, message.cdate)}"></MessageView>
       {/each}
       {#each pending as message}
-        <MessageView bind:message on:rendered="rescrollToBottom()" pending="true"></MessageView>
+        <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[messages.length - 1].cdate)}"></MessageView>
       {/each}
     </div>
   {/if}
@@ -357,7 +357,22 @@
     },
 
     helpers: {
-      moment
+      moment,
+      showTime (time1, time2) {
+        if (time2 === undefined) {
+          time2 = new Date() / 1000;
+        }
+        const now = new Date() / 1000;
+        if (now - time1 > 6 * 24 * 60 * 60) {
+          // More than 6 days ago.
+          return (time2 - time1 > 24 * 60 * 60); // 24 hours
+        } else if (now - time1 > 24 * 60 * 60) {
+          // More than 1 day ago.
+          return (time2 - time1 > 4 * 60 * 60); // 4 hours
+        } else {
+          return (time2 - time1 > 2 * 60 * 60); // 2 hours
+        }
+      }
     }
   };
 </script>

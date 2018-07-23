@@ -1,11 +1,21 @@
+{#if showTime}
+  <small class="d-flex justify-content-center w-100 text-muted">
+    {createdDateRelative}
+  </small>
+{/if}
 <div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if _showActions && isOwner}
     <div class="h1 mr-3 my-0" style="font-size: 0;">
       <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
     </div>
   {/if}
+  {#if !isOwner && message.data.user !== null && message.data.user.data.name !== null}
+    <a class="d-inline-flex ml-3 my-0 align-items-center align-self-start" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
+      <Avatar user="{message.data.user}" size="18" />
+    </a>
+  {/if}
   {#if shouldEmbiggen}
-    <div class="h1 mx-3 my-0" on:dblclick="set({_showActions: isOwner && !_showActions})">
+    <div class="h1 mx-3 my-0" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if message.decrypted.text != null}
         {message.decrypted.text}
       {:else}
@@ -13,27 +23,29 @@
       {/if}
     </div>
   {:else}
-    <div class="card mx-3 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;">
+    <div class="card mx-3 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if message.decrypted.images.length}
         <div class="card-body p-0 m-0">
           <ImageGrid images="{message.decrypted.images}" />
         </div>
       {/if}
-      <div class="card-body py-1 px-2 m-0" tabindex="{isOwner ? '0' : '-1'}" role="{isOwner ? 'button' : ''}" on:dblclick="set({_showActions: isOwner && !_showActions})">
+      <div class="card-body py-1 px-2 m-0">
         {#if _formattedText != null}
           <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
         {/if}
       </div>
     </div>
   {/if}
-  <small class="text-muted">
-    <span>{isOwner ? '' : (message.data.user.data.name || 'Loading...')}{@html isOwner ? '' : '&nbsp;'}</span>
-    {#if pending}
+  {#if _showActions}
+    <div class="mr-3 my-0">
+      <small class="text-muted">{createdDate}</small>
+    </div>
+  {/if}
+  {#if pending}
+    <small class="text-muted">
       <span><i class="fas fa-sync fa-spin"></i></span>
-    {:else}
-      <span title="{moment.unix(message.cdate).format('llll')}">{createdDate}</span>
-    {/if}
-  </small>
+    </small>
+  {/if}
 </div>
 {#if readLineCDate === message.cdate}
   <div class="d-flex align-items-center w-100 readline">
@@ -48,6 +60,7 @@
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
   import ImageGrid from './ImageGrid.html';
+  import Avatar from '../Users/Avatar.html';
   import ErrHandler from '../../ErrHandler';
 
   const converter = new showdown.Converter({
@@ -70,7 +83,29 @@
 
   export default {
     oncreate () {
-      const updateTime = () => this.set({createdDate: moment(new Date(Math.min(this.get().message.cdate * 1000, new Date()))).fromNow()});
+      const updateTime = () => {
+        if (!this.get().showTime) {
+          this.set({createdDateRelative: ''});
+          return;
+        }
+        const {cdate} = this.get().message;
+        const now = new Date() / 1000;
+        const cdateMoment = moment(new Date(Math.min(cdate * 1000, new Date())));
+        let createdDateRelative;
+        if (now - cdate > 10 * 30 * 24 * 60 * 60) {
+          // More than 10 months ago.
+          createdDateRelative = cdateMoment.format('MMM D, YYYY');
+        } else if (now - cdate > 6 * 24 * 60 * 60) {
+          // More than 6 days ago.
+          createdDateRelative = cdateMoment.format('MMM D');
+        } else if (now - cdate > 24 * 60 * 60) {
+          // More than 1 day ago.
+          createdDateRelative = cdateMoment.format('ddd, hA');
+        } else {
+          createdDateRelative = cdateMoment.fromNow();
+        }
+        this.set({createdDateRelative});
+      };
       this.interval = window.setInterval(updateTime, 10000);
       updateTime();
 
@@ -109,6 +144,7 @@
 
     computed: {
       isOwner: ({message, pending, $user}) => pending || $user.is(message.data.user),
+      createdDate: ({message}) => moment.unix(message.cdate).format('llll'),
       cdateJson: ({message}) => JSON.stringify(message.cdate),
       shouldEmbiggen: ({message}) => {
         // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
@@ -144,11 +180,8 @@
     },
 
     components: {
-      ImageGrid
-    },
-
-    helpers: {
-      moment
+      ImageGrid,
+      Avatar
     }
   };
 </script>
