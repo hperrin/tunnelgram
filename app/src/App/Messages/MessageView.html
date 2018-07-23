@@ -1,27 +1,27 @@
 {#if showTime}
-  <small class="d-flex justify-content-center w-100 text-muted">
+  <small class="d-flex justify-content-center w-100 mb-2 text-muted">
     {createdDateRelative}
   </small>
 {/if}
-<div class="message d-flex align-items-center w-100 mb-3 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
+<div class="message d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if _showActions && isOwner}
-    <div class="h1 mr-3 my-0" style="font-size: 0;">
+    <div class="h1 mr-2 my-0" style="font-size: 0;">
       <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
     </div>
   {/if}
   {#if !isOwner}
     {#if showAvatar && message.data.user !== null && message.data.user.data.name !== null}
-      <a class="d-inline-flex ml-3 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
+      <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
         <Avatar user="{message.data.user}" size="18" />
       </a>
     {:else}
-      <div class="d-inline-block ml-3 my-0">
+      <div class="d-inline-block ml-2 my-0">
         <div style="height: 18px; width: 18px;">&nbsp;</div>
       </div>
     {/if}
   {/if}
   {#if shouldEmbiggen}
-    <div class="h1 mx-3 my-0" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
+    <div class="h1 mx-2 my-0" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if message.decrypted.text != null}
         {message.decrypted.text}
       {:else}
@@ -29,7 +29,7 @@
       {/if}
     </div>
   {:else}
-    <div class="card mx-3 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
+    <div class="card mx-2 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if message.decrypted.images.length}
         <div class="card-body p-0 m-0">
           <ImageGrid images="{message.decrypted.images}" />
@@ -43,7 +43,7 @@
     </div>
   {/if}
   {#if _showActions}
-    <div class="mr-3 my-0">
+    <div class="mr-2 my-0">
       <small class="text-muted">{createdDate}</small>
     </div>
   {/if}
@@ -54,7 +54,7 @@
   {/if}
 </div>
 {#if readLineCDate === message.cdate}
-  <div class="d-flex align-items-center w-100 readline">
+  <div class="d-flex align-items-center w-100 mb-2 readline">
     <hr class="mx-2 flex-grow-1" />
     <small class="text-muted">new messages</small>
     <hr class="mx-2 flex-grow-1" />
