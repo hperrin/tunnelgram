@@ -1,4 +1,4 @@
-<div class="rounded-circle d-inline" style="width: {size || '40'}px; height: {size || '40'}px;">
+<div class="rounded-circle d-inline-block" style="width: {size || '40'}px; height: {size || '40'}px;">
   {#if user.data.avatar}
     <img class="rounded-circle" src="{avatarUrl}" width="{size || '40'}" height="{size || '40'}" alt="{user.data.name}'s avatar" />
   {:elseif user.data.nameFirst || user.data.nameLast}
