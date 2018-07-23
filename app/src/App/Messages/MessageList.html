@@ -22,7 +22,7 @@
         </div>
       {/if}
       {#each messages as message, i (message.guid)}
-        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showTime="{i > 0 && showTime(messages[i - 1].cdate, message.cdate)}"></MessageView>
+        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{messages.length === i + 1 || messages[i + 1].data.user.guid !== message.data.user.guid}" showTime="{i > 0 && showTime(messages[i - 1].cdate, message.cdate)}"></MessageView>
       {/each}
       {#each pending as message}
         <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[messages.length - 1].cdate)}"></MessageView>

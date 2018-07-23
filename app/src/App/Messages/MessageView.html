@@ -9,10 +9,16 @@
       <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
     </div>
   {/if}
-  {#if !isOwner && message.data.user !== null && message.data.user.data.name !== null}
-    <a class="d-inline-flex ml-3 my-0 align-items-center align-self-start" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
-      <Avatar user="{message.data.user}" size="18" />
-    </a>
+  {#if !isOwner}
+    {#if showAvatar && message.data.user !== null && message.data.user.data.name !== null}
+      <a class="d-inline-flex ml-3 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
+        <Avatar user="{message.data.user}" size="18" />
+      </a>
+    {:else}
+      <div class="d-inline-block ml-3 my-0">
+        <div style="height: 18px; width: 18px;">&nbsp;</div>
+      </div>
+    {/if}
   {/if}
   {#if shouldEmbiggen}
     <div class="h1 mx-3 my-0" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
@@ -166,6 +172,8 @@
         _formattedText: null,
         message: null,
         readLineCDate: false,
+        showAvatar: true,
+        showTime: false,
         pending: false
       };
     },
