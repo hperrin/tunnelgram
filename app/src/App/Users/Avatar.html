@@ -15,7 +15,7 @@
 <script>
   export default {
     computed: {
-      avatarUrl: ({user}) => user.data.avatar.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')
+      avatarUrl: ({user}) => user.data.avatar && user.data.avatar.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')
     },
 
     helpers: {
