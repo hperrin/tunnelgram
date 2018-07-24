@@ -20,28 +20,35 @@
       </div>
     {/if}
   {/if}
-  {#if shouldEmbiggen}
-    <div class="h1 mx-2 my-0" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
-      {#if message.decrypted.text != null}
-        {message.decrypted.text}
-      {:else}
-        <ImageGrid images="{message.decrypted.images}" />
-      {/if}
-    </div>
-  {:else}
-    <div class="card mx-2 my-0 rounded {isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light'}" style="min-width: 10rem; max-width: 80%;" tabindex="0" role="button" on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
-      {#if message.decrypted.images.length}
-        <div class="card-body p-0 m-0">
+  <div class="animation-stage">
+    <div
+      class="{shouldEmbiggen ? 'h1' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
+      style="{shouldEmbiggen ? '' : 'min-width: 10rem; max-width: 80%;'}"
+      tabindex="0"
+      role="button"
+      on:click="set({_flipFirst: !!flipper})"
+      on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
+      on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
+      {#if shouldEmbiggen}
+        {#if message.decrypted.text != null}
+          {flipper ? (_flipped ? flipper.back : flipper.front) : message.decrypted.text}
+        {:else}
           <ImageGrid images="{message.decrypted.images}" />
+        {/if}
+      {:else}
+        {#if message.decrypted.images.length && (!flipper || _flipped)}
+          <div class="card-body p-0 m-0">
+            <ImageGrid images="{message.decrypted.images}" />
+          </div>
+        {/if}
+        <div class="card-body py-1 px-2 m-0">
+          {#if _formattedText != null}
+            <div class="card-text markdown-body" ref:message>{@html flipper ? (_flipped ? flipper.back : flipper.front) : _formattedText}</div>
+          {/if}
         </div>
       {/if}
-      <div class="card-body py-1 px-2 m-0">
-        {#if _formattedText != null}
-          <div class="card-text markdown-body" ref:message>{@html _formattedText}</div>
-        {/if}
-      </div>
     </div>
-  {/if}
+  </div>
   {#if _showActions}
     <div class="mr-2 my-0">
       <small class="text-muted">{createdDate}</small>
@@ -157,11 +164,19 @@
         if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.text.match(bareEmojiRegex)) {
           return true;
         }
-
         if (message.decrypted.text == null && message.decrypted.images.length) {
           return true;
         }
-
+        return false;
+      },
+      flipper: ({message}) => {
+        if (message.decrypted.text != null && message.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
+          const match = message.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+          return {
+            front: converter.makeHtml(match[1]).replace(/\n$/, ''),
+            back: converter.makeHtml(match[2]).replace(/\n$/, '')
+          };
+        }
         return false;
       }
     },
@@ -206,4 +221,30 @@
     padding-bottom: 0;
     border-bottom: 0;
   }
+
+  .animation-stage {
+    perspective: 500px;
+  }
+  .flip-first {
+    animation: flip-first 0.25s linear both;
+  }
+  .flip-second {
+    animation: flip-second 0.25s linear both;
+  }
+   @keyframes flip-first {
+     0% {
+       transform: rotateY(0);
+     }
+     100% {
+       transform: rotateY(90deg);
+     }
+   }
+   @keyframes flip-second {
+     0% {
+       transform: rotateY(-90deg);
+     }
+     100% {
+       transform: rotateY(0);
+     }
+   }
 </style>
