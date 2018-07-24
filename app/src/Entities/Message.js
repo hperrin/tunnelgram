@@ -33,6 +33,11 @@ export class Message extends Entity {
       const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
       if (this.data.text != null) {
         this.decrypted.text = crypt.decrypt(this.data.text, key);
+        if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
+          const match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+          this.decrypted.text = match[1];
+          this.decrypted.secretText = match[2];
+        }
       } else if (this.data.images) {
         this.decrypted.text = null;
       }
@@ -88,6 +93,11 @@ export class Message extends Entity {
     const key = crypt.generateKey();
     if (this.decrypted.text != null) {
       this.data.text = crypt.encrypt(this.decrypted.text, key);
+      if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
+        const match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+        this.decrypted.text = match[1];
+        this.decrypted.secretText = match[2];
+      }
     }
     if (this.decrypted.images.length) {
       this.data.images = this.decrypted.images.map(image => ({

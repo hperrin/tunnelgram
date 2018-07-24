@@ -6,7 +6,7 @@
   {#if conversation.data.lastMessage}
     <small ref:lastmessage>
       {#if conversation.data.lastMessage.decrypted.text != null}
-        {conversation.data.lastMessage.decrypted.text.match(/^1> (?:.|\n)*\n2> ./) ? conversation.data.lastMessage.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/)[1] : conversation.data.lastMessage.decrypted.text}
+        {conversation.data.lastMessage.decrypted.text}
       {:elseif conversation.data.lastMessage.decrypted.images.length === 1}
         [A photo]
       {:elseif conversation.data.lastMessage.decrypted.images.length > 1}

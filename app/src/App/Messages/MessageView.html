@@ -29,11 +29,13 @@
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
       on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if shouldEmbiggen}
-        {#if message.decrypted.text != null}
-          {flipper ? (_flipped ? flipper.back : flipper.front) : message.decrypted.text}
-        {:else}
-          <ImageGrid images="{message.decrypted.images}" />
-        {/if}
+        <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})">
+          {#if message.decrypted.text != null}
+            {(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}
+          {:else}
+            <ImageGrid images="{message.decrypted.images}" />
+          {/if}
+        </div>
       {:else}
         {#if message.decrypted.images.length && (!flipper || _flipped)}
           <div class="card-body p-0 m-0">
@@ -42,7 +44,7 @@
         {/if}
         <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
           {#if _formattedText != null}
-            <div class="card-text markdown-body" ref:message>{@html flipper ? (_flipped ? flipper.back : flipper.front) : _formattedText}</div>
+            <div class="card-text markdown-body" ref:message>{@html (flipper && _flipped) ? _formattedSecretText : _formattedText}</div>
           {/if}
         </div>
       {/if}
@@ -139,7 +141,10 @@
       if (current.message && current.message.decrypted.text != null && current._formattedText === null) {
         const {message} = current;
         if (message.decrypted.text != null) {
-          this.set({_formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, '')});
+          this.set({
+            _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
+            _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
+          });
         }
       }
     },
@@ -161,23 +166,14 @@
       shouldEmbiggen: ({message}) => {
         // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
         if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.text.match(bareEmojiRegex)) {
-          return true;
+          return (message.decrypted.secretText == null || !!message.decrypted.secretText.match(bareEmojiRegex));
         }
         if (message.decrypted.text == null && message.decrypted.images.length) {
           return true;
         }
         return false;
       },
-      flipper: ({message}) => {
-        if (message.decrypted.text != null && message.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
-          const match = message.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
-          return {
-            front: converter.makeHtml(match[1]).replace(/\n$/, ''),
-            back: converter.makeHtml(match[2]).replace(/\n$/, '')
-          };
-        }
-        return false;
-      }
+      flipper: ({message}) => message.decrypted.secretText != null
     },
 
     data () {
