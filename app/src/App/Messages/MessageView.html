@@ -20,13 +20,12 @@
       </div>
     {/if}
   {/if}
-  <div class="animation-stage">
+  <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}">
     <div
       class="{shouldEmbiggen ? 'h1' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
       style="{shouldEmbiggen ? '' : 'min-width: 10rem; max-width: 80%;'}"
       tabindex="0"
       role="button"
-      on:click="set({_flipFirst: !!flipper})"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
       on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if shouldEmbiggen}
@@ -41,7 +40,7 @@
             <ImageGrid images="{message.decrypted.images}" />
           </div>
         {/if}
-        <div class="card-body py-1 px-2 m-0">
+        <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
           {#if _formattedText != null}
             <div class="card-text markdown-body" ref:message>{@html flipper ? (_flipped ? flipper.back : flipper.front) : _formattedText}</div>
           {/if}
