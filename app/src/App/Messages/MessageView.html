@@ -20,10 +20,10 @@
       </div>
     {/if}
   {/if}
-  <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}">
+  <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
       class="{shouldEmbiggen ? 'h1' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
-      style="{shouldEmbiggen ? '' : 'min-width: 10rem; max-width: 80%;'}"
+      style="{shouldEmbiggen ? '' : 'min-width: 10rem;'}"
       tabindex="0"
       role="button"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
