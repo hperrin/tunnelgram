@@ -80,9 +80,19 @@
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
-          this.subscribe();
           const {conversations} = this.store.get();
-          conversations.map(c => c.refresh().then(() => this.store.set({conversations})));
+          Nymph.getEntities({
+            'class': Conversation.class,
+            'sort': 'mdate',
+            'reverse': true
+          }, {
+            'type': '&',
+            'gt': ['mdate', conversations.length ? Math.max(...conversations.map(c => c.mdate)) : 0]
+          }).then(newConversations => {
+            let newArray = [...newConversations, ...conversations.filter(c => !c.inArray(newConversations))];
+            this.sortConversations(newArray);
+            this.store.set({conversations: newArray});
+          });
         }
         this.set({_disconnected: false});
       };

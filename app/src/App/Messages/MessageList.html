@@ -55,9 +55,18 @@
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
-          this.subscribe();
           const {messages} = this.get();
-          messages.map(m => m.refresh().then(() => this.set({messages})));
+          const {conversation} = this.store.get();
+          Nymph.getEntities({
+            'class': Message.class,
+            'sort': 'cdate'
+          }, {
+            'type': '&',
+            'ref': ['conversation', conversation.guid],
+            'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
+          }).then(newMessages => {
+            this.set({messages: [...messages, ...newMessages]})
+          });
         }
         this.set({_disconnected: false});
       };
