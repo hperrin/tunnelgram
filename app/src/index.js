@@ -32,6 +32,7 @@ const sleepyGroupCacheService = new SleepyCacheService(Group);
 const sleepyConversationCacheService = new SleepyCacheService(Conversation);
 const sleepyMessageCacheService = new SleepyCacheService(Message);
 const router = new Navigo(null, true, '#');
+let setupSubscription;
 
 const store = new UserStore({
   conversations: [],
@@ -98,29 +99,48 @@ User.on('logout', () => {
   await store.get().ready;
 
   store.on('state', ({changed, current}) => {
-    if (changed.conversation && current.conversation && current.conversation.guid) {
-      const {conversation, conversations} = current;
+    let {conversation, conversations} = current;
 
-      if (conversation.data.user.isASleepingReference) {
-        conversation.readyAll(() => store.set({conversation}), ErrHandler, 1);
-      }
-
+    if (changed.conversation && conversation && conversation.guid) {
       // Refresh conversations' readlines when current conversation changes.
       for (let curConv of conversations) {
-        if (curConv != null && conversation != null) {
-          if (conversation.guid === curConv.guid && curConv.readline !== conversation.readline) {
-            // They are the same entity, but different instances.
-            curConv.readline = conversation.readline;
-            store.set({conversations});
-          } else if (conversation === curConv) {
-            // They are the same instance, so just mark conversations as changed.
-            store.set({conversations});
-          }
+        if (curConv != null && conversation != null && conversation === curConv) {
+          // They are the same instance, so mark conversations as changed.
+          store.set({conversations});
+          break;
+          // If they are the same entity, but different instances, the next code
+          // block will update conversations.
         }
       }
     }
 
-    if (changed.conversations && current.conversations.length === 0) {
+    // 'conversation' and the corresponding entity in 'conversations' should be
+    // the same instance, so check to make sure they are.
+    if ((changed.conversations || changed.conversation) && conversation && conversation.guid) {
+      const idx = conversation.arraySearch(conversations);
+
+      if (idx !== false && conversation !== conversations[idx]) {
+        // Check both of their modified dates. Whichever is most recent wins.
+        if (conversations[idx].mdate > conversation.mdate) {
+          conversation = conversations[idx];
+          store.set({conversation});
+        } else {
+          conversations[idx] = conversation;
+          store.set({conversations});
+        }
+      }
+    }
+
+    if (changed.conversations) {
+      // Ready all the conversations' entities.
+      for (let curConv of conversations) {
+        if (curConv.data.user.isASleepingReference) {
+          curConv.readyAll(() => store.set({conversations}), ErrHandler, 1);
+        }
+      }
+    }
+
+    if (changed.conversations && conversations.length === 0) {
       router.navigate('/c');
     }
 
@@ -129,8 +149,16 @@ User.on('logout', () => {
       store.refreshAll();
     }
 
-    if (changed.user) {
-      router.resolve();
+    if (changed.user && current.user) {
+      const route = router.lastRouteResolved();
+      const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+      if (queryMatch) {
+        router.navigate(decodeURIComponent(queryMatch[1]));
+      }
+
+      if (setupSubscription) {
+        setupSubscription();
+      }
     }
   });
 
@@ -160,7 +188,7 @@ User.on('logout', () => {
     // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
 
     if (pushSupport && notificationSupport) {
-      const setupSubscription = async () => {
+      setupSubscription = async () => {
         const getSubscription = () => {
           return navigator.serviceWorker.ready.then(registration => {
             return registration.pushManager.getSubscription();
@@ -251,11 +279,9 @@ User.on('logout', () => {
       }});
 
       if (Notification.permission === 'granted') {
-        setupSubscription();
-
-        User.on('login', () => {
+        if (store.get().user) {
           setupSubscription();
-        });
+        }
       }
     }
   })();
@@ -344,6 +370,11 @@ User.on('logout', () => {
   router.hooks({
     before: (done, params) => {
       if (!store.get().user) {
+        const route = router.lastRouteResolved();
+        if (route.url !== '/' && route.url !== '') {
+          const url = route.url + (route.query !== '' ? '?'+route.query : '');
+          router.navigate('/?continue='+encodeURIComponent(url));
+        }
         done(false);
       } else {
         done();
@@ -378,6 +409,7 @@ User.on('logout', () => {
 
 // useful for debugging!
 window.store = store;
+window.router = router;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;
