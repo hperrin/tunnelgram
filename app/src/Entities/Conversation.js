@@ -112,7 +112,7 @@ export class Conversation extends Entity {
         'class': Message.class,
         'return': 'guid'
       }, {
-        type: '&',
+        'type': '&',
         'ref': ['conversation', this.guid],
         'gt': ['cdate', this.readline]
       });
@@ -126,17 +126,17 @@ export class Conversation extends Entity {
       this.readline = args[0];
       this.unreadCountPromise = null;
     }
-    return this.serverCall('saveReadline', args);
+    return this.serverCall('saveReadline', args, true);
   }
 
   clearReadline (...args) {
     this.readline = null;
     this.unreadCountPromise = null;
-    return this.serverCall('clearReadline', args);
+    return this.serverCall('clearReadline', args, true);
   }
 
   findMatchingConversations(...args) {
-    return this.serverCall('findMatchingConversations', args);
+    return this.serverCall('findMatchingConversations', args, true);
   }
 }
 
