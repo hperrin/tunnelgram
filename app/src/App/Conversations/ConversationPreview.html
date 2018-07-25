@@ -1,38 +1,48 @@
-<div class="d-flex w-100 justify-content-between align-items-start">
-  <h5 class="mb-0">{name}</h5>
-  <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{modifiedDate}</small>
-</div>
-<div class="d-flex w-100 mt-1 justify-content-between align-items-end">
-  {#if conversation.data.lastMessage}
-    <small ref:lastmessage>
-      {#if conversation.data.lastMessage.decrypted.text != null}
-        {conversation.data.lastMessage.decrypted.text}
-      {:elseif conversation.data.lastMessage.decrypted.images.length === 1}
-        [A photo]
-      {:elseif conversation.data.lastMessage.decrypted.images.length > 1}
-        [Photos]
+<div class="d-flex w-100 justify-content-center align-items-center">
+  <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px;">
+    {#each avatarUsersAndWidth.users as user}
+      <Avatar user="{user}" size="{avatarUsersAndWidth.width}" />
+    {/each}
+  </div>
+  <div class="flex-grow-1 ml-2">
+    <div class="d-flex w-100 justify-content-between align-items-start">
+      <h5 class="mb-0">{name}</h5>
+      <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{modifiedDate}</small>
+    </div>
+    <div class="d-flex w-100 justify-content-between align-items-end">
+      {#if conversation.data.lastMessage}
+        <small ref:lastmessage>
+          {#if conversation.data.lastMessage.decrypted.text != null}
+            {conversation.data.lastMessage.decrypted.text}
+          {:elseif conversation.data.lastMessage.decrypted.images.length === 1}
+            [A photo]
+          {:elseif conversation.data.lastMessage.decrypted.images.length > 1}
+            [Photos]
+          {/if}
+        </small>
+      {:else}
+        <span>&nbsp;</span>
       {/if}
-    </small>
-  {:else}
-    <span>&nbsp;</span>
-  {/if}
-  {#await _unreadCount}
-    <span>&nbsp;</span>
-  {:then count}
-    {#if count === 0}
-      <span>&nbsp;</span>
-    {:elseif count === true}
-      <span class="badge badge-primary">New</span>
-    {:else}
-      <span class="badge badge-primary">{count}</span>
-    {/if}
-  {:catch e}
-    <span>&nbsp;</span>
-  {/await}
+      {#await _unreadCount}
+        <span>&nbsp;</span>
+      {:then count}
+        {#if count === 0}
+          <span>&nbsp;</span>
+        {:elseif count === true}
+          <span class="badge badge-primary">New</span>
+        {:else}
+          <span class="badge badge-primary">{count}</span>
+        {/if}
+      {:catch e}
+        <span>&nbsp;</span>
+      {/await}
+    </div>
+  </div>
 </div>
 
 <script>
   import moment from 'moment';
+  import Avatar from '../Users/Avatar.html';
   import Conversation from '../../Entities/Conversation';
   import ErrHandler from '../../ErrHandler';
 
@@ -66,6 +76,29 @@
       this.storeStateListener.cancel();
     },
 
+    computed: {
+      name: ({conversation, $user}) => conversation.getName($user),
+      isOwner: ({conversation, $user}) => $user.is(conversation.data.user),
+      avatarUsersAndWidth: ({conversation, $user}) => {
+        let users;
+        if (!conversation.data.acFull) {
+          users = [];
+        } else if (conversation.data.acFull.length === 1) {
+          users = conversation.data.acFull;
+        } else {
+          users = conversation.data.acFull.filter(u => !$user.is(u));
+        }
+        let i = 1;
+        while (i**2 < users.length) {
+          i++;
+        }
+        console.log({i});
+        const width = Math.floor(60 / i);
+        console.log({users, width});
+        return {users, width};
+      }
+    },
+
     data () {
       return {
         _readline: 0,
@@ -74,15 +107,14 @@
       }
     },
 
-    computed: {
-      name: ({conversation, $user}) => conversation.getName($user),
-      isOwner: ({conversation, $user}) => $user.is(conversation.data.user)
-    },
-
     methods: {
       updateTime () {
         this.set({modifiedDate: moment(new Date(Math.min(this.get().conversation.mdate * 1000, new Date()))).fromNow(true)});
       }
+    },
+
+    components: {
+      Avatar
     },
 
     helpers: {

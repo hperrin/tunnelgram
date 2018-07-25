@@ -8,9 +8,7 @@
   {:else}
     <div class="list-group">
       <a class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
-        <div class="d-flex w-100 align-items-center">
-          <h5 class="mb-0"><i class="fas fa-plus-circle"></i> New Conversation</h5>
-        </div>
+        <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
       </a>
       {#if $conversations.length > 1}
         <div class="list-group-item d-flex justify-content-center p-0 border-0">
@@ -26,17 +24,17 @@
       {/if}
       {#if $conversations.length}
         {#each $conversations as conversation (conversation.guid)}
-          <a class="list-group-item list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="fire('tunnelgram-navigate', {conversation})">
+          <a class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="fire('tunnelgram-navigate', {conversation})">
             <ConversationPreview bind:conversation />
           </a>
         {/each}
       {:else}
-        <div class="list-group-item rounded-0 flex-column align-items-start bg-transparent border-0">
+        <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
           You have no conversations yet.
         </div>
       {/if}
       {#if _loadingEarlierConversations}
-        <div class="list-group-item rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0">
+        <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0">
           <div class="col-auto">
             <LoadingIndicator width="50px" height="50px" />
           </div>
