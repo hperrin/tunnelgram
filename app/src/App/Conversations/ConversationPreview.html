@@ -38,7 +38,7 @@
 
   export default {
     oncreate () {
-      this.interval = window.setInterval(this.updateTime.bind(this), 10000);
+      this.interval = window.setInterval(() => this.updateTime(), 10000);
       this.updateTime();
 
       this.storeStateListener = this.store.on('state', ({changed}) => {
@@ -53,12 +53,7 @@
 
     onstate ({changed, current}) {
       if (changed.conversation && current.conversation) {
-        const {conversation} = current;
-        if (conversation.data.user.isASleepingReference) {
-          conversation.readyAll(() => this.set({conversation}), ErrHandler, 1);
-          this.updateTime();
-        }
-
+        this.updateTime();
         this.set({
           _unreadCount: current.conversation.unreadCount(),
           _readline: current.conversation.readline
@@ -85,10 +80,6 @@
     },
 
     methods: {
-      save () {
-        this.get().conversation.save().then(() => {}, ErrHandler);
-      },
-
       updateTime () {
         this.set({modifiedDate: moment(new Date(Math.min(this.get().conversation.mdate * 1000, new Date()))).fromNow(true)});
       }
