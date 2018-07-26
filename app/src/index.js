@@ -1,7 +1,5 @@
 import XMLHttpRequestWrapper from './Services/XMLHttpRequestWrapper';
-import 'bootstrap';
-import '@fortawesome/fontawesome';
-import '@fortawesome/fontawesome-free-solid';
+import './icons';
 import Navigo from 'navigo';
 import PNotify from 'pnotify/dist/es/PNotify';
 import 'pnotify/dist/es/PNotifyMobile';

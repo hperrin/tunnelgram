@@ -29,7 +29,7 @@
         {#if $user}
           <ul class="navbar-nav d-lg-none">
             <li class="nav-item">
-              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()">
+              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()" title="Conversations">
                 <i class="fas fa-comments"></i>
               </a>
             </li>
@@ -37,13 +37,13 @@
           <span class="navbar-text">
             {name}
           </span>
-          <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" on:click="updateNavbarHeightLots()">
+          <button class="navbar-toggler ml-auto" type="button" ref:navbarCollapse data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" on:click="updateNavbarHeightLots()">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <NavBar></NavBar>
             <ul class="navbar-nav ml-auto">
-              <li class="nav-item dropdown">
+              <li class="nav-item dropdown" ref:menuDropdown>
                 <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <Avatar user="{$user}" />
                 </a>
@@ -125,7 +125,7 @@
 
 <script>
   import {User, TilmeldLogin} from 'tilmeld-client';
-  import $ from 'jquery';
+  import bsn from 'bootstrap.native/dist/bootstrap-native-v4';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import NavBar from './App/NavBar.html';
   import FrontPage from './App/FrontPage.html';
@@ -162,10 +162,20 @@
 
   export default {
     actions: {
-      tooltip: node => $(node).tooltip()
+      tooltip: node => new bsn.Tooltip(node)
     },
 
     onupdate () {
+      if (this.refs.navbarCollapse && !this.navbarCollapse) {
+        this.navbarCollapse = new bsn.Collapse(this.refs.navbarCollapse);
+      } else if (!this.refs.navbarCollapse && this.navbarCollapse) {
+        delete this.navbarCollapse;
+      }
+      if (this.refs.menuDropdown && !this.menuDropdown) {
+        this.menuDropdown = new bsn.Dropdown(this.refs.menuDropdown);
+      } else if (!this.refs.menuDropdown && this.menuDropdown) {
+        delete this.menuDropdown;
+      }
       this.updateNavbarHeight();
     },
 

@@ -51,7 +51,7 @@
 </div>
 
 <script>
-  import EmojiConvertor from 'emoji-js';
+  import emoji from 'node-emoji';
   import PNotify from 'pnotify/dist/es/PNotify';
   import aesjs from 'aes-js';
   import base64js from 'base64-js';
@@ -61,8 +61,6 @@
   import LoadingIndicator from '../LoadingIndicator.html';
   import ResizeImage from '../../Services/ResizeImage';
   import ErrHandler from '../../ErrHandler';
-
-  const emoji = new EmojiConvertor();
 
   const mobile = (() => {
     let check = false;
@@ -95,7 +93,7 @@
 
       handleKeyUp (event) {
         const {text} = this.get();
-        const emojied = emoji.replace_colons(text);
+        const emojied = emoji.emojify(text);
         if (emojied !== text) {
           this.set({text: emojied});
         }
