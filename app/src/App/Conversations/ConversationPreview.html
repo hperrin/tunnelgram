@@ -4,7 +4,7 @@
       <Avatar user="{user}" size="{avatarUsersAndWidth.width}" />
     {/each}
   </div>
-  <div class="flex-grow-1 ml-2">
+  <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0">{name}</h5>
       <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{modifiedDate}</small>
