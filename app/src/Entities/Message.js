@@ -111,6 +111,19 @@ export class Message extends Entity {
         thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
         thumbnail: crypt.encrypt(image.thumbnail, key)
       }));
+    } else if (this.decrypted.video != null) {
+      this.data.video = {
+        name: crypt.encrypt(this.decrypted.video.name, key),
+        dataType: crypt.encrypt(this.decrypted.video.dataType, key),
+        dataWidth: crypt.encrypt(this.decrypted.video.dataWidth, key),
+        dataHeight: crypt.encrypt(this.decrypted.video.dataHeight, key),
+        dataDuration: crypt.encrypt(this.decrypted.video.dataDuration, key),
+        data: crypt.encrypt(this.decrypted.video.data, key),
+        thumbnailType: crypt.encrypt(this.decrypted.video.thumbnailType, key),
+        thumbnailWidth: crypt.encrypt(this.decrypted.video.thumbnailWidth, key),
+        thumbnailHeight: crypt.encrypt(this.decrypted.video.thumbnailHeight, key),
+        thumbnail: crypt.encrypt(this.decrypted.video.thumbnail, key)
+      };
     }
 
     const encryptPromises = [];

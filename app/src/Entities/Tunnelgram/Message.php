@@ -12,6 +12,7 @@ class Message extends \Nymph\Entity {
   protected $whitelistData = [
     'text',
     'images',
+    'video',
     'keys',
     'conversation',
     'acRead'
@@ -20,10 +21,8 @@ class Message extends \Nymph\Entity {
   protected $whitelistTags = [];
 
   public function __construct($id = 0) {
-    $this->text = null;
     $this->images = [];
     $this->keys = [];
-    $this->conversation = null;
     parent::__construct($id);
   }
 
@@ -79,11 +78,20 @@ class Message extends \Nymph\Entity {
       return false;
     }
 
+    if (isset($this->video) && count($this->images) > 0) {
+      // Gotta be either images or video. Not both.
+      return false;
+    }
+
     if (!isset($this->guid)) {
       foreach ($this->images as &$curImg) {
         $curImg['id'] = Uuid::uuid4()->toString();
       }
       unset($curImg);
+
+      if ($this->video) {
+        $this->video['id'] = Uuid::uuid4()->toString();
+      }
     }
 
     $recipientGuids = [];
@@ -102,8 +110,11 @@ class Message extends \Nymph\Entity {
             )
         )
         ->when(
-            v::attribute('text', v::nullType()),
-            v::attribute('images', v::notEmpty()),
+            v::attribute('text', v::nullType(), false),
+            v::oneOf(
+              v::attribute('images', v::notEmpty()),
+              v::attribute('video', v::notEmpty())
+            ),
             v::attribute(
                 'text',
                 v::stringType()->notEmpty()->prnt()->length(
@@ -168,6 +179,68 @@ class Message extends \Nymph\Entity {
                 )
             )
         )
+        ->attribute(
+            'video',
+            v::oneOf(
+              v::nullType(),
+              v::arrayVal()->length(11, 11)->keySet(
+                  v::key(
+                      'id',
+                      v::regex('/'.Uuid::VALID_PATTERN.'/')
+                  ),
+                  v::key(
+                      'name',
+                      v::stringType()->notEmpty()->prnt()->length(
+                          1,
+                          ceil(2048 * 4 / 3) // Base64 of 2KiB
+                      )
+                  ),
+                  v::key(
+                      'thumbnail',
+                      v::stringType()->notEmpty()->prnt()->length(
+                          1,
+                          ceil(409600 * 4 / 3) // Base64 of 400KiB
+                      )
+                  ),
+                  v::key(
+                      'thumbnailType',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'thumbnailWidth',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'thumbnailHeight',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'data',
+                      v::stringType()->notEmpty()->prnt()->length(
+                          1,
+                          ceil(20971520 * 4 / 3) // Base64 of 20MiB
+                      )
+                  ),
+                  v::key(
+                      'dataType',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'dataWidth',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'dataHeight',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  ),
+                  v::key(
+                      'dataDuration',
+                      v::stringType()->notEmpty()->prnt()->length(1, 50)
+                  )
+              )
+            ),
+            false
+        )
         ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
         ->setName('message')
         ->assert($this->getValidatable());
@@ -189,6 +262,22 @@ class Message extends \Nymph\Entity {
           );
         }
         unset($curImg);
+      }
+
+      // Upload video to blob store.
+      if (!isset($this->guid) && $this->video) {
+        include(__DIR__.'/../../Blob/BlobClient.php');
+        $client = new BlobClient();
+        $this->video['thumbnail'] = $client->upload(
+            'tunnelgram-thumbnails',
+            $this->video['id'],
+            base64_decode($this->video['thumbnail'])
+        );
+        $this->video['data'] = $client->upload(
+            'tunnelgram-videos',
+            $this->video['id'],
+            base64_decode($this->video['data'])
+        );
       }
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());

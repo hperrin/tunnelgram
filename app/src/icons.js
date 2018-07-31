@@ -6,6 +6,7 @@ import fasMinus from '@fortawesome/fontawesome-free-solid/faMinus';
 import fasPlusCircle from '@fortawesome/fontawesome-free-solid/faPlusCircle';
 import fasFile from '@fortawesome/fontawesome-free-solid/faFile';
 import fasCamera from '@fortawesome/fontawesome-free-solid/faCamera';
+import fasVideo from '@fortawesome/fontawesome-free-solid/faVideo';
 import fasComment from '@fortawesome/fontawesome-free-solid/faComment';
 import fasTrashAlt from '@fortawesome/fontawesome-free-solid/faTrashAlt';
 import fasSync from '@fortawesome/fontawesome-free-solid/faSync';
@@ -20,6 +21,7 @@ fontawesome.library.add(
   fasPlusCircle,
   fasFile,
   fasCamera,
+  fasVideo,
   fasComment,
   fasTrashAlt,
   fasSync,

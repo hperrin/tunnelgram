@@ -18,7 +18,7 @@
     <MessageList bind:pending />
   </div>
   <form on:submit="newMessage(event.preventDefault())">
-    {#if images.length || _imagesLoading}
+    {#if images.length || video != null || _imagesLoading}
       <div class="d-flex flex-wrap justify-content-start align-items-start bg-secondary pt-2 pl-2">
         {#each images as image, i}
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
@@ -26,26 +26,42 @@
             <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})">
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
-            <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px;">
+            <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
               {image.dataWidth}x{image.dataHeight}
             </span>
-            <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px;">
-              {round(image.data.length / 1024 / 1024, 1)}MB
+            <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
+              {round((image.data.length / 1024 / 1024) * (3 / 4), 1)}MB
             </span>
           </div>
         {/each}
+        {#if video != null}
+          <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 border border-light position-relative" style="min-width: 152px; min-height: 152px;">
+            <video poster="{video.thumbnailImg}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" alt="{video.name}" title="{video.name}" controls>
+              <source src="{video.objectURL}" type="{video.dataType}" />
+            </video>
+            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({video: null})">
+              <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+            </button>
+            <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
+              {video.dataWidth}x{video.dataHeight} - {floor(video.dataDuration / (60 * 60))}:{floor((video.dataDuration % (60 * 60)) / 60)}:{floor(video.dataDuration % 60)}
+            </span>
+            <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
+              {round((video.data.length / 1024 / 1024) * (3 / 4), 1)}MB
+            </span>
+          </div>
+        {/if}
         {#if _imagesLoading}
           <div class="d-flex justify-content-center align-items-center text-white mr-2 mb-2" style="width: 152px; height: 152px;">
-            <LoadingIndicator width="50px" height="50px" text="Resizing..." />
+            <LoadingIndicator width="50px" height="50px" text="Resampling..." />
           </div>
         {/if}
       </div>
     {/if}
     <div class="d-flex align-items-stretch">
-      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)">
-      <button class="btn btn-lg btn-info" style="width: 60px;" type="button" on:click="refs.fileInput.click()"><i class="fas fa-camera"></i></button>
+      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/webm, video/mp4" multiple>
+      <button class="btn btn-lg btn-info p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 60px;" type="submit" disabled="{messageIsEmpty}"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty}" title="Send message"><i class="fas fa-comment"></i></button>
     </div>
   </form>
 </div>
@@ -79,6 +95,7 @@
         _imagesLoading: false,
         text: '',
         images: [],
+        video: null,
         pending: []
       };
     },
@@ -176,71 +193,155 @@
         this.handleFiles(event.dataTransfer.files);
       },
 
-      handleFiles (files) {
+      async handleFiles (files) {
         let imageCount = 0;
         const currentImageCount = this.get().images.length;
+        const hasVideo = !!this.get().video;
+
+        if (hasVideo) {
+          PNotify.notice({
+            title: 'Whoa There',
+            text: 'You\'ve already got a video pending. Send it or delete it before you add something else.'
+          });
+          return;
+        }
+
         for (var i = 0; i < files.length; i++) {
           const file = files[i];
 
-          if (!file.type.startsWith('image/')) {
+          if (file.type === 'video/webm' || file.type === 'video/mp4') {
+            if (currentImageCount + imageCount > 0) {
+              PNotify.notice({
+                title: 'Images or Video',
+                text: 'You gotta pick one.'
+              });
+              this.set({_imagesLoading: false});
+              continue;
+            }
+
+            if (file.size >= 20971520) {
+              PNotify.notice({
+                title: 'Too Big',
+                text: 'That video is too big. You can upload videos up to 20MB (MiB).'
+              });
+              this.set({_imagesLoading: false});
+              continue;
+            }
+
+            this.set({_imagesLoading: true});
+
+            const video = document.createElement('video');
+            const objectURL = URL.createObjectURL(file);
+            let resolve;
+            const p = new Promise(r => resolve = r);
+            video.onloadeddata = () => resolve();
+            video.src = objectURL;
+            await p;
+
+            if (!video.videoWidth || !video.videoHeight || !video.duration) {
+              PNotify.notice({
+                title: 'Unreadable',
+                text: 'Your browser can\'t read the video stream from this file.'
+              });
+              this.set({_imagesLoading: false});
+              break;
+            }
+
+            // Videos are handled differently than images.
+            const reader = new FileReader();
+            reader.onload = async e => {
+              let data = e.target.result;
+              let dataType = file.type;
+              let resizeImage = new ResizeImage(e.target.result, 'image/jpeg', video);
+              const thumbnailImg = await resizeImage.resizeContain(300, 300);
+              resizeImage.destroy();
+              const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+              const thumbnailType = thumbnailMatch[1];
+              const thumbnail = window.atob(thumbnailMatch[2]);
+
+              this.set({
+                video: {
+                  name: file.name,
+                  dataType,
+                  dataWidth: '' + video.videoWidth,
+                  dataHeight: '' + video.videoHeight,
+                  dataDuration: '' + video.duration,
+                  data,
+                  thumbnailType,
+                  thumbnailWidth: '' + thumbnailImg.width,
+                  thumbnailHeight: '' + thumbnailImg.height,
+                  thumbnail,
+                  thumbnailImg: thumbnailImg.data,
+                  objectURL
+                },
+                images: [],
+                _imagesLoading: false
+              });
+            };
+            reader.readAsDataURL(file);
+
+            break;
+          } else if (!file.type.startsWith('image/')) {
             PNotify.notice({
-              title: 'Only Images',
-              text: 'Right now, Tunnelgram only supports image uploads.'
+              title: 'Only Images/Video',
+              text: 'Right now, Tunnelgram only supports images, WebM videos, and MP4 videos.'
             });
             this.set({_imagesLoading: false});
-            continue;
-          }
-
-          if (currentImageCount + imageCount === 9) {
+          } else if (currentImageCount + imageCount === 9) {
             PNotify.notice({
               title: 'Max Images Reached',
               text: 'You can put up to 9 images into a message.'
             });
             break;
+          } else {
+            this.set({_imagesLoading: true});
+            imageCount++;
+
+            const reader = new FileReader();
+            reader.onload = async e => {
+              let size = 1400;
+              let dataImg;
+              let dataMatch;
+              let dataType;
+              let data;
+              let resizeImage = new ResizeImage(e.target.result, file.type);
+              do {
+                // Resize the image repeatedly down until the size is under 2MiB.
+                dataImg = await resizeImage.resizeContain(size, size);
+                dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+                dataType = dataMatch[1];
+                data = window.atob(dataMatch[2]);
+                size -= 200;
+              } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
+              const thumbnailImg = await resizeImage.resizeContain();
+              resizeImage.destroy();
+              const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+              const thumbnailType = thumbnailMatch[1];
+              const thumbnail = window.atob(thumbnailMatch[2]);
+
+              this.set({
+                images: this.get().images.concat([{
+                  name: file.name,
+                  dataType,
+                  dataWidth: '' + dataImg.width,
+                  dataHeight: '' + dataImg.height,
+                  data,
+                  thumbnailType,
+                  thumbnailWidth: '' + thumbnailImg.width,
+                  thumbnailHeight: '' + thumbnailImg.height,
+                  thumbnail,
+                  thumbnailImg: thumbnailImg.data
+                }]),
+                video: null
+              });
+
+              imageCount--;
+              if (imageCount === 0) {
+                this.set({_imagesLoading: false});
+              }
+            };
+            reader.readAsDataURL(file);
           }
-
-          this.set({_imagesLoading: true});
-          imageCount++;
-
-          const reader = new FileReader();
-          reader.onload = async e => {
-            let size = 1400;
-            let dataImg;
-            let dataMatch;
-            let dataType;
-            let data;
-            let resizeImage = new ResizeImage(e.target.result, file.type);
-            do {
-              // Resize the image repeatedly down until the size is under 2MiB.
-              dataImg = await resizeImage.resizeContain(size, size);
-              dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-              dataType = dataMatch[1];
-              data = window.atob(dataMatch[2]);
-              size -= 200;
-            } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
-            const thumbnailImg = await resizeImage.resizeContain();
-            resizeImage.destroy();
-            const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-            const thumbnailType = thumbnailMatch[1];
-            const thumbnail = window.atob(thumbnailMatch[2]);
-            this.set({images: this.get().images.concat([{
-              name: file.name,
-              dataType,
-              dataWidth: '' + dataImg.width,
-              dataHeight: '' + dataImg.height,
-              data,
-              thumbnailType,
-              thumbnailWidth: '' + thumbnailImg.width,
-              thumbnailHeight: '' + thumbnailImg.height,
-              thumbnail,
-              thumbnailImg: thumbnailImg.data
-            }])});
-            imageCount--;
-            if (imageCount === 0) {
-              this.set({_imagesLoading: false});
-            }
-          };
-          reader.readAsDataURL(file);
         }
       }
     },
@@ -258,7 +359,9 @@
 
       round (value, precision) {
         return Number.parseFloat(value.toFixed(precision));
-      }
+      },
+
+      floor: Math.floor
     }
   };
 </script>

@@ -97,3 +97,33 @@ try {
     throw $e;
   }
 }
+
+try {
+  $s3->createBucket([
+    'ACL' => 'public-read',
+    'Bucket' => 'tunnelgram-videos'
+  ]);
+  $s3->putBucketPolicy([
+    'Policy' => '{"Version":"2012-10-17","Statement":[{"Sid":"AddPerm","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::tunnelgram-videos/*"]}]}',
+    'Bucket' => 'tunnelgram-videos'
+  ]);
+} catch (\Aws\S3\Exception\S3Exception $e) {
+  if ($e->getStatusCode() === 409) {
+    try {
+      $s3->putBucketAcl([
+        'ACL' => 'public-read',
+        'Bucket' => 'tunnelgram-videos'
+      ]);
+    } catch (\Aws\S3\Exception\S3Exception $e) {
+      if ($e->getStatusCode() !== 501) {
+        throw $e;
+      }
+    }
+    $s3->putBucketPolicy([
+      'Policy' => '{"Version":"2012-10-17","Statement":[{"Sid":"AddPerm","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::tunnelgram-videos/*"]}]}',
+      'Bucket' => 'tunnelgram-videos'
+    ]);
+  } else {
+    throw $e;
+  }
+}
