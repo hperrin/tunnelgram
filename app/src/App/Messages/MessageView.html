@@ -109,7 +109,10 @@
           this.set({createdDateRelative: ''});
           return;
         }
-        const {cdate} = this.get().message;
+        let {cdate} = this.get().message;
+        if (cdate == null) {
+          cdate = 0 + (new Date());
+        }
         const now = new Date() / 1000;
         const cdateMoment = moment(new Date(Math.min(cdate * 1000, new Date())));
         let createdDateRelative;
