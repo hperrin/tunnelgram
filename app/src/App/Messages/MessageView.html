@@ -22,30 +22,30 @@
   {/if}
   <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
-      class="{shouldEmbiggen ? 'h1' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
-      style="{shouldEmbiggen ? '' : 'min-width: 10rem;'}"
+      class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
+      style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
       tabindex="0"
       role="button"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
       on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
       {#if shouldEmbiggen}
-        <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})">
+        <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
           {#if message.decrypted.text != null}
-            {(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}
+            <span class="h1">{(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}</span>
           {:elseif message.decrypted.images.length}
-            <ImageGrid bind:resources="message.decrypted.images" />
+            <ImageGrid resources="{message.decrypted.images}" />
           {:elseif message.decrypted.video != null}
-            <Video bind:resource="message.decrypted.video" />
+            <Video resource="{message.decrypted.video}" />
           {/if}
         </div>
       {:else}
         {#if message.decrypted.images.length && (!flipper || _flipped)}
           <div class="card-body p-0 m-0">
-            <ImageGrid bind:images="message.decrypted.images" />
+            <ImageGrid resources="{message.decrypted.images}" />
           </div>
         {:elseif message.decrypted.video != null && (!flipper || _flipped)}
           <div class="card-body p-0 m-0">
-            <Video bind:video="message.decrypted.video" />
+            <Video resource="{message.decrypted.video}" />
           </div>
         {/if}
         <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
