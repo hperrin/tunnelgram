@@ -1,9 +1,9 @@
-<div class="d-flex flex-wrap bg-secondary rounded" style="max-width: 450px;">
+<div class="d-flex flex-wrap bg-secondary rounded text-white" style="max-width: 450px; font-size: 1em;">
   {#each images as image, index (image.name)}
     <div class="d-flex justify-content-center align-items-center">
       {#if image.thumbnailPromise}
         {#await image.thumbnailPromise}
-          <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" />
+          <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" text="Decrypting..." />
         {:then thumbnail}
           <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
             <img src="{image.thumbnailSrc}" alt="{image.name}" title="{image.name}" width="{image.thumbnailWidth}" height="{image.thumbnailHeight}" />
@@ -12,7 +12,7 @@
           <span class="badge badge-warning">error</span>
         {/await}
       {:else}
-        <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" />
+        <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" text="Loading..." />
       {/if}
     </div>
   {/each}

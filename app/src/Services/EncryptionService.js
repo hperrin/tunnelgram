@@ -1,6 +1,7 @@
 import {User} from 'tilmeld-client';
 import PrivateKey from '../Entities/PrivateKey';
 import PublicKey from '../Entities/PublicKey';
+import AESEncryptionService from './AESEncryptionService';
 import StorageService from './StorageService';
 import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
@@ -8,8 +9,10 @@ import aesjs from 'aes-js';
 import base64js from 'base64-js';
 import utf8 from 'utf8';
 
-class EncryptionService {
+class EncryptionService extends AESEncryptionService {
   constructor () {
+    super();
+
     const that = this;
     this.storage = new StorageService();
     this.decryptor = null;
@@ -25,7 +28,16 @@ class EncryptionService {
       this.resolve = resolve;
       this.reject = reject;
     });
-    this.decryption = true; // Turning this off causes the decrypt function to just return what it is given.
+
+    // Async encryption/decryption is provided through a service worker.
+    this.aesEncryptionWorker = new Worker('dist/Workers/AESEncryption.js');
+    this.aesEncryptionWorkerCounter = 0;
+    this.aesEncryptionWorkerCallbacks = {};
+    this.aesEncryptionWorker.onmessage = (e) => {
+      const {counter, result} = e.data;
+      this.aesEncryptionWorkerCallbacks[counter](result);
+      delete this.aesEncryptionWorkerCallbacks[counter];
+    };
 
     (async () => {
       this.userPrivateKey = await this.getUserPrivateKey();
@@ -243,68 +255,54 @@ class EncryptionService {
     return this.encryptRSA(text, publicKey);
   }
 
-  decrypt (text, key) {
+  async decryptAsync (text, key) {
     if (!this.decryption) {
       return text;
     }
 
-    // Decrypt the text.
-    const encryptedBytes = this.decodeBase64(text);
-    const bytes = this.decryptBytes(encryptedBytes, key);
-    return utf8.decode(aesjs.utils.utf8.fromBytes(bytes));
+    return await this.callAESEncryptionWorker('decrypt', [text, key]);
   }
 
-  decryptBytes (bytes, key) {
+  async encryptAsync (text, key) {
+    return await this.callAESEncryptionWorker('encrypt', [text, key]);
+  }
+
+  async decryptBytesAsync (bytes, key) {
     if (!this.decryption) {
       return bytes;
     }
 
-    const cryptKey = key.substr(0, 64);
-    const cryptIV = key.substr(64, 32);
-    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
-    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
-    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+    const returnBytes = await this.callAESEncryptionWorker('decryptBytes', [bytes, key], [bytes.buffer]);
 
-    // Decrypt the bytes.
-    return aesCtr.decrypt(bytes);
+    return returnBytes;
   }
 
-  encrypt (text, key) {
-    // Encrypt the text.
-    const bytes = aesjs.utils.utf8.toBytes(utf8.encode(text));
-    const encryptedBytes = this.encryptBytes(bytes, key);
-    return this.encodeBase64(encryptedBytes);
+  async encryptBytesAsync (bytes, key) {
+    return await this.callAESEncryptionWorker('encryptBytes', [bytes, key], [bytes.buffer]);
   }
 
-  encryptBytes (bytes, key) {
-    const cryptKey = key.substr(0, 64);
-    const cryptIV = key.substr(64, 32);
-    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
-    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
-    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
-
-    // Encrypt the bytes.
-    return aesCtr.encrypt(bytes);
+  async encryptBytesToBase64Async (bytes, key) {
+    return await this.callAESEncryptionWorker('encryptBytesToBase64', [bytes, key], [bytes.buffer]);
   }
 
-  encodeBase64 (bytes) {
-    return base64js.fromByteArray(bytes);
-  }
+  callAESEncryptionWorker (action, args, transferrables) {
+    this.aesEncryptionWorkerCounter++;
+    const counter = this.aesEncryptionWorkerCounter;
 
-  decodeBase64 (text) {
-    return base64js.toByteArray(text);
-  }
+    let resolve;
+    const promise = new Promise(r => resolve = r);
 
-  generateKey () {
-    let keyArray = new Uint8Array(48);
-    (window.crypto || window.msCrypto).getRandomValues(keyArray);
-    return aesjs.utils.hex.fromBytes(keyArray);
-  }
+    this.aesEncryptionWorkerCallbacks[counter] = result => {
+      resolve(result);
+    };
 
-  generatePad () {
-    let keyArray = new Uint8Array(8);
-    (window.crypto || window.msCrypto).getRandomValues(keyArray);
-    return aesjs.utils.hex.fromBytes(keyArray);
+    this.aesEncryptionWorker.postMessage({
+      counter,
+      action,
+      args
+    }, transferrables);
+
+    return promise;
   }
 }
 

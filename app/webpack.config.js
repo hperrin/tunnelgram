@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin')
 const devMode = process.env.NODE_ENV !== 'production';
 
 const plugins = [
@@ -9,12 +8,6 @@ const plugins = [
     filename: '[name].css',
     chunkFilename: '[id].css',
   }),
-  new CopyWebpackPlugin([
-    {
-      from: 'src/Workers',
-      to: 'Workers'
-    }
-  ]),
   // load `moment/locale/ja.js` and `moment/locale/it.js`
   new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
   new webpack.DefinePlugin({
@@ -26,10 +19,17 @@ const plugins = [
 
 module.exports = {
   mode: devMode ? 'development' : 'production',
-  entry: ['babel-polyfill', path.resolve(__dirname, 'src', 'index.js')],
+  entry: {
+    main: [
+      'babel-polyfill',
+      path.resolve(__dirname, 'src', 'index.js')
+    ],
+    'Workers/ResizeImage': path.resolve(__dirname, 'src', 'workers', 'ResizeImage.js'),
+    'Workers/AESEncryption': path.resolve(__dirname, 'src', 'workers', 'AESEncryption.js')
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   plugins,
   resolve: {

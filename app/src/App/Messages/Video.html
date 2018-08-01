@@ -1,11 +1,11 @@
-<div class="d-flex flex-wrap bg-secondary rounded" style="max-width: 450px;">
+<div class="d-flex flex-wrap bg-secondary rounded text-white" style="max-width: 450px; font-size: 1em;">
   <div class="d-flex justify-content-center align-items-center">
     {#if video.thumbnailPromise}
       {#await video.thumbnailPromise}
-        <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+        <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Decrypting..." />
       {:then thumbnail}
         {#if _loading}
-          <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+          <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Decrypting..." />
         {:elseif _source}
           <video poster="{video.thumbnailSrc}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" title="{video.name}" controls autoplay>
             <source src="{_source}" type="{video.dataType}" />
@@ -20,7 +20,7 @@
         <span class="badge badge-warning">error</span>
       {/await}
     {:else}
-      <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+      <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Loading..." />
     {/if}
   </div>
 </div>

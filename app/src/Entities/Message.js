@@ -45,7 +45,7 @@ export class Message extends Entity {
       }
       if (this.data.images && this.data.images.length) {
         this.decrypted.images = this.data.images.map(image => {
-          // Don't request the full image until the user requests it.
+          // Don't fetch the full image until the user requests it.
           let fullSizePromise;
           const data = {
             promise: () => {
@@ -57,7 +57,9 @@ export class Message extends Entity {
                     return response.arrayBuffer();
                   }).then(arrayBuffer => {
                     // This is purposefully returned as Uint8Array, not Base64.
-                    resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+                    return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+                  }).then(result => {
+                    resolve(result);
                   });
                 });
               }
@@ -71,7 +73,9 @@ export class Message extends Entity {
               return response.arrayBuffer();
             }).then(arrayBuffer => {
               // This is purposefully returned as Uint8Array, not Base64.
-              resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+              return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+            }).then(result => {
+              resolve(result);
             });
           });
           return {
@@ -87,7 +91,7 @@ export class Message extends Entity {
           };
         });
       } else if (this.data.video != null) {
-        // Don't request the full video until the user requests it.
+        // Don't fetch the full video until the user requests it.
         let fullSizePromise;
         const data = {
           promise: () => {
@@ -99,7 +103,9 @@ export class Message extends Entity {
                   return response.arrayBuffer();
                 }).then(arrayBuffer => {
                   // This is purposefully returned as Uint8Array, not Base64.
-                  resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+                  return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+                }).then(result => {
+                  resolve(result);
                 });
               });
             }
@@ -113,7 +119,9 @@ export class Message extends Entity {
             return response.arrayBuffer();
           }).then(arrayBuffer => {
             // This is purposefully returned as Uint8Array, not Base64.
-            resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+            return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+          }).then(result => {
+            resolve(result);
           });
         });
         this.decrypted.video = {
@@ -146,19 +154,19 @@ export class Message extends Entity {
       }
     }
     if (this.decrypted.images.length) {
-      this.data.images = this.decrypted.images.map(image => ({
+      this.data.images = await Promise.all(this.decrypted.images.map(async image => ({
         name: crypt.encrypt(image.name, key),
         dataType: crypt.encrypt(image.dataType, key),
         dataWidth: crypt.encrypt(image.dataWidth, key),
         dataHeight: crypt.encrypt(image.dataHeight, key),
         // Image/video data is a Uint8Array, not a string.
-        data: crypt.encodeBase64(crypt.encryptBytes(image.data, key)),
+        data: await crypt.encryptBytesToBase64Async(image.data, key),
         thumbnailType: crypt.encrypt(image.thumbnailType, key),
         thumbnailWidth: crypt.encrypt(image.thumbnailWidth, key),
         thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
         // Image/video data is a Uint8Array, not a string.
-        thumbnail: crypt.encodeBase64(crypt.encryptBytes(image.thumbnail, key))
-      }));
+        thumbnail: await crypt.encryptBytesToBase64Async(image.thumbnail, key)
+      })));
     } else if (this.decrypted.video != null) {
       this.data.video = {
         name: crypt.encrypt(this.decrypted.video.name, key),
@@ -167,12 +175,12 @@ export class Message extends Entity {
         dataHeight: crypt.encrypt(this.decrypted.video.dataHeight, key),
         dataDuration: crypt.encrypt(this.decrypted.video.dataDuration, key),
         // Image/video data is a Uint8Array, not a string.
-        data: crypt.encodeBase64(crypt.encryptBytes(this.decrypted.video.data, key)),
+        data: await crypt.encryptBytesToBase64Async(this.decrypted.video.data, key),
         thumbnailType: crypt.encrypt(this.decrypted.video.thumbnailType, key),
         thumbnailWidth: crypt.encrypt(this.decrypted.video.thumbnailWidth, key),
         thumbnailHeight: crypt.encrypt(this.decrypted.video.thumbnailHeight, key),
         // Image/video data is a Uint8Array, not a string.
-        thumbnail: crypt.encodeBase64(crypt.encryptBytes(this.decrypted.video.thumbnail, key))
+        thumbnail: await crypt.encryptBytesToBase64Async(this.decrypted.video.thumbnail, key)
       };
     }
 
