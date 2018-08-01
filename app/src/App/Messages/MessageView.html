@@ -33,9 +33,9 @@
           {#if message.decrypted.text != null}
             {(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}
           {:elseif message.decrypted.images.length}
-            <ImageGrid bind:images="message.decrypted.images" />
+            <ImageGrid bind:resources="message.decrypted.images" />
           {:elseif message.decrypted.video != null}
-            <Video bind:video="message.decrypted.video" />
+            <Video bind:resource="message.decrypted.video" />
           {/if}
         </div>
       {:else}

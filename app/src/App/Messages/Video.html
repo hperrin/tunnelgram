@@ -1,26 +1,26 @@
 <div class="d-flex flex-wrap bg-secondary rounded text-white" style="max-width: 450px; font-size: 1em;">
   <div class="d-flex justify-content-center align-items-center">
-    {#if video.thumbnailPromise}
-      {#await video.thumbnailPromise}
-        <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Decrypting..." />
+    {#if resource.thumbnailPromise}
+      {#await resource.thumbnailPromise}
+        <LoadingIndicator width="{resource.thumbnailWidth}px" height="{resource.thumbnailHeight}px" text="Decrypting..." />
       {:then thumbnail}
         {#if _loading}
-          <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Decrypting..." />
+          <LoadingIndicator width="{resource.thumbnailWidth}px" height="{resource.thumbnailHeight}px" text="Decrypting..." />
         {:elseif _source}
-          <video poster="{video.thumbnailSrc}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" title="{video.name}" controls autoplay>
-            <source src="{_source}" type="{video.dataType}" />
+          <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay>
+            <source src="{_source}" type="{resource.dataType}" />
           </video>
         {:else}
           <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click="loadVideo()" style="cursor: pointer;">
             <i class="fas fa-play-circle position-absolute text-white"></i>
-            <img src="{video.thumbnailSrc}" alt="{video.name}" title="{video.name}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" />
+            <img src="{resource.thumbnailSrc}" alt="{resource.name}" title="{resource.name}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" />
           </div>
         {/if}
       {:catch e}
         <span class="badge badge-warning">error</span>
       {/await}
     {:else}
-      <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" text="Loading..." />
+      <LoadingIndicator width="{resource.thumbnailWidth}px" height="{resource.thumbnailHeight}px" text="Loading..." />
     {/if}
   </div>
 </div>
@@ -33,21 +33,21 @@
 
   export default {
     oncreate () {
-      const {video} = this.get();
-      if (video.thumbnail instanceof Uint8Array) {
-        video.thumbnailPromise = Promise.resolve(video.thumbnail);
-        const blob = new Blob([video.thumbnail], {type: video.thumbnailType});
+      const {resource} = this.get();
+      if (resource.thumbnail instanceof Uint8Array) {
+        resource.thumbnailPromise = Promise.resolve(resource.thumbnail);
+        const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
         const _source = URL.createObjectURL(blob);
-        video.thumbnailSrc = _source;
+        resource.thumbnailSrc = _source;
       } else {
-        video.thumbnailPromise = video.thumbnail;
-        video.thumbnail.then(data => {
-          const blob = new Blob([data], {type: video.thumbnailType});
+        resource.thumbnailPromise = resource.thumbnail;
+        resource.thumbnail.then(data => {
+          const blob = new Blob([data], {type: resource.thumbnailType});
           const _source = URL.createObjectURL(blob);
-          video.thumbnailSrc = _source;
+          resource.thumbnailSrc = _source;
         });
       }
-      this.set({video});
+      this.set({resource});
     },
 
     data () {
@@ -59,11 +59,11 @@
 
     methods: {
       loadVideo () {
-        const {video} = this.get();
+        const {resource} = this.get();
         this.set({_loading: true});
-        const videoPromise = ('promise' in video.data) ? video.data.promise() : Promise.resolve(video.data);
-        videoPromise.then(data => {
-          const blob = new Blob([data], {type: video.dataType});
+        const resourcePromise = ('promise' in resource.data) ? resource.data.promise() : Promise.resolve(resource.data);
+        resourcePromise.then(data => {
+          const blob = new Blob([data], {type: resource.dataType});
           const _source = URL.createObjectURL(blob);
           this.set({
             _source,
