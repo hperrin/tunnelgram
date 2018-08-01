@@ -156,6 +156,13 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
+  function addToCache (cache, request, itemType) {
+    return fetch(request).then(function (response) {
+      console.log('[Content Cache] add '+itemType+' to offline '+response.url);
+      cache.put(request, response);
+    });
+  }
+
   event.respondWith(caches.open('offline-cache').then(function (cache) {
     if (event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/') || event.request.url.startsWith('http://localhost:8082/')) {
       // Check in the cache first, return response.
@@ -163,22 +170,16 @@ self.addEventListener('fetch', function (event) {
       return cache.match(event.request).then(function (matching) {
         if (!matching) {
           console.log('[Content Cache] Not found in cache. Requesting from network.');
-          return fetch(event.request).then(function (response) {
-            console.log('[Content Cache] add blob to offline '+response.url)
-            cache.put(event.request, response.clone());
-            return response;
-          });
+          event.waitUntil(addToCache(cache, event.request, 'blob'));
+          return fetch(event.request);
         }
         console.log('[Content Cache] Serving request from cache.');
         var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
         return report;
       });
     } else {
-      return fetch(event.request).then(function (response) {
-        console.log('[Content Cache] add page to offline '+response.url)
-        cache.put(event.request, response.clone());
-        return response;
-      }, function (error) {
+      event.waitUntil(addToCache(cache, event.request, 'page'));
+      return fetch(event.request).catch(function (error) {
         console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
         // Check in the cache second, return response.
         // If not in the cache, return error page.
