@@ -24,8 +24,8 @@ module.exports = {
       'babel-polyfill',
       path.resolve(__dirname, 'src', 'index.js')
     ],
-    'Workers/ResizeImage': path.resolve(__dirname, 'src', 'workers', 'ResizeImage.js'),
-    'Workers/AESEncryption': path.resolve(__dirname, 'src', 'workers', 'AESEncryption.js')
+    'Workers/ResizeImage': path.resolve(__dirname, 'src', 'Workers', 'ResizeImage.js'),
+    'Workers/AESEncryption': path.resolve(__dirname, 'src', 'Workers', 'AESEncryption.js')
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
