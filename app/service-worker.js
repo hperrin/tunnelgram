@@ -156,29 +156,38 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  var updateCache = function (request){
-    return caches.open('offline-cache').then(function (cache) {
-      return fetch(request).then(function (response) {
-        console.log('[Content Cache] add page to offline '+response.url)
-        return cache.put(request, response);
-      });
-    });
-  };
-
-  event.waitUntil(updateCache(event.request));
-
-  event.respondWith(fetch(event.request).catch(function (error) {
-    console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
-
-    // Check to see if you have it in the cache
-    // Return response
-    // If not in the cache, then return error page
-    return caches.open('offline-cache').then(function (cache) {
+  event.respondWith(caches.open('offline-cache').then(function (cache) {
+    if (event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/') || event.request.url.startsWith('http://localhost:8082/')) {
+      // Check in the cache first, return response.
+      // If not in the cache, return error page.
       return cache.match(event.request).then(function (matching) {
+        if (!matching) {
+          console.log('[Content Cache] Not found in cache. Requesting from network.');
+          return fetch(event.request).then(function (response) {
+            console.log('[Content Cache] add blob to offline '+response.url)
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        }
+        console.log('[Content Cache] Serving request from cache.');
         var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
         return report;
       });
-    });
+    } else {
+      return fetch(event.request).then(function (response) {
+        console.log('[Content Cache] add page to offline '+response.url)
+        cache.put(event.request, response.clone());
+        return response;
+      }, function (error) {
+        console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
+        // Check in the cache second, return response.
+        // If not in the cache, return error page.
+        return cache.match(event.request).then(function (matching) {
+          var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
+          return report;
+        });
+      });
+    }
   }));
 });
 
