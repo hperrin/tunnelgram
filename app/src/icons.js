@@ -12,6 +12,7 @@ import fasTrashAlt from '@fortawesome/fontawesome-free-solid/faTrashAlt';
 import fasSync from '@fortawesome/fontawesome-free-solid/faSync';
 import fasUpload from '@fortawesome/fontawesome-free-solid/faUpload';
 import fasComments from '@fortawesome/fontawesome-free-solid/faComments';
+import fasPlayCircle from '@fortawesome/fontawesome-free-solid/faPlayCircle';
 
 fontawesome.library.add(
   fasWifi,
@@ -26,5 +27,6 @@ fontawesome.library.add(
   fasTrashAlt,
   fasSync,
   fasUpload,
-  fasComments
+  fasComments,
+  fasPlayCircle
 );

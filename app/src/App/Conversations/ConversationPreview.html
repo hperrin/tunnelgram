@@ -18,6 +18,8 @@
             [A photo]
           {:elseif conversation.data.lastMessage.decrypted.images.length > 1}
             [Photos]
+          {:elseif conversation.data.lastMessage.decrypted.video !== null}
+            [A video]
           {/if}
         </small>
       {:else}

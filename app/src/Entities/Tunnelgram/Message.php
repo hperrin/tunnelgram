@@ -39,12 +39,19 @@ class Message extends \Nymph\Entity {
     }
     // Delete images from blob store.
     if (count($this->images)) {
-      include(__DIR__.'/../../Blob/BlobClient.php');
+      include_once(__DIR__.'/../../Blob/BlobClient.php');
       $client = new BlobClient();
       foreach ($this->images as $curImg) {
         $client->delete('tunnelgram-thumbnails', $curImg['id']);
         $client->delete('tunnelgram-images', $curImg['id']);
       }
+    }
+    // Delete video from blob store.
+    if ($this->video) {
+      include_once(__DIR__.'/../../Blob/BlobClient.php');
+      $client = new BlobClient();
+      $client->delete('tunnelgram-thumbnails', $this->video['id']);
+      $client->delete('tunnelgram-videos', $this->video['id']);
     }
     return true;
   }

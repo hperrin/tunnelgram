@@ -248,29 +248,51 @@ class EncryptionService {
       return text;
     }
 
-    const cryptKey = key.substr(0, 64);
-    const cryptIV = key.substr(64, 32);
-    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
-    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
-    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
-
-    // Decrypt the Text.
-    const encryptedBytes = base64js.toByteArray(text);
-    const bytes = aesCtr.decrypt(encryptedBytes);
+    // Decrypt the text.
+    const encryptedBytes = this.decodeBase64(text);
+    const bytes = this.decryptBytes(encryptedBytes, key);
     return utf8.decode(aesjs.utils.utf8.fromBytes(bytes));
   }
 
-  encrypt (text, key) {
+  decryptBytes (bytes, key) {
+    if (!this.decryption) {
+      return bytes;
+    }
+
     const cryptKey = key.substr(0, 64);
     const cryptIV = key.substr(64, 32);
     const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
     const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
     const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
 
-    // Encrypt the Text.
+    // Decrypt the bytes.
+    return aesCtr.decrypt(bytes);
+  }
+
+  encrypt (text, key) {
+    // Encrypt the text.
     const bytes = aesjs.utils.utf8.toBytes(utf8.encode(text));
-    const encryptedBytes = aesCtr.encrypt(bytes);
-    return base64js.fromByteArray(encryptedBytes);
+    const encryptedBytes = this.encryptBytes(bytes, key);
+    return this.encodeBase64(encryptedBytes);
+  }
+
+  encryptBytes (bytes, key) {
+    const cryptKey = key.substr(0, 64);
+    const cryptIV = key.substr(64, 32);
+    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
+    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
+    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+
+    // Encrypt the bytes.
+    return aesCtr.encrypt(bytes);
+  }
+
+  encodeBase64 (bytes) {
+    return base64js.fromByteArray(bytes);
+  }
+
+  decodeBase64 (text) {
+    return base64js.toByteArray(text);
   }
 
   generateKey () {

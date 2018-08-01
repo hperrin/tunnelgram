@@ -1,0 +1,84 @@
+<div class="d-flex flex-wrap bg-secondary rounded" style="max-width: 450px;">
+  <div class="d-flex justify-content-center align-items-center">
+    {#if video.thumbnailPromise}
+      {#await video.thumbnailPromise}
+        <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+      {:then thumbnail}
+        {#if _loading}
+          <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+        {:elseif _source}
+          <video poster="{video.thumbnailSrc}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" title="{video.name}" controls autoplay>
+            <source src="{_source}" type="{video.dataType}" />
+          </video>
+        {:else}
+          <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click="loadVideo()" style="cursor: pointer;">
+            <i class="fas fa-play-circle position-absolute text-white"></i>
+            <img src="{video.thumbnailSrc}" alt="{video.name}" title="{video.name}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" />
+          </div>
+        {/if}
+      {:catch e}
+        <span class="badge badge-warning">error</span>
+      {/await}
+    {:else}
+      <LoadingIndicator width="{video.thumbnailWidth}px" height="{video.thumbnailHeight}px" />
+    {/if}
+  </div>
+</div>
+
+<script>
+  import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
+  import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import {crypt} from '../../Services/EncryptionService';
+
+  export default {
+    oncreate () {
+      const {video} = this.get();
+      if (video.thumbnail instanceof Uint8Array) {
+        video.thumbnailPromise = Promise.resolve(video.thumbnail);
+        const blob = new Blob([video.thumbnail], {type: video.thumbnailType});
+        const _source = URL.createObjectURL(blob);
+        video.thumbnailSrc = _source;
+      } else {
+        video.thumbnailPromise = video.thumbnail;
+        video.thumbnail.then(data => {
+          const blob = new Blob([data], {type: video.thumbnailType});
+          const _source = URL.createObjectURL(blob);
+          video.thumbnailSrc = _source;
+        });
+      }
+      this.set({video});
+    },
+
+    data () {
+      return {
+        _loading: false,
+        _source: null
+      };
+    },
+
+    methods: {
+      loadVideo () {
+        const {video} = this.get();
+        this.set({_loading: true});
+        const videoPromise = ('promise' in video.data) ? video.data.promise() : Promise.resolve(video.data);
+        videoPromise.then(data => {
+          const blob = new Blob([data], {type: video.dataType});
+          const _source = URL.createObjectURL(blob);
+          this.set({
+            _source,
+            _loading: false
+          });
+        });
+      }
+    },
+
+    components: {
+      LoadingIndicator
+    },
+
+    helpers: {
+      parseFloat
+    }
+  };
+</script>

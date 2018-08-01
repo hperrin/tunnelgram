@@ -16,10 +16,12 @@ export class Message extends Entity {
     super(id);
     this.decrypted = {
       text: '[Encrypted text]',
-      images: []
+      images: [],
+      video: null
     };
     this.data.text = null;
     this.data.images = [];
+    this.data.video = null;
     this.data.keys = {};
   }
 
@@ -28,7 +30,7 @@ export class Message extends Entity {
   init (...args) {
     super.init(...args);
 
-    // Decrypt the message text and images.
+    // Decrypt the message text, images, and/or video.
     if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
       const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
       if (this.data.text != null) {
@@ -38,15 +40,15 @@ export class Message extends Entity {
           this.decrypted.text = match[1];
           this.decrypted.secretText = match[2];
         }
-      } else if (this.data.images) {
+      } else if (this.data.images || this.data.video) {
         this.decrypted.text = null;
       }
-      if (this.data.images) {
+      if (this.data.images && this.data.images.length) {
         this.decrypted.images = this.data.images.map(image => {
           // Don't request the full image until the user requests it.
           let fullSizePromise;
           const data = {
-            promise () {
+            promise: () => {
               if (!fullSizePromise) {
                 fullSizePromise = new Promise((resolve, reject) => {
                   window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
@@ -54,7 +56,8 @@ export class Message extends Entity {
                   }).then(response => {
                     return response.arrayBuffer();
                   }).then(arrayBuffer => {
-                    resolve(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key));
+                    // This is purposefully returned as Uint8Array, not Base64.
+                    resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
                   });
                 });
               }
@@ -67,7 +70,8 @@ export class Message extends Entity {
             }).then(response => {
               return response.arrayBuffer();
             }).then(arrayBuffer => {
-              resolve(crypt.decrypt(base64js.fromByteArray(new Uint8Array(arrayBuffer)), key));
+              // This is purposefully returned as Uint8Array, not Base64.
+              resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
             });
           });
           return {
@@ -82,6 +86,48 @@ export class Message extends Entity {
             thumbnail
           };
         });
+      } else if (this.data.video != null) {
+        // Don't request the full video until the user requests it.
+        let fullSizePromise;
+        const data = {
+          promise: () => {
+            if (!fullSizePromise) {
+              fullSizePromise = new Promise((resolve, reject) => {
+                window.fetch(this.data.video.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+                  mode: 'cors'
+                }).then(response => {
+                  return response.arrayBuffer();
+                }).then(arrayBuffer => {
+                  // This is purposefully returned as Uint8Array, not Base64.
+                  resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+                });
+              });
+            }
+            return fullSizePromise;
+          }
+        }
+        const thumbnail = new Promise((resolve, reject) => {
+          window.fetch(this.data.video.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+            mode: 'cors'
+          }).then(response => {
+            return response.arrayBuffer();
+          }).then(arrayBuffer => {
+            // This is purposefully returned as Uint8Array, not Base64.
+            resolve(crypt.decryptBytes(new Uint8Array(arrayBuffer), key));
+          });
+        });
+        this.decrypted.video = {
+          name: crypt.decrypt(this.data.video.name, key),
+          dataType: crypt.decrypt(this.data.video.dataType, key),
+          dataWidth: crypt.decrypt(this.data.video.dataWidth, key),
+          dataHeight: crypt.decrypt(this.data.video.dataHeight, key),
+          dataDuration: crypt.decrypt(this.data.video.dataDuration, key),
+          data,
+          thumbnailType: crypt.decrypt(this.data.video.thumbnailType, key),
+          thumbnailWidth: crypt.decrypt(this.data.video.thumbnailWidth, key),
+          thumbnailHeight: crypt.decrypt(this.data.video.thumbnailHeight, key),
+          thumbnail
+        };
       }
     }
 
@@ -105,11 +151,13 @@ export class Message extends Entity {
         dataType: crypt.encrypt(image.dataType, key),
         dataWidth: crypt.encrypt(image.dataWidth, key),
         dataHeight: crypt.encrypt(image.dataHeight, key),
-        data: crypt.encrypt(image.data, key),
+        // Image/video data is a Uint8Array, not a string.
+        data: crypt.encodeBase64(crypt.encryptBytes(image.data, key)),
         thumbnailType: crypt.encrypt(image.thumbnailType, key),
         thumbnailWidth: crypt.encrypt(image.thumbnailWidth, key),
         thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
-        thumbnail: crypt.encrypt(image.thumbnail, key)
+        // Image/video data is a Uint8Array, not a string.
+        thumbnail: crypt.encodeBase64(crypt.encryptBytes(image.thumbnail, key))
       }));
     } else if (this.decrypted.video != null) {
       this.data.video = {
@@ -118,11 +166,13 @@ export class Message extends Entity {
         dataWidth: crypt.encrypt(this.decrypted.video.dataWidth, key),
         dataHeight: crypt.encrypt(this.decrypted.video.dataHeight, key),
         dataDuration: crypt.encrypt(this.decrypted.video.dataDuration, key),
-        data: crypt.encrypt(this.decrypted.video.data, key),
+        // Image/video data is a Uint8Array, not a string.
+        data: crypt.encodeBase64(crypt.encryptBytes(this.decrypted.video.data, key)),
         thumbnailType: crypt.encrypt(this.decrypted.video.thumbnailType, key),
         thumbnailWidth: crypt.encrypt(this.decrypted.video.thumbnailWidth, key),
         thumbnailHeight: crypt.encrypt(this.decrypted.video.thumbnailHeight, key),
-        thumbnail: crypt.encrypt(this.decrypted.video.thumbnail, key)
+        // Image/video data is a Uint8Array, not a string.
+        thumbnail: crypt.encodeBase64(crypt.encryptBytes(this.decrypted.video.thumbnail, key))
       };
     }
 

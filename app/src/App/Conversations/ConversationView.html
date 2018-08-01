@@ -30,13 +30,13 @@
               {image.dataWidth}x{image.dataHeight}
             </span>
             <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
-              {round((image.data.length / 1024 / 1024) * (3 / 4), 1)}MB
+              {round(image.data.length / 1024 / 1024, 1)}MB
             </span>
           </div>
         {/each}
         {#if video != null}
           <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 border border-light position-relative" style="min-width: 152px; min-height: 152px;">
-            <video poster="{video.thumbnailImg}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" alt="{video.name}" title="{video.name}" controls>
+            <video poster="{video.thumbnailImg}" width="{video.thumbnailWidth}" height="{video.thumbnailHeight}" title="{video.name}" controls>
               <source src="{video.objectURL}" type="{video.dataType}" />
             </video>
             <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({video: null})">
@@ -46,7 +46,7 @@
               {video.dataWidth}x{video.dataHeight} - {floor(video.dataDuration / (60 * 60))}:{floor((video.dataDuration % (60 * 60)) / 60)}:{floor(video.dataDuration % 60)}
             </span>
             <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
-              {round((video.data.length / 1024 / 1024) * (3 / 4), 1)}MB
+              {round(video.data.length / 1024 / 1024, 1)}MB
             </span>
           </div>
         {/if}
@@ -69,12 +69,10 @@
 <script>
   import emoji from 'node-emoji';
   import PNotify from 'pnotify/dist/es/PNotify';
-  import aesjs from 'aes-js';
-  import base64js from 'base64-js';
-  import utf8 from 'utf8';
   import Message from '../../Entities/Message';
   import MessageList from '../Messages/MessageList.html';
   import LoadingIndicator from '../LoadingIndicator.html';
+  import {crypt} from '../../Services/EncryptionService';
   import ResizeImage from '../../Services/ResizeImage';
   import ErrHandler from '../../ErrHandler';
 
@@ -86,7 +84,7 @@
 
   export default {
     computed: {
-      messageIsEmpty: ({text, images}) => (text === '' || text.match(/^\s+$/)) && !images.length
+      messageIsEmpty: ({text, images, video}) => (text === '' || text.match(/^\s+$/)) && !images.length && video == null
     },
 
     data () {
@@ -121,12 +119,13 @@
           return;
         }
 
-        const {text, images, pending} = this.get();
+        const {text, images, video, pending} = this.get();
         const {conversation} = this.store.get();
 
         const message = new Message();
         message.decrypted.text = (text === '' || text.match(/^\s+$/)) ? null : text;
         message.decrypted.images = images;
+        message.decrypted.video = video;
         message.set({
           conversation,
           acRead: [...conversation.data.acFull]
@@ -150,7 +149,7 @@
           ErrHandler(err);
         });
 
-        this.set({pending, text: '', images: []});
+        this.set({pending, text: '', images: [], video: null});
         this.focus();
       },
 
@@ -230,14 +229,17 @@
 
             this.set({_imagesLoading: true});
 
+            // Read the video into a temporary video element to check it and
+            // generate a thumbnail.
             const video = document.createElement('video');
-            const objectURL = URL.createObjectURL(file);
+            const tempObjectURL = URL.createObjectURL(file);
             let resolve;
             const p = new Promise(r => resolve = r);
             video.onloadeddata = () => resolve();
-            video.src = objectURL;
+            video.src = tempObjectURL;
             await p;
 
+            // Make sure it's valid.
             if (!video.videoWidth || !video.videoHeight || !video.duration) {
               PNotify.notice({
                 title: 'Unreadable',
@@ -247,17 +249,24 @@
               break;
             }
 
-            // Videos are handled differently than images.
+            // Now read the video fully into memory.
             const reader = new FileReader();
             reader.onload = async e => {
-              let data = e.target.result;
+              let data = new Uint8Array(e.target.result);
+
+              // This isn't really necessary, but I think it ensures the video
+              // element remains intact if the user deletes the source video
+              // before sending the message.
+              const blob = new Blob([data], {type: file.type});
+              const objectURL = URL.createObjectURL(blob);
+
               let dataType = file.type;
-              let resizeImage = new ResizeImage(e.target.result, 'image/jpeg', video);
+              let resizeImage = new ResizeImage(video, 'image/jpeg');
               const thumbnailImg = await resizeImage.resizeContain(300, 300);
               resizeImage.destroy();
               const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
               const thumbnailType = thumbnailMatch[1];
-              const thumbnail = window.atob(thumbnailMatch[2]);
+              const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
 
               this.set({
                 video: {
@@ -278,7 +287,7 @@
                 _imagesLoading: false
               });
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
 
             break;
           } else if (!file.type.startsWith('image/')) {
@@ -297,50 +306,56 @@
             this.set({_imagesLoading: true});
             imageCount++;
 
-            const reader = new FileReader();
-            reader.onload = async e => {
-              let size = 1400;
-              let dataImg;
-              let dataMatch;
-              let dataType;
-              let data;
-              let resizeImage = new ResizeImage(e.target.result, file.type);
-              do {
-                // Resize the image repeatedly down until the size is under 2MiB.
-                dataImg = await resizeImage.resizeContain(size, size);
-                dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-                dataType = dataMatch[1];
-                data = window.atob(dataMatch[2]);
-                size -= 200;
-              } while ((aesjs.utils.utf8.toBytes(utf8.encode(data)).length * 4 / 3) >= 2097152);
-              const thumbnailImg = await resizeImage.resizeContain();
-              resizeImage.destroy();
-              const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-              const thumbnailType = thumbnailMatch[1];
-              const thumbnail = window.atob(thumbnailMatch[2]);
+            // Read the image into an Image to resize it and generate a
+            // thumbnail.
+            const image = new Image();
+            const tempObjectURL = URL.createObjectURL(file);
+            let resolve;
+            const p = new Promise(r => resolve = r);
+            image.onload = () => resolve();
+            image.src = tempObjectURL;
+            await p;
 
-              this.set({
-                images: this.get().images.concat([{
-                  name: file.name,
-                  dataType,
-                  dataWidth: '' + dataImg.width,
-                  dataHeight: '' + dataImg.height,
-                  data,
-                  thumbnailType,
-                  thumbnailWidth: '' + thumbnailImg.width,
-                  thumbnailHeight: '' + thumbnailImg.height,
-                  thumbnail,
-                  thumbnailImg: thumbnailImg.data
-                }]),
-                video: null
-              });
+            let size = 3000;
+            let dataImg;
+            let dataMatch;
+            let dataType;
+            let data;
+            let resizeImage = new ResizeImage(image, file.type);
+            do {
+              // Resize the image repeatedly down until the size is under 2MiB.
+              dataImg = await resizeImage.resizeContain(size, size);
+              dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+              dataType = dataMatch[1];
+              data = crypt.decodeBase64(dataMatch[2]);
+              size -= 200;
+            } while (data.length >= 2097152);
+            const thumbnailImg = await resizeImage.resizeContain();
+            resizeImage.destroy();
+            const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+            const thumbnailType = thumbnailMatch[1];
+            const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
 
-              imageCount--;
-              if (imageCount === 0) {
-                this.set({_imagesLoading: false});
-              }
-            };
-            reader.readAsDataURL(file);
+            this.set({
+              images: this.get().images.concat([{
+                name: file.name,
+                dataType,
+                dataWidth: '' + dataImg.width,
+                dataHeight: '' + dataImg.height,
+                data,
+                thumbnailType,
+                thumbnailWidth: '' + thumbnailImg.width,
+                thumbnailHeight: '' + thumbnailImg.height,
+                thumbnail,
+                thumbnailImg: thumbnailImg.data
+              }]),
+              video: null
+            });
+
+            imageCount--;
+            if (imageCount === 0) {
+              this.set({_imagesLoading: false});
+            }
           }
         }
       }

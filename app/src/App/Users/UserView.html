@@ -213,7 +213,7 @@
         this.set({[name]: value});
       },
 
-      handleAvatar (files) {
+      async handleAvatar (files) {
         const file = files[0];
 
         if (!file.type.startsWith('image/')) {
@@ -226,19 +226,24 @@
 
         this.set({_avatarLoading: true});
 
-        const reader = new FileReader();
-        reader.onload = async e => {
-          let resizeImage = new ResizeImage(e.target.result, file.type);
-          const avatarImg = await resizeImage.resizeCrop(500, 500);
-          resizeImage.destroy();
+        // Read the image into an Image to resize it and generate a thumbnail.
+        const image = new Image();
+        const tempObjectURL = URL.createObjectURL(file);
+        let resolve;
+        const p = new Promise(r => resolve = r);
+        image.onload = () => resolve();
+        image.src = tempObjectURL;
+        await p;
 
-          const {viewUser} = this.store.get();
-          viewUser.set({avatar: avatarImg.data});
+        let resizeImage = new ResizeImage(image, file.type);
+        const avatarImg = await resizeImage.resizeCrop(500, 500);
+        resizeImage.destroy();
 
-          this.store.set({viewUser});
-          this.set({_avatarLoading: false});
-        };
-        reader.readAsDataURL(file);
+        const {viewUser} = this.store.get();
+        viewUser.set({avatar: avatarImg.data});
+
+        this.store.set({viewUser});
+        this.set({_avatarLoading: false});
       }
     },
 

@@ -32,14 +32,20 @@
         <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})">
           {#if message.decrypted.text != null}
             {(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}
-          {:else}
-            <ImageGrid images="{message.decrypted.images}" />
+          {:elseif message.decrypted.images.length}
+            <ImageGrid bind:images="message.decrypted.images" />
+          {:elseif message.decrypted.video != null}
+            <Video bind:video="message.decrypted.video" />
           {/if}
         </div>
       {:else}
         {#if message.decrypted.images.length && (!flipper || _flipped)}
           <div class="card-body p-0 m-0">
-            <ImageGrid images="{message.decrypted.images}" />
+            <ImageGrid bind:images="message.decrypted.images" />
+          </div>
+        {:elseif message.decrypted.video != null && (!flipper || _flipped)}
+          <div class="card-body p-0 m-0">
+            <Video bind:video="message.decrypted.video" />
           </div>
         {/if}
         <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
@@ -74,6 +80,7 @@
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
   import ImageGrid from './ImageGrid.html';
+  import Video from './Video.html';
   import Avatar from '../Users/Avatar.html';
   import ErrHandler from '../../ErrHandler';
 
@@ -165,10 +172,10 @@
       cdateJson: ({message}) => JSON.stringify(message.cdate),
       shouldEmbiggen: ({message}) => {
         // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
-        if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.text.match(bareEmojiRegex)) {
+        if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.video == null && message.decrypted.text.match(bareEmojiRegex)) {
           return (message.decrypted.secretText == null || !!message.decrypted.secretText.match(bareEmojiRegex));
         }
-        if (message.decrypted.text == null && message.decrypted.images.length) {
+        if (message.decrypted.text == null && (message.decrypted.images.length || message.decrypted.video != null)) {
           return true;
         }
         return false;
@@ -199,6 +206,7 @@
 
     components: {
       ImageGrid,
+      Video,
       Avatar
     }
   };

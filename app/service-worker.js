@@ -106,9 +106,13 @@ self.addEventListener('push', function (event) {
           messageCount === 0
             ? payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.'
             : (messageCount === 1
-                ? entry.messages[0].data.images.length
-                  ? 'Photo from '
-                  : 'Message from '
+                ? (entry.messages[0].data.images.length
+                    ? 'Photo from '
+                    : (entry.messages[0].data.video !== null
+                        ? 'Video from '
+                        : 'Message from '
+                      )
+                  )
                 : messageCount + ' messages from '
               )
         ) + (

@@ -6,7 +6,7 @@
           <LoadingIndicator width="{image.thumbnailWidth}px" height="{image.thumbnailHeight}px" />
         {:then thumbnail}
           <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
-            <img src="data:{image.thumbnailType};base64,{btoa(thumbnail)}" alt="{image.name}" title="{image.name}" width="{image.thumbnailWidth}" height="{image.thumbnailHeight}" />
+            <img src="{image.thumbnailSrc}" alt="{image.name}" title="{image.name}" width="{image.thumbnailWidth}" height="{image.thumbnailHeight}" />
           </a>
         {:catch e}
           <span class="badge badge-warning">error</span>
@@ -58,21 +58,26 @@
 </div>
 
 <script>
-  import LoadingIndicator from '../LoadingIndicator.html';
   import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
   import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import {crypt} from '../../Services/EncryptionService';
 
   export default {
     oncreate () {
       const {images} = this.get();
       for (let image of images) {
-        if (typeof image.thumbnail === 'string') {
+        if (image.thumbnail instanceof Uint8Array) {
           image.thumbnailPromise = Promise.resolve(image.thumbnail);
-          image.thumbnailSrc = image.thumbnail;
+          const blob = new Blob([image.thumbnail], {type: image.thumbnailType});
+          const _source = URL.createObjectURL(blob);
+          image.thumbnailSrc = _source;
         } else {
           image.thumbnailPromise = image.thumbnail;
-          image.thumbnail.then(thumbnailSrc => {
-            image.thumbnailSrc = thumbnailSrc;
+          image.thumbnail.then(data => {
+            const blob = new Blob([data], {type: image.thumbnailType});
+            const _source = URL.createObjectURL(blob);
+            image.thumbnailSrc = _source;
           });
         }
       }
@@ -87,7 +92,7 @@
           return {
             w: image.dataWidth,
             h: image.dataHeight,
-            src: `data:${image.thumbnailType};base64,${window.btoa(image.thumbnailSrc)}`,
+            src: image.thumbnailSrc,
             _loading: false,
             _image: image
           };
@@ -108,8 +113,9 @@
           item._loading = true;
           const imagePromise = ('promise' in item._image.data) ? item._image.data.promise() : Promise.resolve(item._image.data);
           imagePromise.then(data => {
-            const newSrc = `data:${item._image.dataType};base64,${window.btoa(data)}`;
-            item.src = newSrc;
+            const blob = new Blob([data], {type: item._image.dataType});
+            const _source = URL.createObjectURL(blob);
+            item.src = _source;
             // Sets a flag that slides should be updated.
             pswp.invalidateCurrItems();
             // Updates the content of slides.
@@ -126,8 +132,7 @@
     },
 
     helpers: {
-      parseFloat,
-      btoa
+      parseFloat
     }
   };
 </script>
