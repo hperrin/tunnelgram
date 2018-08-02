@@ -16,6 +16,7 @@ import Conversation from './Entities/Conversation';
 import Message from './Entities/Message';
 import WebPushSubscription from './Entities/WebPushSubscription';
 import Readline from './Entities/Readline';
+import Settings from './Entities/Settings';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 
@@ -40,6 +41,7 @@ const store = new UserStore({
   convosOut: false,
   router: router,
   crypt: crypt,
+  settings: null,
   disconnected: !navigator.onLine,
   decryption: true,
   requestNotificationPermission: () => {
@@ -78,6 +80,14 @@ store.constructor.prototype.refreshAll = function () {
   }, ErrHandler);
 };
 
+store.constructor.prototype.getDisplayName = (user, prop, defaultValue = 'Loading...') => {
+  const {settings} = store.get();
+  if (settings != null && user.guid in settings.decrypted.nicknames) {
+    return settings.decrypted.nicknames[user.guid];
+  }
+  return (prop in user.data && user.data[prop] != null) ? user.data[prop] : defaultValue;
+};
+
 window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
@@ -96,7 +106,7 @@ User.on('logout', () => {
 (async () => {
   await store.get().ready;
 
-  store.on('state', ({changed, current}) => {
+  store.on('state', ({changed, current, previous}) => {
     let {conversation, conversations} = current;
 
     if (changed.conversation && conversation && conversation.guid) {
@@ -147,18 +157,38 @@ User.on('logout', () => {
       store.refreshAll();
     }
 
-    if (changed.user && current.user) {
-      const route = router.lastRouteResolved();
-      const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
-      if (queryMatch) {
-        router.navigate(decodeURIComponent(queryMatch[1]));
-      }
+    if (changed.user) {
+      if (current.user) {
+        const route = router.lastRouteResolved();
+        const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+        if (queryMatch) {
+          router.navigate(decodeURIComponent(queryMatch[1]));
+        }
 
-      if (setupSubscription) {
-        setupSubscription();
+        if (setupSubscription) {
+          setupSubscription();
+        }
+
+        // If the user logs in, get their settings.
+        if (current.settings == null || !current.user.is(previous.user)) {
+          store.set({settings: null});
+          Settings.current().then(settings => {
+            store.set({settings});
+          });
+        }
+      } else {
+        // If the user logs out, clear their settings.
+        store.set({settings: null});
       }
     }
   });
+
+  if (store.get().user != null) {
+    // Get the current settings.
+    Settings.current().then(settings => {
+      store.set({settings});
+    });
+  }
 
   // Register the caching and pushing ServiceWorker
   (async () => {

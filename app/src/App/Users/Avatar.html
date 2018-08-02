@@ -3,9 +3,7 @@
     <div class="rounded-circle d-flex justify-content-center align-items-center bg-info text-white w-100 h-100" style="background-size: contain; background-image: url({avatarUrl});">&nbsp;</div>
   {:else}
     <div class="rounded-circle d-flex justify-content-center align-items-center bg-info text-white w-100 h-100" style="font-size: {parseFloat(size || '40') * .6}px; line-height: {parseFloat(size || '40') * .6}px; pointer-events: none; user-select: none;">
-      {#if user.data.nameFirst || user.data.nameLast}
-        {user.data.nameFirst === '' ? '' : user.data.nameFirst.substr(0, 1).toUpperCase()}{user.data.nameLast === '' ? '' : user.data.nameLast.substr(0, 1).toUpperCase()}
-      {/if}
+      {iconLetters}
     </div>
   {/if}
 </div>
@@ -13,7 +11,22 @@
 <script>
   export default {
     computed: {
-      avatarUrl: ({user}) => user.data.avatar && user.data.avatar.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/')
+      avatarUrl: ({user}) => user.data.avatar && user.data.avatar.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'),
+      iconLetters: ({user, $settings}) => {
+        const nickname = ($settings != null && user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[user.guid] : null;
+        let letters = '';
+        if (nickname) {
+          const split = nickname.split(' ');
+          letters += split[0].substr(0, 1).toUpperCase();
+          if (split.length > 1) {
+            letters += split.reverse()[0].substr(0, 1).toUpperCase();
+          }
+        } else if (user.data.nameFirst || user.data.nameLast) {
+          letters += user.data.nameFirst.substr(0, 1).toUpperCase();
+          letters += user.data.nameLast.substr(0, 1).toUpperCase()
+        }
+        return letters;
+      }
     },
 
     helpers: {

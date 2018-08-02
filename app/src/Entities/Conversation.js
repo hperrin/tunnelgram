@@ -73,10 +73,10 @@ export class Conversation extends Entity {
       delete this.data.keys;
     }
 
-    return super.save();
+    return await super.save();
   }
 
-  getName (currentUser) {
+  getName (settings) {
     if (this.guid == null) {
       return 'New Conversation';
     } else if (this.decrypted.name != null) {
@@ -88,7 +88,11 @@ export class Conversation extends Entity {
       for (let i = 0; i < this.data.acFull.length; i++) {
         const participant = this.data.acFull[i];
         if (!currentUser.is(participant)) {
-          names.push(participant.data.name ? participant.data.name : 'Loading...');
+          let name = participant.data.name ? participant.data.name : 'Loading...';
+          if (settings && participant.guid in settings.decrypted.nicknames) {
+            name = settings.decrypted.nicknames[participant.guid];
+          }
+          names.push(name);
         }
       }
       return names.join(', ');

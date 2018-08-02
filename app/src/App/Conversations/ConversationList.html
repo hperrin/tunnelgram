@@ -56,10 +56,7 @@
   export default {
     oncreate () {
       this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {
-        if (changed.user &&
-            current.user &&
-            !current.user.is(previous.user)
-          ) {
+        if (changed.user && current.user && !current.user.is(previous.user)) {
           this.subscribe();
         }
 
@@ -68,7 +65,7 @@
           if (sort === 'mdate') {
             Nymph.sort(conversations, sort, null, true);
           } else if (sort === 'name') {
-            conversations.sort((a, b) => a.getName(current.user).toLowerCase().localeCompare(b.getName(current.user).toLowerCase()));
+            conversations.sort((a, b) => a.getName(current.settings).toLowerCase().localeCompare(b.getName(current.settings).toLowerCase()));
           }
           this.store.set({conversations});
         }
@@ -159,11 +156,11 @@
       },
 
       sortConversations (conversations) {
-        const {sort, user} = this.store.get();
+        const {sort, settings} = this.store.get();
         if (sort === 'mdate') {
           Nymph.sort(conversations, sort, null, true);
         } else if (sort === 'name') {
-          conversations.sort((a, b) => a.getName(user).toLowerCase().localeCompare(b.getName(user).toLowerCase()));
+          conversations.sort((a, b) => a.getName(settings).toLowerCase().localeCompare(b.getName(settings).toLowerCase()));
         }
       },
 

@@ -13,8 +13,8 @@
     </div>
   {/if}
   {#if !isOwner}
-    {#if showAvatar && message.data.user !== null && message.data.user.data.name !== null}
-      <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{message.data.user.data.name}">
+    {#if showAvatar && message.data.user !== null && message.data.user.data.username != null}
+      <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="$navigate('/u/' + message.data.user.data.username)" title="{displayName}">
         <Avatar user="{message.data.user}" size="18" />
       </a>
     {:else}
@@ -170,7 +170,8 @@
         }
         return false;
       },
-      flipper: ({message}) => message.decrypted.secretText != null
+      flipper: ({message}) => message.decrypted.secretText != null,
+      displayName: ({message, $settings}) => message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name)
     },
 
     data () {

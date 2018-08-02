@@ -1,0 +1,20 @@
+{#if nickname != null}
+  {nickname}
+{:else}
+  {user.data[prop] || defaultValue}
+{/if}
+
+<script>
+  export default {
+    computed: {
+      nickname: ({user, $settings}) => ($settings != null && user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[user.guid] : null
+    },
+
+    data () {
+      return {
+        prop: 'name',
+        defaultValue: 'Loading...'
+      }
+    }
+  };
+</script>

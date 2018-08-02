@@ -26,7 +26,7 @@
         <ul class="list-group mt-3 text-body">
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><span class="mr-2"><Avatar user="{user}" /></span> {user.data.name}</span>
+              <span><span class="mr-2"><Avatar user="{user}" /></span> <DisplayName user="{user}" /></span>
               <button class="btn btn-danger btn-sm" on:click="removeUser(user)">
                 <i class="fas fa-minus"></i>
               </button>
@@ -48,7 +48,7 @@
           <div class="list-group mt-3 text-body w-100 px-2" style="max-width: 600px;">
             {#each conversations as conversation (conversation.guid)}
               <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
-                <h5 class="mb-0">{conversation.getName($user)}</h5>
+                <h5 class="mb-0">{conversation.getName($settings)}</h5>
                 <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{moment.unix(conversation.mdate).fromNow(true)}</small>
               </a>
             {/each}
@@ -71,6 +71,7 @@
   import ConversationPeople from './ConversationPeople.html';
   import ConversationSettings from './ConversationSettings.html';
   import Avatar from '../Users/Avatar.html';
+  import DisplayName from '../Users/DisplayName.html';
   import ErrHandler from '../../ErrHandler';
 
   export default {
@@ -200,7 +201,8 @@
       ConversationView,
       ConversationPeople,
       ConversationSettings,
-      Avatar
+      Avatar,
+      DisplayName
     },
 
     helpers: {

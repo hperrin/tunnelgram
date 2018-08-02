@@ -139,9 +139,9 @@
         if (conversation.data.lastMessage) {
           // Notify the user of a new message.
           notice = PNotify.info(Object.assign({
-            title: conversation.data.lastMessage.data.user.data.name
+            title: this.store.getDisplayName(conversation.data.lastMessage.data.user, 'name')
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? ' - ' + conversation.getName(this.store.get().user)
+                ? ' - ' + conversation.getName(this.store.get().settings)
                 : ''
               )
               + ' - Tunnelgram',
@@ -153,9 +153,9 @@
           // Notify the user of a new conversation.
           notice = PNotify.info(Object.assign({
             title: 'New Conversation - Tunnelgram',
-            text: conversation.data.user.data.name + ' started '
+            text: this.store.getDisplayName(conversation.data.user, 'name') + ' started '
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? conversation.getName(this.store.get().user)
+                ? conversation.getName(this.store.get().settings)
                 : 'a conversation'
               )
               + '.'

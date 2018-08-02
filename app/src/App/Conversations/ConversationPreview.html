@@ -81,7 +81,7 @@
     },
 
     computed: {
-      name: ({conversation, $user}) => conversation.getName($user),
+      name: ({conversation, $settings}) => conversation.getName($settings),
       isOwner: ({conversation, $user}) => $user.is(conversation.data.user),
       avatarUsersAndWidth: ({conversation, $user}) => {
         let users;

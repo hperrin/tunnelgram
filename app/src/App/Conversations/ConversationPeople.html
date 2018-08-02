@@ -2,9 +2,9 @@
   <h2>People in this Conversation</h2>
   <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
     <div class="list-group mt-3 text-body">
-      {#each $conversation.data.acFull as user (user.guid)}
+      {#each $conversation.data.acFull as user, i (user.guid)}
         <a class="list-group-item d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click="$navigate('/u/' + user.data.username)">
-          <span><span class="mr-2"><Avatar user="{user}" /></span> {user.data.name} ({user.data.username})</span>
+          <span><span class="mr-2"><Avatar user="{user}" /></span> <DisplayName user="{user}" /> ({user.data.username})</span>
           {#if $user.guid === user.guid}
             <span>(You)</span>
           {/if}
@@ -16,10 +16,12 @@
 
 <script>
   import Avatar from '../Users/Avatar.html';
+  import DisplayName from '../Users/DisplayName.html';
 
   export default {
     components: {
-      Avatar
+      Avatar,
+      DisplayName
     }
   };
 </script>
