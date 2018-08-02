@@ -5,8 +5,11 @@
 {/if}
 <div class="message d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if _showActions && isOwner}
-    <div class="h1 mr-2 my-0" style="font-size: 0;">
-      <button type="button" class="btn btn-sm btn-danger" on:click="deleteMessage()"><i class="fas fa-trash-alt"></i></button>
+    <div class="h1 my-0" style="font-size: 0;">
+      <button type="button" class="btn btn-sm btn-danger mr-2" on:click="deleteMessage()" title="Delete message"><i class="fas fa-trash-alt"></i></button>
+      {#if pending && _saveFailed}
+        <button type="button" class="btn btn-sm btn-success mr-2" on:click="retrySave()" title="Retry sending"><i class="fas fa-sync"></i></button>
+      {/if}
     </div>
   {/if}
   {#if !isOwner}
@@ -56,14 +59,18 @@
       {/if}
     </div>
   </div>
-  {#if _showActions}
+  {#if _showActions && !pending}
     <div class="mr-2 my-0">
       <small class="text-muted">{createdDate}</small>
     </div>
   {/if}
   {#if pending}
     <small class="text-muted">
-      <span><i class="fas fa-sync fa-spin"></i></span>
+      {#if _saveFailed}
+        <span title="Failed to send message"><i class="fas fa-exclamation-circle"></i></span>
+      {:else}
+        <span title="Sending message..."><i class="fas fa-sync fa-spin"></i></span>
+      {/if}
     </small>
   {/if}
 </div>
@@ -104,39 +111,18 @@
 
   export default {
     oncreate () {
-      const updateTime = () => {
-        if (!this.get().showTime) {
-          this.set({createdDateRelative: ''});
-          return;
-        }
-        let {cdate} = this.get().message;
-        if (cdate == null) {
-          cdate = 0 + (new Date());
-        }
-        const now = new Date() / 1000;
-        const cdateMoment = moment(new Date(Math.min(cdate * 1000, new Date())));
-        let createdDateRelative;
-        if (now - cdate > 10 * 30 * 24 * 60 * 60) {
-          // More than 10 months ago.
-          createdDateRelative = cdateMoment.format('MMM D, YYYY');
-        } else if (now - cdate > 6 * 24 * 60 * 60) {
-          // More than 6 days ago.
-          createdDateRelative = cdateMoment.format('MMM D');
-        } else if (now - cdate > 24 * 60 * 60) {
-          // More than 1 day ago.
-          createdDateRelative = cdateMoment.format('ddd, hA');
-        } else {
-          createdDateRelative = cdateMoment.fromNow();
-        }
-        this.set({createdDateRelative});
-      };
-      this.interval = window.setInterval(updateTime, 10000);
-      updateTime();
+      this.interval = window.setInterval(() => this.updateTime(), 10000);
+      this.updateTime();
 
-      const {message} = this.get();
+      const {message, pending} = this.get();
+
       if (message.decrypted.text != '[Encrypted text]') {
         const html = converter.makeHtml(message.decrypted.text);
         this.set({_formattedText: html == null ? null : html.replace(/\n$/, '')});
+      }
+
+      if (pending) {
+        this.handlePending();
       }
     },
 
@@ -146,6 +132,7 @@
         if (!current.pending && message.data.user.isASleepingReference) {
           message.readyAll(() => this.set({message}), ErrHandler, 1);
         }
+        this.updateTime();
       }
 
       if (current.message && current.message.decrypted.text != null && current._formattedText === null) {
@@ -190,6 +177,7 @@
       return {
         _showActions: false,
         _formattedText: null,
+        _saveFailed: null,
         message: null,
         readLineCDate: false,
         showAvatar: true,
@@ -200,10 +188,57 @@
 
     methods: {
       async deleteMessage () {
-        const {message} = this.get();
-        if (await message.delete()) {
-          this.fire('deleted');
+        const {message, pending} = this.get();
+        if (pending) {
+          message.cancelSave();
+        } else {
+          if (await message.delete()) {
+            this.fire('deleted');
+          }
         }
+      },
+
+      handlePending () {
+        const {message} = this.get();
+        if (message.savePromise) {
+          message.savePromise.catch((err) => {
+            this.set({_saveFailed: true, _showActions: true});
+          });
+        }
+      },
+
+      retrySave () {
+        const {message} = this.get();
+        message.retrySave();
+        this.set({_saveFailed: null, _showActions: false});
+        this.handlePending();
+      },
+
+      updateTime () {
+        if (!this.get().showTime) {
+          this.set({createdDateRelative: ''});
+          return;
+        }
+        let {cdate} = this.get().message;
+        if (cdate == null) {
+          cdate = +(new Date());
+        }
+        const now = new Date() / 1000;
+        const cdateMoment = moment(new Date(Math.min(cdate * 1000, new Date())));
+        let createdDateRelative;
+        if (now - cdate > 10 * 30 * 24 * 60 * 60) {
+          // More than 10 months ago.
+          createdDateRelative = cdateMoment.format('MMM D, YYYY');
+        } else if (now - cdate > 6 * 24 * 60 * 60) {
+          // More than 6 days ago.
+          createdDateRelative = cdateMoment.format('MMM D');
+        } else if (now - cdate > 24 * 60 * 60) {
+          // More than 1 day ago.
+          createdDateRelative = cdateMoment.format('ddd, hA');
+        } else {
+          createdDateRelative = cdateMoment.fromNow();
+        }
+        this.set({createdDateRelative});
       }
     },
 

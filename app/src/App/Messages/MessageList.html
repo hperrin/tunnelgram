@@ -24,7 +24,7 @@
       {#each messages as message, i (message.guid)}
         <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{messages.length === i + 1 || messages[i + 1].data.user.guid !== message.data.user.guid}" showTime="{i > 0 && showTime(messages[i - 1].cdate, message.cdate)}"></MessageView>
       {/each}
-      {#each pending as message}
+      {#each $conversation.pending as message}
         <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[messages.length - 1].cdate)}"></MessageView>
       {/each}
     </div>
@@ -52,6 +52,13 @@
       });
       this.scrollWaitBottom = true;
       this.scrollWaitReadline = false;
+
+      this.scrollToBottomListener = this.on('scrollToBottom', () => {
+        if (!this.scrollWaitReadline) {
+          this.scrollWaitBottom = true;
+          this.scrollToBottom();
+        }
+      });
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
@@ -102,9 +109,7 @@
           // Scroll to the bottom when the messages are first loaded.
           (changed._loading && !current._loading && !this.scrollWaitReadline) ||
           // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline) ||
-          // Scroll to the bottom when the user adds a pending message.
-          (changed.pending && current.pending.length && !this.scrollWaitReadline)
+          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline)
         )) {
         this.scrollWaitBottom = true;
         this.scrollToBottom();
@@ -136,12 +141,14 @@
         _subscription.unsubscribe();
       }
 
+      this.scrollToBottomListener.cancel();
+
       PubSub.off('connect', this.onPubSubConnect);
       PubSub.off('disconnect', this.onPubSubDisconnect);
     },
 
     computed: {
-      name: ({$conversation, $user}) => $conversation.getName($user)
+      name: ({$conversation, $conversations, $user}) => $conversation.getName($user)
     },
 
     data () {
@@ -154,8 +161,7 @@
         _loadingEarlierMessages: false,
         _reachedEarliestMessage: false,
         _scrollToDistanceFromBottom: null,
-        messages: [],
-        pending: []
+        messages: []
       };
     },
 
@@ -197,14 +203,13 @@
 
             if (update.added) {
               // Remove the message from pending messages.
-              const {pending} = this.get();
-              const {user} = this.store.get();
+              const {user, conversation} = this.store.get();
               const ent = update.data;
-              for (let i = 0; i < pending.length; i++) {
-                const cur = pending[i];
+              for (let i = 0; i < conversation.pending.length; i++) {
+                const cur = conversation.pending[i];
                 if (ent.data.keys[user.guid] === cur.data.keys[user.guid]) {
-                  pending.splice(i, 1);
-                  this.set({pending});
+                  conversation.pending.splice(i, 1);
+                  this.store.set({conversation});
                   break;
                 }
               }

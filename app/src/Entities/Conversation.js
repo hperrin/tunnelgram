@@ -14,6 +14,7 @@ export class Conversation extends Entity {
 
   constructor (id) {
     super(id);
+    this.pending = [];
     this.unreadCountPromise = null;
     this.unreadCountPromiseReadline = null;
     this.decrypted = {

@@ -15,7 +15,7 @@
     </div>
   {/if}
   <div class="flex-grow-1  position-relative">
-    <MessageList bind:pending />
+    <MessageList ref:messageList />
   </div>
   <form on:submit="newMessage(event.preventDefault())">
     {#if images.length || video != null || _imagesLoading}
@@ -93,8 +93,7 @@
         _imagesLoading: false,
         text: '',
         images: [],
-        video: null,
-        pending: []
+        video: null
       };
     },
 
@@ -119,7 +118,7 @@
           return;
         }
 
-        const {text, images, video, pending} = this.get();
+        const {text, images, video} = this.get();
         const {conversation} = this.store.get();
 
         const message = new Message();
@@ -131,25 +130,36 @@
           acRead: [...conversation.data.acFull]
         });
 
-        pending.push(message);
+        conversation.pending.push(message);
 
-        message.save().then(() => {
+        const saveSuccess = () => {
           conversation.readline = message.cdate;
           conversation.unreadCountPromise = null;
-          this.store.set({conversation});
 
-          const {pending} = this.get();
+          removePending();
+        };
 
-          const idx = message.arraySearch(pending);
+        const removePending = () => {
+          const idx = message.arraySearch(conversation.pending);
           if (idx !== false) {
-            pending.splice(idx, 1);
-            this.set({pending});
+            conversation.pending.splice(idx, 1);
           }
-        }, (err) => {
-          ErrHandler(err);
-        });
 
-        this.set({pending, text: '', images: [], video: null});
+          if (conversation.is(this.store.get().conversation)) {
+            this.store.set({conversation});
+          } else {
+            this.store.set({conversations: this.store.get().conversations});
+          }
+        };
+
+        message.retrySave = () => message.save(true).then(saveSuccess, ErrHandler);
+        message.cancelSave = () => removePending();
+        message.save().then(saveSuccess, ErrHandler);
+
+        this.set({text: '', images: [], video: null});
+        this.store.set({conversation});
+        // Scroll to the bottom when the user adds a pending message.
+        this.refs.messageList.fire('scrollToBottom');
         this.focus();
       },
 

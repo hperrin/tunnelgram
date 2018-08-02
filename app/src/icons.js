@@ -13,6 +13,7 @@ import fasSync from '@fortawesome/fontawesome-free-solid/faSync';
 import fasUpload from '@fortawesome/fontawesome-free-solid/faUpload';
 import fasComments from '@fortawesome/fontawesome-free-solid/faComments';
 import fasPlayCircle from '@fortawesome/fontawesome-free-solid/faPlayCircle';
+import fasExclamationCircle from '@fortawesome/fontawesome-free-solid/faExclamationCircle';
 
 fontawesome.library.add(
   fasWifi,
@@ -28,5 +29,6 @@ fontawesome.library.add(
   fasSync,
   fasUpload,
   fasComments,
-  fasPlayCircle
+  fasPlayCircle,
+  fasExclamationCircle
 );

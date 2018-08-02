@@ -14,6 +14,7 @@ export class Message extends Entity {
 
   constructor (id) {
     super(id);
+    this.savePromise = null;
     this.decrypted = {
       text: '[Encrypted text]',
       images: [],
@@ -142,59 +143,64 @@ export class Message extends Entity {
     return this;
   }
 
-  async save () {
-    // Encrypt the message text for all recipients (which should include the current user).
-    const key = crypt.generateKey();
-    if (this.decrypted.text != null) {
-      this.data.text = crypt.encrypt(this.decrypted.text, key);
-      if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
-        const match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
-        this.decrypted.text = match[1];
-        this.decrypted.secretText = match[2];
+  save (skipEncryption) {
+    this.savePromise = (async () => {
+      if (!skipEncryption) {
+        // Encrypt the message text for all recipients (which should include the current user).
+        const key = crypt.generateKey();
+        if (this.decrypted.text != null) {
+          this.data.text = crypt.encrypt(this.decrypted.text, key);
+          if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
+            const match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+            this.decrypted.text = match[1];
+            this.decrypted.secretText = match[2];
+          }
+        }
+        if (this.decrypted.images.length) {
+          this.data.images = await Promise.all(this.decrypted.images.map(async image => ({
+            name: crypt.encrypt(image.name, key),
+            dataType: crypt.encrypt(image.dataType, key),
+            dataWidth: crypt.encrypt(image.dataWidth, key),
+            dataHeight: crypt.encrypt(image.dataHeight, key),
+            // Image/video data is a Uint8Array, not a string.
+            data: await crypt.encryptBytesToBase64Async(image.data, key),
+            thumbnailType: crypt.encrypt(image.thumbnailType, key),
+            thumbnailWidth: crypt.encrypt(image.thumbnailWidth, key),
+            thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
+            // Image/video data is a Uint8Array, not a string.
+            thumbnail: await crypt.encryptBytesToBase64Async(image.thumbnail, key)
+          })));
+        } else if (this.decrypted.video != null) {
+          this.data.video = {
+            name: crypt.encrypt(this.decrypted.video.name, key),
+            dataType: crypt.encrypt(this.decrypted.video.dataType, key),
+            dataWidth: crypt.encrypt(this.decrypted.video.dataWidth, key),
+            dataHeight: crypt.encrypt(this.decrypted.video.dataHeight, key),
+            dataDuration: crypt.encrypt(this.decrypted.video.dataDuration, key),
+            // Image/video data is a Uint8Array, not a string.
+            data: await crypt.encryptBytesToBase64Async(this.decrypted.video.data, key),
+            thumbnailType: crypt.encrypt(this.decrypted.video.thumbnailType, key),
+            thumbnailWidth: crypt.encrypt(this.decrypted.video.thumbnailWidth, key),
+            thumbnailHeight: crypt.encrypt(this.decrypted.video.thumbnailHeight, key),
+            // Image/video data is a Uint8Array, not a string.
+            thumbnail: await crypt.encryptBytesToBase64Async(this.decrypted.video.thumbnail, key)
+          };
+        }
+
+        const encryptPromises = [];
+        for (let user of this.data.acRead) {
+          const pad = crypt.generatePad();
+          encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
+        }
+        this.data.keys = {};
+        for (let entry of encryptPromises) {
+          this.data.keys[entry.user.guid] = await entry.promise;
+        }
       }
-    }
-    if (this.decrypted.images.length) {
-      this.data.images = await Promise.all(this.decrypted.images.map(async image => ({
-        name: crypt.encrypt(image.name, key),
-        dataType: crypt.encrypt(image.dataType, key),
-        dataWidth: crypt.encrypt(image.dataWidth, key),
-        dataHeight: crypt.encrypt(image.dataHeight, key),
-        // Image/video data is a Uint8Array, not a string.
-        data: await crypt.encryptBytesToBase64Async(image.data, key),
-        thumbnailType: crypt.encrypt(image.thumbnailType, key),
-        thumbnailWidth: crypt.encrypt(image.thumbnailWidth, key),
-        thumbnailHeight: crypt.encrypt(image.thumbnailHeight, key),
-        // Image/video data is a Uint8Array, not a string.
-        thumbnail: await crypt.encryptBytesToBase64Async(image.thumbnail, key)
-      })));
-    } else if (this.decrypted.video != null) {
-      this.data.video = {
-        name: crypt.encrypt(this.decrypted.video.name, key),
-        dataType: crypt.encrypt(this.decrypted.video.dataType, key),
-        dataWidth: crypt.encrypt(this.decrypted.video.dataWidth, key),
-        dataHeight: crypt.encrypt(this.decrypted.video.dataHeight, key),
-        dataDuration: crypt.encrypt(this.decrypted.video.dataDuration, key),
-        // Image/video data is a Uint8Array, not a string.
-        data: await crypt.encryptBytesToBase64Async(this.decrypted.video.data, key),
-        thumbnailType: crypt.encrypt(this.decrypted.video.thumbnailType, key),
-        thumbnailWidth: crypt.encrypt(this.decrypted.video.thumbnailWidth, key),
-        thumbnailHeight: crypt.encrypt(this.decrypted.video.thumbnailHeight, key),
-        // Image/video data is a Uint8Array, not a string.
-        thumbnail: await crypt.encryptBytesToBase64Async(this.decrypted.video.thumbnail, key)
-      };
-    }
 
-    const encryptPromises = [];
-    for (let user of this.data.acRead) {
-      const pad = crypt.generatePad();
-      encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
-    }
-    this.data.keys = {};
-    for (let entry of encryptPromises) {
-      this.data.keys[entry.user.guid] = await entry.promise;
-    }
-
-    return super.save();
+      return await super.save();
+    })();
+    return this.savePromise;
   }
 }
 
