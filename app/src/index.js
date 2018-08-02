@@ -62,6 +62,11 @@ store.constructor.prototype.refreshAll = function () {
   sleepyConversationCacheService.clear();
   sleepyMessageCacheService.clear();
 
+  const {settings} = store.get();
+  if (settings != null) {
+    settings.init(settings.toJSON());
+  }
+
   const {conversation} = this.get();
   if (conversation.guid) {
     conversation.refresh().then(() => {
