@@ -25,7 +25,7 @@
   {/if}
   <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
-      class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
+      class="{shouldEmbiggen ? '' : 'card rounded shadow-sm '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
       style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
       tabindex="0"
       role="button"
@@ -36,9 +36,9 @@
           {#if message.decrypted.text != null}
             <span class="h1">{(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}</span>
           {:elseif message.decrypted.images.length}
-            <ImageGrid resources="{message.decrypted.images}" />
+            <div class="shadow-sm"><ImageGrid resources="{message.decrypted.images}" /></div>
           {:elseif message.decrypted.video != null}
-            <Video resource="{message.decrypted.video}" />
+            <div class="shadow-sm"><Video resource="{message.decrypted.video}" /></div>
           {/if}
         </div>
       {:else}
