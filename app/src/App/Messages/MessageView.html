@@ -43,11 +43,11 @@
         </div>
       {:else}
         {#if message.decrypted.images.length && (!flipper || _flipped)}
-          <div class="card-body p-0 m-0">
+          <div class="card-header p-0 w-100 d-flex justify-content-center">
             <ImageGrid resources="{message.decrypted.images}" />
           </div>
         {:elseif message.decrypted.video != null && (!flipper || _flipped)}
-          <div class="card-body p-0 m-0">
+          <div class="card-header p-0 w-100 d-flex justify-content-center">
             <Video resource="{message.decrypted.video}" />
           </div>
         {/if}

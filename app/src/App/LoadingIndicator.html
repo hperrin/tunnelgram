@@ -1,13 +1,11 @@
 <div style="display: flex; justify-content: center; align-items: center; position: relative; width: {width}; height: {height};">
   {#if text || title}
-    <div style="text-align: center; font-size: .9em;">
+    <div style="text-align: center; font-size: .9em; text-overflow: ellipsis; overflow: hidden; max-height: 100%; max-width: 100%;">
       {#if title}
         <h3>{title}</h3>
       {/if}
       {#if text}
-        <p>
-          {text}
-        </p>
+        {text}
       {/if}
     </div>
   {/if}
