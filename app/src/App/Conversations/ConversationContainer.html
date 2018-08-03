@@ -12,7 +12,37 @@
       <h2>Start a New Conversation</h2>
       <form class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;" on:submit="save(event.preventDefault())">
         <div class="d-flex">
-          <input type="text" class="form-control mr-3 flex-grow-1" id="username" ref:username placeholder="Username" on:keydown="handleKeyDown(event)" bind:value="addUsername" disabled="{_loadingUser}">
+          <div class="d-inline-block mr-3 flex-grow-1 position-relative userSearchDropdown">
+            <input
+              type="search"
+              class="form-control mr-3 flex-grow-1"
+              id="username"
+              ref:username
+              placeholder="Username or name of contact"
+              on:keydown="handleUserSearchKeyDown(event)"
+              bind:value="addUsername"
+              disabled="{_loadingUser}"
+              autocomplete="off" />
+            {#if _userSearchPromise}
+              {#await _userSearchPromise}
+                <div class="dropdown-menu">
+                  <span class="dropdown-item-text d-flex justify-content-center">
+                    <LoadingIndicator width="18px" height="18px" />
+                  </span>
+                </div>
+              {:then users}
+                {#if users.length}
+                  <div class="dropdown-menu">
+                    {#each users as user}
+                      <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click="addUser(user.data.username)">
+                        <span><span class="mr-2"><Avatar user="{user}" /></span> <DisplayName user="{user}" /> ({user.data.username})</span>
+                      </a>
+                    {/each}
+                  </div>
+                {/if}
+              {/await}
+            {/if}
+          </div>
           <button type="button" class="btn btn-success" title="Add person" on:click="addUser()" disabled="{_loadingUser}">
             <i class="fas fa-plus"></i>
           </button>
@@ -66,18 +96,63 @@
 <script>
   import {Nymph} from 'nymph-client';
   import {User} from 'tilmeld-client';
+  import bsn from 'bootstrap.native/dist/bootstrap-native-v4';
   import moment from 'moment';
   import ConversationView from './ConversationView.html';
   import ConversationPeople from './ConversationPeople.html';
   import ConversationSettings from './ConversationSettings.html';
   import Avatar from '../Users/Avatar.html';
   import DisplayName from '../Users/DisplayName.html';
+  import LoadingIndicator from '../LoadingIndicator.html';
   import ErrHandler from '../../ErrHandler';
 
   export default {
     oncreate () {
       if (!this.store.get().conversation.guid) {
         this.refs.username.focus();
+      }
+    },
+
+    onupdate ({changed, current}) {
+      if (changed.addUsername) {
+        let users = [];
+        let startsWithUsers = [];
+        let containUsers = [];
+        const {addUsername} = this.get();
+        const searchQuery = addUsername.toLowerCase();
+        this.set({_userSearchPromise: null});
+        if (searchQuery.length >= 2) {
+          this.set({_userSearchPromise: new Promise(resolve => {
+            // Search for users in the conversations in cache.
+            const {conversations, settings, user} = this.store.get();
+            conversations.map(conversation => {
+              conversation.data.acFull.map(searchUser => {
+                if (user.is(searchUser) || searchUser.isASleepingReference) {
+                  return;
+                }
+                let name = searchUser.data.name.toLowerCase();
+                if (searchUser.guid in settings.decrypted.nicknames) {
+                  name = settings.decrypted.nicknames[searchUser.guid].toLowerCase();
+                }
+                if (name.startsWith(searchQuery) || searchUser.data.username.startsWith(searchQuery)) {
+                  if (!searchUser.inArray(startsWithUsers)) {
+                    startsWithUsers.push(searchUser);
+                  }
+                } else if (name.includes(searchQuery) || searchUser.data.username.includes(searchQuery)) {
+                  if (!searchUser.inArray(containUsers)) {
+                    containUsers.push(searchUser);
+                  }
+                }
+              });
+            });
+            users = [...users, ...startsWithUsers, ...containUsers];
+            startsWithUsers = [];
+            containUsers = [];
+            resolve(users);
+          })});
+          // TODO(hperrin): Search for nicknames.
+          // TODO(hperrin): Search for users in conversations from the server.
+        }
       }
     },
 
@@ -105,20 +180,22 @@
     },
 
     methods: {
-      handleKeyDown (event) {
+      handleUserSearchKeyDown (event) {
         if (event.keyCode === 13) {
           this.addUser();
           event.preventDefault();
         }
       },
 
-      async addUser () {
+      async addUser (addUsername) {
         this.set({
           _loadingUser: true,
           _addUserError: null
         });
 
-        const addUsername = this.get().addUsername.replace(/\\\\/g, '\\\\\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+        if (!addUsername) {
+          addUsername = this.get().addUsername.replace(/\\\\/g, '\\\\\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+        }
 
         if (!addUsername || addUsername.match(/^\s+$/)) {
           this.set({
@@ -202,7 +279,8 @@
       ConversationPeople,
       ConversationSettings,
       Avatar,
-      DisplayName
+      DisplayName,
+      LoadingIndicator
     },
 
     helpers: {
@@ -210,3 +288,9 @@
     }
   };
 </script>
+
+<style>
+  .userSearchDropdown:focus-within .dropdown-menu {
+    display: block;
+  }
+</style>
