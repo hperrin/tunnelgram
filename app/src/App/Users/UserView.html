@@ -2,7 +2,7 @@
   <div class="d-flex flex-column align-items-center py-3">
     <div class="d-inline-block position-relative mb-3" on:mouseenter="set({_mouseOverAvatar: true})" on:mouseleave="set({_mouseOverAvatar: false})">
       {#if $viewUserIsSelf}
-        <input class="d-none" type="file" ref:avatarInput on:change="handleAvatar(event.target.files)" />
+        <input class="d-none" type="file" ref:avatarInput on:change="handleAvatar(event.target.files)" capture />
         <a class="{_mouseOverAvatar ? 'd-flex' : 'd-none'} position-absolute h-100 w-100 justify-content-center align-items-center" href="javascript:void(0)" on:click="refs.avatarInput.click()">
           <i class="fas fa-upload fa-3x"></i>
         </a>
@@ -22,7 +22,7 @@
         <div class="form-group">
           <label for="viewUserNickname">Nickname</label>
           <div class="d-flex">
-            <input type="text" class="form-control flex-grow-1" id="viewUserNickname" bind:value="nickname" aria-describedby="viewUserNicknameHelp" placeholder="Enter nickname" />
+            <input type="text" class="form-control flex-grow-1" id="viewUserNickname" bind:value="nickname" aria-describedby="viewUserNicknameHelp" placeholder="Enter nickname" autocomplete="nickname" />
             <button type="button" class="btn btn-primary ml-2" style="width: 100px;" on:click="saveSettings()">Save</button>
           </div>
           <small id="viewUserNicknameHelp" class="form-text text-muted">Only visible to you.</small>
@@ -41,31 +41,20 @@
       <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
         <div class="form-group">
           <label for="accountDetailsUsername">Username</label>
-          <input type="text" class="form-control" id="accountDetailsUsername" bind:value="$viewUser.data.username" placeholder="Enter username" />
+          <input type="text" class="form-control" id="accountDetailsUsername" bind:value="$viewUser.data.username" placeholder="Enter username" autocomplete="username" />
         </div>
         <div class="form-group">
           <label for="accountDetailsFirstName">First name</label>
-          <input type="text" class="form-control" id="accountDetailsFirstName" bind:value="$viewUser.data.nameFirst" placeholder="Enter name" />
+          <input type="text" class="form-control" id="accountDetailsFirstName" bind:value="$viewUser.data.nameFirst" placeholder="Enter name" autocomplete="given-name" />
         </div>
         <div class="form-group">
           <label for="accountDetailsLastName">Last name</label>
-          <input type="text" class="form-control" id="accountDetailsLastName" bind:value="$viewUser.data.nameLast" placeholder="Enter name" />
+          <input type="text" class="form-control" id="accountDetailsLastName" bind:value="$viewUser.data.nameLast" placeholder="Enter name" autocomplete="family-name" />
         </div>
         <div class="form-group">
           <label for="accountDetailsPhone">Phone</label>
-          <input type="tel" class="form-control" id="accountDetailsPhone" bind:value="$viewUser.data.phone" placeholder="Enter phone number" />
+          <input type="tel" class="form-control" id="accountDetailsPhone" bind:value="$viewUser.data.phone" placeholder="Enter phone number" autocomplete="tel" />
         </div>
-        {#if clientConfig.timezones}
-          <div class="form-group">
-            <label for="accountDetailsTimezone">Timezone</label>
-            <select class="form-control" id="accountDetailsTimezone" bind:value="$viewUser.data.timezone">
-              <option value="">--Default--</option>
-              {#each clientConfig.timezones as tz}
-                <option value="{tz}">{tz}</option>
-              {/each}
-            </select>
-          </div>
-        {/if}
         <div class="form-group">
           <span>Password</span>
           <TilmeldChangePassword
@@ -137,11 +126,6 @@
 
   export default {
     oncreate () {
-      // Get the client config (for timezones).
-      User.getClientConfig().then(clientConfig => {
-        this.set({clientConfig});
-      });
-
       QRCode.toCanvas(
         this.refs.code,
         this.get().shortLink,
@@ -212,7 +196,6 @@
         _startingConversation: false,
         _mouseOverAvatar: false,
         _avatarLoading: false,
-        clientConfig: {},
         nickname: '',
         // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
       };
