@@ -244,8 +244,7 @@
       shareShortLink () {
         if (navigator.share !== undefined) {
           navigator.share({
-            title: 'Message me on Tunnelgram',
-            text: 'The easy, secure messenger.',
+            text: 'Message me on Tunnelgram',
             url: this.get().shortLink
           })
         } else {
