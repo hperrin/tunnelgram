@@ -35,11 +35,23 @@ export class Message extends Entity {
     if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
       const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
       if (this.data.text != null) {
+        let match;
+
         this.decrypted.text = crypt.decrypt(this.data.text, key);
         if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
-          const match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+          match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
           this.decrypted.text = match[1];
           this.decrypted.secretText = match[2];
+        }
+
+        const elevationRegEx = /(?:\n|^)e> ([0-3])(?:\n|$)/m;
+        match = this.decrypted.text.match(elevationRegEx);
+        this.textElevation = match ? parseFloat(match[1]) : 1;
+        this.decrypted.text = this.decrypted.text.replace(elevationRegEx, '');
+        if (this.decrypted.secretText != null) {
+          match = this.decrypted.secretText.match(elevationRegEx);
+          this.secretTextElevation = match ? parseFloat(match[1]) : 1;
+          this.decrypted.secretText = this.decrypted.secretText.replace(elevationRegEx, '');
         }
       } else if (this.data.images || this.data.video) {
         this.decrypted.text = null;

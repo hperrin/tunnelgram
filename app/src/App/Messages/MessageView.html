@@ -25,7 +25,7 @@
   {/if}
   <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
-      class="{shouldEmbiggen ? '' : 'card rounded shadow-sm '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
+      class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
       style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
       tabindex="0"
       role="button"
@@ -34,11 +34,11 @@
       {#if shouldEmbiggen}
         <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
           {#if message.decrypted.text != null}
-            <span class="h1">{(flipper && _flipped) ? message.decrypted.secretText : message.decrypted.text}</span>
+            <span class="h1">{_flipped ? message.decrypted.secretText : message.decrypted.text}</span>
           {:elseif message.decrypted.images.length}
-            <div class="shadow-sm"><ImageGrid resources="{message.decrypted.images}" /></div>
+            <div class="{shadowClass}"><ImageGrid resources="{message.decrypted.images}" /></div>
           {:elseif message.decrypted.video != null}
-            <div class="shadow-sm"><Video resource="{message.decrypted.video}" /></div>
+            <div class="{shadowClass}"><Video resource="{message.decrypted.video}" /></div>
           {/if}
         </div>
       {:else}
@@ -53,7 +53,7 @@
         {/if}
         <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
           {#if _formattedText != null}
-            <div class="card-text markdown-body" ref:message>{@html (flipper && _flipped) ? _formattedSecretText : _formattedText}</div>
+            <div class="card-text markdown-body" ref:message>{@html _flipped ? _formattedSecretText : _formattedText}</div>
           {/if}
         </div>
       {/if}
@@ -171,7 +171,8 @@
         return false;
       },
       flipper: ({message}) => message.decrypted.secretText != null,
-      displayName: ({message, $settings}) => message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name)
+      displayName: ({message, $settings}) => message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name),
+      shadowClass: ({message, _flipped}) => ['shadow-none', 'shadow-sm', 'shadow', 'shadow-lg'][_flipped ? message.secretTextElevation : message.textElevation]
     },
 
     data () {
@@ -179,6 +180,7 @@
         _showActions: false,
         _formattedText: null,
         _saveFailed: null,
+        _flipped: false,
         message: null,
         readLineCDate: false,
         showAvatar: true,
