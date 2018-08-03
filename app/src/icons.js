@@ -13,7 +13,13 @@ import fasSync from '@fortawesome/fontawesome-free-solid/faSync';
 import fasUpload from '@fortawesome/fontawesome-free-solid/faUpload';
 import fasComments from '@fortawesome/fontawesome-free-solid/faComments';
 import fasPlayCircle from '@fortawesome/fontawesome-free-solid/faPlayCircle';
+import fasShare from '@fortawesome/fontawesome-free-solid/faShare';
+
+// For PNotify
 import fasExclamationCircle from '@fortawesome/fontawesome-free-solid/faExclamationCircle';
+import fasInfoCircle from '@fortawesome/fontawesome-free-solid/faInfoCircle';
+import fasCheckCircle from '@fortawesome/fontawesome-free-solid/faCheckCircle';
+import fasExclamationTriangle from '@fortawesome/fontawesome-free-solid/faExclamationTriangle';
 
 fontawesome.library.add(
   fasWifi,
@@ -30,5 +36,11 @@ fontawesome.library.add(
   fasUpload,
   fasComments,
   fasPlayCircle,
-  fasExclamationCircle
+  fasShare,
+
+  // For PNotify
+  fasExclamationCircle,
+  fasInfoCircle,
+  fasCheckCircle,
+  fasExclamationTriangle
 );
