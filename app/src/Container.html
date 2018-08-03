@@ -180,7 +180,7 @@
     },
 
     computed: {
-      name: ({$view, $viewUser, $conversation, $conversations, $settings}) => $view === 'user' ? $viewUser.data.name : ($settings ? $conversation.getName($settings) : '')
+      name: ({$view, $viewUser, $conversation, $conversations, $settings}) => $view === 'user' ? $viewUser.data.name : ($settings && $conversation.guid ? $conversation.getName($settings) : '')
     },
 
     data () {
