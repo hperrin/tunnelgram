@@ -120,7 +120,7 @@
   import Conversation from '../../Entities/Conversation';
   import Avatar from './Avatar.html';
   import LoadingIndicator from '../LoadingIndicator.html';
-  import ResizeImage from '../../Services/ResizeImage';
+  import EditImage from '../../Services/EditImage';
   import getCookieValue from '../../Services/getCookieValue';
   import ErrHandler from '../../ErrHandler';
 
@@ -281,7 +281,7 @@
         image.src = tempObjectURL;
         await p;
 
-        let resizeImage = new ResizeImage(image, file.type);
+        let resizeImage = new EditImage(image, file.type);
         const avatarImg = await resizeImage.resizeCrop(500, 500);
         resizeImage.destroy();
 

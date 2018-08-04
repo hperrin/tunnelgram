@@ -14,6 +14,7 @@ import fasUpload from '@fortawesome/fontawesome-free-solid/faUpload';
 import fasComments from '@fortawesome/fontawesome-free-solid/faComments';
 import fasPlayCircle from '@fortawesome/fontawesome-free-solid/faPlayCircle';
 import fasShare from '@fortawesome/fontawesome-free-solid/faShare';
+import fasUndo from '@fortawesome/fontawesome-free-solid/faUndo';
 
 // For PNotify
 import fasExclamationCircle from '@fortawesome/fontawesome-free-solid/faExclamationCircle';
@@ -37,6 +38,7 @@ fontawesome.library.add(
   fasComments,
   fasPlayCircle,
   fasShare,
+  fasUndo,
 
   // For PNotify
   fasExclamationCircle,

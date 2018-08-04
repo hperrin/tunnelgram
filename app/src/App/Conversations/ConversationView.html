@@ -23,13 +23,16 @@
         {#each images as image, i}
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
             <img src="{image.thumbnailImg}" alt="{image.name}" title="{image.name}" />
-            <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})">
+            <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click="rotateImage(i)" title="Rotate">
+              <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-danger rounded-circle thumbnailOverlay thumbnailButton" style="right: 4px; top: 4px;" on:click="set({images: removeIndex(images, i)})" title="Remove">
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
-            <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
+            <span class="badge badge-light thumbnailOverlay" style="left: 4px; bottom: 4px; pointer-events: none;">
               {image.dataWidth}x{image.dataHeight}
             </span>
-            <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
+            <span class="badge badge-light thumbnailOverlay" style="right: 4px; bottom: 4px; pointer-events: none;">
               {round(image.data.length / 1024 / 1024, 1)}MB
             </span>
           </div>
@@ -58,7 +61,7 @@
       </div>
     {/if}
     <div class="d-flex align-items-stretch">
-      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/webm, video/mp4" multiple>
+      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/webm, .webm, video/mp4, .mp4, .mpg, .mpeg" multiple>
       <button class="btn btn-lg btn-info p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
       <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty}" title="Send message"><i class="fas fa-comment"></i></button>
@@ -73,7 +76,7 @@
   import MessageList from '../Messages/MessageList.html';
   import LoadingIndicator from '../LoadingIndicator.html';
   import {crypt} from '../../Services/EncryptionService';
-  import ResizeImage from '../../Services/ResizeImage';
+  import EditImage from '../../Services/EditImage';
   import ErrHandler from '../../ErrHandler';
 
   const mobile = (() => {
@@ -169,6 +172,52 @@
         }
       },
 
+      async rotateImage (index) {
+        const {images} = this.get();
+
+        // Read the image and thumbnail into Images to rotate them.
+        const imageData = new Image();
+        let resolveData;
+        const pData = new Promise(r => resolveData = r);
+        imageData.onload = () => resolveData();
+        imageData.src = images[index].dataImg;
+        const imageThumbnail = new Image();
+        let resolveThumbnail;
+        const pThumbnail = new Promise(r => resolveThumbnail = r);
+        imageThumbnail.onload = () => resolveThumbnail();
+        imageThumbnail.src = images[index].thumbnailImg;
+
+        await Promise.all([pData, pThumbnail]);
+
+        let rotateData = new EditImage(imageData, images[index].dataType);
+        let rotateThumbnail = new EditImage(imageThumbnail, images[index].thumbnailType);
+
+        let dataImg = rotateData.rotate();
+        let thumbnailImg = rotateThumbnail.rotate();
+
+        rotateData.destroy();
+        rotateThumbnail.destroy();
+
+        const dataMatch = dataImg.match(/^data:(image\/\w+);base64,(.*)$/);
+        const data = crypt.decodeBase64(dataMatch[2]);
+        const thumbnailMatch = thumbnailImg.match(/^data:(image\/\w+);base64,(.*)$/);
+        const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
+
+        images[index] = {
+          ...images[index],
+          dataWidth: images[index].dataHeight,
+          dataHeight: images[index].dataWidth,
+          data,
+          dataImg,
+          thumbnailWidth: images[index].thumbnailHeight,
+          thumbnailHeight: images[index].thumbnailWidth,
+          thumbnail,
+          thumbnailImg
+        };
+
+        this.set({images});
+      },
+
       clearTimeout () {
         if (this.timeout) {
           window.clearTimeout(this.timeout);
@@ -218,7 +267,7 @@
         for (var i = 0; i < files.length; i++) {
           const file = files[i];
 
-          if (file.type === 'video/webm' || file.type === 'video/mp4') {
+          if (['video/mp4', 'video/webm'].indexOf(file.type) !== -1) {
             if (currentImageCount + imageCount > 0) {
               PNotify.notice({
                 title: 'Images or Video',
@@ -271,7 +320,7 @@
               const objectURL = URL.createObjectURL(blob);
 
               let dataType = file.type;
-              let resizeImage = new ResizeImage(video, 'image/jpeg');
+              let resizeImage = new EditImage(video, 'image/jpeg');
               const thumbnailImg = await resizeImage.resizeContain(300, 300);
               resizeImage.destroy();
               const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
@@ -303,7 +352,7 @@
           } else if (!file.type.startsWith('image/')) {
             PNotify.notice({
               title: 'Only Images/Video',
-              text: 'Right now, Tunnelgram only supports images, WebM videos, and MP4 videos.'
+              text: 'Right now, Tunnelgram only supports images, and WebM/MP4 videos. You tried to add: '+file.type
             });
             this.set({_imagesLoading: false});
           } else if (currentImageCount + imageCount === 9) {
@@ -331,7 +380,7 @@
             let dataMatch;
             let dataType;
             let data;
-            let resizeImage = new ResizeImage(image, file.type);
+            let resizeImage = new EditImage(image, file.type);
             do {
               // Resize the image repeatedly down until the size is under 2MiB.
               dataImg = await resizeImage.resizeContain(size, size);
@@ -353,6 +402,7 @@
                 dataWidth: '' + dataImg.width,
                 dataHeight: '' + dataImg.height,
                 data,
+                dataImg: dataImg.data,
                 thumbnailType,
                 thumbnailWidth: '' + thumbnailImg.width,
                 thumbnailHeight: '' + thumbnailImg.height,
@@ -390,3 +440,16 @@
     }
   };
 </script>
+
+<style>
+  .thumbnailOverlay {
+    position: absolute;
+    opacity: .7;
+  }
+  .thumbnailButton {
+    font-size: 0.7em;
+    padding: 0;
+    width: 2.2em;
+    height: 2.2em;
+  }
+</style>

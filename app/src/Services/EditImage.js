@@ -1,5 +1,5 @@
 // Based on: https://stackoverflow.com/a/14845805
-export default class ResizeImage {
+export default class EditImage {
   constructor (img, type) {
     // Create two canvas.
     this.canvas = document.createElement('canvas');
@@ -36,11 +36,7 @@ export default class ResizeImage {
     return this.resize(maxWidth, maxHeight, true);
   }
 
-  async resize (maxWidth, maxHeight, crop) {
-    // Max size for image.
-    maxWidth = maxWidth || 150;
-    maxHeight = maxHeight || 150;
-
+  async resize (maxWidth = 150, maxHeight = 150, crop) {
     const imgWidth = this.img.videoWidth || this.img.naturalWidth;
     const imgHeight = this.img.videoHeight || this.img.naturalHeight;
 
@@ -118,9 +114,14 @@ export default class ResizeImage {
       };
     }
   }
+
+  rotate () {
+    rotate(this.canvas, this.img);
+    return this.canvas.toDataURL(this.type, .95);
+  }
 }
 
-function scale(canvas, img, ratio, destWidth, destHeight, x, y) {
+function scale (canvas, img, ratio, destWidth, destHeight, x, y) {
   const canvas2 = document.createElement('canvas');
 
   const ctx = canvas.getContext('2d');
@@ -132,7 +133,7 @@ function scale(canvas, img, ratio, destWidth, destHeight, x, y) {
   canvas2.width = destWidth;
   canvas2.height = destHeight;
   const ctx2 = canvas2.getContext('2d');
-  ctx2.drawImage(canvas, x * -1, y * -1, destWidth, destHeight, 0, 0, destWidth, destHeight);
+  ctx2.drawImage(canvas, -x, -y, destWidth, destHeight, 0, 0, destWidth, destHeight);
 
   //resize canvas
   canvas.width = destWidth;
@@ -140,4 +141,20 @@ function scale(canvas, img, ratio, destWidth, destHeight, x, y) {
 
   //draw
   ctx.drawImage(canvas2, 0, 0);
+}
+
+function rotate (canvas, img) {
+  const imgWidth = img.videoWidth || img.naturalWidth;
+  const imgHeight = img.videoHeight || img.naturalHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  canvas.width = imgHeight;
+  canvas.height = imgWidth;
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(Math.PI / 2);
+  ctx.drawImage(img, -imgWidth / 2, -imgHeight / 2);
+  ctx.restore();
 }
