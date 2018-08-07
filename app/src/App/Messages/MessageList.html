@@ -1,5 +1,5 @@
 <svelte:window on:resize="handleWindowResize()" />
-<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; overflow-x: hidden;" ref:container on:scroll="handleScroll()">
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" ref:container on:scroll="handleScroll()">
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
       <div class="col-auto">
