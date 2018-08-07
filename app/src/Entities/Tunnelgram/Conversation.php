@@ -28,6 +28,9 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function findMatchingConversations() {
+    if (!Tilmeld::$currentUser) {
+      return [];
+    }
     $acFullRefs = [];
     $acFulls = $this->acFull;
     if (!Tilmeld::$currentUser->inArray($acFulls)) {

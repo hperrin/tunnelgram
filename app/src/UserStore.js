@@ -25,7 +25,10 @@ export default class UserStore extends Store {
       this.set({user});
     });
     User.on('logout', () => {
-      this.set({user: null});
+      this.set({
+        user: null,
+        userIsTilmeldAdmin: false
+      });
     });
 
     this.on('state', ({changed, current, previous}) => {

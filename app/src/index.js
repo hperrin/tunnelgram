@@ -103,10 +103,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
 PubSub.on('connect', () => store.set({disconnected: false}));
 PubSub.on('disconnect', () => store.set({disconnected: true}));
 
-User.on('logout', () => {
-  router.navigate('/');
-});
-
 // Everything is this function requires the logged in user status to be known.
 (async () => {
   await store.get().ready;
@@ -148,7 +144,14 @@ User.on('logout', () => {
       // Ready all the conversations' entities.
       for (let curConv of conversations) {
         if (curConv.data.user.isASleepingReference) {
-          curConv.readyAll(() => store.set({conversations}), ErrHandler, 1);
+          curConv.readyAll(() => {
+            const {conversation} = store.get();
+            if (curConv.is(conversation)) {
+              store.set({conversations, conversation});
+            } else {
+              store.set({conversations});
+            }
+          }, ErrHandler, 1);
         }
       }
     }
@@ -181,9 +184,17 @@ User.on('logout', () => {
             store.set({settings});
           });
         }
-      } else {
-        // If the user logs out, clear their settings.
-        store.set({settings: null});
+      } else if (current.user === null) {
+        // If the user logs out, clear everything.
+        store.set({
+          user: null,
+          conversations: [],
+          conversation: new Conversation(),
+          settings: null
+        });
+        store.refreshAll();
+        // And navigate to the home screen.
+        router.navigate('/');
       }
     }
   });
