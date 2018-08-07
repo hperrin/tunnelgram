@@ -18,7 +18,7 @@
     <div>{$viewUser.data.username}, member since {moment.unix($viewUser.cdate).format('MMM D, YYYY')}</div>
 
     {#if !$viewUserIsSelf}
-      <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
+      <div class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;">
         <div class="form-group">
           <label for="viewUserNickname">Nickname</label>
           <div class="d-flex">
@@ -38,7 +38,7 @@
     </div>
 
     {#if $viewUserIsSelf}
-      <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
+      <div class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;">
         <div class="form-group">
           <label for="accountDetailsUsername">Username</label>
           <input type="text" class="form-control" id="accountDetailsUsername" bind:value="$viewUser.data.username" placeholder="Enter username" autocomplete="username" />
@@ -90,11 +90,10 @@
               You've got no conversations with {$viewUser.data.nameFirst}.
             </div>
           {:else}
-            <div class="list-group mt-3 text-body w-100 px-2" style="max-width: 600px;">
+            <div class="list-group mt-3 text-body px-2" style="width: 600px; max-width: 100vw;">
               {#each conversations as conversation (conversation.guid)}
-                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
-                  <h5 class="mb-0">{conversation.getName($settings)}</h5>
-                  <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{moment.unix(conversation.mdate).fromNow(true)}</small>
+                <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
+                  <ConversationPreview conversation="{conversation}" />
                 </a>
               {/each}
             </div>
@@ -119,6 +118,7 @@
   import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Conversation';
   import Avatar from './Avatar.html';
+  import ConversationPreview from '../Conversations/ConversationPreview.html';
   import LoadingIndicator from '../LoadingIndicator.html';
   import EditImage from '../../Services/EditImage';
   import getCookieValue from '../../Services/getCookieValue';
@@ -296,7 +296,8 @@
     components: {
       LoadingIndicator,
       TilmeldChangePassword,
-      Avatar
+      Avatar,
+      ConversationPreview
     },
 
     helpers: {

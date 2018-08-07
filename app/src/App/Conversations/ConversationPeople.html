@@ -1,6 +1,6 @@
 <div class="d-flex flex-column align-items-center pt-3 mb-3">
   <h2>People in this Conversation</h2>
-  <div class="d-flex flex-column justify-content-start w-100 px-2" style="max-width: 600px;">
+  <div class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;">
     <div class="list-group mt-3 text-body">
       {#each $conversation.data.acFull as user, i (user.guid)}
         <a class="list-group-item d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click="$navigate('/u/' + user.data.username)">
