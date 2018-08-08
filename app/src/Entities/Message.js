@@ -15,6 +15,8 @@ export class Message extends Entity {
   constructor (id) {
     super(id);
     this.savePromise = null;
+    this.textElevation = 1;
+    this.secretTextElevation = 1;
     this.decrypted = {
       text: '[Encrypted text]',
       images: [],

@@ -1,4 +1,4 @@
-<div class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px; font-size: 1em;">
+<div ref:thumbnailContainer class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px; font-size: 1em;">
   {#each resources as resource, index (resource.name)}
     <div class="d-flex justify-content-center align-items-center">
       {#if resource.thumbnailPromise}
@@ -18,48 +18,8 @@
   {/each}
 </div>
 
-<div ref:photoswipe class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="pswp__bg"></div>
-  <div class="pswp__scroll-wrap">
-    <div class="pswp__container">
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-    </div>
-    <div class="pswp__ui pswp__ui--hidden">
-      <div class="pswp__top-bar">
-        <div class="pswp__counter"></div>
-
-        <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-        <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-        <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-        <div class="pswp__preloader">
-          <div class="pswp__preloader__icn">
-            <div class="pswp__preloader__cut">
-              <div class="pswp__preloader__donut"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-        <div class="pswp__share-tooltip"></div>
-      </div>
-
-      <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
-      <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
-
-      <div class="pswp__caption">
-        <div class="pswp__caption__center"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
-  import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
-  import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
+  import PhotoSwipe from './PhotoSwipe.html';
   import LoadingIndicator from '../LoadingIndicator.html';
   import {crypt} from '../../Services/EncryptionService';
 
@@ -91,8 +51,6 @@
 
     methods: {
       showBigImage (index) {
-        const pswpElement = this.refs.photoswipe;
-
         let items = this.get().resources.map(resource => {
           return {
             w: resource.dataWidth,
@@ -105,11 +63,19 @@
 
         let options = {
           index,
-          history: false
+          history: false,
+          showHideOpacity: true,
+          getThumbBoundsFn: index => {
+            const rect = this.refs.thumbnailContainer.children[index].getBoundingClientRect();
+            return {x: rect.x, y: rect.y, w: rect.width};
+          }
         };
 
         // Initializes and opens PhotoSwipe.
-        const pswp = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+        const pswp = new PhotoSwipe({
+          target: document.body,
+          data: {items, options}
+        });
 
         pswp.listen('gettingData', function(index, item) {
           if (item._loading) {
@@ -126,6 +92,10 @@
             // Updates the content of slides.
             pswp.updateSize(true);
           });
+        });
+
+        pswp.listen('destroy', function () {
+          pswp.destroy();
         });
 
         pswp.init();
