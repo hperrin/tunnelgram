@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.63.5",
+            "version": "3.64.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "e12a6fb9045720fd96bd75e801b23e2877aa1245"
+                "reference": "1fa00e20adc697ae996b778528254d3acff39eaa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/e12a6fb9045720fd96bd75e801b23e2877aa1245",
-                "reference": "e12a6fb9045720fd96bd75e801b23e2877aa1245",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/1fa00e20adc697ae996b778528254d3acff39eaa",
+                "reference": "1fa00e20adc697ae996b778528254d3acff39eaa",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-07-20T21:01:32+00:00"
+            "time": "2018-08-07T20:30:32+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -465,16 +465,16 @@
         },
         {
             "name": "lcobucci/jwt",
-            "version": "3.2.2",
+            "version": "3.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "0b5930be73582369e10c4d4bb7a12bac927a203c"
+                "reference": "c9704b751315d21735dc98d78d4f37bd73596da7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/0b5930be73582369e10c4d4bb7a12bac927a203c",
-                "reference": "0b5930be73582369e10c4d4bb7a12bac927a203c",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/c9704b751315d21735dc98d78d4f37bd73596da7",
+                "reference": "c9704b751315d21735dc98d78d4f37bd73596da7",
                 "shasum": ""
             },
             "require": {
@@ -511,7 +511,7 @@
                 {
                     "name": "Luís Otávio Cobucci Oblonczyk",
                     "email": "lcobucci@gmail.com",
-                    "role": "developer"
+                    "role": "Developer"
                 }
             ],
             "description": "A simple library to work with JSON Web Token and JSON Web Signature",
@@ -519,24 +519,24 @@
                 "JWS",
                 "jwt"
             ],
-            "time": "2017-09-01T08:23:26+00:00"
+            "time": "2018-08-03T11:23:50+00:00"
         },
         {
             "name": "microsoft/azure-storage-blob",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Azure/azure-storage-blob-php.git",
-                "reference": "9a8c8a8f03ddbf5d3fa83927b6af112967a99fa2"
+                "reference": "6a89f277e876056cc80bd867f7d6104557ee26a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Azure/azure-storage-blob-php/zipball/9a8c8a8f03ddbf5d3fa83927b6af112967a99fa2",
-                "reference": "9a8c8a8f03ddbf5d3fa83927b6af112967a99fa2",
+                "url": "https://api.github.com/repos/Azure/azure-storage-blob-php/zipball/6a89f277e876056cc80bd867f7d6104557ee26a4",
+                "reference": "6a89f277e876056cc80bd867f7d6104557ee26a4",
                 "shasum": ""
             },
             "require": {
-                "microsoft/azure-storage-common": "~1.1",
+                "microsoft/azure-storage-common": "~1.2.0",
                 "php": ">=5.6.0"
             },
             "type": "library",
@@ -563,20 +563,20 @@
                 "sdk",
                 "storage"
             ],
-            "time": "2018-04-26T07:38:33+00:00"
+            "time": "2018-08-02T11:05:31+00:00"
         },
         {
             "name": "microsoft/azure-storage-common",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Azure/azure-storage-common-php.git",
-                "reference": "d44421b8f7b69368d7732f0d765c2be1623df396"
+                "reference": "5a721c15a4eba9233e423203bee168e47c7f8682"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Azure/azure-storage-common-php/zipball/d44421b8f7b69368d7732f0d765c2be1623df396",
-                "reference": "d44421b8f7b69368d7732f0d765c2be1623df396",
+                "url": "https://api.github.com/repos/Azure/azure-storage-common-php/zipball/5a721c15a4eba9233e423203bee168e47c7f8682",
+                "reference": "5a721c15a4eba9233e423203bee168e47c7f8682",
                 "shasum": ""
             },
             "require": {
@@ -607,7 +607,7 @@
                 "sdk",
                 "storage"
             ],
-            "time": "2018-04-26T07:46:59+00:00"
+            "time": "2018-08-02T10:54:53+00:00"
         },
         {
             "name": "minishlink/web-push",
@@ -1441,16 +1441,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.19",
+            "version": "1.1.22",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "667ed36b4868e785d52d815181ff00c798a61be7"
+                "reference": "19d6ec893994912d21b390c43d287816ab070772"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/667ed36b4868e785d52d815181ff00c798a61be7",
-                "reference": "667ed36b4868e785d52d815181ff00c798a61be7",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/19d6ec893994912d21b390c43d287816ab070772",
+                "reference": "19d6ec893994912d21b390c43d287816ab070772",
                 "shasum": ""
             },
             "require": {
@@ -1500,7 +1500,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-07-02T06:22:41+00:00"
+            "time": "2018-08-01T13:06:54+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -1610,16 +1610,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.17",
+            "version": "3.0.0-beta.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b"
+                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/cab5e46d8bcd08f842d4061de9b40f3fd456892b",
-                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/9414fd7f754d4a4890f88ac4a66e9339d817d269",
+                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269",
                 "shasum": ""
             },
             "require-dev": {
@@ -1660,7 +1660,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-06-22T00:00:00+00:00"
+            "time": "2018-08-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
@@ -1821,16 +1821,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.1.2",
+            "version": "v4.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "8da9ea68ab2d80dfabd41e0d14b9606bb47a10c0"
+                "reference": "7d93e3547660ec7ee3dad1428ba42e8076a0e5f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/8da9ea68ab2d80dfabd41e0d14b9606bb47a10c0",
-                "reference": "8da9ea68ab2d80dfabd41e0d14b9606bb47a10c0",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7d93e3547660ec7ee3dad1428ba42e8076a0e5f1",
+                "reference": "7d93e3547660ec7ee3dad1428ba42e8076a0e5f1",
                 "shasum": ""
             },
             "require": {
@@ -1871,29 +1871,32 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-07-16T14:05:40+00:00"
+            "time": "2018-08-01T14:07:44+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.8.0",
+            "version": "v1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae"
+                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
-                "reference": "7cc359f1b7b80fc25ed7796be7d96adc9b354bae",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/e3d826245268269cd66f8326bd8bc066687b4a19",
+                "reference": "e3d826245268269cd66f8326bd8bc066687b4a19",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.3"
             },
+            "suggest": {
+                "ext-ctype": "For best performance"
+            },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.8-dev"
+                    "dev-master": "1.9-dev"
                 }
             },
             "autoload": {
@@ -1926,20 +1929,20 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2018-04-30T19:57:29+00:00"
+            "time": "2018-08-06T14:22:27+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.8.0",
+            "version": "v1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "3296adf6a6454a050679cde90f95350ad604b171"
+                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/3296adf6a6454a050679cde90f95350ad604b171",
-                "reference": "3296adf6a6454a050679cde90f95350ad604b171",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/d0cd638f4634c16d8df4508e847f14e9e43168b8",
+                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8",
                 "shasum": ""
             },
             "require": {
@@ -1951,7 +1954,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.8-dev"
+                    "dev-master": "1.9-dev"
                 }
             },
             "autoload": {
@@ -1985,20 +1988,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2018-04-26T10:06:28+00:00"
+            "time": "2018-08-06T14:22:27+00:00"
         },
         {
             "name": "symfony/routing",
-            "version": "v4.1.2",
+            "version": "v4.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "73770bf3682b4407b017c2bdcb2b11cdcbce5322"
+                "reference": "6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/73770bf3682b4407b017c2bdcb2b11cdcbce5322",
-                "reference": "73770bf3682b4407b017c2bdcb2b11cdcbce5322",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b",
+                "reference": "6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b",
                 "shasum": ""
             },
             "require": {
@@ -2062,7 +2065,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-06-28T06:30:33+00:00"
+            "time": "2018-07-26T11:24:31+00:00"
         },
         {
             "name": "textalk/websocket",
