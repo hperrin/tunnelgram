@@ -23,7 +23,7 @@
       </div>
     {/if}
   {/if}
-  <div class="{(_flipFirst || _flipSecond) ? 'animation-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
+  <div class="animation-stage" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
       class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
       style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
@@ -172,7 +172,7 @@
       },
       flipper: ({message}) => message.decrypted.secretText != null,
       displayName: ({message, $settings}) => message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name),
-      shadowClass: ({message, _flipped}) => ['shadow-none', 'shadow-sm', 'shadow', 'shadow-lg'][_flipped ? message.secretTextElevation : message.textElevation]
+      shadowClass: ({message, _flipped}) => ['shadow-none elevate-0', 'shadow-sm elevate-1', 'shadow elevate-2', 'shadow-lg elevate-3'][_flipped ? message.secretTextElevation : message.textElevation]
     },
 
     data () {
@@ -270,26 +270,37 @@
     perspective: 1000px;
     z-index: 20;
   }
+
+  .elevate-0 {
+    transform: scale(.96);
+  }
+  .elevate-2 {
+    transform: scale(1.04);
+  }
+  .elevate-3 {
+    transform: scale(1.08);
+  }
+
   .flip-first {
     animation: flip-first 0.25s linear both;
   }
   .flip-second {
     animation: flip-second 0.25s linear both;
   }
-   @keyframes flip-first {
-     0% {
-       transform: translateZ(0) rotateY(0);
-     }
-     100% {
-       transform: translateZ(300px) rotateY(90deg);
-     }
-   }
-   @keyframes flip-second {
-     0% {
-       transform: translateZ(300px) rotateY(-90deg);
-     }
-     100% {
-       transform: translateZ(0) rotateY(0);
-     }
-   }
+  @keyframes flip-first {
+    0% {
+      transform: translateZ(0) rotateY(0);
+    }
+    100% {
+      transform: translateZ(300px) rotateY(90deg);
+    }
+  }
+  @keyframes flip-second {
+    0% {
+      transform: translateZ(300px) rotateY(-90deg);
+    }
+    100% {
+      transform: translateZ(0) rotateY(0);
+    }
+  }
 </style>
