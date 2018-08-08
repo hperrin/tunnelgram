@@ -12,18 +12,22 @@
       </a>
       {#if $conversations.length > 1}
         <div class="list-group-item d-flex p-0 border-0">
-          <input type="text" class="form-control" name="search" placeholder="Search" />
+          <input type="text" class="form-control bg-secondary border-0 text-light" bind:value="_search" name="search" placeholder="Search users" autocomplete="off" />
         </div>
       {/if}
-      {#if $conversations.length}
-        {#each $conversations as conversation (conversation.guid)}
-          <a class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="fire('tunnelgram-navigate', {conversation})">
-            <ConversationPreview bind:conversation />
-          </a>
-        {/each}
+      {#if filteredConversations.length}
+          {#each filteredConversations as conversation (conversation.guid)}
+            <a class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="navigate(conversation)">
+              <ConversationPreview bind:conversation />
+            </a>
+          {/each}
       {:else}
         <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
-          You have no conversations yet.
+          {#if $conversations.length}
+            No matching conversations.
+          {:else}
+            You have no conversations yet.
+          {/if}
         </div>
       {/if}
       {#if _loadingEarlierConversations}
@@ -82,6 +86,12 @@
       PubSub.on('disconnect', this.onPubSubDisconnect);
     },
 
+    onupdate ({changed}) {
+      if (changed._search) {
+        this.handleScroll();
+      }
+    },
+
     ondestroy () {
       this.storeStateListener.cancel();
 
@@ -99,8 +109,34 @@
         _disconnected: false,
         _loading: true,
         _loadingEarlierConversations: false,
-        _reachedEarliestConversation: false
+        _reachedEarliestConversation: false,
+        _search: ''
       };
+    },
+
+    computed: {
+      filteredConversations: ({$user, $conversations, $settings, _search}) => {
+        if (_search === '' || !$settings) {
+          return $conversations;
+        }
+        _search = _search.toLowerCase();
+        const nicknameUserGUIDs = Object.entries($settings.decrypted.nicknames).filter(entry => {
+          const [guid, nickname] = entry;
+          return nickname.toLowerCase().indexOf(_search) !== -1;
+        }).map(entry => parseFloat(entry[0]));
+        return $conversations.filter(c => {
+          for (let user of c.data.acFull) {
+            if (user.isASleepingReference || ($user.is(user) && c.data.acFull.length > 1)) {
+              continue;
+            } else if (nicknameUserGUIDs.indexOf(user.guid) !== -1) {
+              return true;
+            } else if (!(user.guid in $settings.decrypted.nicknames) && user.data.name.toLowerCase().indexOf(_search) !== -1) {
+              return true;
+            }
+          }
+          return false;
+        });
+      }
     },
 
     methods: {
@@ -135,6 +171,11 @@
           }
         }, ErrHandler);
         this.set({_subscription});
+      },
+
+      navigate (conversation) {
+        this.fire('tunnelgram-navigate', {conversation});
+        this.set({_search: ''});
       },
 
       handleScroll () {
