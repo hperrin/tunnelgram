@@ -1664,16 +1664,16 @@
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.25",
+            "version": "1.0.0-beta.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "05f5b30a714eb0f6e356734f61a19b73a3f91969"
+                "reference": "da658e85327166a701da57c8801cc9e0a07f3277"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/05f5b30a714eb0f6e356734f61a19b73a3f91969",
-                "reference": "05f5b30a714eb0f6e356734f61a19b73a3f91969",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/da658e85327166a701da57c8801cc9e0a07f3277",
+                "reference": "da658e85327166a701da57c8801cc9e0a07f3277",
                 "shasum": ""
             },
             "require": {
@@ -1719,7 +1719,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-07-23T00:00:00+00:00"
+            "time": "2018-08-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
