@@ -11,15 +11,8 @@
         <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
       </a>
       {#if $conversations.length > 1}
-        <div class="list-group-item d-flex justify-content-center p-0 border-0">
-          <div class="btn-group btn-group-toggle d-flex w-100">
-            <button class="btn btn-secondary flex-fill {$sort === 'name' ? 'active' : ''}" type="button" on:click="$set({sort: 'name'})">
-              Alphabetical
-            </button>
-            <button class="btn btn-secondary flex-fill {$sort === 'mdate' ? 'active' : ''}" type="button" on:click="$set({sort: 'mdate'})">
-              Newest
-            </button>
-          </div>
+        <div class="list-group-item d-flex p-0 border-0">
+          <input type="text" class="form-control" name="search" placeholder="Search" />
         </div>
       {/if}
       {#if $conversations.length}
@@ -59,16 +52,6 @@
         if (changed.user && current.user && !current.user.is(previous.user)) {
           this.subscribe();
         }
-
-        if (changed.sort) {
-          const {conversations, sort} = current;
-          if (sort === 'mdate') {
-            Nymph.sort(conversations, sort, null, true);
-          } else if (sort === 'name') {
-            conversations.sort((a, b) => a.getName(current.settings).toLowerCase().localeCompare(b.getName(current.settings).toLowerCase()));
-          }
-          this.store.set({conversations});
-        }
       });
 
       this.subscribe();
@@ -85,7 +68,6 @@
             'gt': ['mdate', conversations.length ? Math.max(...conversations.map(c => c.mdate)) : 0]
           }).then(newConversations => {
             let newArray = [...newConversations, ...conversations.filter(c => !c.inArray(newConversations))];
-            this.sortConversations(newArray);
             this.store.set({conversations: newArray});
           });
         }
@@ -138,7 +120,7 @@
         }).subscribe(update => {
           this.set({_loading: false});
           if (update) {
-            const {conversations, sort} = this.store.get();
+            const {conversations} = this.store.get();
             if (Array.isArray(update)) {
               if (update.length < CONVERSATION_PAGE_SIZE) {
                 this.set({_reachedEarliestConversation: true});
@@ -147,21 +129,12 @@
               this.fire('tunnelgram-notification', {update});
             }
             PubSub.updateArray(conversations, update);
-            this.sortConversations(conversations);
+            Nymph.sort(conversations, 'mdate', null, true);
             this.store.set({conversations});
             this.handleScroll();
           }
         }, ErrHandler);
         this.set({_subscription});
-      },
-
-      sortConversations (conversations) {
-        const {sort, settings} = this.store.get();
-        if (sort === 'mdate') {
-          Nymph.sort(conversations, sort, null, true);
-        } else if (sort === 'name') {
-          conversations.sort((a, b) => a.getName(settings).toLowerCase().localeCompare(b.getName(settings).toLowerCase()));
-        }
       },
 
       handleScroll () {
@@ -195,8 +168,7 @@
           });
 
           if (earlierConversations && earlierConversations.length) {
-            const newConversations = [...earlierConversations, ...conversations];
-            this.sortConversations(newConversations);
+            const newConversations = [...conversations, ...earlierConversations];
             this.store.set({conversations: newConversations});
           } else {
             this.set({_reachedEarliestConversation: true});

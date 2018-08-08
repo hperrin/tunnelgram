@@ -36,7 +36,6 @@ let setupSubscription;
 const store = new UserStore({
   conversations: [],
   conversation: new Conversation(),
-  sort: 'mdate',
   view: 'conversation',
   convosOut: false,
   router: router,
