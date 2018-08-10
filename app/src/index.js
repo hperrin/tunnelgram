@@ -179,8 +179,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         // If the user logs in, get their settings.
         if (current.settings == null || !current.user.is(previous.user)) {
           store.set({settings: null});
-          Settings.current().then(settings => {
-            store.set({settings});
+          crypt.ready.then(() => {
+            Settings.current().then(settings => {
+              store.set({settings});
+            });
           });
         }
       } else if (current.user === null) {
@@ -410,11 +412,16 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
     }
   };
 
+  let forwardCount = 0;
   router.hooks({
     before: (done, params) => {
       if (!store.get().user) {
         const route = router.lastRouteResolved();
         if (route.url !== '/' && route.url !== '') {
+          forwardCount++;
+          if (forwardCount > 15) {
+            debugger;
+          }
           const url = route.url + (route.query !== '' ? '?'+route.query : '');
           router.navigate('/?continue='+encodeURIComponent(url));
         }
