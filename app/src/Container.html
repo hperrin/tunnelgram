@@ -81,20 +81,24 @@
   {#if $user === null}
     <div class="container mt-3">
       <div class="row">
-        <div class="col-md-4 order-md-2 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
-          <TilmeldLogin
-            layout="small"
-            classInput="form-control w-100"
-            classSelect="form-control w-100"
-            classTextarea="form-control w-100"
-            classSubmit="btn btn-primary w-100"
-            classButtonGroup="btn-group d-flex"
-            classButton="btn btn-secondary"
-            classButtonToggle="flex-grow-1"
-            classButtonActive="active"
-            disableActiveButton="{false}" />
+        <div class="col-md-4 order-md-2 mb-3 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
+          <div class="card" style="width: 100%;">
+            <div class="card-body pb-0">
+              <TilmeldLogin
+                layout="small"
+                classInput="form-control w-100"
+                classSelect="form-control w-100"
+                classTextarea="form-control w-100"
+                classSubmit="btn btn-primary w-100"
+                classButtonGroup="btn-group d-flex"
+                classButton="btn btn-secondary"
+                classButtonToggle="flex-grow-1"
+                classButtonActive="active"
+                disableActiveButton="{false}" />
+            </div>
+          </div>
         </div>
-        <div class="col-md-8 order-md-1">
+        <div class="col-md-8 order-md-1 mb-3">
           <FrontPage brand="{brand}" />
         </div>
       </div>
