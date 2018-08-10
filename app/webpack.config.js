@@ -19,6 +19,7 @@ const plugins = [
 
 module.exports = {
   mode: devMode ? 'development' : 'production',
+  devtool: devMode && 'source-map',
   entry: {
     main: [
       'babel-polyfill',

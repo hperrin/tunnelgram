@@ -105,7 +105,7 @@
     </div>
   {/if}
   {#if $user}
-    <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="flex-basis: 0;">
+    <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="flex-basis: 0; height: 0;">
       {#await $crypt.ready}
         <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
           <LoadingIndicator width="100px" height="100px" />
