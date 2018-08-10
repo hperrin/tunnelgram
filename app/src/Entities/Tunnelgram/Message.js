@@ -1,6 +1,6 @@
 import {Nymph, Entity} from 'nymph-client';
 import {User} from 'tilmeld-client';
-import {crypt} from '../Services/EncryptionService';
+import {crypt} from '../../Services/EncryptionService';
 import base64js from 'base64-js';
 
 let currentUser = null;

@@ -12,11 +12,11 @@ import {crypt} from './Services/EncryptionService';
 import {SleepyCacheService} from './Services/SleepyCacheService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
 import UserStore from './UserStore';
-import Conversation from './Entities/Conversation';
-import Message from './Entities/Message';
-import WebPushSubscription from './Entities/WebPushSubscription';
-import Readline from './Entities/Readline';
-import Settings from './Entities/Settings';
+import Conversation from './Entities/Tunnelgram/Conversation';
+import Message from './Entities/Tunnelgram/Message';
+import WebPushSubscription from './Entities/Tunnelgram/WebPushSubscription';
+import Readline from './Entities/Tunnelgram/Readline';
+import Settings from './Entities/Tunnelgram/Settings';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
 

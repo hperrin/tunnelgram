@@ -1,7 +1,7 @@
 import {Nymph, Entity} from 'nymph-client';
 import {User} from 'tilmeld-client';
 import {Message} from './Message';
-import {crypt} from '../Services/EncryptionService';
+import {crypt} from '../../Services/EncryptionService';
 
 let currentUser = null;
 
