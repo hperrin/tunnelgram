@@ -5,18 +5,18 @@
 
 // Distributes a message to all window clients controlled by the current Service Worker.
 function sendMessageToAllClients(command, message) {
-  clients.matchAll({type: 'window'}).then(function (windowClients) {
-    windowClients.forEach(function (windowClient) {
+  clients.matchAll({type: 'window'}).then(windowClients => {
+    windowClients.forEach(windowClient => {
       windowClient.postMessage({command: command, message: message || ''});
     });
   });
 }
 
-self.addEventListener('activate', function (event) {
+self.addEventListener('activate', event => {
   event.waitUntil(clients.claim());
 });
 
-self.addEventListener('message', function (event) {
+self.addEventListener('message', event => {
   switch (event.data.command) {
     case 'subscribe':
       const subscriptionOptions = event.data.subscriptionOptions;
@@ -24,52 +24,48 @@ self.addEventListener('message', function (event) {
         subscriptionOptions.applicationServerKey = new Uint8Array(subscriptionOptions.applicationServerKey);
       }
 
-      registration.pushManager.subscribe(subscriptionOptions).then(function (subscription) {
+      registration.pushManager.subscribe(subscriptionOptions).then(subscription => {
         sendMessageToAllClients('subscribe-success');
-      }).catch(function (error) {
+      }).catch(error => {
         sendMessageToAllClients('subscribe-failure', '' + error);
       });
 
       break;
 
     case 'unsubscribe':
-      registration.pushManager.getSubscription().then(function (subscription) {
+      registration.pushManager.getSubscription().then(subscription => {
         if (subscription) {
           return subscription.unsubscribe();
         }
-      }).then(function () {
+      }).then(() => {
         sendMessageToAllClients('unsubscribe-success');
-      }).catch(function (error) {
+      }).catch(error => {
         sendMessageToAllClients('unsubscribe-failure', '' + error);
       });
   }
 });
 
-self.addEventListener('push', function (event) {
+self.addEventListener('push', event => {
   console.log({pushEvent: event});
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     return;
   }
 
-  const promiseChain = isClientFocused().then(function (clientIsFocused) {
+  const promiseChain = isClientFocused().then(clientIsFocused => {
     if (clientIsFocused) {
       // No need to show a notification.
       return;
     }
-    return getEndpoint().then(function(endpoint) {
-      return fetch('./user/pull.php', {
-        body: 'endpoint=' + encodeURIComponent(endpoint),
-        cache: 'no-cache',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
-        method: 'POST'
-      });
-    }).then(function(response) {
-      return response.json();
-    }).then(function(payload) {
-      let promises = payload.data.map(function (entry) {
+    return getEndpoint().then(endpoint => fetch('./user/pull.php', {
+      body: 'endpoint=' + encodeURIComponent(endpoint),
+      cache: 'no-cache',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      method: 'POST'
+    })).then(response => response.json()).then(payload => {
+      let promises = payload.data.map(entry => {
         const showNameProp = entry.conversation.data.acFull.length > 2
           ? 'nameFirst'
           : 'name';
@@ -84,23 +80,18 @@ self.addEventListener('push', function (event) {
                   )
             ) + (
               entry.conversation.data.acFull
-                .filter(function (user) {
-                  return user[1] !== payload.currentUserGuid
-                })
-                .map(function (user) {
-                  return payload.users[user[1]].data[showNameProp];
-                }).join(', ')
+                .filter(user => user[1] !== payload.currentUserGuid)
+                .map(user => payload.users[user[1]].data[showNameProp])
+                .join(', ')
             );
 
         let users = [];
-        entry.messages.map(function (message) {
+        entry.messages.map(message => {
           if (users.indexOf(message.data.user[1]) === -1) {
             users.push(message.data.user[1]);
           }
         });
-        users = users.map(function (guid) {
-          return payload.users[guid].data.name;
-        });
+        users = users.map(guid => payload.users[guid].data.name);
         const messageCount = entry.messages.length;
         const message = (
           messageCount === 0
@@ -127,7 +118,7 @@ self.addEventListener('push', function (event) {
   event.waitUntil(promiseChain);
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', event => {
   const clickedNotification = event.notification;
   clickedNotification.close();
 
@@ -138,36 +129,32 @@ self.addEventListener('notificationclick', function(event) {
 // Offline copy of pages service worker
 
 // Install stage sets up the index page (home page) in the cache and opens a new cache
-self.addEventListener('install', function (event) {
+self.addEventListener('install', event => {
   var indexPage = new Request('/index.html');
-  event.waitUntil(fetch(indexPage).then(function (response) {
-    return caches.open('offline-cache').then(function (cache) {
-      console.log('[Content Cache] Cached index page during Install '+ response.url);
-      return cache.put(indexPage, response);
-    });
-  }).then(function () {
-    return skipWaiting();
-  }));
+  event.waitUntil(fetch(indexPage).then(response => caches.open('offline-cache').then(cache => {
+    console.log('[Content Cache] Cached index page during Install '+ response.url);
+    return cache.put(indexPage, response);
+  })).then(() => skipWaiting()));
 });
 
 // If any fetch fails, it will look for the request in the cache and serve it from there first
-self.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
   }
 
   function addToCache (cache, request, itemType) {
-    return fetch(request).then(function (response) {
+    return fetch(request).then(response => {
       console.log('[Content Cache] add '+itemType+' to offline '+response.url);
       cache.put(request, response);
     });
   }
 
-  event.respondWith(caches.open('offline-cache').then(function (cache) {
+  event.respondWith(caches.open('offline-cache').then(cache => {
     if (event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/') || event.request.url.startsWith('http://localhost:8082/')) {
       // Check in the cache first, return response.
       // If not in the cache, return error page.
-      return cache.match(event.request).then(function (matching) {
+      return cache.match(event.request).then(matching => {
         if (!matching) {
           console.log('[Content Cache] Not found in cache. Requesting from network.');
           event.waitUntil(addToCache(cache, event.request, 'blob'));
@@ -179,11 +166,11 @@ self.addEventListener('fetch', function (event) {
       });
     } else {
       event.waitUntil(addToCache(cache, event.request, 'page'));
-      return fetch(event.request).catch(function (error) {
+      return fetch(event.request).catch(error => {
         console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
         // Check in the cache second, return response.
         // If not in the cache, return error page.
-        return cache.match(event.request).then(function (matching) {
+        return cache.match(event.request).then(matching => {
           var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
           return report;
         });
@@ -196,7 +183,7 @@ self.addEventListener('fetch', function (event) {
 // Utility functions
 
 function getEndpoint () {
-  return self.registration.pushManager.getSubscription().then(function (subscription) {
+  return self.registration.pushManager.getSubscription().then(subscription => {
     if (subscription) {
       return subscription.endpoint;
     }
@@ -209,7 +196,7 @@ function isClientFocused () {
   return clients.matchAll({
     type: 'window',
     includeUncontrolled: true
-  }).then(function (windowClients) {
+  }).then(windowClients => {
     let clientIsFocused = false;
 
     for (let i = 0; i < windowClients.length; i++) {
@@ -241,7 +228,7 @@ function openConversation (conversationId) {
   return clients.matchAll({
     type: 'window',
     includeUncontrolled: true
-  }).then((windowClients) => {
+  }).then(windowClients => {
     let matchingClient = null;
 
     for (let i = 0; i < windowClients.length; i++) {

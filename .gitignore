@@ -5,3 +5,4 @@ dist
 /db_*
 /tilmeld_secret.txt
 /maintenance/entities-export-*.nex
+/app/ServiceWorker.js*

@@ -219,7 +219,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       registration = await navigator.serviceWorker.getRegistration('/');
       console.log('Service worker has been retrieved for scope: '+ registration.scope);
     } else {
-      registration = await navigator.serviceWorker.register('/service-worker.js', {
+      registration = await navigator.serviceWorker.register('/ServiceWorker.js', {
         scope: '/'
       });
       console.log('Service worker has been registered for scope: '+ registration.scope);
