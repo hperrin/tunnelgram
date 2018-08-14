@@ -4,7 +4,7 @@ import utf8 from 'utf8';
 
 const root = (self || window);
 
-export default class AESEncryptionService {
+export class AESEncryptionService {
   constructor () {
     this.decryption = true; // Turning this off causes the decrypt functions to just return what they are given.
   }

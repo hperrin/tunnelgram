@@ -60,7 +60,7 @@
   import ConversationList from './Conversations/ConversationList.html';
   import ConversationContainer from './Conversations/ConversationContainer.html';
   import UserView from './Users/UserView.html';
-  import getCookieValue from '../Services/getCookieValue';
+  import {getCookieValue} from '../Services/getCookieValue';
   import ErrHandler from '../ErrHandler';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';

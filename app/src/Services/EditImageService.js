@@ -1,5 +1,5 @@
 // Based on: https://stackoverflow.com/a/14845805
-export default class EditImage {
+export class EditImageService {
   constructor (img, type) {
     // Create two canvas.
     this.canvas = document.createElement('canvas');
@@ -8,7 +8,7 @@ export default class EditImage {
     this.offscreenCanvasSupport = !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
-      this.resizeImageWorker = new Worker('dist/Workers/ResizeImage.js');
+      this.resizeImageWorker = new Worker('/dist/Workers/ResizeImage.js');
       this.resizeImageWorkerCounter = 0;
       this.resizeImageWorkerCallbacks = {};
       this.resizeImageWorker.onmessage = (e) => {

@@ -3,7 +3,7 @@ import {urlBase64ToBase64} from './urlBase64';
 
 const _XMLHttpRequest = window.XMLHttpRequest;
 
-export default class XMLHttpRequestWrapper {
+export class XMLHttpRequestWrapper {
   constructor (...args) {
     this.xhr = new _XMLHttpRequest(...args);
     return this;

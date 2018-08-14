@@ -1,4 +1,4 @@
-export default class StorageService {
+export class StorageService {
   constructor () {
     if (window.hasOwnProperty('inCordova') && window.inCordova) {
       this.async = true;

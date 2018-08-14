@@ -1,7 +1,7 @@
 import aesjs from 'aes-js';
 import base64js from 'base64-js';
 import utf8 from 'utf8';
-import AESEncryptionService from '../Services/AESEncryptionService';
+import {AESEncryptionService} from '../Services/AESEncryptionService';
 
 const crypt = new AESEncryptionService();
 

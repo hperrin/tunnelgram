@@ -1,4 +1,4 @@
-import XMLHttpRequestWrapper from './Services/XMLHttpRequestWrapper';
+import {XMLHttpRequestWrapper} from './Services/XMLHttpRequestWrapper';
 import './icons';
 import Navigo from 'navigo';
 import PNotify from 'pnotify/dist/es/PNotify';
