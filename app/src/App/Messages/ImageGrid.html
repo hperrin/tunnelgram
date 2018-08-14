@@ -1,19 +1,15 @@
 <div ref:thumbnailContainer class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px; font-size: 1em;">
   {#each resources as resource, index (resource.name)}
     <div class="d-flex justify-content-center align-items-center">
-      {#if resource.thumbnailPromise}
-        {#await resource.thumbnailPromise}
-          <LoadingIndicator width="{thumbnailDimension}px" height="{thumbnailDimension}px" text="Decrypting..." />
-        {:then thumbnail}
-          <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
-            <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc}); width: {thumbnailDimension}px; height: {thumbnailDimension}px;" title="{resource.name}">&nbsp;</div>
-          </a>
-        {:catch e}
-          <span class="badge badge-warning">error</span>
-        {/await}
-      {:else}
-        <LoadingIndicator width="{thumbnailDimension}px" height="{thumbnailDimension}px" text="Loading..." />
-      {/if}
+      {#await thumbnailPromises[index]}
+        <LoadingIndicator width="{thumbnailDimension}px" height="{thumbnailDimension}px" text="Decrypting..." />
+      {:then thumbnail}
+        <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
+          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc}); width: {thumbnailDimension}px; height: {thumbnailDimension}px;" title="{resource.name}">&nbsp;</div>
+        </a>
+      {:catch e}
+        <span class="badge badge-warning">error</span>
+      {/await}
     </div>
   {/each}
 </div>
@@ -28,16 +24,15 @@
       const {resources} = this.get();
       for (let resource of resources) {
         if (resource.thumbnail instanceof Uint8Array) {
-          resource.thumbnailPromise = Promise.resolve(resource.thumbnail);
           const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
           const _source = URL.createObjectURL(blob);
           resource.thumbnailSrc = _source;
         } else {
-          resource.thumbnailPromise = resource.thumbnail;
           resource.thumbnail.then(data => {
             const blob = new Blob([data], {type: resource.thumbnailType});
             const _source = URL.createObjectURL(blob);
             resource.thumbnailSrc = _source;
+            this.set({resources});
           });
         }
       }
@@ -46,7 +41,14 @@
 
     computed: {
       thumbnailDimension: ({resources}) => Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight)))),
-      thumbnailContainerMaxWidthMultiplier: ({resources}) => Math.min(3, resources.length)
+      thumbnailContainerMaxWidthMultiplier: ({resources}) => Math.min(3, resources.length),
+      thumbnailPromises: ({resources}) => resources.map(resource => {
+        if (resource.thumbnail instanceof Uint8Array) {
+          return Promise.resolve(resource.thumbnail);
+        } else {
+          return resource.thumbnail;
+        }
+      })
     },
 
     methods: {
