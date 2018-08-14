@@ -202,8 +202,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
   if (store.get().user != null) {
     // Get the current settings.
-    Settings.current().then(settings => {
-      store.set({settings});
+    crypt.ready.then(() => {
+      Settings.current().then(settings => {
+        store.set({settings});
+      });
     });
   }
 
@@ -363,22 +365,24 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         loadingConversation: false
       });
     } else {
-      Nymph.getEntity({
-        'class': Conversation.class
-      }, {
-        'type': '&',
-        'guid': guid
-      }).then(conversation => {
-        store.set({
-          conversation: conversation,
-          view: params.view || 'conversation',
-          convosOut: false,
-          loadingConversation: false
+      crypt.ready.then(() => {
+        Nymph.getEntity({
+          'class': Conversation.class
+        }, {
+          'type': '&',
+          'guid': guid
+        }).then(conversation => {
+          store.set({
+            conversation: conversation,
+            view: params.view || 'conversation',
+            convosOut: false,
+            loadingConversation: false
+          });
+        }, (err) => {
+          ErrHandler(err);
+          store.set({loadingConversation: false});
+          router.navigate('/');
         });
-      }, (err) => {
-        ErrHandler(err);
-        store.set({loadingConversation: false});
-        router.navigate('/');
       });
     }
   };
@@ -396,18 +400,20 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         loadingUser: false
       });
     } else {
-      User.byUsername(username).then(viewUser => {
-        store.set({
-          viewUser,
-          viewUserIsSelf: false,
-          view: 'user',
-          convosOut: false,
-          loadingUser: false
+      crypt.ready.then(() => {
+        User.byUsername(username).then(viewUser => {
+          store.set({
+            viewUser,
+            viewUserIsSelf: false,
+            view: 'user',
+            convosOut: false,
+            loadingUser: false
+          });
+        }, (err) => {
+          ErrHandler(err);
+          store.set({loadingUser: false});
+          router.navigate('/');
         });
-      }, (err) => {
-        ErrHandler(err);
-        store.set({loadingUser: false});
-        router.navigate('/');
       });
     }
   };
