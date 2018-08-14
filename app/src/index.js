@@ -46,6 +46,9 @@ const store = new UserStore({
   requestNotificationPermission: () => {
     PNotify.modules.Desktop.permission();
   },
+  requestPersistentStorage: () => {
+    navigator.storage.persist();
+  },
   beforeInstallPromptEvent: null,
   webPushSubscription: null,
   inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
