@@ -180,25 +180,25 @@ class EncryptionService extends AESEncryptionService {
 
   async setUserPrivateKey (privateKey) {
     this.userPrivateKey = privateKey;
-    await this.storage.setItem('esPrivateKey', privateKey);
+    await this.storage.setItem('twPrivateKey', privateKey);
   }
 
   async setUserPublicKey (publicKey) {
     this.userPublicKey = publicKey;
-    await this.storage.setItem('esPublicKey', publicKey);
+    await this.storage.setItem('twPublicKey', publicKey);
   }
 
   async getUserPrivateKey () {
-    return await this.storage.getItem('esPrivateKey');
+    return await this.storage.getItem('twPrivateKey');
   }
 
   async getUserPublicKey () {
-    return await this.storage.getItem('esPublicKey');
+    return await this.storage.getItem('twPublicKey');
   }
 
   async unsetUserKeys () {
-    await this.storage.removeItem('esPrivateKey');
-    await this.storage.removeItem('esPublicKey');
+    await this.storage.removeItem('twPrivateKey');
+    await this.storage.removeItem('twPublicKey');
     this.decryptor = null;
     this.key = null;
     this.iv = null;
@@ -211,6 +211,9 @@ class EncryptionService extends AESEncryptionService {
   }
 
   decryptRSA (text) {
+    if (!this.userPrivateKey) {
+      throw new Error('Tried to decrypt RSA without private key!');
+    }
     if (!this.decryptor) {
       this.decryptor = new JSEncrypt();
       this.decryptor.setPrivateKey(this.userPrivateKey);

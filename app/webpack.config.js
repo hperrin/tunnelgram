@@ -62,6 +62,7 @@ module.exports = {
         ]
       },
       {
+        exclude: /\/node_modules\/localforage\//, 
         test: /\.js$/,
         use: {
           loader: 'babel-loader'
