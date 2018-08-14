@@ -141,10 +141,16 @@
         _subscription.unsubscribe();
       }
 
-      this.scrollToBottomListener.cancel();
+      if (this.scrollToBottomListener) {
+        this.scrollToBottomListener.cancel();
+      }
 
-      PubSub.off('connect', this.onPubSubConnect);
-      PubSub.off('disconnect', this.onPubSubDisconnect);
+      if (this.onPubSubConnect) {
+        PubSub.off('connect', this.onPubSubConnect);
+      }
+      if (this.onPubSubDisconnect) {
+        PubSub.off('disconnect', this.onPubSubDisconnect);
+      }
     },
 
     computed: {

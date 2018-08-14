@@ -163,7 +163,9 @@
     },
 
     ondestroy () {
-      this.storeStateListener.cancel();
+      if (this.storeStateListener) {
+        this.storeStateListener.cancel();
+      }
     },
 
     computed: {

@@ -52,13 +52,14 @@
 
   export default {
     oncreate () {
+      this.destroyed = false;
+      this.subscribe();
+
       this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {
         if (changed.user && current.user && !current.user.is(previous.user)) {
           this.subscribe();
         }
       });
-
-      this.subscribe();
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
@@ -93,15 +94,22 @@
     },
 
     ondestroy () {
-      this.storeStateListener.cancel();
-
+      this.destroyed = true;
       let {_subscription} = this.get();
       if (_subscription) {
         _subscription.unsubscribe();
       }
 
-      PubSub.off('connect', this.onPubSubConnect);
-      PubSub.off('disconnect', this.onPubSubDisconnect);
+      if (this.storeStateListener) {
+        this.storeStateListener.cancel();
+      }
+
+      if (this.onPubSubConnect) {
+        PubSub.off('connect', this.onPubSubConnect);
+      }
+      if (this.onPubSubDisconnect) {
+        PubSub.off('disconnect', this.onPubSubDisconnect);
+      }
     },
 
     data () {
@@ -154,6 +162,9 @@
           'reverse': true,
           'limit': CONVERSATION_PAGE_SIZE
         }).subscribe(update => {
+          if (this.destroyed) {
+            return;
+          }
           this.set({_loading: false});
           if (update) {
             const {conversations} = this.store.get();
