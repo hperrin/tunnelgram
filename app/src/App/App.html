@@ -11,7 +11,7 @@
 {#if $beforeInstallPromptEvent && !_hideInstallPrompt}
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
-      Wanna install Tunnelgram.com to your app drawer for an app-like experience?
+      Wanna install {$brandWeb} to your app drawer for an app-like experience?
       <a href="javascript:void(0)" on:click="set({_hideInstallPrompt: true, _nothing: $beforeInstallPromptEvent.prompt()})">Yeah</a>
     </div>
 
@@ -163,8 +163,7 @@
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
                 ? ' - ' + conversation.getName(this.store.get().settings)
                 : ''
-              )
-              + ' - Tunnelgram',
+              ),
             text:  conversation.data.lastMessage.decrypted.text.length > 40
               ? conversation.data.lastMessage.decrypted.text.substr(0, 40) + '...'
               : conversation.data.lastMessage.decrypted.text
@@ -172,7 +171,7 @@
         } else if (update.added) {
           // Notify the user of a new conversation.
           notice = PNotify.info(Object.assign({
-            title: 'New Conversation - Tunnelgram',
+            title: 'New Conversation',
             text: this.store.getDisplayName(conversation.data.user, 'name') + ' started '
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
                 ? conversation.getName(this.store.get().settings)

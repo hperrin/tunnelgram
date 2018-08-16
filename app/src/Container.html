@@ -1,130 +1,127 @@
-<div class="{$user ? 'd-flex flex-column' : ''} flex-grow-1" style="height: {$user ? '100%' : 'auto'};">
-  {#if !_storageAvailable}
-    <div class="container">
-      <h1>Your browser doesn't support the localStorage API. {brand} will not work on this browser!</h1>
-    </div>
-  {/if}
-  {#if !_cryptoAvailable}
-    <div class="container">
-      <h1>Your browser doesn't support the Crypto API. {brand} will not work on this browser!</h1>
-    </div>
-  {/if}
-  {#if $user === false}
-    <div class="container" style="height: 100vh;">
-      <div class="row align-items-center justify-content-center" style="height: 100vh;">
-        <div class="col-auto">
-          <LoadingIndicator width="300px" height="300px" title="Tunnelgram" text="Easy, secure messenger." />
+{#if !_cryptoAvailable}
+  <div class="container">
+    <div class="lead py-3">Your browser doesn't support the Crypto API, and therefore can't do secure encryption. Unfortunately, this means {$brand} will not work on this browser.</div>
+    <div class="lead py-3">You should update your browser to the latest version in order to use {$brand}.</div>
+  </div>
+{:else}
+  <div class="{$user ? 'd-flex flex-column' : ''} flex-grow-1" style="height: {$user ? '100%' : 'auto'};">
+    {#if $user === false}
+      <div class="container" style="height: 100%;">
+        <div class="row align-items-center justify-content-center" style="height: 100%;">
+          <div class="col-auto">
+            <LoadingIndicator width="300px" height="300px" title="{$brand}" text="Easy, secure messenger." />
+          </div>
         </div>
       </div>
-    </div>
-  {/if}
-  {#if $user !== false}
-    <nav ref:navbar class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: max-content;">
-      <div class="container-fluid">
-        <span class="navbar-brand {$user ? 'd-md-flex d-none' : ''} align-items-center">
-          <span>{brand}</span>
-          <span class="badge badge-warning ml-1" style="font-size: .6em;">beta</span>
-        </span>
-        {#if $user}
-          <ul class="navbar-nav d-lg-none">
-            <li class="nav-item">
-              <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()" title="Conversations">
-                <i class="fas fa-comments"></i>
-              </a>
-            </li>
-          </ul>
-          <span class="navbar-text">
-            {name}
+    {/if}
+    {#if $user !== false}
+      <nav ref:navbar class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: max-content;">
+        <div class="container-fluid">
+          <span class="navbar-brand {$user ? 'd-md-flex d-none' : ''} align-items-center">
+            <span>{$brand}</span>
+            <span class="badge badge-warning ml-1" style="font-size: .6em;">beta</span>
           </span>
-          <button class="navbar-toggler ml-auto" type="button" ref:navbarCollapse data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <NavBar></NavBar>
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item dropdown" ref:menuDropdown>
-                <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <Avatar user="{$user}" />
+          {#if $user}
+            <ul class="navbar-nav d-lg-none">
+              <li class="nav-item">
+                <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()" title="Conversations">
+                  <i class="fas fa-comments"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                  <h6 class="dropdown-header">
-                    {$user.data.name}
-                  </h6>
-                  <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/u/' + $user.data.username)">
-                    Your Account
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
-                    <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
-                    Log Out
-                  </a>
-                  {#if $userIsTilmeldAdmin}
-                    <div class="dropdown-divider"></div>
-                    <h6 class="dropdown-header">
-                      Admin
-                    </h6>
-                    <a class="dropdown-item" href="/user/" target="_blank">
-                      User Admin App
-                    </a>
-                  {/if}
-                </div>
               </li>
             </ul>
-          </div>
-        {/if}
-      </div>
-    </nav>
-  {/if}
-  {#if $user === null}
-    <div class="container mt-3">
-      <div class="row">
-        <div class="col-md-4 order-md-2 mb-3 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
-          <div class="card" style="width: 100%;">
-            <div class="card-body pb-0">
-              <TilmeldLogin
-                layout="small"
-                classInput="form-control w-100"
-                classSelect="form-control w-100"
-                classTextarea="form-control w-100"
-                classSubmit="btn btn-primary w-100"
-                classButtonGroup="btn-group d-flex"
-                classButton="btn btn-secondary"
-                classButtonToggle="flex-grow-1"
-                classButtonActive="active"
-                disableActiveButton="{false}" />
+            <span class="navbar-text">
+              {name}
+            </span>
+            <button class="navbar-toggler ml-auto" type="button" ref:navbarCollapse data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <NavBar></NavBar>
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown" ref:menuDropdown>
+                  <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <Avatar user="{$user}" />
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                    <h6 class="dropdown-header">
+                      {$user.data.name}
+                    </h6>
+                    <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/u/' + $user.data.username)">
+                      Your Account
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
+                      <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
+                      Log Out
+                    </a>
+                    {#if $userIsTilmeldAdmin}
+                      <div class="dropdown-divider"></div>
+                      <h6 class="dropdown-header">
+                        Admin
+                      </h6>
+                      <a class="dropdown-item" href="/user/" target="_blank">
+                        User Admin App
+                      </a>
+                    {/if}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          {/if}
+        </div>
+      </nav>
+    {/if}
+    {#if $user === null}
+      <div class="container mt-3">
+        <div class="row">
+          <div class="col-md-4 order-md-2 mb-3 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
+            <div class="card" style="width: 100%;">
+              <div class="card-body pb-0">
+                <TilmeldLogin
+                  layout="small"
+                  classInput="form-control w-100"
+                  classSelect="form-control w-100"
+                  classTextarea="form-control w-100"
+                  classSubmit="btn btn-primary w-100"
+                  classButtonGroup="btn-group d-flex"
+                  classButton="btn btn-secondary"
+                  classButtonToggle="flex-grow-1"
+                  classButtonActive="active"
+                  disableActiveButton="{false}" />
+              </div>
             </div>
           </div>
+          <div class="col-md-8 order-md-1 mb-3">
+            <FrontPage />
+          </div>
         </div>
-        <div class="col-md-8 order-md-1 mb-3">
-          <FrontPage brand="{brand}" />
+        <div class="text-center mb-3">
+          &copy; Copyright 2018 Hunter Perrin. All rights reserved.
+          <a href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">Privacy Policy</a>
         </div>
       </div>
-      <div class="text-center mb-3">
-        &copy; Copyright 2018 Hunter Perrin. All rights reserved.
-        <a href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">Privacy Policy</a>
+    {/if}
+    {#if $user}
+      <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="height: 0;">
+        {#await $crypt.ready}
+          <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
+            <LoadingIndicator width="100px" height="100px" />
+            <h3>Setting up encryption...</h3>
+          </div>
+        {:then data}
+          <App />
+        {:catch error}
+          <div>
+            Error during encryption setup: {error}
+          </div>
+        {/await}
       </div>
-    </div>
-  {/if}
-  {#if $user}
-    <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="height: 0;">
-      {#await $crypt.ready}
-        <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
-          <LoadingIndicator width="100px" height="100px" />
-          <h3>Setting up encryption...</h3>
-        </div>
-      {:then data}
-        <App />
-      {:catch error}
-        <div>
-          Error during encryption setup: {error}
-        </div>
-      {/await}
-    </div>
-  {/if}
-</div>
+    {/if}
+  </div>
+{/if}
 
 <script>
   import {User, TilmeldLogin} from 'tilmeld-client';
@@ -134,30 +131,6 @@
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
   import Avatar from './App/Users/Avatar.html';
-
-  // From https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
-  const storageAvailable = (type) => {
-    try {
-      var storage = window[type];
-      var x = '__storage_test__';
-      storage.setItem(x, x);
-      storage.removeItem(x);
-      return true;
-    } catch(e) {
-      return e instanceof DOMException && (
-        // everything except Firefox
-        e.code === 22 ||
-        // Firefox
-        e.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        e.name === 'QuotaExceededError' ||
-        // Firefox
-        e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-        // acknowledge QuotaExceededError only if there's something already stored
-        storage.length !== 0;
-    }
-  };
 
   const cryptoAvailable = () => {
     return !!((window.crypto || window.msCrypto).getRandomValues);
@@ -187,7 +160,6 @@
 
     data () {
       return {
-        _storageAvailable: storageAvailable('localStorage'),
         _cryptoAvailable: cryptoAvailable()
       };
     },

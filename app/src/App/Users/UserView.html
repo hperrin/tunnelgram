@@ -229,12 +229,12 @@
       shareShortLink () {
         if (navigator.share !== undefined) {
           navigator.share({
-            text: 'Message me on Tunnelgram',
+            text: 'Message me on '+this.store.get().brand,
             url: this.get().shortLink
           })
         } else {
           const ta = document.createElement('textarea');
-          ta.value = 'Message me on Tunnelgram at '+this.get().shortLink;
+          ta.value = 'Message me on '+this.store.get().brand+' at '+this.get().shortLink;
           document.body.appendChild(ta);
           ta.select();
           document.execCommand('copy');

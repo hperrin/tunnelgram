@@ -351,7 +351,7 @@
           } else if (!file.type.startsWith('image/')) {
             PNotify.notice({
               title: 'Only Images/Video',
-              text: 'Right now, Tunnelgram only supports images, and WebM/MP4 videos. You tried to add: '+file.type
+              text: 'Right now, '+this.store.get().brand+' only supports images, and WebM/MP4 videos. You tried to add: '+file.type
             });
             this.set({_imagesLoading: false});
           } else if (currentImageCount + imageCount === 9) {

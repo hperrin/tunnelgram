@@ -34,6 +34,8 @@ const router = new Navigo(null, true, '#');
 let setupSubscription;
 
 const store = new UserStore({
+  brand: 'Tunnelgram',
+  brandWeb: 'Tunnelgram.com',
   conversations: [],
   conversation: new Conversation(),
   view: 'conversation',
@@ -343,9 +345,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
   const app = new Container({
     target: document.querySelector('main'),
-    data: {
-      brand: 'Tunnelgram'
-    },
+    data: {},
     store
   });
 
