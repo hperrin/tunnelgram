@@ -34,7 +34,7 @@
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
       Do you want to stay logged in when your device runs low on space?
-      <a href="javascript:void(0)" on:click="set({_hidePersistentStoragePrompt: true, _nothing: $requestPersistentStorage()})">Yeah</a>
+      <a href="javascript:void(0)" on:click="set({_hidePersistentStoragePrompt: true, _nothing: $requestPersistentStorage.call()})">Yeah</a>
     </div>
 
     <a class="ml-2" href="javascript:void(0)" on:click="set({_hidePersistentStoragePrompt: true})">
