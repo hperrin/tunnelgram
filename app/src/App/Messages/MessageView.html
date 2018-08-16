@@ -23,7 +23,7 @@
       </div>
     {/if}
   {/if}
-  <div class="animation-stage" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
+  <div class="{stageClass} {(_flipFirst || _flipSecond) ? 'raise-to-top' : ''} animation-stage" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
     <div
       class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
       style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
@@ -174,7 +174,8 @@
       },
       flipper: ({message}) => message.decrypted.secretText != null,
       displayName: ({message, $settings}) => message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name),
-      shadowClass: ({message, _flipped}) => ['shadow-none elevate-0', 'shadow-sm elevate-1', 'shadow elevate-2', 'shadow-lg elevate-3'][_flipped ? message.secretTextElevation : message.textElevation]
+      shadowClass: ({message, _flipped}) => ['shadow-none elevate-0', 'shadow-sm elevate-1', 'shadow elevate-2', 'shadow-lg elevate-3'][_flipped ? message.secretTextElevation : message.textElevation],
+      stageClass: ({message, _flipped}) => ['', '', 'p-1', 'p-2'][_flipped ? message.secretTextElevation : message.textElevation]
     },
 
     data () {
@@ -270,6 +271,8 @@
 
   .animation-stage {
     perspective: 1000px;
+  }
+  .raise-to-top {
     z-index: 20;
   }
 
