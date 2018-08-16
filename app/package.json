@@ -17,6 +17,7 @@
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "ffmpeg.js": "https://github.com/hperrin/ffmpeg.js.git",
     "github-markdown-css": "^2.10.0",
     "npm-font-source-sans-pro": "^1.0.2",
     "pform": "^3.3.0",

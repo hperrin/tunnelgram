@@ -18,7 +18,7 @@
     <MessageList ref:messageList />
   </div>
   <form on:submit="newMessage(event.preventDefault())">
-    {#if images.length || video != null || _imagesLoading}
+    {#if images.length || video != null || _mediaLoading}
       <div class="d-flex flex-wrap justify-content-start align-items-start bg-secondary pt-2 pl-2">
         {#each images as image, i}
           <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
@@ -46,25 +46,30 @@
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
             <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
-              {video.dataWidth}x{video.dataHeight} - {floor(video.dataDuration / (60 * 60))}:{floor((video.dataDuration % (60 * 60)) / 60)}:{floor(video.dataDuration % 60)}
+              {video.dataWidth}x{video.dataHeight} - {floor(video.dataDuration / 60)}:{padSingleDigits(floor(video.dataDuration % 60))}
             </span>
             <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
               {round(video.data.length / 1024 / 1024, 1)}MB
             </span>
           </div>
         {/if}
-        {#if _imagesLoading}
-          <div class="d-flex justify-content-center align-items-center text-white mr-2 mb-2" style="width: 152px; height: 152px;">
-            <LoadingIndicator width="50px" height="50px" text="Resampling..." />
+        {#if _mediaLoading === 'image'}
+          <div class="d-flex justify-content-center align-items-center mr-2 mb-2 text-white" style="width: 152px; height: 152px;">
+            <LoadingIndicator width="80px" height="80px" text="Resampling..." />
+          </div>
+        {/if}
+        {#if _mediaLoading === 'video'}
+          <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 text-white" style="width: 152px; height: 152px;">
+            <LoadingIndicator width="150px" height="150px" text="Transcoding..." progress="{_transcodeProgress}" />
           </div>
         {/if}
       </div>
     {/if}
     <div class="d-flex align-items-stretch">
-      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/webm, .webm, video/mp4, .mp4, .mpg, .mpeg" multiple>
+      <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/*" multiple>
       <button class="btn btn-lg btn-info p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
       <textarea class="form-control border-primary border-top text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty}" title="Send message"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty || _mediaLoading}" title="Send message"><i class="fas fa-comment"></i></button>
     </div>
   </form>
 </div>
@@ -77,6 +82,7 @@
   import LoadingIndicator from '../LoadingIndicator.html';
   import {crypt} from '../../Services/EncryptionService';
   import {EditImageService} from '../../Services/EditImageService';
+  import {VideoService} from '../../Services/VideoService';
   import ErrHandler from '../../ErrHandler';
 
   const mobile = (() => {
@@ -93,7 +99,8 @@
     data () {
       return {
         _showDropbox: false,
-        _imagesLoading: false,
+        _mediaLoading: false,
+        _transcodeProgress: null,
         text: '',
         images: [],
         video: null
@@ -266,26 +273,16 @@
         for (var i = 0; i < files.length; i++) {
           const file = files[i];
 
-          if (['video/mp4', 'video/webm'].indexOf(file.type) !== -1) {
+          if (file.type.startsWith('video/')) {
             if (currentImageCount + imageCount > 0) {
               PNotify.notice({
                 title: 'Images or Video',
                 text: 'You gotta pick one.'
               });
-              this.set({_imagesLoading: false});
               continue;
             }
 
-            if (file.size >= 20971520) {
-              PNotify.notice({
-                title: 'Too Big',
-                text: 'That video is too big. You can upload videos up to 20MB (MiB).'
-              });
-              this.set({_imagesLoading: false});
-              continue;
-            }
-
-            this.set({_imagesLoading: true});
+            this.set({_mediaLoading: 'video', _transcodeProgress: null});
 
             // Read the video into a temporary video element to check it and
             // generate a thumbnail.
@@ -303,22 +300,33 @@
                 title: 'Unreadable',
                 text: 'Your browser can\'t read the video stream from this file.'
               });
-              this.set({_imagesLoading: false});
+              this.set({_mediaLoading: false});
               break;
             }
 
             // Now read the video fully into memory.
             const reader = new FileReader();
             reader.onload = async e => {
-              let data = new Uint8Array(e.target.result);
+              let data;
 
-              // This isn't really necessary, but I think it ensures the video
-              // element remains intact if the user deletes the source video
-              // before sending the message.
-              const blob = new Blob([data], {type: file.type});
+              // Does the video need to be transcoded?
+              if (file.type === 'video/mp4' && file.size < 20971520) {
+                data = new Uint8Array(e.target.result);
+              } else {
+                PNotify.info({
+                  title: 'Transcoding',
+                  text: file.size < 20971520
+                    ? 'Your video is formatted as '+file.type+'. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
+                    : 'Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This may take a while, and it may be clipped if it\'s too big.'
+                });
+                const transcoder = new VideoService();
+                data = await transcoder.transcode(new Uint8Array(e.target.result), video.duration, progress => this.set({_transcodeProgress: progress}));
+              }
+
+              const blob = new Blob([data], {type: 'video/mp4'});
               const objectURL = URL.createObjectURL(blob);
 
-              let dataType = file.type;
+              let dataType = 'video/mp4';
               let resizeImage = new EditImageService(video, 'image/jpeg');
               const thumbnailImg = await resizeImage.resizeContain(300, 300);
               resizeImage.destroy();
@@ -342,7 +350,8 @@
                   objectURL
                 },
                 images: [],
-                _imagesLoading: false
+                _mediaLoading: false,
+                _transcodeProgress: null
               });
             };
             reader.readAsArrayBuffer(file);
@@ -351,9 +360,8 @@
           } else if (!file.type.startsWith('image/')) {
             PNotify.notice({
               title: 'Only Images/Video',
-              text: 'Right now, '+this.store.get().brand+' only supports images, and WebM/MP4 videos. You tried to add: '+file.type
+              text: 'Right now, '+this.store.get().brand+' only supports images and videos. You tried to add: '+file.type
             });
-            this.set({_imagesLoading: false});
           } else if (currentImageCount + imageCount === 9) {
             PNotify.notice({
               title: 'Max Images Reached',
@@ -361,7 +369,7 @@
             });
             break;
           } else {
-            this.set({_imagesLoading: true});
+            this.set({_mediaLoading: 'image'});
             imageCount++;
 
             // Read the image into an Image to resize it and generate a
@@ -413,7 +421,7 @@
 
             imageCount--;
             if (imageCount === 0) {
-              this.set({_imagesLoading: false});
+              this.set({_mediaLoading: false});
             }
           }
         }
@@ -431,11 +439,11 @@
         return arr;
       },
 
-      round (value, precision) {
-        return Number.parseFloat(value.toFixed(precision));
-      },
+      round: (value, precision) => Number.parseFloat(value.toFixed(precision)),
 
-      floor: Math.floor
+      floor: Math.floor,
+
+      padSingleDigits: digits => digits < 10 ? '0'+digits : digits
     }
   };
 </script>
