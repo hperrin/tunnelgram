@@ -12,7 +12,7 @@
       {:else}
         <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click="loadVideo()" style="cursor: pointer;">
           <i class="fas fa-play-circle position-absolute h1 text-white"></i>
-          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc}); width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;" title="{resource.name}">&nbsp;</div>
+          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;" title="{resource.name}">&nbsp;</div>
         </div>
       {/if}
     {:catch e}
