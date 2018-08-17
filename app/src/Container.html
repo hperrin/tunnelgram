@@ -9,7 +9,7 @@
       <div class="container" style="height: 100%;">
         <div class="row align-items-center justify-content-center" style="height: 100%;">
           <div class="col-auto">
-            <LoadingIndicator width="300px" height="300px" title="{$brand}" text="Easy, secure messenger." />
+            <LoadingIndicator width="300" height="300" title="{$brand}" text="Easy, secure messenger." />
           </div>
         </div>
       </div>
@@ -108,7 +108,7 @@
       <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="height: 0;">
         {#await $crypt.ready}
           <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
-            <LoadingIndicator width="100px" height="100px" />
+            <LoadingIndicator width="100" height="100" />
             <h3>Setting up encryption...</h3>
           </div>
         {:then data}

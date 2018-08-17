@@ -1,10 +1,10 @@
 <div class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: 450px; font-size: 1em;">
   <div class="d-flex justify-content-center align-items-center">
     {#await resource.thumbnailPromise}
-      <LoadingIndicator width="{resource.thumbnailWidth}px" height="{resource.thumbnailHeight}px" text="Decrypting..." />
+      <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
     {:then thumbnail}
       {#if _loading}
-        <LoadingIndicator width="{resource.thumbnailWidth}px" height="{resource.thumbnailHeight}px" text="Decrypting..." />
+        <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
       {:elseif _source}
         <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay>
           <source src="{_source}" type="{resource.dataType}" />

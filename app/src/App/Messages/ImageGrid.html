@@ -2,7 +2,7 @@
   {#each resources as resource, index (resource.name)}
     <div class="d-flex justify-content-center align-items-center">
       {#await thumbnailPromises[index]}
-        <LoadingIndicator width="{thumbnailDimension}px" height="{thumbnailDimension}px" text="Decrypting..." />
+        <LoadingIndicator width="{thumbnailDimension}" height="{thumbnailDimension}" text="Decrypting..." />
       {:then thumbnail}
         <a href="javascript:void(0)" on:click="showBigImage(index)" style="font-size: 0;">
           <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); width: {thumbnailDimension}px; height: {thumbnailDimension}px;" title="{resource.name}">&nbsp;</div>
