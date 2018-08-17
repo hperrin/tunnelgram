@@ -142,6 +142,7 @@ export class VideoService {
     let commonArgs = [
       '-i', 'input',
       '-f', 'mp4',
+      '-movflags', '+faststart',
       '-hide_banner'
     ];
 
@@ -159,13 +160,27 @@ export class VideoService {
       commonArgs = [
         ...commonArgs,
         '-vcodec', 'libx264',
-          '-qmin', '16',
+          '-qmin', '10',
           '-qmax', '1024',
-          '-vf', 'format=yuv420p',
-          '-preset', 'fast',
+          // '-preset', 'fast',
           '-profile:v', 'high',
           '-level', '4.2',
-          '-tune', 'film',
+          '-pix_fmt', 'yuv420p',
+          '-g', '30',
+          '-keyint_min', '25',
+          '-sc_threshold', '40',
+          '-bf', '16',
+          '-b_strategy', '1',
+          '-coder', '1',
+          '-refs', '6',
+          '-flags', '+loop',
+          '-deblock', '0:0',
+          '-qdiff', '4',
+          // '-flags2', '+weightb',
+          '-subq', '6',
+          // '-flags2', '+mixed_refs',
+          // '-flags2', '+dct8x8',
+          '-trellis', '2',
           '-b:v', Math.floor(targetVideoBitRate)+'k',
           // '-maxrate', Math.floor(maxBitRate)+'k',
           // '-bufsize', Math.floor(bufSize)+'k',
@@ -188,11 +203,12 @@ export class VideoService {
       commonArgs = [
         ...commonArgs,
         '-acodec', 'aac',
+          '-profile:a', 'aac_low',
           '-b:a', Math.floor(targetAudioBitRate)+'k',
       ];
     }
 
-    let logFile = null;
+    let logFiles = [];
     if (!copy) {
       // First pass.
       this.init();
@@ -221,7 +237,7 @@ export class VideoService {
       let firstPass;
       firstPass = await this.promise;
       // Grab the log file from the first pass.
-      logFile = firstPass.MEMFS.find(file => file.name === 'ffmpeg2pass-0.log');
+      logFiles = firstPass.MEMFS;
     }
 
     // Second pass.
@@ -238,10 +254,9 @@ export class VideoService {
       };
     }
     const twoPassArgs = copy ? [] : ['-pass', '2'];
-    const logFileArgs = copy ? [] : [logFile];
     this.worker.postMessage({
       type: 'run',
-      MEMFS: [{name: 'input', data: typedArray}, ...logFileArgs],
+      MEMFS: [{name: 'input', data: typedArray}, ...logFiles],
       arguments: [
         ...commonArgs,
         ...twoPassArgs,
