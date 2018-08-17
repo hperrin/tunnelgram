@@ -40,6 +40,7 @@ export class VideoService {
         case 'done':
           this.state = 'done';
           this.resolve(msg.data);
+          this.worker.terminate();
           break;
         case 'exit':
           this.state = 'closed';
@@ -71,68 +72,156 @@ export class VideoService {
       throw new Error('The video worker is not ready.');
     }
 
-    // Calculate the max bitrate in Kbits/s.
-    const currentBitRate = Math.floor((typedArray.length * 8) / duration) / 1000;
-    const maxBitRate = Math.floor(Math.floor(20971520 * 8 * .95) / duration) / 1000; // Limit file size to 20ish MB.
-    // Since they're most likely trying to upload a better format video, choose
-    // between 150% their video's bitrate and the maximum bitrate this video can
-    // be to achieve a 20MB file.
-    const targetTotalBitRate = Math.min(currentBitRate * 1.5, maxBitRate);
-    // const bufSize = Math.max(currentBitRate, maxBitRate) * 2;
-    const targetAudioBitRate = Math.min(125, targetTotalBitRate * .25);
-    const targetVideoBitRate = targetTotalBitRate - targetAudioBitRate;
-
-    // The common arguments for each pass.
-    const commonArgs = [
-      '-i', 'input',
-      '-f', 'mp4',
-      '-qmin', '16',
-      '-qmax', '1024',
-      '-vcodec', 'libx264',
-        '-vf', 'format=yuv420p',
-        '-preset', 'veryslow',
-        '-profile:v', 'high',
-        '-level', '4.2',
-        '-b:v', Math.floor(targetVideoBitRate)+'k',
-        // '-maxrate', Math.floor(maxBitRate)+'k',
-        // '-bufsize', Math.floor(bufSize)+'k',
-      '-acodec', 'aac',
-        '-b:a', Math.floor(targetAudioBitRate)+'k',
-      '-hide_banner'
-    ];
+    // Get information about the video.
 
     // First pass.
     this.init();
     await this._readyPromise;
     // The worker is ready.
-    if (progressCallback) {
-      this.stderrCallback = line => {
-        const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
-        if (match) {
-          const times = match[1].split(':').reverse().map(parseFloat);
-          let seconds = 0;
-          for (let i = 0; i < times.length; i++) {
-            seconds += times[i] * (60 ** i);
-          }
-          progressCallback(seconds / (duration * 2));
-        }
-      };
-    }
+    let information = '';
+    this.stderrCallback = line => {
+      if (information !== '' || line.startsWith('Input #0,')) {
+        information += line+'\n';
+      }
+    };
     this.worker.postMessage({
       type: 'run',
-      MEMFS: [{name: 'input', data: typedArray}, {name: 'null', data: null}],
+      MEMFS: [{name: 'input', data: typedArray}],
       arguments: [
-        ...commonArgs,
-        '-pass', '1',
-        '-y',
-        'null'
+        '-i', 'input'
       ]
     });
 
-    let firstPass;
-    firstPass = await this.promise;
-    // Grab the log file from the first pass.
-    const logFile = firstPass.MEMFS.find(file => file.name === 'ffmpeg2pass-0.log');
+    await this.promise;
+
+    // Extract the information from the output.
+    let fileDuration = null;
+    let fileBitrate = null;
+    let videoCodec = null;
+    let videoBitrate = null;
+    let audioCodec = null;
+    let audioBitrate = null;
+    if (information !== '') {
+      const fileMatch = information.match(/^\s*Duration: ([\d:.]+), start: [\d:.]+, bitrate: ([\d.]+) (gb|mb|kb|b)\/s\s*$/m);
+      if (fileMatch) {
+        fileDuration = this.convertFfmpegTimeToSeconds(fileMatch[1]);
+        fileBitrate = this.convertFfmpegBitrateToKbps(fileMatch[2], fileMatch[3]);
+      }
+      const videoMatch = information.match(/^\s*Stream #\d+:\d+(?:[()\w]*): Video: ([^ ,]+)[ ,](?:[^\n]* ([\d.]+) (gb|mb|kb|b)\/s\b)?.*$/m);
+      if (videoMatch) {
+        videoCodec = videoMatch[1];
+        videoBitrate = videoMatch[2] ? this.convertFfmpegBitrateToKbps(videoMatch[2], videoMatch[3]) : null;
+      } else {
+        throw new Error('FFMPEG can\'t read the video stream.');
+      }
+      const audioMatch = information.match(/^\s*Stream #\d+:\d+(?:[()\w]*): Audio: ([^ ,]+)[ ,](?:[^\n]* ([\d.]+) (gb|mb|kb|b)\/s\b)?.*$/m);
+      if (audioMatch) {
+        audioCodec = audioMatch[1];
+        audioBitrate = audioMatch[2] ? this.convertFfmpegBitrateToKbps(audioMatch[2], audioMatch[3]) : null;
+      }
+    } else {
+      throw new Error('FFMPEG can\'t read the file streams.');
+    }
+
+    // Calculate the max bitrate in Kbits/s.
+    if (fileDuration !== null) {
+      duration = fileDuration;
+    }
+    // Since they're most likely trying to upload a better format video, choose
+    // between 150% their video's bitrate and the maximum bitrate this video can
+    // be to achieve a 20MB file. Audio should be 25% the total bitrate, with a
+    // max of either the original audio bitrate or 125.
+    const currentBitRate = fileBitrate === null ? Math.floor((typedArray.length * 8) / duration) / 1000 : fileBitrate;
+    const maxBitRate = Math.floor(Math.floor(20971520 * 8 * .95) / duration) / 1000; // Limit file size to 20ish MB.
+    const targetTotalBitRate = Math.min(currentBitRate * 1.5, maxBitRate);
+    // const bufSize = Math.max(currentBitRate, maxBitRate) * 2;
+    const targetAudioBitRate = audioCodec === null ? 0 : Math.min(audioBitrate === null ? 125 : audioBitrate, targetTotalBitRate * .25);
+    const targetVideoBitRate = Math.min(videoBitrate === null ? Infinity : (videoBitrate * 1.5), targetTotalBitRate - targetAudioBitRate);
+
+    // The common arguments for each pass.
+    let commonArgs = [
+      '-i', 'input',
+      '-f', 'mp4',
+      '-hide_banner'
+    ];
+
+    let copy = true;
+
+    if (videoCodec === 'h264' && typedArray.length < (20971520 * .98)) {
+      // We can just copy the stream.
+      commonArgs = [
+        ...commonArgs,
+        '-vcodec', 'copy'
+      ];
+    } else {
+      // We need to re-encode.
+      copy = false;
+      commonArgs = [
+        ...commonArgs,
+        '-vcodec', 'libx264',
+          '-qmin', '16',
+          '-qmax', '1024',
+          '-vf', 'format=yuv420p',
+          '-preset', 'veryslow',
+          '-profile:v', 'high',
+          '-level', '4.2',
+          '-b:v', Math.floor(targetVideoBitRate)+'k',
+          // '-maxrate', Math.floor(maxBitRate)+'k',
+          // '-bufsize', Math.floor(bufSize)+'k',
+      ];
+    }
+    if (audioCodec === null) {
+      commonArgs = [
+        ...commonArgs,
+        '-an'
+      ];
+    } else if (audioCodec === 'aac' && typedArray.length < (20971520 * .98)) {
+      // We can just copy the stream.
+      commonArgs = [
+        ...commonArgs,
+        '-acodec', 'copy'
+      ];
+    } else {
+      // We need to re-encode.
+      copy = false;
+      commonArgs = [
+        ...commonArgs,
+        '-acodec', 'aac',
+          '-b:a', Math.floor(targetAudioBitRate)+'k',
+      ];
+    }
+
+    let logFile = null;
+    if (!copy) {
+      // First pass.
+      this.init();
+      await this._readyPromise;
+      // The worker is ready.
+      if (progressCallback) {
+        this.stderrCallback = line => {
+          const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
+          if (match) {
+            let seconds = this.convertFfmpegTimeToSeconds(match[1]);
+            progressCallback(seconds / (duration * 2));
+          }
+        };
+      }
+      this.worker.postMessage({
+        type: 'run',
+        MEMFS: [{name: 'input', data: typedArray}, {name: 'null', data: null}],
+        arguments: [
+          ...commonArgs,
+          '-pass', '1',
+          '-y',
+          'null'
+        ]
+      });
+
+      let firstPass;
+      firstPass = await this.promise;
+      // Grab the log file from the first pass.
+      logFile = firstPass.MEMFS.find(file => file.name === 'ffmpeg2pass-0.log');
+    }
 
     // Second pass.
     this.init();
@@ -142,29 +231,52 @@ export class VideoService {
       this.stderrCallback = line => {
         const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
         if (match) {
-          const times = match[1].split(':').reverse().map(parseFloat);
-          let seconds = 0;
-          for (let i = 0; i < times.length; i++) {
-            seconds += times[i] * (60 ** i);
-          }
-          progressCallback((seconds + duration) / (duration * 2));
+          let seconds = this.convertFfmpegTimeToSeconds(match[1]);
+          progressCallback((seconds + duration) / (duration * (copy ? 1 : 2)));
         }
       };
     }
+    const twoPassArgs = copy ? [] : ['-pass', '2'];
+    const logFileArgs = copy ? [] : [logFile];
     this.worker.postMessage({
       type: 'run',
-      MEMFS: [{name: 'input', data: typedArray}, logFile],
+      MEMFS: [{name: 'input', data: typedArray}, ...logFileArgs],
       arguments: [
         ...commonArgs,
-        '-pass', '2',
+        ...twoPassArgs,
         '-fs', ''+Math.floor(20971520 * .98), // Just stop encoding if it gets to 20MB.
         'output.mp4'
       ]
-    });
+    }, [typedArray.buffer]);
 
     let data;
     data = await this.promise;
 
     return data.MEMFS.find(file => file.name === 'output.mp4').data;
+  }
+
+  convertFfmpegTimeToSeconds (ffmpegTime) {
+    const times = ffmpegTime.split(':').reverse().map(parseFloat);
+    let seconds = 0;
+    for (let i = 0; i < times.length; i++) {
+      seconds += times[i] * (60 ** i);
+    }
+    return seconds;
+  }
+
+  convertFfmpegBitrateToKbps (ffmpegBitrate, unit) {
+    let bitrate = parseFloat(ffmpegBitrate);
+    switch (unit) {
+      case 'gb':
+        bitrate *= 1024 * 1024;
+        break;
+      case 'mb':
+        bitrate *= 1024;
+        break;
+      case 'b':
+        bitrate /= 1024;
+        break;
+    }
+    return bitrate;
   }
 }

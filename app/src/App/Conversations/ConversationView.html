@@ -291,6 +291,9 @@
             let resolve;
             const p = new Promise(r => resolve = r);
             video.onloadeddata = () => resolve();
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+              video.autoplay = true;
+            }
             video.src = tempObjectURL;
             await p;
 
@@ -310,21 +313,41 @@
               let data;
 
               // Does the video need to be transcoded?
+              let transcoded = false;
               if (file.type === 'video/mp4' && file.size < 20971520) {
                 data = new Uint8Array(e.target.result);
               } else {
+                transcoded = true;
                 PNotify.info({
                   title: 'Transcoding',
                   text: file.size < 20971520
                     ? 'Your video is formatted as '+file.type+'. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
                     : 'Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This may take a while, and it may be clipped if it\'s too big.'
                 });
-                const transcoder = new VideoService();
-                data = await transcoder.transcode(new Uint8Array(e.target.result), video.duration, progress => this.set({_transcodeProgress: progress}));
+                try {
+                  const transcoder = new VideoService();
+                  data = await transcoder.transcode(new Uint8Array(e.target.result), video.duration, progress => this.set({_transcodeProgress: progress}));
+                } catch (err) {
+                  PNotify.error({
+                    title: 'Error',
+                    text: err.message
+                  });
+                  this.set({_mediaLoading: false});
+                  return;
+                }
               }
 
               const blob = new Blob([data], {type: 'video/mp4'});
               const objectURL = URL.createObjectURL(blob);
+
+              if (transcoded) {
+                // Reload the transcoded video to get a proper thumbnail.
+                let resolve;
+                const p = new Promise(r => resolve = r);
+                video.onloadeddata = () => resolve();
+                video.src = objectURL;
+                await p;
+              }
 
               let dataType = 'video/mp4';
               let resizeImage = new EditImageService(video, 'image/jpeg');
@@ -336,7 +359,7 @@
 
               this.set({
                 video: {
-                  name: file.name,
+                  name: file.name + (transcoded ? '-transcoded.mp4' : ''),
                   dataType,
                   dataWidth: '' + video.videoWidth,
                   dataHeight: '' + video.videoHeight,
