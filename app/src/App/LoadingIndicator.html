@@ -1,19 +1,17 @@
 <div style="display: flex; justify-content: center; align-items: center; position: relative; width: {width}; height: {height};">
-  <div style="display: flex; justify-content: center; align-items: center; position: relative; width: 90%; height: 90%; margin-left: 5%; margin-top: 5%;">
-    {#if text || title}
-      <div style="text-align: center; font-size: .9em; text-overflow: ellipsis; overflow: hidden; max-height: 100%; max-width: 100%;">
-        {#if title}
-          <h3>{title}</h3>
-        {/if}
-        {#if text}
-          {text}
-        {/if}
-      </div>
-    {/if}
-    <svg class="lds-dual-ring" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="position: absolute; background: none;">
-      <circle cx="50" cy="50" fill="none" stroke-linecap="round" r="48" stroke-width="4" stroke="#337ab7" stroke-dasharray="{progress != null ? (progress * 301.593)+' '+(301.593 - (progress * 301.593)) : '75.398 75.398'}" transform="rotate(99 50 50)">
-        <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="2s" begin="0s" repeatCount="indefinite"></animateTransform>
-      </circle>
-    </svg>
-  </div>
+  {#if text || title}
+    <div style="text-align: center; font-size: .9em; text-overflow: ellipsis; overflow: hidden; max-height: 100%; max-width: 100%;">
+      {#if title}
+        <h3>{title}</h3>
+      {/if}
+      {#if text}
+        {text}
+      {/if}
+    </div>
+  {/if}
+  <svg class="lds-dual-ring" width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="position: absolute; background: none;">
+    <circle cx="50" cy="50" fill="none" stroke-linecap="round" r="48" stroke-width="4" stroke="#337ab7" stroke-dasharray="{progress != null ? (progress * 301.593)+' '+(301.593 - (progress * 301.593)) : '75.398 75.398'}" transform="rotate(99 50 50)">
+      <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="2s" begin="0s" repeatCount="indefinite"></animateTransform>
+    </circle>
+  </svg>
 </div>
