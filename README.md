@@ -56,25 +56,6 @@ When a user logs in, the client must:
 
 > :information_source: The server never knows their actual password, so it can't decrypt their private key. Therefore, the server also never knows their private key. Boom, Tunnelwire.
 
-## How Tunnelgram Uses the Tunnelwire Encryption Scheme to Send Messages
-
-### Upon Message Send
-
-The client:
-
-1. Generates a random, cryptographically secure message key, and encrypts the message with it.
-2. Retrieves the public keys of all of the recipients.
-3. Encrypts the message key with each of the recipients' public keys and the user's public key.
-4. Sends the encrypted message and all of the encrypted copies of the message key to the server.
-
-### Upon Message Receipt
-
-The client:
-
-1. Retrieves their copy of the encrypted message key.
-2. Uses the user's private key to decrypt the message key.
-3. Uses the message key to decrypt the message.
-
 ## Using the Tunnelwire Encryption Scheme in Your Own Project
 
 The Tunnelwire Encryption Scheme is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode). You are free to use the scheme in your own software, provided you abide by the terms of the license.
@@ -98,6 +79,37 @@ Or text:
 ```
 This software uses an encryption scheme based on the Tunnelwire Encryption Scheme (https://github.com/hperrin/tunnelgram#the-tunnelwire-encryption-scheme) by Hunter Perrin, which is licensed under the CC BY 4.0 license (https://creativecommons.org/licenses/by/4.0/).
 ```
+
+# How Tunnelgram Uses the Tunnelwire Encryption Scheme to Send Messages
+
+## Upon Message Send
+
+The client:
+
+1. Generates a random, cryptographically secure message key, and encrypts the message with it.
+2. Retrieves the public keys of all of the recipients.
+3. Encrypts the message key with each of the recipients' public keys and the user's public key.
+4. Sends the encrypted message and all of the encrypted copies of the message key to the server.
+
+## Upon Message Receipt
+
+The client:
+
+1. Retrieves their copy of the encrypted message key.
+2. Uses the user's private key to decrypt the message key.
+3. Uses the message key to decrypt the message.
+
+# How Tunnelgram Sends Images
+
+Images are fairly easy. An HTML canvas element is used to size the image down until it is under 2MB, which is small enough to decrypt quickly and big enough to hold a good quality image. The message key is used to encrypt the image data in a web worker. A thumbnail is generated in the same way as well, and encrypted with the same key.
+
+# How Tunnelgram Sends Videos
+
+Videos are much harder. The closest thing to a universal format is H.264 video and AAC or MP3 audio in an MP4 container. VP9 and Vorbis in a WebM container would be perfect, if Apple supported it. Since many people use iPhones, that won't work. Android will record an MP4, so it can just be encrypted and sent, as long as it's under the arbitrary 20MB limit. I've found this limit is a good tradeoff in video quality/length to decryption time. But iPhones record H.264/AAC in a QuickTime container that can't be played on Android devices. Other devices may record in completely different formats/containers. Or the user may add a video well above the 20MB limit.
+
+A normal messenger app handles this easily. It remuxes or transcodes the video on the server side. Bing bang boom, super compatible video, easy peasy. Tunnelgram can't do that, because *the video is encrypted before it's sent to the server*. The video needs to be made compatible before it's encrypted on the client. So Tunnelgram uses a custom version of FFMPEG compiled to WebAssembly called [FFMPEG.js](https://github.com/hperrin/ffmpeg.js). It loads the video into an ArrayBuffer and passes it to a Web Worker, which downloads and compiles the FFMPEG code in the browser then uses it to remux/transcode the video. For transcoding, it will use 1.5x the original bitrate or the maximum bitrate it can to get a video under 20MB. It uses a two pass transcoding strategy to get the best quality it can at this small file size.
+
+Using this strategy, Tunnelgram can send a video from any client device that can be viewed on any other device, regardless of the type or size of the original video.
 
 # Developing for Tunnelgram
 
