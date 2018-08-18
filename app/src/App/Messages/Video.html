@@ -34,6 +34,7 @@
         const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
         const _source = URL.createObjectURL(blob);
         resource.thumbnailSrc = _source;
+        this.set({resource});
       } else {
         resource.thumbnail.then(data => {
           const blob = new Blob([data], {type: resource.thumbnailType});
@@ -42,7 +43,6 @@
           this.set({resource});
         });
       }
-      this.set({resource});
     },
 
     computed: {

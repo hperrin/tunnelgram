@@ -22,11 +22,13 @@
   export default {
     oncreate () {
       const {resources} = this.get();
+      let setResource = false;
       for (let resource of resources) {
         if (resource.thumbnail instanceof Uint8Array) {
           const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
           const _source = URL.createObjectURL(blob);
           resource.thumbnailSrc = _source;
+          setResource = true;
         } else {
           resource.thumbnail.then(data => {
             const blob = new Blob([data], {type: resource.thumbnailType});
@@ -36,7 +38,9 @@
           });
         }
       }
-      this.set({resources});
+      if (setResource) {
+        this.set({resources});
+      }
     },
 
     computed: {
