@@ -146,7 +146,7 @@ export class VideoService {
       '-hide_banner'
     ];
 
-    let copy = true;
+    let copyStreams = true;
 
     if (videoCodec === 'h264' && typedArray.length < (20971520 * .98)) {
       // We can just copy the stream.
@@ -156,7 +156,8 @@ export class VideoService {
       ];
     } else {
       // We need to re-encode.
-      copy = false;
+      // http://dev.beandog.org/x264_preset_reference.html - Good reference.
+      copyStreams = false;
       commonArgs = [
         ...commonArgs,
         '-vcodec', 'libx264',
@@ -166,21 +167,14 @@ export class VideoService {
           '-profile:v', 'high',
           '-level', '4.2',
           '-pix_fmt', 'yuv420p',
-          '-g', '30',
+          '-g', '250',
           '-keyint_min', '25',
-          '-sc_threshold', '40',
-          '-bf', '16',
-          '-b_strategy', '1',
-          '-coder', '1',
-          '-refs', '6',
+          '-x264-params', 'scenecut=40:b_adapt=1:cabac=1:partitions=p8x8,b8x8,i8x8,i4x4:weightb=1:weightp=1:me_range=16:mixed_ref=1:8x8dct=1:rc_lookahead=20:chroma_me=1',
+          '-bf', '3',
           '-flags', '+loop',
           '-deblock', '0:0',
           '-qdiff', '4',
-          // '-flags2', '+weightb',
-          '-subq', '6',
-          // '-flags2', '+mixed_refs',
-          // '-flags2', '+dct8x8',
-          '-trellis', '2',
+          '-trellis', '1',
           '-b:v', Math.floor(targetVideoBitRate)+'k',
           // '-maxrate', Math.floor(maxBitRate)+'k',
           // '-bufsize', Math.floor(bufSize)+'k',
@@ -199,7 +193,7 @@ export class VideoService {
       ];
     } else {
       // We need to re-encode.
-      copy = false;
+      copyStreams = false;
       commonArgs = [
         ...commonArgs,
         '-acodec', 'aac',
@@ -209,7 +203,7 @@ export class VideoService {
     }
 
     let logFiles = [];
-    if (!copy) {
+    if (!copyStreams) {
       // First pass.
       this.init();
       await this._readyPromise;
@@ -229,6 +223,9 @@ export class VideoService {
         arguments: [
           ...commonArgs,
           '-pass', '1',
+          // Go for speed on the first pass.
+          '-subq', '1',
+          '-refs', '1',
           '-y',
           'null'
         ]
@@ -249,11 +246,16 @@ export class VideoService {
         const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
         if (match) {
           let seconds = this.convertFfmpegTimeToSeconds(match[1]);
-          progressCallback((seconds + duration) / (duration * (copy ? 1 : 2)));
+          progressCallback((seconds + (copyStreams ? 0 : duration)) / (duration * (copyStreams ? 1 : 2)));
         }
       };
     }
-    const twoPassArgs = copy ? [] : ['-pass', '2'];
+    const twoPassArgs = copyStreams ? [] : [
+      '-pass', '2',
+      // Better quality on the second pass.
+      '-subq', '4',
+      '-refs', '2'
+    ];
     this.worker.postMessage({
       type: 'run',
       MEMFS: [{name: 'input', data: typedArray}, ...logFiles],
