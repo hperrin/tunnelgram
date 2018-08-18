@@ -14,7 +14,7 @@ export class VideoService {
     });
     this._readyResolve = null;
     this._readyPromise = new Promise(resolve => this._readyResolve = resolve);
-    this.worker = new Worker('/node_modules/ffmpeg.js/ffmpeg-worker-mp4.js');
+    this.worker = new Worker('/node_modules/ffmpeg.js-hperrin/ffmpeg-worker-mp4.js');
     this.worker.onmessage = e => {
       const msg = e.data;
       switch (msg.type) {
