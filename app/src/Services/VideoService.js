@@ -53,6 +53,16 @@ export class VideoService {
     };
   }
 
+  cancel () {
+    if (this.state !== 'running' && this.state !== 'done') {
+      return;
+    }
+
+    this.state = 'closed';
+    this.reject('Transcoding was canceled by the user.');
+    this.worker.terminate();
+  }
+
   async run (...args) {
     if (this.state !== 'loading' && this.state !== 'ready' && this.state !== 'closed') {
       throw new Error('The video worker is not ready.');
