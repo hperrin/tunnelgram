@@ -7,7 +7,7 @@
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0" style="word-break: break-word;">{name}</h5>
-      <small class="ml-1" title="{moment.unix(conversation.mdate).format('llll')}" style="white-space: nowrap;">{modifiedDate}</small>
+      <small class="ml-1" title="{_longModifiedDate}" style="white-space: nowrap;">{_modifiedDate}</small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
       {#if conversation.data.lastMessage}
@@ -66,16 +66,36 @@
     },
 
     onstate ({changed, current}) {
+      if (changed.mdate && current.conversation) {
+        setTimeout(() => {
+          if (!this.destroyed) {
+            this.updateTime();
+            this.set({
+              _unreadCount: current.conversation.unreadCount(),
+              _readline: current.conversation.readline
+            });
+          }
+        }, 0);
+      }
+
       if (changed.conversation && current.conversation) {
-        this.updateTime();
-        this.set({
-          _unreadCount: current.conversation.unreadCount(),
-          _readline: current.conversation.readline
-        });
+        // Ready the conversation's referenced entities.
+        const {conversation} = current;
+        if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+          conversation._tgCalledReadyAll = true;
+          conversation.readyAll(() => {
+            conversation.containsSleepingReference = false;
+            conversation._tgCalledReadyAll = false;
+            if (!this.destroyed) {
+              this.set({conversation});
+            }
+          }, ErrHandler, 1);
+        }
       }
     },
 
     ondestroy() {
+      this.destroyed = true;
       if (this.interval) {
         clearInterval(this.interval);
       }
@@ -102,7 +122,8 @@
         }
         const width = Math.floor(60 / i);
         return {users, width};
-      }
+      },
+      mdate: ({conversation}) => conversation.mdate
     },
 
     data () {
@@ -115,16 +136,16 @@
 
     methods: {
       updateTime () {
-        this.set({modifiedDate: moment(new Date(Math.min(this.get().conversation.mdate * 1000, new Date()))).fromNow(true)});
+        const {conversation} = this.get();
+        this.set({
+          _modifiedDate: moment(new Date(Math.min(conversation.mdate * 1000, +new Date()))).fromNow(true),
+          _longModifiedDate: moment.unix(conversation.mdate).format('llll')
+        });
       }
     },
 
     components: {
       Avatar
-    },
-
-    helpers: {
-      moment
     }
   };
 </script>

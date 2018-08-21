@@ -139,7 +139,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   store.on('state', ({changed, current, previous}) => {
     let {conversation, conversations} = current;
 
-    if (changed.conversation && conversation && conversation.guid) {
+    if (changed.conversation && !changed.conversations && conversation && conversation.guid) {
       // Refresh conversations' readlines when current conversation changes.
       for (let curConv of conversations) {
         if (curConv != null && conversation != null && conversation === curConv) {
@@ -165,22 +165,6 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         } else {
           conversations[idx] = conversation;
           store.set({conversations});
-        }
-      }
-    }
-
-    if (changed.conversations) {
-      // Ready all the conversations' entities.
-      for (let curConv of conversations) {
-        if (curConv.data.user.isASleepingReference) {
-          curConv.readyAll(() => {
-            const {conversation} = store.get();
-            if (curConv.is(conversation)) {
-              store.set({conversations, conversation});
-            } else {
-              store.set({conversations});
-            }
-          }, ErrHandler, 1);
         }
       }
     }

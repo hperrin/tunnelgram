@@ -3,7 +3,7 @@
     {createdDateRelative}
   </small>
 {/if}
-<div class="message d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" data-cdate="{cdateJson}" style="opacity: {pending ? '.6' : '1'};" ref:container>
+<div class="message d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if _showActions && isOwner}
     <div class="h1 my-0" style="font-size: 0;">
       <button type="button" class="btn btn-sm btn-danger mr-2" on:click="deleteMessage()" title="Delete message"><i class="fas fa-trash-alt"></i></button>
@@ -30,7 +30,7 @@
       tabindex="0"
       role="button"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
-      on:dblclick="set({_showActions: !_showActions})" title="{createdDate}">
+      on:dblclick="set({_showActions: !_showActions})" title="{_}">
       {#if shouldEmbiggen}
         <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
           {#if message.decrypted.text != null}
@@ -61,7 +61,7 @@
   </div>
   {#if _showActions && !pending}
     <div class="mr-2 my-0">
-      <small class="text-muted">{createdDate}</small>
+      <small class="text-muted">{_}</small>
     </div>
   {/if}
   {#if pending}
@@ -118,8 +118,16 @@
 
       if (message.decrypted.text != '[Encrypted text]') {
         const html = converter.makeHtml(message.decrypted.text);
-        this.set({_formattedText: html == null ? null : html.replace(/\n$/, '')});
+        const secretHtml = message.decrypted.secretText != null ? converter.makeHtml(message.decrypted.secretText) : null;
+        this.set({
+          _formattedText: html == null ? null : html.replace(/\n$/, ''),
+          _formattedSecretText: secretHtml == null ? null : secretHtml.replace(/\n$/, '')
+        });
       }
+
+      this.set({
+        _createdDate: message.cdate == null ? 'Pending' : moment.unix(message.cdate).format('llll')
+      });
 
       if (pending) {
         this.handlePending();
@@ -127,21 +135,32 @@
     },
 
     onstate ({changed, current, previous}) {
-      if (changed.message && current.message) {
+      if (changed.message && current.message && !current.pending) {
+        // Ready the message's referenced entities.
         const {message} = current;
-        if (!current.pending && message.data.user.isASleepingReference) {
-          message.readyAll(() => this.set({message}), ErrHandler, 1);
+        if (message.containsSleepingReference && !message._tgCalledReadyAll) {
+          message._tgCalledReadyAll = true;
+          message.readyAll(() => {
+            message.containsSleepingReference = false;
+            message._tgCalledReadyAll = false;
+            if (!this.destroyed) {
+              this.set({message});
+            }
+          }, ErrHandler, 1);
         }
-        this.updateTime();
       }
 
       if (current.message && current.message.decrypted.text != null && current._formattedText === null) {
         const {message} = current;
         if (message.decrypted.text != null) {
-          this.set({
-            _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
-            _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
-          });
+          setTimeout(() => {
+            if (!this.destroyed) {
+              this.set({
+                _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
+                _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
+              });
+            }
+          }, 0);
         }
       }
     },
@@ -153,6 +172,7 @@
     },
 
     ondestroy() {
+      this.destroyed = true;
       if (this.interval) {
         clearInterval(this.interval);
       }
@@ -160,8 +180,6 @@
 
     computed: {
       isOwner: ({message, pending, $user}) => pending || $user.is(message.data.user),
-      createdDate: ({message}) => moment.unix(message.cdate).format('llll'),
-      cdateJson: ({message}) => JSON.stringify(message.cdate),
       shouldEmbiggen: ({message}) => {
         // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
         if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.video == null && message.decrypted.text.match(bareEmojiRegex)) {
@@ -227,10 +245,10 @@
         }
         let {cdate} = this.get().message;
         if (cdate == null) {
-          cdate = +(new Date());
+          cdate = +new Date();
         }
-        const now = new Date() / 1000;
-        const cdateMoment = moment(new Date(Math.min(cdate * 1000, new Date())));
+        const now = (+new Date()) / 1000;
+        const cdateMoment = moment(new Date(Math.min(cdate * 1000, +new Date())));
         let createdDateRelative;
         if (now - cdate > 10 * 30 * 24 * 60 * 60) {
           // More than 10 months ago.

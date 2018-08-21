@@ -7,21 +7,20 @@
     </div>
   {:else}
     <div class="list-group">
-      <a class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" href="javascript:void(0)" on:click="$navigate('/c')">
+      <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click="$navigate('/c')">
         <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
-      </a>
+      </div>
       {#if $conversations.length > 1}
         <div class="list-group-item d-flex p-0 border-0">
           <input type="text" class="form-control bg-secondary border-0 text-light" bind:value="_search" name="search" placeholder="Search users" autocomplete="off" />
         </div>
       {/if}
-      {#if filteredConversations.length}
-          {#each filteredConversations as conversation (conversation.guid)}
-            <a class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''}" href="javascript:void(0)" on:click="navigate(conversation)">
-              <ConversationPreview bind:conversation />
-            </a>
-          {/each}
-      {:else}
+      {#each $conversations as conversation (conversation.guid)}
+        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''} {conversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click="navigate(conversation)">
+          <ConversationPreview bind:conversation />
+        </div>
+      {/each}
+      {#if !$conversations.length}
         <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
           {#if $conversations.length}
             No matching conversations.
@@ -72,7 +71,8 @@
             'type': '&',
             'gt': ['mdate', conversations.length ? Math.max(...conversations.map(c => c.mdate)) : 0]
           }).then(newConversations => {
-            let newArray = [...newConversations, ...conversations.filter(c => !c.inArray(newConversations))];
+            const {conversations} = this.store.get();
+            const newArray = [...newConversations, ...conversations.filter(c => !c.inArray(newConversations))];
             this.store.set({conversations: newArray});
           });
         }
@@ -176,7 +176,6 @@
               this.fire('tunnelgram-notification', {update});
             }
             PubSub.updateArray(conversations, update);
-            Nymph.sort(conversations, 'mdate', null, true);
             this.store.set({conversations});
             this.handleScroll();
           }
@@ -220,8 +219,8 @@
           });
 
           if (earlierConversations && earlierConversations.length) {
-            const newConversations = [...conversations, ...earlierConversations];
-            this.store.set({conversations: newConversations});
+            const conversations = [...this.store.get().conversations, ...earlierConversations];
+            this.store.set({conversations});
           } else {
             this.set({_reachedEarliestConversation: true});
           }

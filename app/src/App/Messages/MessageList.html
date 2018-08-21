@@ -7,23 +7,27 @@
       </div>
     </div>
   {:else}
-    <div class="d-flex flex-column align-items-start" ref:messageContainer>
-      <div class="align-self-stretch text-center">
-        <h1>{name}</h1>
-        <p>
-          Started {moment.unix($conversation.cdate).format('llll')}
-        </p>
-      </div>
-      {#if _loadingEarlierMessages}
-        <div class="d-flex align-items-center justify-content-center align-self-stretch" style="height: 200px;">
-          <div class="col-auto">
-            <LoadingIndicator width="50" height="50" />
-          </div>
+    <div class="text-center">
+      <h1>{name}</h1>
+      <p>
+        Started {_startedDate}
+      </p>
+    </div>
+    {#if _loadingEarlierMessages}
+      <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+        <div class="col-auto">
+          <LoadingIndicator width="50" height="50" />
         </div>
-      {/if}
+      </div>
+    {/if}
+    <div class="d-flex flex-column-reverse" ref:messageContainer>
       {#each messages as message, i (message.guid)}
-        <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{messages.length === i + 1 || messages[i + 1].data.user.guid !== message.data.user.guid}" showTime="{i > 0 && showTime(messages[i - 1].cdate, message.cdate)}"></MessageView>
+        <div class="d-flex flex-column align-items-start" data-cdate="{'' + message.cdate}">
+          <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}" showTime="{i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}"></MessageView>
+        </div>
       {/each}
+    </div>
+    <div class="d-flex flex-column align-items-start">
       {#each $conversation.pending as message}
         <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[messages.length - 1].cdate)}"></MessageView>
       {/each}
@@ -48,7 +52,8 @@
       const {conversation} = this.store.get();
       this.set({
         _initialReadline: conversation.readline,
-        _latestReadline: conversation.readline
+        _latestReadline: conversation.readline,
+        _startedDate: moment.unix(conversation.cdate).format('llll')
       });
       this.scrollWaitBottom = true;
       this.scrollWaitReadline = false;
@@ -66,13 +71,14 @@
           const {conversation} = this.store.get();
           Nymph.getEntities({
             'class': Message.class,
-            'sort': 'cdate'
+            'sort': 'cdate',
+            'reverse': true
           }, {
             'type': '&',
             'ref': ['conversation', conversation.guid],
             'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
           }).then(newMessages => {
-            this.set({messages: [...messages, ...newMessages]})
+            this.set({messages: [...newMessages, ...messages]})
           });
         }
         this.set({_disconnected: false});
@@ -90,7 +96,7 @@
       const {_showReadline, _initialReadline, messages} = current;
       if (_showReadline === null && _initialReadline !== 0 && messages.length) {
         const visibleReadLine = _initialReadline > 0
-          && _initialReadline < messages[messages.length - 1].cdate;
+          && _initialReadline < messages[0].cdate;
         this.set({
           _showReadline: visibleReadLine
         });
@@ -123,6 +129,7 @@
       if (changed._scrollToDistanceFromBottom && current._scrollToDistanceFromBottom != null) {
         window.requestAnimationFrame(() => {
           this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
+          this.set({_scrollToDistanceFromBottom: null});
         });
       }
 
@@ -201,7 +208,6 @@
               }
             }
             PubSub.updateArray(messages, update);
-            Nymph.sort(messages, 'cdate');
             // Setting _loading needs to go before handleScroll to scroll to the bottom on initial load.
             this.set({messages, _loading: false});
             this.createNewReadlineIfNeeded();
@@ -251,8 +257,8 @@
       },
 
       async loadEarlierMessages () {
-        const {_loadingEarlierMessages, _reachedEarliestMessage} = this.get();
-        if (_loadingEarlierMessages || _reachedEarliestMessage || this.scrollWaitReadline || this.scrollWaitBottom) {
+        const {_loadingEarlierMessages, _reachedEarliestMessage, _scrollToDistanceFromBottom} = this.get();
+        if (_loadingEarlierMessages || _reachedEarliestMessage || _scrollToDistanceFromBottom || this.scrollWaitReadline || this.scrollWaitBottom) {
           return;
         }
 
@@ -274,13 +280,13 @@
           }, {
             'type': '&',
             'ref': ['conversation', conversation.guid],
-            'lt': ['cdate', messages[0].cdate]
+            'lt': ['cdate', messages[messages.length - 1].cdate]
           });
 
           if (earlierMessages && earlierMessages.length) {
+            const messages = [...this.get().messages, ...earlierMessages];
             const distanceFromBottom = this.refs.container.scrollHeight - this.refs.container.scrollTop;
-            Nymph.sort(earlierMessages, 'cdate');
-            this.set({messages: [...earlierMessages, ...messages], _scrollToDistanceFromBottom: distanceFromBottom});
+            this.set({messages, _scrollToDistanceFromBottom: distanceFromBottom});
           } else {
             this.set({_reachedEarliestMessage: true});
           }
@@ -304,7 +310,7 @@
           const {_latestReadline} = this.get();
           if (_latestReadline !== null) {
             const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
-            const messageElsInViewport = Array.from(messageEls).filter((el) => {
+            const messageElsInViewport = Array.from(messageEls).filter(el => {
                 const containerTop = this.refs.container.scrollTop;
                 const containerBottom = containerTop + this.refs.container.clientHeight;
                 const elBottom = el.offsetTop + el.offsetHeight;
@@ -312,7 +318,7 @@
                        && (elBottom <= containerBottom);
             });
             if (messageElsInViewport.length) {
-              const latestReadMessageEl = messageElsInViewport[messageElsInViewport.length - 1];
+              const latestReadMessageEl = messageElsInViewport[0];
               const updateReadline = JSON.parse(latestReadMessageEl.dataset.cdate);
               if (updateReadline > _latestReadline) {
                 this.set({_latestReadline: updateReadline});
@@ -329,7 +335,7 @@
         const {conversation} = this.store.get();
         const {messages} = this.get();
         if (conversation.readline == null && messages.length) {
-          const updateReadline = messages[messages.length - 1].cdate;
+          const updateReadline = messages[0].cdate;
           this.set({
             _initialReadline: updateReadline,
             _latestReadline: updateReadline
@@ -363,9 +369,9 @@
 
       removeMessage (message) {
         const {messages} = this.get();
-        const index = message.arraySearch(messages);
-        if (index !== false) {
-          messages.splice(index, 1);
+        const idx = message.arraySearch(messages);
+        if (idx !== false) {
+          messages.splice(idx, 1);
           this.set({messages});
         }
       }
@@ -377,12 +383,11 @@
     },
 
     helpers: {
-      moment,
       showTime (time1, time2) {
         if (time2 === undefined) {
-          time2 = new Date() / 1000;
+          time2 = (+new Date()) / 1000;
         }
-        const now = new Date() / 1000;
+        const now = (+new Date()) / 1000;
         if (now - time1 > 6 * 24 * 60 * 60) {
           // More than 6 days ago.
           return (time2 - time1 > 24 * 60 * 60); // 24 hours
