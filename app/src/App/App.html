@@ -103,10 +103,7 @@
       },
 
       async notification (update) {
-        // Calculate whether the page is hidden.
-        let hidden = 'hasFocus' in document ? !document.hasFocus() : document.hidden;
-
-        if (hidden && this.store.get().webPushSubscription) {
+        if (document.hidden && this.store.get().webPushSubscription) {
           // They will get a push notification.
           return;
         }
@@ -119,7 +116,7 @@
         conversation.init(update.data);
 
         if (conversation.data.lastMessage) {
-          if (conversation.is(this.store.get().conversation) && !hidden) {
+          if (conversation.is(this.store.get().conversation) && !document.hidden) {
             // Don't notify if the user is on the conversation and not hidden.
             return;
           }
@@ -145,7 +142,7 @@
 
         let notice;
         let options = {};
-        if (hidden) {
+        if (document.hidden) {
           // If the tab is hidden, display a desktop notice.
           Object.assign(options, {
             modules: {
@@ -189,7 +186,7 @@
             }
             target = target.parentNode;
           }
-          if (hidden) {
+          if (document.hidden) {
             window.focus();
           }
           if (!conversation.is(this.store.get().conversation)) {

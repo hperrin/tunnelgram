@@ -3,7 +3,7 @@
     {createdDateRelative}
   </small>
 {/if}
-<div class="message d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};" ref:container>
+<div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};" ref:container>
   {#if _showActions && isOwner}
     <div class="h1 my-0" style="font-size: 0;">
       <button type="button" class="btn btn-sm btn-danger mr-2" on:click="deleteMessage()" title="Delete message"><i class="fas fa-trash-alt"></i></button>
@@ -116,14 +116,12 @@
 
       const {message, pending} = this.get();
 
-      if (message.decrypted.text != '[Encrypted text]') {
-        const html = converter.makeHtml(message.decrypted.text);
-        const secretHtml = message.decrypted.secretText != null ? converter.makeHtml(message.decrypted.secretText) : null;
-        this.set({
-          _formattedText: html == null ? null : html.replace(/\n$/, ''),
-          _formattedSecretText: secretHtml == null ? null : secretHtml.replace(/\n$/, '')
-        });
-      }
+      const html = converter.makeHtml(message.decrypted.text);
+      const secretHtml = message.decrypted.secretText != null ? converter.makeHtml(message.decrypted.secretText) : null;
+      this.set({
+        _formattedText: html == null ? null : html.replace(/\n$/, ''),
+        _formattedSecretText: secretHtml == null ? null : secretHtml.replace(/\n$/, '')
+      });
 
       this.set({
         _createdDate: message.cdate == null ? 'Pending' : moment.unix(message.cdate).format('llll')
@@ -132,19 +130,11 @@
       if (pending) {
         this.handlePending();
       }
+
+      this.fire('rendered');
     },
 
-    onstate ({changed, current, previous}) {
-      if (current.message && current.message.decrypted.text != null && current._formattedText === null && previous != null) {
-        const {message} = current;
-        if (message.decrypted.text != null) {
-          this.set({
-            _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
-            _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
-          });
-        }
-      }
-
+    onstate ({changed, current}) {
       if (changed.message && current.message && !current.pending) {
         // Ready the message's referenced entities.
         const {message} = current;
@@ -158,12 +148,6 @@
             }
           });
         }
-      }
-    },
-
-    onupdate ({changed, current}) {
-      if (changed._formattedText || (changed.message && current.shouldEmbiggen)) {
-        this.fire('rendered');
       }
     },
 

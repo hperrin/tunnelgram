@@ -22,7 +22,7 @@
     {/if}
     <div class="d-flex flex-column-reverse" ref:messageContainer>
       {#each messages as message, i (message.guid)}
-        <div class="d-flex flex-column align-items-start" data-cdate="{'' + message.cdate}">
+        <div class="d-flex flex-column align-items-start message-box" data-cdate="{'' + message.cdate}">
           <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}" showTime="{i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}"></MessageView>
         </div>
       {/each}
@@ -114,7 +114,7 @@
           // Scroll to the bottom when the messages are first loaded.
           (changed._loading && !current._loading && !this.scrollWaitReadline) ||
           // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-          (changed.messages && current._isAtBottom && ('hasFocus' in document ? document.hasFocus() : !document.hidden) && !this.scrollWaitReadline)
+          (changed.messages && current._isAtBottom && !document.hidden && !this.scrollWaitReadline)
         )) {
         this.scrollWaitBottom = true;
         this.scrollToBottom();
@@ -298,7 +298,7 @@
 
       updateReadline () {
         // Don't update the readline if the user doesn't have the page open.
-        if ('hasFocus' in document ? !document.hasFocus() : document.hidden) {
+        if (document.hidden) {
           return;
         }
         // Update readline on next animation frame (so that the DOM can be updated).
@@ -308,17 +308,17 @@
           }
           const {_latestReadline} = this.get();
           if (_latestReadline !== null) {
-            const messageEls = this.refs.messageContainer.querySelectorAll('.message[data-cdate]');
-            const messageElsInViewport = Array.from(messageEls).filter(el => {
+            const messageBoxes = this.refs.messageContainer.querySelectorAll('.message-box[data-cdate]');
+            const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
                 const containerTop = this.refs.container.scrollTop;
                 const containerBottom = containerTop + this.refs.container.clientHeight;
                 const elBottom = el.offsetTop + el.offsetHeight;
                 return (elBottom >= containerTop)
                        && (elBottom <= containerBottom);
             });
-            if (messageElsInViewport.length) {
-              const latestReadMessageEl = messageElsInViewport[0];
-              const updateReadline = JSON.parse(latestReadMessageEl.dataset.cdate);
+            if (messageBoxesInViewport.length) {
+              const latestReadMessageBox = messageBoxesInViewport[0];
+              const updateReadline = JSON.parse(latestReadMessageBox.dataset.cdate);
               if (updateReadline > _latestReadline) {
                 this.set({_latestReadline: updateReadline});
                 const {conversation} = this.store.get();
