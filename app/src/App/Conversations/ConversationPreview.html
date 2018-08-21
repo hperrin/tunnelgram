@@ -65,17 +65,13 @@
       });
     },
 
-    onstate ({changed, current}) {
-      if (changed.mdate && current.conversation) {
-        setTimeout(() => {
-          if (!this.destroyed) {
-            this.updateTime();
-            this.set({
-              _unreadCount: current.conversation.unreadCount(),
-              _readline: current.conversation.readline
-            });
-          }
-        }, 0);
+    onstate ({changed, current, previous}) {
+      if (changed.mdate && current.conversation && previous != null) {
+        this.updateTime();
+        this.set({
+          _unreadCount: current.conversation.unreadCount(),
+          _readline: current.conversation.readline
+        });
       }
 
       if (changed.conversation && current.conversation) {
@@ -83,13 +79,13 @@
         const {conversation} = current;
         if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
           conversation._tgCalledReadyAll = true;
-          conversation.readyAll(() => {
+          conversation.readyAll(null, ErrHandler, 1).then(() => {
             conversation.containsSleepingReference = false;
             conversation._tgCalledReadyAll = false;
             if (!this.destroyed) {
               this.set({conversation});
             }
-          }, ErrHandler, 1);
+          });
         }
       }
     },

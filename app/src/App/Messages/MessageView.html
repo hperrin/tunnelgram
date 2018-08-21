@@ -135,37 +135,33 @@
     },
 
     onstate ({changed, current, previous}) {
+      if (current.message && current.message.decrypted.text != null && current._formattedText === null && previous != null) {
+        const {message} = current;
+        if (message.decrypted.text != null) {
+          this.set({
+            _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
+            _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
+          });
+        }
+      }
+
       if (changed.message && current.message && !current.pending) {
         // Ready the message's referenced entities.
         const {message} = current;
         if (message.containsSleepingReference && !message._tgCalledReadyAll) {
           message._tgCalledReadyAll = true;
-          message.readyAll(() => {
+          message.readyAll(null, ErrHandler, 1).then(() => {
             message.containsSleepingReference = false;
             message._tgCalledReadyAll = false;
             if (!this.destroyed) {
               this.set({message});
             }
-          }, ErrHandler, 1);
-        }
-      }
-
-      if (current.message && current.message.decrypted.text != null && current._formattedText === null) {
-        const {message} = current;
-        if (message.decrypted.text != null) {
-          setTimeout(() => {
-            if (!this.destroyed) {
-              this.set({
-                _formattedText: converter.makeHtml(message.decrypted.text).replace(/\n$/, ''),
-                _formattedSecretText: message.decrypted.secretText != null && converter.makeHtml(message.decrypted.secretText).replace(/\n$/, '')
-              });
-            }
-          }, 0);
+          });
         }
       }
     },
 
-    onupdate ({changed, current, previous}) {
+    onupdate ({changed, current}) {
       if (changed._formattedText || (changed.message && current.shouldEmbiggen)) {
         this.fire('rendered');
       }

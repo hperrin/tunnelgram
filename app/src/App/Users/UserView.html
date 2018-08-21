@@ -187,7 +187,7 @@
             ['acFull', $user.guid]
           ]
         }).then(async conversations => {
-          await Promise.all(conversations.map(conversation => conversation.readyAll(undefined, ErrHandler, 1)));
+          await Promise.all(conversations.map(conversation => conversation.readyAll(null, ErrHandler, 1)));
           return conversations;
         });
       }

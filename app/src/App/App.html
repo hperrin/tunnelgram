@@ -138,7 +138,7 @@
             // Don't notify if the user made a new conversation.
             return;
           }
-          await conversation.readyAll(undefined, ErrHandler, 1);
+          await conversation.readyAll(null, ErrHandler, 1);
         } else {
           return;
         }

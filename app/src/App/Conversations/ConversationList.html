@@ -51,7 +51,6 @@
 
   export default {
     oncreate () {
-      this.destroyed = false;
       this.subscribe();
 
       this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {

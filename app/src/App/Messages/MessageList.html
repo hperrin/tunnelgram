@@ -47,7 +47,6 @@
 
   export default {
     oncreate () {
-      this.destroyed = false;
       this.subscribe();
       const {conversation} = this.store.get();
       this.set({
