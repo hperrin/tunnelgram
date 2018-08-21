@@ -3,8 +3,8 @@
     <div class="d-inline-block position-relative mb-3" on:mouseenter="set({_mouseOverAvatar: true})" on:mouseleave="set({_mouseOverAvatar: false})">
       {#if $viewUserIsSelf}
         <input class="d-none" type="file" ref:avatarInput on:change="handleAvatar(event.target.files)" capture />
-        <a class="{_mouseOverAvatar ? 'd-flex' : 'd-none'} position-absolute h-100 w-100 justify-content-center align-items-center" href="javascript:void(0)" on:click="refs.avatarInput.click()">
-          <i class="fas fa-upload fa-3x"></i>
+        <a class="position-absolute" href="javascript:void(0)" on:click="refs.avatarInput.click()" style="right: 0; bottom: 0;">
+          <i class="fas fa-upload fa-2x"></i>
         </a>
       {/if}
       {#if _avatarLoading}
