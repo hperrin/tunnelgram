@@ -1,4 +1,4 @@
-import {XMLHttpRequestWrapper} from './Services/XMLHttpRequestWrapper';
+import './Services/XMLHttpRequestWrapper';
 import './icons';
 import Navigo from 'navigo';
 import PNotify from 'pnotify/dist/es/PNotify';
@@ -23,15 +23,39 @@ import ErrHandler from './ErrHandler';
 
 import './scss/styles.scss';
 
+// Register the ServiceWorker.
+let swRegPromise = Promise.resolve(null);
+if ('serviceWorker' in navigator) {
+  if (navigator.serviceWorker.controller) {
+    swRegPromise = navigator.serviceWorker.getRegistration('/');
+    swRegPromise.then(reg => {
+      console.log('Service worker has been retrieved for scope: '+ reg.scope);
+    });
+  } else {
+    swRegPromise = navigator.serviceWorker.register('/ServiceWorker.js', {
+      scope: '/'
+    });
+    swRegPromise.then(reg => {
+      console.log('Service worker has been registered for scope: '+ reg.scope);
+    });
+  }
+}
+
+// PNotify defaults.
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
 
+// Sleepy caches.
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
 const sleepyConversationCacheService = new SleepyCacheService(Conversation);
 const sleepyMessageCacheService = new SleepyCacheService(Message);
+
+// Router.
 const router = new Navigo(null, true, '#');
+
+// This stores the function to set up the Web Push Notification subscription.
 let setupSubscription;
 
 const store = new UserStore({
@@ -215,22 +239,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
     });
   }
 
-  // Register the caching and pushing ServiceWorker
   (async () => {
-    if (!('serviceWorker' in navigator)) {
+    if ((await swRegPromise) == null) {
       return;
-    }
-
-    let registration;
-
-    if (navigator.serviceWorker.controller) {
-      registration = await navigator.serviceWorker.getRegistration('/');
-      console.log('Service worker has been retrieved for scope: '+ registration.scope);
-    } else {
-      registration = await navigator.serviceWorker.register('/ServiceWorker.js', {
-        scope: '/'
-      });
-      console.log('Service worker has been registered for scope: '+ registration.scope);
     }
 
     // Support for push, notifications, and push payloads.

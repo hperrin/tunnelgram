@@ -1,3 +1,63 @@
+// Offline Cache
+
+// Install stage sets up the index page (home page) in the cache and opens a new cache
+self.addEventListener('install', event => {
+  var indexPage = new Request('/');
+  event.waitUntil(fetch(indexPage).then(response => caches.open('tunnelgram-static').then(cache => {
+    console.log('[Content Cache] Cached index page during Install '+ response.url);
+    return cache.put(indexPage, response);
+  })).then(() => caches.open('tunnelgram-content')).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  function addToCache (cacheType, cache, request) {
+    return fetch(request).then(response => {
+      console.log('['+cacheType+' Cache] add item to offline: '+response.url);
+      cache.put(request, response);
+    });
+  }
+
+  if (event.request.url === 'https://tunnelgram.com/'
+      || event.request.url === 'http://localhost:8080/'
+      || event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/')
+      || event.request.url.startsWith('http://localhost:8082/')
+      || event.request.url.startsWith('https://tunnelgram.com/node_modules/')
+      || event.request.url.startsWith('http://localhost:8080/node_modules/')) {
+    // Check in the cache first, return response.
+    // If not in the cache, return error page.
+    event.respondWith(caches.open('tunnelgram-static').then(cache => {
+      return cache.match(event.request).then(matching => {
+        if (!matching) {
+          console.log('[Static Cache] Not found in cache. Requesting from network: ' + event.request.url);
+          event.waitUntil(addToCache('Static', cache, event.request));
+          return fetch(event.request);
+        }
+        console.log('[Static Cache] Serving request from cache: ' + event.request.url);
+        var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
+        return report;
+      });
+    }));
+  } else {
+    // Check in the cache second, return response.
+    // If not in the cache, return error page.
+    event.respondWith(caches.open('tunnelgram-content').then(cache => {
+      event.waitUntil(addToCache('Content', cache, event.request));
+      return fetch(event.request).catch(error => {
+        console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
+        return cache.match(event.request).then(matching => {
+          var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
+          return report;
+        });
+      });
+    }));
+  }
+});
+
+
 // Web push notifications
 
 // Portions Copyright 2016 Peter Beverloo. All rights reserved.
@@ -126,60 +186,6 @@ self.addEventListener('notificationclick', event => {
 });
 
 
-// Offline copy of pages service worker
-
-// Install stage sets up the index page (home page) in the cache and opens a new cache
-self.addEventListener('install', event => {
-  var indexPage = new Request('/index.html');
-  event.waitUntil(fetch(indexPage).then(response => caches.open('offline-cache').then(cache => {
-    console.log('[Content Cache] Cached index page during Install '+ response.url);
-    return cache.put(indexPage, response);
-  })).then(() => skipWaiting()));
-});
-
-// If any fetch fails, it will look for the request in the cache and serve it from there first
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  function addToCache (cache, request, itemType) {
-    return fetch(request).then(response => {
-      console.log('[Content Cache] add '+itemType+' to offline '+response.url);
-      cache.put(request, response);
-    });
-  }
-
-  event.respondWith(caches.open('offline-cache').then(cache => {
-    if (event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/') || event.request.url.startsWith('http://localhost:8082/')) {
-      // Check in the cache first, return response.
-      // If not in the cache, return error page.
-      return cache.match(event.request).then(matching => {
-        if (!matching) {
-          console.log('[Content Cache] Not found in cache. Requesting from network.');
-          event.waitUntil(addToCache(cache, event.request, 'blob'));
-          return fetch(event.request);
-        }
-        console.log('[Content Cache] Serving request from cache.');
-        var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
-        return report;
-      });
-    } else {
-      event.waitUntil(addToCache(cache, event.request, 'page'));
-      return fetch(event.request).catch(error => {
-        console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
-        // Check in the cache second, return response.
-        // If not in the cache, return error page.
-        return cache.match(event.request).then(matching => {
-          var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
-          return report;
-        });
-      });
-    }
-  }));
-});
-
-
 // Utility functions
 
 function getEndpoint () {
@@ -214,8 +220,8 @@ function isClientFocused () {
 function sendNotification (title, body, conversationId) {
   return self.registration.showNotification(title, {
     body,
-    badge: '/images/badge-96x96.png',
-    icon: '/images/web-192x192.png',
+    badge: 'https://tunnelgram.com/images/badge-96x96.png',
+    icon: 'https://tunnelgram.com/images/android-chrome-192x192.png',
     renotify: true,
     tag: '' + conversationId,
     vibrate: [120, 240, 120, 240, 360]

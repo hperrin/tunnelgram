@@ -14,6 +14,7 @@ export class OfflineServerCallsService {
       });
       User.on('logout', () => {
         storage.removeItem('tgCurrentUser');
+        storage.removeItem('tgGatekeeper');
         storage.removeItem('tgClientConfig');
       });
 
@@ -31,6 +32,36 @@ export class OfflineServerCallsService {
               if (userJson != null) {
                 const user = Nymph.initEntity(JSON.parse(userJson));
                 return Promise.resolve(user);
+              }
+              return Promise.reject(err);
+            });
+          }
+          return Promise.reject(err);
+        });
+      };
+
+      const _gatekeeper = User.prototype.gatekeeper;
+      User.prototype.gatekeeper = function(...args) {
+        // This one is more complicated, as it can be called with arguments.
+        let user = this;
+        return _gatekeeper.apply(this, args).then(gkResponse => {
+          // Save the response to cache for offline retrieval.
+          storage.getItem('tgGatekeeper').then(gkResponseJson => {
+            let gkResponseObj = gkResponseJson == null ? {} : JSON.parse(gkResponseJson);
+            gkResponseObj[user.guid+JSON.stringify(args)] = gkResponse;
+            storage.setItem('tgGatekeeper', JSON.stringify(gkResponseObj));
+          });
+          return Promise.resolve(gkResponse);
+        }, err => {
+          if (err.status === 0) {
+            // Try to load the response from cache.
+            return storage.getItem('tgGatekeeper').then(gkResponseJson => {
+              if (gkResponseJson != null) {
+                const gkResponseObj = JSON.parse(gkResponseJson);
+                if ((user.guid+JSON.stringify(args)) in gkResponseObj) {
+                  return Promise.resolve(gkResponseObj[user.guid+JSON.stringify(args)]);
+                }
+                return Promise.reject(err);
               }
               return Promise.reject(err);
             });
