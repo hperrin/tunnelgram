@@ -1,6 +1,7 @@
 import {Nymph, Entity} from 'nymph-client';
 import {User} from 'tilmeld-client';
 import {Message} from './Message';
+import {saveEntities, restoreEntities} from '../../Services/entityRefresh';
 import {crypt} from '../../Services/EncryptionService';
 
 let currentUser = null;
@@ -14,6 +15,7 @@ export class Conversation extends Entity {
 
   constructor (id) {
     super(id);
+    this.containsSleepingReference = false;
     this.pending = [];
     this.unreadCountPromise = null;
     this.unreadCountPromiseReadline = null;
@@ -27,7 +29,9 @@ export class Conversation extends Entity {
   // === Instance Methods ===
 
   init (entityData) {
+    const savedEntities = saveEntities(this);
     super.init(entityData);
+    this.containsSleepingReference = restoreEntities(this, savedEntities);
 
     if (entityData == null) {
       return this;

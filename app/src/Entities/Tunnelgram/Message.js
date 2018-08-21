@@ -1,5 +1,6 @@
 import {Nymph, Entity} from 'nymph-client';
 import {User} from 'tilmeld-client';
+import {saveEntities, restoreEntities} from '../../Services/entityRefresh';
 import {crypt} from '../../Services/EncryptionService';
 import base64js from 'base64-js';
 
@@ -14,6 +15,7 @@ export class Message extends Entity {
 
   constructor (id) {
     super(id);
+    this.containsSleepingReference = false;
     this.savePromise = null;
     this.textElevation = 1;
     this.secretTextElevation = 1;
@@ -31,7 +33,9 @@ export class Message extends Entity {
   // === Instance Methods ===
 
   init (...args) {
+    const savedEntities = saveEntities(this);
     super.init(...args);
+    this.containsSleepingReference = restoreEntities(this, savedEntities);
 
     // Decrypt the message text, images, and/or video.
     if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
