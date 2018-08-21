@@ -60,7 +60,7 @@
         {/if}
         {#if _mediaLoading === 'video'}
           <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 text-white" style="width: 152px; height: 152px;">
-            <LoadingIndicator width="150" height="150" text="{_transcoder == null ? 'Loading...' : 'Transcoding...'+(_transcodeProgress == null ? '' : '\n'+floor(_transcodeProgress * 100)+'%')}" progress="{_transcodeProgress}" />
+            <LoadingIndicator width="150" height="150" text="{_transcoder == null ? 'Loading...' : (_transcodeProgress == null ? 'Preparing...' : 'Transcoding...'+'\n'+floor(_transcodeProgress * 100)+'%')}" progress="{_transcodeProgress}" />
           </div>
           {#if _transcoder != null}
             <button type="button" class="btn btn-sm btn-danger position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click="cancelVideoTranscode()">
