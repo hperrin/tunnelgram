@@ -65,3 +65,7 @@ html, body, main {
 .bg-info-light {
   background-color: lighten($info, 30%);
 }
+
+.no-focus-highlight:focus {
+  box-shadow: none;
+}
