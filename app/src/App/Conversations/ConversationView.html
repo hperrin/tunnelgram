@@ -73,7 +73,7 @@
     <div class="d-flex align-items-stretch border-dark border-top">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/*" multiple>
       <button class="btn btn-lg btn-info p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
-      <textarea class="form-control border-0 text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
+      <textarea class="form-control border-0 text-dark no-focus-highlight" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
       <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty || _mediaLoading}" title="Send message"><i class="fas fa-comment"></i></button>
     </div>
   </form>
@@ -501,7 +501,7 @@
 </script>
 
 <style>
-  ref:textEditor:focus {
+  .no-focus-highlight:focus {
     box-shadow: none;
   }
   .thumbnailOverlay {
