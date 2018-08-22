@@ -5,8 +5,8 @@ const devMode = process.env.NODE_ENV !== 'production';
 
 const plugins = [
   new MiniCssExtractPlugin({
-    filename: '[name].css',
-    chunkFilename: '[id].css',
+    filename: 'dist/[name].css',
+    chunkFilename: 'dist/[id].css',
   }),
   // load `moment/locale/ja.js` and `moment/locale/it.js`
   new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
@@ -62,7 +62,7 @@ module.exports = {
         ]
       },
       {
-        exclude: /\/node_modules\/localforage\//, 
+        exclude: /\/node_modules\/localforage\//,
         test: /\.js$/,
         use: {
           loader: 'babel-loader'
