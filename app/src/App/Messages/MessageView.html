@@ -30,7 +30,7 @@
       tabindex="0"
       role="button"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
-      on:dblclick="set({_showActions: !_showActions})" title="{_}">
+      on:dblclick="set({_showActions: !_showActions})" title="{_createdDate}">
       {#if shouldEmbiggen}
         <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
           {#if message.decrypted.text != null}
@@ -61,7 +61,7 @@
   </div>
   {#if _showActions && !pending}
     <div class="mr-2 my-0">
-      <small class="text-muted">{_}</small>
+      <small class="text-muted">{_createdDate}</small>
     </div>
   {/if}
   {#if pending}
