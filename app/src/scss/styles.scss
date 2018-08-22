@@ -9,11 +9,8 @@ $danger:        #BA4F52;
 $light:         #F5F5F2;
 $dark:          #211526;
 
-$font-size-base: 1.1rem;
-
-// Source Sans Pro
-$FontPathSourceSansPro: "/node_modules/npm-font-source-sans-pro/fonts";
-@import "~npm-font-source-sans-pro/source-sans-pro";
+$font-family-sans-serif: Arial, sans-serif;
+$font-size-base: 1rem;
 
 // Bootstrap
 @import "~bootswatch/dist/cosmo/variables";
