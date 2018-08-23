@@ -22,7 +22,6 @@ module.exports = {
   devtool: devMode && 'source-map',
   entry: {
     main: [
-      'babel-polyfill',
       path.resolve(__dirname, 'src', 'index.js')
     ],
     '../ServiceWorker': path.resolve(__dirname, 'src', 'Workers', 'ServiceWorker.js'),
