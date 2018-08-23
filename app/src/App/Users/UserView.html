@@ -3,9 +3,9 @@
     <div class="d-inline-block position-relative mb-3" on:mouseenter="set({_mouseOverAvatar: true})" on:mouseleave="set({_mouseOverAvatar: false})">
       {#if $viewUserIsSelf}
         <input class="d-none" type="file" ref:avatarInput on:change="handleAvatar(event.target.files)" capture />
-        <a class="position-absolute" href="javascript:void(0)" on:click="refs.avatarInput.click()" style="right: 0; bottom: 0;">
+        <button class="position-absolute btn btn-primary btn-sm rounded" on:click="refs.avatarInput.click()" style="right: 0; bottom: 0;">
           <i class="fas fa-upload fa-2x"></i>
-        </a>
+        </button>
       {/if}
       {#if _avatarLoading}
         <div class="d-flex position-absolute h-100 w-100 justify-content-center align-items-center">
@@ -112,7 +112,6 @@
 <script>
   import {Nymph} from 'nymph-client';
   import {TilmeldChangePassword} from 'tilmeld-client';
-  import bsn from 'bootstrap.native/dist/bootstrap-native-v4';
   import moment from 'moment';
   import QRCode from 'qrcode';
   import PNotify from 'pnotify/dist/es/PNotify';
@@ -120,6 +119,7 @@
   import Avatar from './Avatar.html';
   import ConversationPreview from '../Conversations/ConversationPreview.html';
   import LoadingIndicator from '../LoadingIndicator.html';
+  import {Dropdown} from '../../Services/Val/BSN';
   import {EditImageService} from '../../Services/EditImageService';
   import {getCookieValue} from '../../Services/getCookieValue';
   import ErrHandler from '../../ErrHandler';
@@ -156,7 +156,7 @@
 
     onupdate () {
       if (this.refs.experimentsDropdown && !this.experimentsDropdown) {
-        this.experimentsDropdown = new bsn.Dropdown(this.refs.experimentsDropdown);
+        this.experimentsDropdown = new Dropdown(this.refs.experimentsDropdown);
       } else if (!this.refs.experimentsDropdown && this.experimentsDropdown) {
         delete this.experimentsDropdown;
       }

@@ -125,12 +125,12 @@
 
 <script>
   import {User, TilmeldLogin} from 'tilmeld-client';
-  import bsn from 'bootstrap.native/dist/bootstrap-native-v4';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import NavBar from './App/NavBar.html';
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
   import Avatar from './App/Users/Avatar.html';
+  import {Tooltip, Dropdown, Collapse} from './Services/Val/BSN';
 
   const cryptoAvailable = () => {
     return !!((window.crypto || window.msCrypto).getRandomValues);
@@ -138,17 +138,17 @@
 
   export default {
     actions: {
-      tooltip: node => new bsn.Tooltip(node)
+      tooltip: node => new Tooltip(node)
     },
 
     onupdate () {
       if (this.refs.navbarCollapse && !this.navbarCollapse) {
-        this.navbarCollapse = new bsn.Collapse(this.refs.navbarCollapse);
+        this.navbarCollapse = new Collapse(this.refs.navbarCollapse);
       } else if (!this.refs.navbarCollapse && this.navbarCollapse) {
         delete this.navbarCollapse;
       }
       if (this.refs.menuDropdown && !this.menuDropdown) {
-        this.menuDropdown = new bsn.Dropdown(this.refs.menuDropdown);
+        this.menuDropdown = new Dropdown(this.refs.menuDropdown);
       } else if (!this.refs.menuDropdown && this.menuDropdown) {
         delete this.menuDropdown;
       }
