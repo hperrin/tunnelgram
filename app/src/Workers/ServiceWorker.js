@@ -3,10 +3,16 @@
 // Install stage sets up the index page (home page) in the cache and opens a new cache
 self.addEventListener('install', event => {
   var indexPage = new Request('/');
-  event.waitUntil(fetch(indexPage).then(response => caches.open('tunnelgram-static').then(cache => {
-    console.log('[Content Cache] Cached index page during Install '+ response.url);
-    return cache.put(indexPage, response);
-  })).then(() => caches.open('tunnelgram-content')).then(() => self.skipWaiting()));
+  var pwaPage = new Request('/#/pwa-home');
+  event.waitUntil(caches.open('tunnelgram-static').then(cache => {
+    return Promise.all([fetch(indexPage).then(response => {
+      console.log('[Content Cache] Cached index page during Install '+ response.url);
+      return cache.put(indexPage, response);
+    }), fetch(pwaPage).then(response => {
+      console.log('[Content Cache] Cached PWA page during Install '+ response.url);
+      return cache.put(pwaPage, response);
+    })]);
+  }).then(() => caches.open('tunnelgram-content')).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('fetch', event => {

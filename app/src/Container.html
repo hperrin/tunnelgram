@@ -4,14 +4,11 @@
     <div class="lead py-3">You should update your browser to the latest version in order to use {$brand}.</div>
   </div>
 {:else}
-  <div class="{$user ? 'd-flex flex-column' : ''} flex-grow-1" style="height: {$user ? '100%' : 'auto'};">
+  <div class="d-flex flex-column flex-grow-1" style="min-height: 100%;">
     {#if $user === false}
-      <div class="container" style="height: 100%;">
-        <div class="row align-items-center justify-content-center" style="height: 100%;">
-          <div class="col-auto">
-            <LoadingIndicator width="300" height="300" title="{$brand}" text="Easy, secure messenger." />
-          </div>
-        </div>
+      <div class="d-flex justify-content-center align-items-center flex-grow-1" style="height: 100%;">
+        <div style="background-image: url(/images/web-120x120.png); position: absolute; width: 120px; height: 120px;"></div>
+        <LoadingIndicator width="300" height="300" />
       </div>
     {/if}
     {#if $user !== false}

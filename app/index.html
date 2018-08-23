@@ -3,11 +3,12 @@
 <head>
   <title>Tunnelgram</title>
   <meta charset="utf-8" />
+  <meta name="description" content="Easy, secure messenger. Encrypted messaging on all your devices." />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
   <!-- PWA Stuff -->
   <link rel="manifest" href="/site.webmanifest" />
-  <meta name="theme-color" content="#ffffff" />
+  <link rel="fluid-icon" href="/images/android-chrome-512x512.png?v=8j8j5JNYqO" title="Tunnelgram" />
   <link rel="icon" type="image/png" sizes="192x192" href="/images/android-chrome-192x192.png?v=8j8j5JNYqO" />
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=8j8j5JNYqO" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=8j8j5JNYqO" />
@@ -35,12 +36,14 @@
   <meta name="theme-color" content="#211526" />
 
   <!-- Open Graph -->
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="676" />
-  <meta property="og:description" content="Easy, secure messenger. Encrypted messaging on all your devices." />
+  <meta property="og:site_name" content="Tunnelgram" />
   <meta property="og:title" content="Tunnelgram Messenger" />
   <meta property="og:url" content="https://tunnelgram.com" />
+  <meta property="og:description" content="Easy, secure messenger. Encrypted messaging on all your devices." />
   <meta property="og:image" content="https://tunnelgram.com/og-image.png?v=8j8j5JNYqO" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="676" />
 
   <!-- Nymph Config -->
   <script type="text/javascript">
@@ -58,6 +61,9 @@
       rateLimit: 100
     };
   </script>
+
+  <!-- DNS Prefetch -->
+  <link rel="dns-prefetch" href="https://tunnelgram.blob.core.windows.net" />
 
   <!-- Bundled Styles -->
   <link rel="stylesheet" href="/dist/main.css" />
@@ -121,5 +127,10 @@
   </script>
   <!-- Bundled JS -->
   <script src="/dist/main.js"></script>
+  <noscript>
+    Looks like you don't have JavaScript enabled. I like you. You care about
+    security and privacy. Unfortunately, the way Tunnelgram works requires
+    JavaScript. You'll have to turn it back on in order to use Tunnelgram.
+  </noscript>
 </body>
 </html>

@@ -1,9 +1,8 @@
 <div style="height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" ref:container on:scroll="handleScroll()">
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-      <div class="col-auto">
-        <LoadingIndicator width="50" height="50" />
-      </div>
+      <div style="background-image: url(/images/web-88x88.png); position: absolute; width: 88px; height: 88px;"></div>
+      <LoadingIndicator width="200" height="200" />
     </div>
   {:else}
     <div class="list-group">
