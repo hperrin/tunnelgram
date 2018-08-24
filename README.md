@@ -1,11 +1,14 @@
 # Tunnelgram
 
-Easy, secure, end to end encrypted (E2EE) messenger.
+<big>Easy, secure, end to end encrypted (E2EE) messenger.</big><br/>
 
-## Advantages Over Other E2EE Messengers
+* Every message is encrypted from sender to recipient. There is no way to send an unencrypted message and Tunnelgram's servers cannot decrypt them.
+* You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
+  * The original sign-up device is *not required*, and *not used as a proxy*.
+* Your account is not tied to a phone number or specific device. You log in with a username and password.
+* If you lose your device, you **don't lose your messages, photos, videos, or conversations**. No backups necessary.
 
-* Every message is encrypted end to end. There is no way to send an unencrypted message.
-* Users can login on **multiple clients**, read all of their conversations and messages, and send new messages. In this way, it works just like any other messenger.
+It's as easy to use as any non-E2EE messenger.
 
 ## Support Tunnelgram
 
@@ -13,7 +16,7 @@ Easy, secure, end to end encrypted (E2EE) messenger.
 
 # The Tunnelwire Encryption Scheme
 
-How is Tunnelgram able to show all your messages on any client just like a regular messaging app if it's all end to end encrypted?
+How is Tunnelgram able to show all your messages on multiple clients just like a regular messaging app if it's all end to end encrypted?
 
 It uses the **Tunnelwire Encryption Scheme**. I invented this scheme in 2013, and Tunnelgram is the first application to use it.
 
@@ -22,7 +25,7 @@ The Tunnelwire Encryption Scheme has some requirements that can't be met by othe
 1. The server must never know your password.
 2. The server must never know your private key.
 
-With these two key principals, Tunnelgram can use the Tunnelwire Encryption Scheme to securely send encrypted messages between any number of parties.
+With these two principles, Tunnelgram uses the Tunnelwire Encryption Scheme to transfer end to end encrypted messages between multiple parties.
 
 ## How the Tunnelwire Encryption Scheme Works
 
@@ -58,25 +61,21 @@ When a user logs in, the client must:
 
 ## Using the Tunnelwire Encryption Scheme in Your Own Project
 
-The Tunnelwire Encryption Scheme is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode). You are free to use the scheme in your own software, provided you abide by the terms of the license.
+The Tunnelwire Encryption Scheme is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/legalcode) and the implementation is licensed under the [Apache License 2.0
+](http://www.apache.org/licenses/LICENSE-2.0). You are free to use the scheme and implementation in your own software, provided you abide by the terms of the licenses.
 
-In order to comply with the license, you must attribute the creator, Hunter Perrin, along with a license notice, and a link to the Tunnelwire Encryption Scheme.
+In order to comply with the CC-BY license, you must attribute the creator, Hunter Perrin, along with a license notice, and a link to the Tunnelwire Encryption Scheme.
 
-You may use the following HTML:
+You may use the following:
 
-```html
-This software uses an encryption scheme based on the <a href="https://github.com/hperrin/tunnelgram#the-tunnelwire-encryption-scheme">Tunnelwire Encryption Scheme</a> by Hunter Perrin, which is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 license</a>.
 ```
+HTML:
+This software uses an encryption scheme based on the <a href="https://github.com/hperrin/tunnelgram#the-tunnelwire-encryption-scheme">Tunnelwire Encryption Scheme</a> by Hunter Perrin, which is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0 license</a>.
 
 Or Markdown:
-
-```md
 This software uses an encryption scheme based on the [Tunnelwire Encryption Scheme](https://github.com/hperrin/tunnelgram#the-tunnelwire-encryption-scheme) by Hunter Perrin, which is licensed under the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
-```
 
 Or text:
-
-```
 This software uses an encryption scheme based on the Tunnelwire Encryption Scheme (https://github.com/hperrin/tunnelgram#the-tunnelwire-encryption-scheme) by Hunter Perrin, which is licensed under the CC BY 4.0 license (https://creativecommons.org/licenses/by/4.0/).
 ```
 
@@ -147,7 +146,7 @@ Tunnelgram is written by me, Hunter Perrin. I wrote Tunnelgram because I wanted 
 
 None of my friends would use other end to end encrypted messengers, because they're either not easy to setup or not convenient to use.
 
-For example, when you get a new phone, all of your encrypted conversations on Telegram or Facebook Messenger are inaccessible. Or if you're talking with someone on your phone in an encrypted chat, then you start using the web client on your desktop, you can't continue those chats.
+For example, when you get a new phone, all of your encrypted conversations on Telegram or Facebook Messenger are inaccessible. Or if you're talking with someone on your phone in an encrypted chat, then you start using the web client on your desktop, you can't continue that same encrypted chat.
 
 This is a huge barrier to average users adopting an encrypted messenger. The goal of Tunnelgram is to break down that barrier, so anyone can use an encrypted messenger easily.
 
