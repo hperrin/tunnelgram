@@ -37,7 +37,7 @@ When a user registers, the client must:
   * Or use a combination of these techniques in any amount of iterations. This can add computational overhead which will make brute forcing a password harder, should the remainder become known to an attacker.
 3. Send the remainder to the server as the user's password.
 4. Generate a public/private key pair. *Tunnelgram generates a 1024 bit RSA key pair.*
-5. Encrypt the private key with the encryption key it derived from the password hash using a symmetric encryption algorithm. *Tunnelgram uses AES-256 in Output Feedback mode, with the additional bytes from the hash as the initialization vector.*
+5. Encrypt the private key with the encryption key it derived from the password hash using a symmetric encryption algorithm. *Tunnelgram uses AES-256 (14 rounds) in Output Feedback mode, with the additional bytes from the hash as the initialization vector.*
 6. Send the encrypted private key and clear text public key to the server.
 
 > :information_source: Some notes:
@@ -86,7 +86,7 @@ This software uses an encryption scheme based on the Tunnelwire Encryption Schem
 
 The client:
 
-1. Generates a random, cryptographically secure 32 byte message key and 16 byte initialization vector, and encrypts the message with it using AES-256 in Output Feedback mode.
+1. Generates a random, cryptographically secure 32 byte message key and 16 byte initialization vector, and encrypts the message with it using AES-256 (14 rounds) in Output Feedback mode.
 2. Retrieves the public keys of all of the recipients.
 3. Encrypts the message key and initialization vector with each of the recipients' public keys and the user's public key using RSA.
 4. Sends the encrypted message and all of the encrypted copies of the message key to the server.
