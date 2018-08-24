@@ -98,20 +98,19 @@ store.constructor.prototype.refreshAll = function () {
 
   const {conversation} = this.get();
   if (conversation.guid) {
-    conversation.refresh().then(() => {
-      this.set({conversation: new Conversation()});
-      this.set({conversation});
-    }, ErrHandler);
+    const newConv = new Conversation();
+    newConv.init(conversation.toJSON());
+    this.set({conversation: new Conversation()});
+    this.set({conversation: newConv});
   }
 
   const {conversations} = this.get();
-  const promises = [];
-  for (let curConv of conversations) {
-    promises.push(curConv.refresh());
+  for (let i in conversations) {
+    const newConv = new Conversation();
+    newConv.init(conversations[i].toJSON());
+    conversations[i] = newConv;
   }
-  Promise.all(promises).then(() => {
-    this.set({conversations});
-  }, ErrHandler);
+  this.set({conversations});
 };
 
 store.constructor.prototype.getDisplayName = (user, prop, defaultValue = 'Loading...') => {
