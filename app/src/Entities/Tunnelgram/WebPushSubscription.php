@@ -87,11 +87,13 @@ class WebPushSubscription extends \Nymph\Entity {
       ]);
       $count = count($subscriptions);
       // Delete all but 14. (This will be the 15th.)
-      for ($i = 0; $i < $count - 14; $i++) {
-        Nymph:deleteEntityByID(
-            $subscriptions[$i],
-            'Tunnelgram\WebPushSubscription'
-        );
+      if ($count > 14) {
+        for ($i = 0; $i < $count - 14; $i++) {
+          Nymph:deleteEntityByID(
+              $subscriptions[$i],
+              'Tunnelgram\WebPushSubscription'
+          );
+        }
       }
     }
 

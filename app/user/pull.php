@@ -43,7 +43,8 @@ try {
   // an auth token.)
   Tilmeld::fillSession($webPushSubscription->user);
 
-  // Update its last modified time.
+  // Update its user agent and last modified time.
+  $webPushSubscription->uaString = $_SERVER['HTTP_USER_AGENT'] ?? '';
   $webPushSubscription->save();
 
   // Get all of the user's readlines.

@@ -448,6 +448,11 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       });
     },
     'u/:username': {uses: userHandler},
+    'pushSubscriptions': () => {
+      store.set({
+        view: 'pushSubscriptions',
+      });
+    },
     'pwa-home': () => {
       store.set({
         convosOut: true

@@ -56,6 +56,8 @@
       </div>
     {:elseif $view === 'user'}
       <UserView />
+    {:elseif $view === 'pushSubscriptions'}
+      <PushSubscriptionsView />
     {:else}
       <ConversationContainer />
     {/if}
@@ -70,6 +72,7 @@
   import ConversationList from './Conversations/ConversationList.html';
   import ConversationContainer from './Conversations/ConversationContainer.html';
   import UserView from './Users/UserView.html';
+  import PushSubscriptionsView from './Users/PushSubscriptionsView.html';
   import {getCookieValue} from '../Services/getCookieValue';
   import ErrHandler from '../ErrHandler';
 
@@ -202,7 +205,8 @@
       LoadingIndicator,
       ConversationList,
       ConversationContainer,
-      UserView
+      UserView,
+      PushSubscriptionsView
     }
   };
 </script>

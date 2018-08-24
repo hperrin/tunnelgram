@@ -46,6 +46,9 @@
                     <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/u/' + $user.data.username)">
                       Your Account
                     </a>
+                    <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/pushSubscriptions')">
+                      Push Subscriptions
+                    </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
                       <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
@@ -152,7 +155,18 @@
     },
 
     computed: {
-      name: ({$view, $viewUser, $conversation, $conversations, $settings}) => $view === 'user' ? $viewUser.data.name : ($settings && $conversation.guid ? $conversation.getName($settings) : '')
+      name: ({$view, $viewUser, $conversation, $conversations, $settings}) => {
+        if ($view === 'pushSubscriptions') {
+          return 'Push Subscriptions';
+        }
+        if ($view === 'user') {
+          return $viewUser.data.name;
+        }
+        if ($settings && $conversation.guid) {
+          return $conversation.getName($settings);
+        }
+        return '';
+      }
     },
 
     data () {
