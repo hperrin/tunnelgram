@@ -1,4 +1,4 @@
-{#if $view !== 'user' && $conversation.guid}
+{#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
   <ul class="navbar-nav ml-auto mr-auto">
     <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
       <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid)">

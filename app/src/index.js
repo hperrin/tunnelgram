@@ -451,6 +451,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
     'pushSubscriptions': () => {
       store.set({
         view: 'pushSubscriptions',
+        convosOut: false,
+        loadingConversation: false,
+        loadingUser: false
       });
     },
     'pwa-home': () => {
