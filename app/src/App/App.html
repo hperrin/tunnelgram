@@ -48,7 +48,7 @@
       on:tunnelgram-notification="notification(event.update)"
       on:tunnelgram-navigate="navigate(event.conversation)" />
   </div>
-  <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
+  <div class="flex-grow-1 d-lg-block bg-light text-dark {!$convosOut ? '' : 'd-none'}">
     {#if $loadingConversation || $loadingUser}
       <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
         <div style="background-image: url(images/web-88x88.png); position: absolute; width: 88px; height: 88px;"></div>
