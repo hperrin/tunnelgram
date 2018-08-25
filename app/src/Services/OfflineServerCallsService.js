@@ -1,11 +1,9 @@
 import {Nymph} from 'nymph-client';
 import {User} from 'tilmeld-client';
-import {StorageService} from './StorageService';
+import {storage} from './StorageService';
 
 export class OfflineServerCallsService {
   constructor () {
-    const storage = new StorageService();
-
     // If the browser supports service workers, we should cache some required
     // server calls (which happen over POST).
     if (navigator.serviceWorker) {

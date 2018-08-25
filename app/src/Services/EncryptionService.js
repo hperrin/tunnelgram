@@ -2,7 +2,7 @@ import {User} from 'tilmeld-client';
 import PrivateKey from '../Entities/Tunnelwire/PrivateKey';
 import PublicKey from '../Entities/Tunnelwire/PublicKey';
 import {AESEncryptionService} from './AESEncryptionService';
-import {StorageService} from './StorageService';
+import {storage} from './StorageService';
 import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
 import aesjs from 'aes-js';
@@ -14,7 +14,7 @@ class EncryptionService extends AESEncryptionService {
     super();
 
     const that = this;
-    this.storage = new StorageService();
+    this.storage = storage;
     this.decryptor = null;
     this.key = null;
     this.iv = null;
@@ -30,7 +30,7 @@ class EncryptionService extends AESEncryptionService {
     });
 
     // Async encryption/decryption is provided through a service worker.
-    this.aesEncryptionWorker = new Worker('/dist/Workers/AESEncryption.js');
+    this.aesEncryptionWorker = new Worker('dist/Workers/AESEncryption.js');
     this.aesEncryptionWorkerCounter = 0;
     this.aesEncryptionWorkerCallbacks = {};
     this.aesEncryptionWorker.onmessage = (e) => {

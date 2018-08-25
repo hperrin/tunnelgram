@@ -6,7 +6,7 @@
       {#if _loading}
         <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
       {:elseif _source}
-        <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay>
+        <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay playsinline>
           <source src="{_source}" type="{resource.dataType}" />
         </video>
       {:else}

@@ -1,31 +1,32 @@
 import {Nymph, PubSub} from 'nymph-client';
 import {urlBase64ToBase64} from './urlBase64';
+import {storage} from './StorageService';
 
 const _XMLHttpRequest = window.XMLHttpRequest;
 
 export class XMLHttpRequestWrapper {
   constructor (...args) {
+    this._xsrfTokenSet = false;
     this.xhr = new _XMLHttpRequest(...args);
     return this;
   }
 
   static parseAndSaveCookieHeader (token) {
-    XMLHttpRequestWrapper.setToken(token);
-    XMLHttpRequestWrapper.tilmeldAuthToken = token;
-    NativeStorage.setItem('tilmeldAuthToken', token);
+    if (XMLHttpRequestWrapper.tilmeldAuthToken !== token) {
+      XMLHttpRequestWrapper.setToken(token);
+      XMLHttpRequestWrapper.tilmeldAuthToken = token;
+      storage.setItem('tilmeldAuthToken', token);
+    }
   }
 
-  static setToken (token) {
+  static setToken (token, xsrfToken) {
     if (token === '') {
       Nymph.setXsrfToken(null);
       if (PubSub.pubsubURL != null) {
         PubSub.setToken(null);
       }
     } else {
-      const base64Url = token.split('.')[1];
-      const base64 = urlBase64ToBase64(base64Url);
-      const jwt = JSON.parse(atob(base64));
-      Nymph.setXsrfToken(jwt.xsrfToken);
+      Nymph.setXsrfToken(xsrfToken);
       if (PubSub.pubsubURL != null) {
         PubSub.setToken(token);
       }
@@ -33,12 +34,22 @@ export class XMLHttpRequestWrapper {
   }
 
   static async loadTokenFromStorage () {
-    const token = await new Promise(resolve => NativeStorage.getItem('tilmeldAuthToken', token => resolve(token)));
-    XMLHttpRequestWrapper.setToken(token);
-    XMLHttpRequestWrapper.tilmeldAuthToken = token;
+    const token = await new Promise(resolve => storage.getItem('tilmeldAuthToken').then(token => resolve(token)));
+    if (token) {
+      const base64Url = token.split('.')[1];
+      const base64 = urlBase64ToBase64(base64Url);
+      const jwt = JSON.parse(atob(base64));
+
+      XMLHttpRequestWrapper.setToken(token, jwt.xsrfToken);
+      XMLHttpRequestWrapper.tilmeldAuthToken = token;
+      XMLHttpRequestWrapper.tilmeldXsrfToken = jwt.xsrfToken;
+    }
+    XMLHttpRequestWrapper._resolve(true);
   }
 
-  send (...args) {
+  async send (...args) {
+    await XMLHttpRequestWrapper._ready;
+
     const _onreadystatechange = this.onreadystatechange;
     this.onreadystatechange = (...args) => {
       if (this.readyState === 4) {
@@ -52,6 +63,9 @@ export class XMLHttpRequestWrapper {
 
     if (XMLHttpRequestWrapper.tilmeldAuthToken != null) {
       this.xhr.setRequestHeader('X-TILMELDAUTH', XMLHttpRequestWrapper.tilmeldAuthToken);
+      if (!this._xsrfTokenSet) {
+        this.xhr.setRequestHeader('X-Xsrf-Token', XMLHttpRequestWrapper.tilmeldXsrfToken);
+      }
     }
 
     return this.xhr.send(...args);
@@ -74,6 +88,9 @@ export class XMLHttpRequestWrapper {
     return this.xhr.overrideMimeType(...args);
   }
   setRequestHeader (...args) {
+    if (args[0] === 'X-Xsrf-Token') {
+      this._xsrfTokenSet = true;
+    }
     return this.xhr.setRequestHeader(...args);
   }
   get onreadystatechange () {
@@ -154,6 +171,9 @@ XMLHttpRequestWrapper.tilmeldAuthToken = null;
 
 // In Cordova, cookies don't persist, so we need to wrap XMLHttpRequest to look
 // for Tilmeld auth token header and save it.
-if (window.hasOwnProperty('inCordova') && window.inCordova) {
+if ('inCordova' in window && window.inCordova) {
   window.XMLHttpRequest = XMLHttpRequestWrapper;
+  XMLHttpRequestWrapper._resolve;
+  XMLHttpRequestWrapper._ready = new Promise(res => XMLHttpRequestWrapper._resolve = res);
+  XMLHttpRequestWrapper.loadTokenFromStorage();
 }

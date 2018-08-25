@@ -1,8 +1,12 @@
-node_modules
-vendor
-dist
+/app/node_modules
+/app/vendor
+/app/dist
 /mail
 /db_*
 /tilmeld_secret.txt
 /maintenance/entities-export-*.nex
 /app/ServiceWorker.js*
+
+/cordova/node_modules
+/cordova/www/dist
+/cordova/www/images

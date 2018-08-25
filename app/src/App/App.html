@@ -51,7 +51,7 @@
   <div class="flex-grow-1 d-lg-block {!$convosOut ? '' : 'd-none'}">
     {#if $loadingConversation || $loadingUser}
       <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-        <div style="background-image: url(/images/web-88x88.png); position: absolute; width: 88px; height: 88px;"></div>
+        <div style="background-image: url(images/web-88x88.png); position: absolute; width: 88px; height: 88px;"></div>
         <LoadingIndicator width="200" height="200" />
       </div>
     {:elseif $view === 'user'}

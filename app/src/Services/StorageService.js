@@ -2,11 +2,18 @@ import localforage from 'localforage/src/localforage';
 
 export class StorageService {
   constructor () {
-    if (window.hasOwnProperty('inCordova') && window.inCordova) {
-      this.cordovaNativeStorageAPI = true;
-      this.storage = NativeStorage;
+    if ('inCordova' in window && window.inCordova) {
+      this.cordovaAPI = true;
+      let resolve;
+      let reject;
+      this.ready = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      this.storage = new cordova.plugins.SecureStorage(resolve, reject, 'tunnelgram');
     } else {
-      this.cordovaNativeStorageAPI = false;
+      this.cordovaAPI = false;
+      this.ready = Promise.resolve(true);
       localforage.config({
         name: 'Tunnelgram'
       });
@@ -28,26 +35,31 @@ export class StorageService {
   }
 
   async setItem (name, value) {
-    if (this.cordovaNativeStorageAPI) {
-      return await (new Promise((resolve, reject) => this.storage.setItem(name, value, () => resolve(), e => reject(e))));
+    await this.ready;
+    if (this.cordovaAPI) {
+      return await (new Promise((resolve, reject) => this.storage.set(() => resolve(), e => reject(e), name, value)));
     } else {
       return await this.storage.setItem(name, value);
     }
   }
 
   async getItem (name) {
-    if (this.cordovaNativeStorageAPI) {
-      return await (new Promise((resolve, reject) => this.storage.getItem(name, value => resolve(value), e => reject(e))));
+    await this.ready;
+    if (this.cordovaAPI) {
+      return await (new Promise((resolve, reject) => this.storage.get(value => resolve(value), e => reject(e), name)));
     } else {
       return await this.storage.getItem(name);
     }
   }
 
   async removeItem (name) {
-    if (this.cordovaNativeStorageAPI) {
-      return await (new Promise((resolve, reject) => this.storage.remove(name, () => resolve(), e => reject(e))));
+    await this.ready;
+    if (this.cordovaAPI) {
+      return await (new Promise((resolve, reject) => this.storage.remove(() => resolve(), e => reject(e), name)));
     } else {
       return await this.storage.removeItem(name);
     }
   }
 }
+
+export const storage = new StorageService();
