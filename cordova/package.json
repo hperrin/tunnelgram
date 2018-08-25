@@ -1,0 +1,45 @@
+{
+  "name": "tunnelgram",
+  "displayName": "Tunnelgram",
+  "version": "1.0.0-beta.1",
+  "description": "An easy, secure, end to end encrypted messenger.",
+  "main": "index.js",
+  "author": "Hunter Perrin <hperrin@gmail.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "npm run copy && npm run build-android",
+    "copy": "npm run copy-code && npm run copy-media && npm run prepare-packages",
+    "copy-code": "(rm -r ./www/dist || true) && cp -r ../app/dist ./www/ && cp ../app/package.json ./www/dist/",
+    "copy-media": "(rm -r ./www/images || true) && cp -r ../app/images ./www/",
+    "prepare-packages": "cd ./www/dist/ && npm install --only=prod",
+    "build-ios": "cordova build ios",
+    "build-android": "cordova build android",
+    "emulate-android": "adb kill-server && cordova emulate android",
+    "emulate-ios": "cordova emulate ios",
+    "open-ios": "open './platforms/ios/Tunnelgram.xcworkspace/'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cordova-android": "^7.1.0",
+    "cordova-icon": "^1.0.0",
+    "cordova-ios": "^4.5.5",
+    "cordova-plugin-secure-storage": "^2.6.8",
+    "cordova-plugin-statusbar": "^2.4.2",
+    "cordova-plugin-whitelist": "^1.3.3",
+    "cordova-splash": "^1.0.0",
+    "ios-deploy": "^1.9.3",
+    "onesignal-cordova-plugin": "^2.4.1"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {},
+      "onesignal-cordova-plugin": {},
+      "cordova-plugin-statusbar": {},
+      "cordova-plugin-secure-storage": {}
+    },
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  }
+}

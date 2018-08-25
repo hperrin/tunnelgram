@@ -8,5 +8,8 @@
 /app/ServiceWorker.js*
 
 /cordova/node_modules
+/cordova/platforms
+/cordova/plugins
+/cordova/res
 /cordova/www/dist
 /cordova/www/images

@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget defaultlocale="en-US" id="com.tunnelwire.gram" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Tunnelgram</name>
+    <description>
+        An easy, secure, end to end encrypted messenger.
+    </description>
+    <author email="hperrin@gmail.com" href="http://hperrin.com/">
+        Hunter Perrin
+    </author>
+    <content src="index.html#/pwa-home" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <access origin="https://tunnelgram.com" />
+    <access origin="https://pubsub.tunnelgram.com" />
+    <access origin="wss://pubsub.tunnelgram.com" />
+    <access origin="https://tunnelgram.blob.core.windows.net" />
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+        <splash src="www/splash/ios/Default@2x~universal~anyany.png" />
+    </platform>
+    <hook src="hook-icon.js" type="after_platform_add" />
+    <hook src="hook-splash.js" type="after_platform_add" />
+    <preference name="AllowInlineMediaPlayback" value="true" />
+    <preference name="AppendUserAgent" value=" CordovaApp" />
+    <preference name="BackupWebStorage" value="none" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="BackgroundColor" value="FF211526" />
+    <preference name="StatusBarBackgroundColor" value="#211526" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+    <plugin name="cordova-plugin-whitelist" spec="1" />
+    <plugin name="onesignal-cordova-plugin" spec="~2.4.1" />
+    <plugin name="cordova-plugin-statusbar" spec="~2.4.2" />
+    <plugin name="cordova-plugin-secure-storage" spec="~2.6.8" />
+    <engine name="android" spec="^7.1.0" />
+    <engine name="ios" spec="^4.5.5" />
+</widget>

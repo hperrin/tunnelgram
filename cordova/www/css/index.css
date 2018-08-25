@@ -1,0 +1,34 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  overscroll-behavior: none;
+  -webkit-transform: translate3d(0,0,0);
+}
+html, body, div.markdown-body {
+  font-family: sans-serif;
+}
+
+/* Cordova CSS */
+* {
+  -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+body {
+  -webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
+  -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+  -webkit-user-select: 'text'; /* prevent copy paste, to allow, change 'none' to 'text' */
+}
+body > :first-child {
+  /* iPhone X notch padding */
+  padding-top: constant(safe-area-inset-top); /* iOS 11.0 */
+  padding-top: env(safe-area-inset-top); /* iOS 11.2 */
+}
+body > :last-child {
+  margin-bottom: constant(safe-area-inset-bottom); /* iOS 11.0 */
+  margin-bottom: env(safe-area-inset-bottom); /* iOS 11.2 */
+}
