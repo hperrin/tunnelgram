@@ -201,6 +201,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         }
       } else if (current.user === null) {
         // If the user logs out, clear everything.
+        storage.clear();
         store.set({
           user: null,
           conversations: [],

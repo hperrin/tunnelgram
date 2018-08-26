@@ -4,13 +4,7 @@ export class StorageService {
   constructor () {
     if ('inCordova' in window && window.inCordova) {
       this.cordovaAPI = true;
-      let resolve;
-      let reject;
-      this.ready = new Promise((res, rej) => {
-        resolve = res;
-        reject = rej;
-      });
-      this.storage = new cordova.plugins.SecureStorage(resolve, reject, 'tunnelgram');
+      this.storage = NativeStorage;
     } else {
       this.cordovaAPI = false;
       this.ready = Promise.resolve(true);
@@ -35,29 +29,34 @@ export class StorageService {
   }
 
   async setItem (name, value) {
-    await this.ready;
     if (this.cordovaAPI) {
-      return await (new Promise((resolve, reject) => this.storage.set(() => resolve(), e => reject(e), name, value)));
+      return await (new Promise((resolve, reject) => this.storage.setItem(name, value, () => resolve(value), e => reject(e))));
     } else {
       return await this.storage.setItem(name, value);
     }
   }
 
   async getItem (name) {
-    await this.ready;
     if (this.cordovaAPI) {
-      return await (new Promise((resolve, reject) => this.storage.get(value => resolve(value), e => reject(e), name)));
+      return await (new Promise((resolve, reject) => this.storage.getItem(name, value => resolve(value), e => e.code === 2 ? resolve(undefined) : reject(e))));
     } else {
       return await this.storage.getItem(name);
     }
   }
 
   async removeItem (name) {
-    await this.ready;
     if (this.cordovaAPI) {
-      return await (new Promise((resolve, reject) => this.storage.remove(() => resolve(), e => reject(e), name)));
+      return await (new Promise((resolve, reject) => this.storage.remove(name, () => resolve(), () => resolve())));
     } else {
       return await this.storage.removeItem(name);
+    }
+  }
+
+  async clear () {
+    if (this.cordovaAPI) {
+      return await (new Promise((resolve, reject) => this.storage.clear(() => resolve(), e => reject(e))));
+    } else {
+      return await this.storage.clear();
     }
   }
 }

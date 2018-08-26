@@ -11,22 +11,31 @@ export class XMLHttpRequestWrapper {
     return this;
   }
 
-  static parseAndSaveCookieHeader (token) {
+  static saveToken (token) {
     if (XMLHttpRequestWrapper.tilmeldAuthToken !== token) {
       XMLHttpRequestWrapper.setToken(token);
-      XMLHttpRequestWrapper.tilmeldAuthToken = token;
       storage.setItem('tilmeldAuthToken', token);
     }
   }
 
-  static setToken (token, xsrfToken) {
-    if (token === '') {
+  static setToken (token) {
+    if (token === '' || token == null) {
+      XMLHttpRequestWrapper.tilmeldAuthToken = null;
+      XMLHttpRequestWrapper.tilmeldXsrfToken = null;
+
       Nymph.setXsrfToken(null);
       if (PubSub.pubsubURL != null) {
         PubSub.setToken(null);
       }
     } else {
-      Nymph.setXsrfToken(xsrfToken);
+      const base64Url = token.split('.')[1];
+      const base64 = urlBase64ToBase64(base64Url);
+      const jwt = JSON.parse(atob(base64));
+
+      XMLHttpRequestWrapper.tilmeldAuthToken = token;
+      XMLHttpRequestWrapper.tilmeldXsrfToken = jwt.xsrfToken;
+
+      Nymph.setXsrfToken(jwt.xsrfToken);
       if (PubSub.pubsubURL != null) {
         PubSub.setToken(token);
       }
@@ -36,13 +45,7 @@ export class XMLHttpRequestWrapper {
   static async loadTokenFromStorage () {
     const token = await new Promise(resolve => storage.getItem('tilmeldAuthToken').then(token => resolve(token)));
     if (token) {
-      const base64Url = token.split('.')[1];
-      const base64 = urlBase64ToBase64(base64Url);
-      const jwt = JSON.parse(atob(base64));
-
-      XMLHttpRequestWrapper.setToken(token, jwt.xsrfToken);
-      XMLHttpRequestWrapper.tilmeldAuthToken = token;
-      XMLHttpRequestWrapper.tilmeldXsrfToken = jwt.xsrfToken;
+      XMLHttpRequestWrapper.setToken(token);
     }
     XMLHttpRequestWrapper._resolve(true);
   }
@@ -55,7 +58,7 @@ export class XMLHttpRequestWrapper {
       if (this.readyState === 4) {
         const authHeader = this.getResponseHeader('X-TILMELDAUTH');
         if (authHeader != null) {
-          XMLHttpRequestWrapper.parseAndSaveCookieHeader(authHeader);
+          XMLHttpRequestWrapper.saveToken(authHeader);
         }
       }
       return _onreadystatechange.apply(this, args);
