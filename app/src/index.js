@@ -16,6 +16,7 @@ import {VideoService} from './Services/VideoService';
 import UserStore from './UserStore';
 import Conversation from './Entities/Tunnelgram/Conversation';
 import Message from './Entities/Tunnelgram/Message';
+import AppPushSubscription from './Entities/Tunnelgram/AppPushSubscription';
 import WebPushSubscription from './Entities/Tunnelgram/WebPushSubscription';
 import Readline from './Entities/Tunnelgram/Readline';
 import Settings from './Entities/Tunnelgram/Settings';
@@ -225,111 +226,128 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   }
 
   (async () => {
-    if ((await swRegPromise) == null) {
-      return;
-    }
+    if (window.inCordova) {
+      // Cordova OneSignal Push Subscriptions
+      let playerId = await window.pushPlayerIdPromise;
+      if (playerId == null) {
+        return;
+      }
 
-    // Support for push, notifications, and push payloads.
-    const pushSupport = 'PushManager' in window;
-    const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
-    // Maybe I'll use these if I can figure out how to get payloads to work.
-    // const payloadSupport = 'getKey' in PushSubscription.prototype;
-    // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
+      // Push the playerId up to the server. (It will be updated if it already
+      // exists.)
+      const appPushSubscription = new AppPushSubscription();
+      appPushSubscription.set({
+        playerId
+      });
+      appPushSubscription.save().catch(ErrHandler);
+    } else {
+      // Web Push Subscriptions
+      if ((await swRegPromise) == null) {
+        return;
+      }
 
-    if (pushSupport && notificationSupport) {
-      setupSubscription = async () => {
-        const getSubscription = () => {
-          return navigator.serviceWorker.ready.then(registration => {
-            return registration.pushManager.getSubscription();
-          });
-        };
+      // Support for push, notifications, and push payloads.
+      const pushSupport = 'PushManager' in window;
+      const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
+      // Maybe I'll use these if I can figure out how to get payloads to work.
+      // const payloadSupport = 'getKey' in PushSubscription.prototype;
+      // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
 
-        const subscribeFromWorker = subscriptionOptions => {
-          return new Promise((resolve, reject) => {
-            if (!navigator.serviceWorker.controller) {
-              reject(new Error('There is no service worker.'));
-              return;
-            }
-
-            navigator.serviceWorker.controller.postMessage({
-              command: 'subscribe',
-              subscriptionOptions: subscriptionOptions
+      if (pushSupport && notificationSupport) {
+        setupSubscription = async () => {
+          const getSubscription = () => {
+            return navigator.serviceWorker.ready.then(registration => {
+              return registration.pushManager.getSubscription();
             });
+          };
 
-            const messageListenerFunction = event => {
-              navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
-              switch (event.data.command) {
-                case 'subscribe-success':
-                  resolve(getSubscription());
-                  break;
-                case 'subscribe-failure':
-                  reject(new Error('Subscription failed: ' + event.data.message));
-                  break;
-                default:
-                  reject(new Error('Invalid command: ' + event.data.command));
-                  break;
+          const subscribeFromWorker = subscriptionOptions => {
+            return new Promise((resolve, reject) => {
+              if (!navigator.serviceWorker.controller) {
+                reject(new Error('There is no service worker.'));
+                return;
               }
-            };
 
-            navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+              navigator.serviceWorker.controller.postMessage({
+                command: 'subscribe',
+                subscriptionOptions: subscriptionOptions
+              });
+
+              const messageListenerFunction = event => {
+                navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
+                switch (event.data.command) {
+                  case 'subscribe-success':
+                    resolve(getSubscription());
+                    break;
+                  case 'subscribe-failure':
+                    reject(new Error('Subscription failed: ' + event.data.message));
+                    break;
+                  default:
+                    reject(new Error('Invalid command: ' + event.data.command));
+                    break;
+                }
+              };
+
+              navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+            });
+          };
+
+
+          // See if there is a subscription already.
+          const existingSubscription = await getSubscription();
+
+          if (existingSubscription) {
+            store.set({webPushSubscription: existingSubscription});
+            return;
+          }
+
+          // The vapid key from the server.
+          const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+          if (!vapidPublicKey) {
+            return;
+          }
+          const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
+
+          // Make the subscription.
+          const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidKey
+          })));
+
+          store.set({webPushSubscription: subscription});
+
+          // And push it up to the server.
+          const webPushSubscription = new WebPushSubscription();
+          webPushSubscription.set({
+            endpoint: subscription.endpoint,
+            keys: {
+              p256dh: subscription.keys.p256dh,
+              auth: subscription.keys.auth
+            }
           });
+          webPushSubscription.save().catch(ErrHandler);
         };
 
+        // Set notification permission asker.
+        store.set({requestNotificationPermission: async () => {
+          const permissionResult = await new Promise(async resolve => {
+            const promise = Notification.requestPermission(value => resolve(value));
+            if (promise) {
+              resolve(await promise);
+            }
+          });
 
-        // See if there is a subscription already.
-        const existingSubscription = await getSubscription();
-
-        if (existingSubscription) {
-          store.set({webPushSubscription: existingSubscription});
-          return;
-        }
-
-        // The vapid key from the server.
-        const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-        if (!vapidPublicKey) {
-          return;
-        }
-        const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
-
-        // Make the subscription.
-        const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
-          userVisibleOnly: true,
-          applicationServerKey: convertedVapidKey
-        })));
-
-        store.set({webPushSubscription: subscription});
-
-        // And push it up to the server.
-        const webPushSubscription = new WebPushSubscription();
-        webPushSubscription.set({
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: subscription.keys.p256dh,
-            auth: subscription.keys.auth
+          if (permissionResult === 'denied' || permissionResult === 'default') {
+            return;
           }
-        });
-        webPushSubscription.save().catch(ErrHandler);
-      };
 
-      // Set notification permission asker.
-      store.set({requestNotificationPermission: async () => {
-        const permissionResult = await new Promise(async resolve => {
-          const promise = Notification.requestPermission(value => resolve(value));
-          if (promise) {
-            resolve(await promise);
-          }
-        });
-
-        if (permissionResult === 'denied' || permissionResult === 'default') {
-          return;
-        }
-
-        setupSubscription();
-      }});
-
-      if (Notification.permission === 'granted') {
-        if (store.get().user) {
           setupSubscription();
+        }});
+
+        if (Notification.permission === 'granted') {
+          if (store.get().user) {
+            setupSubscription();
+          }
         }
       }
     }

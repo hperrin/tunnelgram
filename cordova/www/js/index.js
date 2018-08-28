@@ -38,13 +38,38 @@ class CordovaApp {
     // Enable to debug issues.
     // window.plugins.OneSignal.setLogLevel({logLevel: 4, visualLevel: 4});
 
-    const notificationOpenedCallback = jsonData => {
-      console.log('notificationOpenedCallback: ' + JSON.stringify(jsonData));
+    let resolve;
+    window.pushPlayerIdPromise = new Promise(res => resolve = res);
+
+    const notificationReceivedCallback = jsonData => {
+      console.log('notificationReceivedCallback: ', jsonData);
     };
+    const notificationOpenedCallback = jsonData => {
+      console.log('notificationOpenedCallback: ', jsonData);
+    };
+
+    window.plugins.OneSignal.getPermissionSubscriptionState(status => {
+      if (status.subscriptionStatus.subscribed) {
+        // get player ID
+        resolve(status.subscriptionStatus.userId);
+      }
+    });
+
+
+    window.plugins.OneSignal.addSubscriptionObserver(state => {
+      if (state.to.subscribed) {
+        console.log('Subscribed for OneSignal push notifications!');
+        // get player ID
+        resolve(state.to.userId);
+      }
+      console.log('Push Subscription state changed: ', state);
+    });
 
     window.plugins.OneSignal
       .startInit('113ebc97-79d7-4f63-9f20-045913af0a49')
+      .handleNotificationReceived(notificationReceivedCallback)
       .handleNotificationOpened(notificationOpenedCallback)
+      .inFocusDisplaying(window.plugins.OneSignal.OSInFocusDisplayOption.InAppAlert) // TODO(hperrin): Change to '.None' on launch.
       .endInit();
   }
 

@@ -1,0 +1,87 @@
+{#await subscriptionsPromise}
+  <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+    <div class="col-auto">
+      <LoadingIndicator width="50" height="50" />
+    </div>
+  </div>
+{:then unused}
+  {#if !subscriptions || !subscriptions.length}
+    <div>
+      You've got no {name} push subscriptions.
+    </div>
+  {:else}
+    <div class="list-group mt-3 text-body px-2" style="width: 600px; max-width: 100vw;">
+      {#each subscriptions as subscription (subscription.guid)}
+        <div class="list-group-item flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between align-items-start">
+            <h5 class="mb-1">{subscription.agent.browser.name || ''} {subscription.agent.browser.version || ''} on {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}</h5>
+            <button type="button" class="btn btn-sm btn-danger rounded-circle" on:click="remove(subscription)" disabled="{subscription.deleting}">
+              <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+            </button>
+          </div>
+          <p class="mb-1">Device: {subscription.agent.device.vendor || ''} {subscription.agent.device.model || 'Unknown'}</p>
+          <small title="{moment.unix(subscription.cdate).format('llll')}">Created: {moment.unix(subscription.cdate).fromNow()}</small>,
+          <small title="{moment.unix(subscription.mdate).format('llll')}">Last used: {moment.unix(subscription.mdate).fromNow()}</small>
+        </div>
+      {/each}
+    </div>
+  {/if}
+{:catch err}
+  <div>
+    An error occurred: {stringify(err)}
+  </div>
+{/await}
+
+<script>
+  import {Nymph} from 'nymph-client';
+  import moment from 'moment';
+  import UAParser from 'ua-parser-js';
+  import LoadingIndicator from '../LoadingIndicator.html';
+  import ErrHandler from '../../ErrHandler';
+
+  export default {
+    oncreate () {
+      const {user} = this.store.get();
+      this.set({
+        subscriptionsPromise: Nymph.getEntities({
+          'class': this.get().entity.class,
+          'sort': 'mdate',
+          'reverse': true
+        }, {
+          'type': '&',
+          'ref': ['user', user.guid]
+        }).then(subs => this.set({subscriptions: subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs})).catch(ErrHandler)
+      });
+    },
+
+    methods: {
+      remove (subscription) {
+        const {subscriptions} = this.get();
+        subscription.deleting = true;
+        this.set({subscriptions});
+        subscription.delete().then(() => {
+          const {subscriptions} = this.get();
+          const idx = subscription.arraySearch(subscriptions);
+          if (idx !== false) {
+            subscriptions.splice(idx, 1);
+            this.set({subscriptions});
+          }
+        }, err => {
+          const {subscriptions} = this.get();
+          subscription.deleting = false;
+          this.set({subscriptions});
+          ErrHandler(err);
+        });
+      }
+    },
+
+    components: {
+      LoadingIndicator
+    },
+
+    helpers: {
+      stringify: JSON.stringify,
+      moment
+    }
+  };
+</script>

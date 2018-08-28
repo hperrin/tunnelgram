@@ -1,101 +1,44 @@
 <div class="h-100 w-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center py-3">
+    <p style="width: 600px; max-width: 100vw;">
+      If you no longer use a device, deleting its subscription may speed up
+      notifications on your other devices.
+    </p>
+  </div>
+  <div class="d-flex flex-column align-items-center py-3">
+    <h3 class="mt-3">Your App Push Subscriptions</h3>
+    <p style="width: 600px; max-width: 100vw;">
+      An app push subscription is used to send you message notifications on a
+      mobile device through the Tunnelgram app installed from the app store.
+    </p>
+    <PushSubscriptionsList entity="{AppPushSubscription}" name="app" />
+  </div>
+  <div class="d-flex flex-column align-items-center py-3">
     <h3 class="mt-3">Your Web Push Subscriptions</h3>
     <p style="width: 600px; max-width: 100vw;">
       A web push subscription is used to send you message notifications on a
-      device, even if you don't have Tunnelgram open.
+      browser, like Chrome on a laptop or if you've installed the website to
+      your home screen.
     </p>
-    <p style="width: 600px; max-width: 100vw;">
-      If you no longer use a device, deleting its subscription will speed up
-      notifications on your other devices.
-    </p>
-    {#await subscriptionsPromise}
-      <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
-        <div class="col-auto">
-          <LoadingIndicator width="50" height="50" />
-        </div>
-      </div>
-    {:then unused}
-      {#if !subscriptions || !subscriptions.length}
-        <div>
-          You've got no push subscriptions.
-        </div>
-      {:else}
-        <div class="list-group mt-3 text-body px-2" style="width: 600px; max-width: 100vw;">
-          {#each subscriptions as subscription (subscription.guid)}
-            <div class="list-group-item flex-column align-items-start">
-              <div class="d-flex w-100 justify-content-between align-items-start">
-                <h5 class="mb-1">{subscription.agent.browser.name || ''} {subscription.agent.browser.version || ''} on {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}</h5>
-                <button type="button" class="btn btn-sm btn-danger rounded-circle" on:click="remove(subscription)" disabled="{subscription.deleting}">
-                  <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
-                </button>
-              </div>
-              <p class="mb-1">Device: {subscription.agent.device.vendor || ''} {subscription.agent.device.model || 'Unknown'}</p>
-              <small title="{moment.unix(subscription.cdate).format('llll')}">Created: {moment.unix(subscription.cdate).fromNow()}</small>,
-              <small title="{moment.unix(subscription.mdate).format('llll')}">Last used: {moment.unix(subscription.mdate).fromNow()}</small>
-            </div>
-          {/each}
-        </div>
-      {/if}
-    {:catch err}
-      <div>
-        An error occurred: {stringify(err)}
-      </div>
-    {/await}
+    <PushSubscriptionsList entity="{WebPushSubscription}" name="web" />
   </div>
 </div>
 
 <script>
-  import {Nymph} from 'nymph-client';
-  import moment from 'moment';
-  import UAParser from 'ua-parser-js';
+  import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
   import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
-  import LoadingIndicator from '../LoadingIndicator.html';
-  import ErrHandler from '../../ErrHandler';
+  import PushSubscriptionsList from './PushSubscriptionsList.html';
 
   export default {
-    oncreate () {
-      const {user} = this.store.get();
-      this.set({
-        subscriptionsPromise: Nymph.getEntities({
-          'class': WebPushSubscription.class,
-          'sort': 'mdate',
-          'reverse': true
-        }, {
-          'type': '&',
-          'ref': ['user', user.guid]
-        }).then(subs => this.set({subscriptions: subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs})).catch(ErrHandler)
-      });
-    },
-
-    methods: {
-      remove (subscription) {
-        const {subscriptions} = this.get();
-        subscription.deleting = true;
-        this.set({subscriptions});
-        subscription.delete().then(() => {
-          const {subscriptions} = this.get();
-          const idx = subscription.arraySearch(subscriptions);
-          if (idx !== false) {
-            subscriptions.splice(idx, 1);
-            this.set({subscriptions});
-          }
-        }, err => {
-          const {subscriptions} = this.get();
-          subscription.deleting = false;
-          this.set({subscriptions});
-          ErrHandler(err);
-        });
-      }
+    data () {
+      return {
+        AppPushSubscription,
+        WebPushSubscription
+      };
     },
 
     components: {
-      LoadingIndicator
-    },
-
-    helpers: {
-      stringify: JSON.stringify,
-      moment
+      PushSubscriptionsList
     }
   };
 </script>
