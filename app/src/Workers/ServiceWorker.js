@@ -176,7 +176,7 @@ self.addEventListener('push', event => {
           users.join(', ')
         ) + '.';
 
-        return sendNotification(title, message, entry.conversation.guid);
+        return sendNotification(title, message, entry.conversation.guid, entry.conversation.mdate * 1000);
       });
       return Promise.all(promises);
     });
@@ -223,13 +223,14 @@ function isClientFocused () {
   });
 }
 
-function sendNotification (title, body, conversationId) {
+function sendNotification (title, body, guid, timestamp) {
   return self.registration.showNotification(title, {
     body,
-    badge: 'https://tunnelgram.com/images/badge-96x96.png',
-    icon: 'https://tunnelgram.com/images/android-chrome-192x192.png',
+    badge: '/images/badge-96x96.png?v=8j8j5JNYqO',
+    icon: '/images/android-chrome-192x192.png?v=8j8j5JNYqO',
     renotify: true,
-    tag: '' + conversationId,
+    tag: '' + guid,
+    timestamp,
     vibrate: [120, 240, 120, 240, 360]
   });
 };
