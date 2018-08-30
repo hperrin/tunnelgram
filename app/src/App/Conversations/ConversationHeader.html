@@ -1,0 +1,23 @@
+<div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 150px;">
+  <h1>{name}</h1>
+  <p>
+    Started {_startedDate}
+  </p>
+</div>
+
+<script>
+  import moment from 'moment';
+
+  export default {
+    oncreate () {
+      const {conversation} = this.get();
+      this.set({
+        _startedDate: moment.unix(conversation.cdate).format('llll')
+      });
+    },
+
+    computed: {
+      name: ({conversation, $settings}) => conversation.getName($settings)
+    }
+  };
+</script>

@@ -3,20 +3,6 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const devMode = process.env.NODE_ENV !== 'production';
 
-const plugins = [
-  new MiniCssExtractPlugin({
-    filename: 'dist/[name].css',
-    chunkFilename: 'dist/[id].css',
-  }),
-  // load `moment/locale/ja.js` and `moment/locale/it.js`
-  new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
-  new webpack.DefinePlugin({
-    'process.env': {
-      'NODE_ENV': devMode || JSON.stringify('production')
-    }
-  })
-];
-
 module.exports = {
   mode: devMode ? 'development' : 'production',
   devtool: devMode && 'source-map',
@@ -32,7 +18,19 @@ module.exports = {
     path: path.resolve(__dirname),
     filename: 'dist/[name].js'
   },
-  plugins,
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'dist/[name].css',
+      chunkFilename: 'dist/[id].css',
+    }),
+    // load `moment/locale/ja.js` and `moment/locale/it.js`
+    new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
+    new webpack.DefinePlugin({
+      'process.env': {
+        'NODE_ENV': devMode || JSON.stringify('production')
+      }
+    })
+  ],
   resolve: {
     mainFields: ['svelte', 'browser', 'module', 'main']
   },

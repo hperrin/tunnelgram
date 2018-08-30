@@ -1,4 +1,5 @@
 <div class="d-flex flex-column align-items-center pt-3 mb-3">
+  <ConversationHeader conversation="{$conversation}" />
   <h2>People in this Conversation</h2>
   <div class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;">
     <div class="list-group mt-3 text-body">
@@ -15,11 +16,13 @@
 </div>
 
 <script>
+  import ConversationHeader from './ConversationHeader.html';
   import Avatar from '../Users/Avatar.html';
   import DisplayName from '../Users/DisplayName.html';
 
   export default {
     components: {
+      ConversationHeader,
       Avatar,
       DisplayName
     }
