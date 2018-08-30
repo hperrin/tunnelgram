@@ -24,8 +24,8 @@
         </div>
       {/if}
     {/if}
-    {#if _loading || _loadingEarlierConversations}
-      <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0">
+    {#if _loading || !_reachedEarliestConversation}
+      <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0 {_loadingEarlierConversations ? '' : 'visibility-hidden'}">
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>
@@ -186,7 +186,7 @@
       },
 
       handleScroll () {
-        if (this.refs.container.scrollTop > (this.refs.container.scrollHeight - this.refs.container.clientHeight - 100)) {
+        if (this.refs.container.scrollTop > (this.refs.container.scrollHeight - this.refs.container.clientHeight - 150)) {
           this.loadEarlierConversations();
         }
       },

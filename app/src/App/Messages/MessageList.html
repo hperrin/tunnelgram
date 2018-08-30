@@ -6,14 +6,10 @@
       <LoadingIndicator width="200" height="200" />
     </div>
   {:else}
-    <div class="text-center">
-      <h1>{name}</h1>
-      <p>
-        Started {_startedDate}
-      </p>
-    </div>
-    {#if _loadingEarlierMessages}
-      <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+    {#if _reachedEarliestMessage}
+      <ConversationHeader conversation="{$conversation}" />
+    {:else}
+      <div class="d-flex align-items-center justify-content-center {_loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>
@@ -36,8 +32,8 @@
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
-  import moment from 'moment';
   import Message from '../../Entities/Tunnelgram/Message';
+  import ConversationHeader from '../Conversations/ConversationHeader.html';
   import LoadingIndicator from '../LoadingIndicator.html';
   import MessageView from './MessageView.html';
   import ErrHandler from '../../ErrHandler';
@@ -50,8 +46,7 @@
       const {conversation} = this.store.get();
       this.set({
         _initialReadline: conversation.readline,
-        _latestReadline: conversation.readline,
-        _startedDate: moment.unix(conversation.cdate).format('llll')
+        _latestReadline: conversation.readline
       });
       this.scrollWaitBottom = true;
       this.scrollWaitReadline = false;
@@ -119,11 +114,6 @@
         this.scrollToBottom();
       }
 
-      if (changed._loadingEarlierMessages && !(current._isAtBottom && !changed._loadingEarlierMessages)) {
-        // Scroll to offset the added/removed height of the loading indicator.
-        this.refs.container.scrollTop += 200 * (current._loadingEarlierMessages ? 1 : -1);
-      }
-
       if (changed._scrollToDistanceFromBottom && current._scrollToDistanceFromBottom != null) {
         window.requestAnimationFrame(() => {
           this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
@@ -156,10 +146,6 @@
       if (this.onPubSubDisconnect) {
         PubSub.off('disconnect', this.onPubSubDisconnect);
       }
-    },
-
-    computed: {
-      name: ({$conversation, $conversations, $settings}) => $conversation.getName($settings)
     },
 
     data () {
@@ -235,7 +221,7 @@
       },
 
       handleScroll () {
-        if (this.refs.container.scrollTop < 100) {
+        if (this.refs.container.scrollTop < 250) {
           this.loadEarlierMessages();
         }
 
@@ -376,6 +362,7 @@
     },
 
     components: {
+      ConversationHeader,
       LoadingIndicator,
       MessageView
     },

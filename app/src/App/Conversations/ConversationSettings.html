@@ -1,4 +1,5 @@
 <div class="d-flex flex-column align-items-center pt-3 mb-3">
+  <ConversationHeader conversation="{$conversation}" />
   <h2>Conversation Settings</h2>
   <form class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;" on:submit="save(event.preventDefault())">
     <div class="form-group">
@@ -37,6 +38,8 @@
 </div>
 
 <script>
+  import ConversationHeader from './ConversationHeader.html';
+
   export default {
     oncreate () {
       this.set({
@@ -81,6 +84,10 @@
         this.store.navigate('/c');
         conversation.delete();
       }
+    },
+
+    components: {
+      ConversationHeader
     }
   };
 </script>
