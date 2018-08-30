@@ -6,6 +6,7 @@
 * You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
   * The original sign-up device is *not required*, and *not used as a proxy*.
 * Your account is not tied to a phone number or specific device. You log in with a username and password.
+  * Changing your phone doesn't require any [complicated](https://support.signal.org/hc/en-us/articles/360007062012) [steps](https://faq.whatsapp.com/en/android/28000018/?category=5245246). Just log in on your new phone.
 * If you lose your device, you **don't lose your messages, photos, videos, or conversations**. No backups necessary.
 
 It's as easy to use as any non-E2EE messenger.
