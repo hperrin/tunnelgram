@@ -28,7 +28,8 @@
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-splash": "^1.0.0",
     "ios-deploy": "^1.9.3",
-    "onesignal-cordova-plugin": "^2.4.1"
+    "onesignal-cordova-plugin": "^2.4.1",
+    "recursive-copy": "^2.0.9"
   },
   "cordova": {
     "plugins": {
@@ -38,8 +39,8 @@
       "cordova-plugin-nativestorage": {}
     },
     "platforms": [
-      "android",
-      "ios"
+      "ios",
+      "android"
     ]
   }
 }
