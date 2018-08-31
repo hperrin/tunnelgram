@@ -105,11 +105,15 @@ services:
       # No, these aren't the same ones used on tunnelgram.com.
       WEB_PUSH_VAPID_PRIVATE_KEY: l8YS2iO3ZdEMgC6HqC6lnDARgwLXvB2TJgLDCYDmpTY
       WEB_PUSH_VAPID_PUBLIC_KEY: BMgNJ6YSV1Dv3VkazCKC004Ft33dcqscBDuvh_R3Qk98k5_nOCb-dh7r56GsRuen-_DcLS4-Bf1bcjbpTw6ELVY
+      # You also need to set this in cordova/www/js/index.js
+      ONESIGNAL_APP_ID: 113ebc97-79d7-4f63-9f20-045913af0a49
+      ONESIGNAL_REST_API_KEY_FILE: /run/secrets/onesignal_rest_api_key
     secrets:
       - db_password
       - tilmeld_secret
       - db_blob_access_key
       - db_blob_secret_key
+      - onesignal_rest_api_key
 
 networks:
   app-network:
@@ -126,3 +130,5 @@ secrets:
     file: db_blob_secret_key.txt
   tilmeld_secret:
     file: tilmeld_secret.txt
+  onesignal_rest_api_key:
+    file: onesignal_rest_api_key.txt

@@ -228,7 +228,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   (async () => {
     if (window.inCordova) {
       // Cordova OneSignal Push Subscriptions
-      let playerId = await window.pushPlayerIdPromise;
+      console.log('Waiting for Push Player ID.');
+      let playerId = await window.appPushPlayerIdPromise;
+      console.log('Push Player ID: ', playerId);
       if (playerId == null) {
         return;
       }
@@ -489,9 +491,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   }).resolve();
 })();
 
-// useful for debugging!
-window.store = store;
+// Required for Cordova.
 window.router = router;
+// Useful for debugging.
+window.store = store;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;

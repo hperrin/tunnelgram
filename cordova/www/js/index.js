@@ -39,20 +39,22 @@ class CordovaApp {
     // window.plugins.OneSignal.setLogLevel({logLevel: 4, visualLevel: 4});
 
     let resolve;
-    window.pushPlayerIdPromise = new Promise(res => resolve = res);
+    window.appPushPlayerIdPromise = new Promise(res => resolve = res);
 
     const notificationReceivedCallback = jsonData => {
       console.log('notificationReceivedCallback: ', jsonData);
     };
-    const notificationOpenedCallback = jsonData => {
-      console.log('notificationOpenedCallback: ', jsonData);
+    const notificationOpenedCallback = openedResult => {
+      window.router.navigate('/c/'+openedResult.notification.payload.additionalData.conversationGuid);
     };
 
     window.plugins.OneSignal.getPermissionSubscriptionState(status => {
       if (status.subscriptionStatus.subscribed) {
+        console.log('Already Subscribed for OneSignal push notifications.');
         // get player ID
         resolve(status.subscriptionStatus.userId);
       }
+      console.log('Push Subscription status: ', status);
     });
 
 

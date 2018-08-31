@@ -296,11 +296,27 @@ class Message extends \Nymph\Entity {
       $this->conversation->lastMessage = $this;
       $this->conversation->save();
 
-      // Send push notifications to the recipients after script execution.
-      register_shutdown_function(
-          [$this, 'sendPushNotifications'],
-          $recipientGuids
-      );
+      if (count($recipientGuids) > 1) {
+        $showNameProp = count($this->conversation->acFull) > 2 ? 'nameFirst' : 'name';
+        $names = [];
+        foreach ($this->conversation->acFull as $curUser) {
+          $names[$curUser->guid] = $curUser->$showNameProp;
+        }
+        // Send push notifications to the recipients after script execution.
+        register_shutdown_function(
+            [$this, 'sendPushNotifications'],
+            array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
+            [
+              'conversationGuid' => $this->conversation->guid,
+              'senderName' => Tilmeld::$currentUser->name,
+              'names' => $names,
+              'type' => 'message',
+              'messageType' => $this->images
+                ? 'Photo'
+                : ($this->video ? 'Video' : 'Message')
+            ]
+        );
+      }
 
       // Update the user's readline.
       $this->conversation->saveReadline($this->cdate);

@@ -232,11 +232,22 @@ class Conversation extends \Nymph\Entity {
     }
     $ret = parent::save();
 
-    if ($ret && $newConversation) {
+    if ($ret && $newConversation && count($recipientGuids) > 1) {
+      $showNameProp = count($this->acFull) > 2 ? 'nameFirst' : 'name';
+      $names = [];
+      foreach ($this->acFull as $curUser) {
+        $names[$curUser->guid] = $curUser->$showNameProp;
+      }
       // Send push notifications to the recipients after script execution.
       register_shutdown_function(
           [$this, 'sendPushNotifications'],
-          $recipientGuids
+          array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
+          [
+            'conversationGuid' => $this->guid,
+            'senderName' => Tilmeld::$currentUser->name,
+            'names' => $names,
+            'type' => 'newConversation'
+          ]
       );
     }
 

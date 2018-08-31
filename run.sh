@@ -38,4 +38,9 @@ if [ ! -f "tilmeld_secret.txt" ]; then
   dd if=/dev/urandom bs=32 count=1 | base64 > ./tilmeld_secret.txt
 fi
 
+if [ ! -f "onesignal_rest_api_key.txt" ]; then
+  echo "In order to test app push notifications, you need to put your OneSignal REST API Key in onesignal_rest_api_key.txt."
+  touch ./onesignal_rest_api_key.txt
+fi
+
 docker-compose up
