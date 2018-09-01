@@ -225,7 +225,7 @@
         const thumbnailMatch = thumbnailImg.match(/^data:(image\/\w+);base64,(.*)$/);
         const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
 
-        images[index] = Object.assign({
+        images[index] = Object.assign({}, images[index], {
           dataWidth: images[index].dataHeight,
           dataHeight: images[index].dataWidth,
           data,
@@ -234,7 +234,7 @@
           thumbnailHeight: images[index].thumbnailWidth,
           thumbnail,
           thumbnailImg
-        }, images[index]);
+        });
 
         this.set({images});
       },
