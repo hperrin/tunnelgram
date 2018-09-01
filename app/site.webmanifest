@@ -3,122 +3,57 @@
   "short_name": "Tunnelgram",
   "icons": [
     {
-      "src": "/images/android-chrome-36x36.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-36x36.png?v=9BPPr7gv28",
       "sizes": "36x36",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-48x48.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-48x48.png?v=9BPPr7gv28",
       "sizes": "48x48",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-72x72.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-72x72.png?v=9BPPr7gv28",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-96x96.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-96x96.png?v=9BPPr7gv28",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-144x144.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-144x144.png?v=9BPPr7gv28",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-192x192.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-192x192.png?v=9BPPr7gv28",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-256x256.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-256x256.png?v=9BPPr7gv28",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-384x384.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-384x384.png?v=9BPPr7gv28",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "/images/android-chrome-512x512.png?v=8j8j5JNYqO",
+      "src": "/images/android-chrome-512x512.png?v=9BPPr7gv28",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-24x24.png?v=8j8j5JNYqO",
-      "sizes": "24x24",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-44x44.png?v=8j8j5JNYqO",
-      "sizes": "44x44",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-50x50.png?v=8j8j5JNYqO",
-      "sizes": "50x50",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-76x76.png?v=8j8j5JNYqO",
-      "sizes": "76x76",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-88x88.png?v=8j8j5JNYqO",
-      "sizes": "88x88",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-120x120.png?v=8j8j5JNYqO",
-      "sizes": "120x120",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-150x150.png?v=8j8j5JNYqO",
-      "sizes": "150x150",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-152x152.png?v=8j8j5JNYqO",
-      "sizes": "152x152",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-180x180.png?v=8j8j5JNYqO",
-      "sizes": "180x180",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-300x300.png?v=8j8j5JNYqO",
-      "sizes": "300x300",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-620x300.png?v=8j8j5JNYqO",
-      "sizes": "620x300",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-1024x1024.png?v=8j8j5JNYqO",
-      "sizes": "1024x1024",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/web-1240x600.png?v=8j8j5JNYqO",
-      "sizes": "1240x600",
       "type": "image/png"
     }
   ],
   "scope": "/",
   "start_url": "/#/pwa-home",
-  "theme_color": "#211526",
-  "background_color": "#211526",
+  "theme_color": "#031926",
+  "background_color": "#031926",
   "display": "standalone",
-  "lang": "",
+  "lang": "en-US",
   "orientation": "any",
   "description": "Easy, secure messenger. Encrypted messaging on all your devices."
 }

@@ -34,8 +34,8 @@
     <preference name="AppendUserAgent" value=" CordovaApp" />
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
-    <preference name="BackgroundColor" value="FF211526" />
-    <preference name="StatusBarBackgroundColor" value="#211526" />
+    <preference name="BackgroundColor" value="FF031926" />
+    <preference name="StatusBarBackgroundColor" value="#031926" />
     <preference name="StatusBarStyle" value="lightcontent" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
     <plugin name="onesignal-cordova-plugin" spec="~2.4.1" />

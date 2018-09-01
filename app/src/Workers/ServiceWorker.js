@@ -226,8 +226,8 @@ function isClientFocused () {
 function sendNotification (title, body, guid, timestamp) {
   return self.registration.showNotification(title, {
     body,
-    badge: '/images/badge-72x72.png?v=8j8j5JNYqO',
-    icon: '/images/android-chrome-192x192.png?v=8j8j5JNYqO',
+    badge: '/images/badge-72x72.png?v=9BPPr7gv28',
+    icon: '/images/android-chrome-192x192.png?v=9BPPr7gv28',
     renotify: true,
     tag: '' + guid,
     timestamp,
