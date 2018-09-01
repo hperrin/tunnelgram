@@ -26,6 +26,15 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
         <splash src="www/splash/ios/Default@2x~universal~anyany.png" />
+        <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
+            <string>Tunnelgram needs access to your camera to take photos to attach to messages.</string>
+        </config-file>
+        <config-file parent="NSMicrophoneUsageDescription" target="*-Info.plist">
+            <string>Tunnelgram needs access to your microphone to record audio to attach to messages.</string>
+        </config-file>
+        <config-file parent="NSPhotoLibraryUsageDescription" target="*-Info.plist">
+            <string>Tunnelgram needs access to your photo library to get pictures to attach to messages.</string>
+        </config-file>
     </platform>
     <hook src="hook-icon.js" type="after_platform_add" />
     <hook src="hook-splash.js" type="after_platform_add" />
@@ -42,5 +51,5 @@
     <plugin name="cordova-plugin-statusbar" spec="~2.4.2" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
     <engine name="ios" spec="^4.5.5" />
-    <engine name="android" spec="~7.1.0" />
+    <engine name="android" spec="^7.1.0" />
 </widget>
