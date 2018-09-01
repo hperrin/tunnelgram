@@ -312,6 +312,7 @@
             video.onloadeddata = () => resolve();
             if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
               video.autoplay = true;
+              video.playsinline = true;
             }
             video.src = tempObjectURL;
             await p;
