@@ -28,6 +28,7 @@ class CordovaApp {
   onDeviceReady () {
     this.initOneSignal();
     this.initDeferredStyles();
+    this.initKeyboardHandling();
 
     const script = document.createElement('script');
     script.src = 'dist/main.js';
@@ -71,8 +72,19 @@ class CordovaApp {
       .startInit('113ebc97-79d7-4f63-9f20-045913af0a49')
       .handleNotificationReceived(notificationReceivedCallback)
       .handleNotificationOpened(notificationOpenedCallback)
-      .inFocusDisplaying(window.plugins.OneSignal.OSInFocusDisplayOption.InAppAlert) // TODO(hperrin): Change to '.None' on launch.
+      .inFocusDisplaying(window.plugins.OneSignal.OSInFocusDisplayOption.None) // Change to '.InAppAlert' for testing.
       .endInit();
+  }
+
+  initKeyboardHandling () {
+    Keyboard.shrinkView(true);
+    Keyboard.hideFormAccessoryBar(true);
+    Keyboard.automaticScrollToTopOnHiding = true;
+    // iOS keyboard open will cause white bar at bottom if this is 100%.
+    document.body.style.minHeight = '100vh';
+    document.body.parentNode.style.minHeight = '100vh';
+    document.body.style.minWidth = '100vw';
+    document.body.parentNode.style.minWidth = '100vw';
   }
 
   initDeferredStyles () {
