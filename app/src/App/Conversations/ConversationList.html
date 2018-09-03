@@ -59,13 +59,14 @@
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
-          const {conversations} = this.store.get();
+          const {conversations, user} = this.store.get();
           Nymph.getEntities({
             'class': Conversation.class,
             'sort': 'mdate',
             'reverse': true
           }, {
             'type': '&',
+            'ref': ['acFull', user.guid],
             'gt': ['mdate', conversations.length ? Math.max(...conversations.map(c => c.mdate)) : 0]
           }).then(newConversations => {
             const {conversations} = this.store.get();
@@ -153,11 +154,15 @@
 
         this.set({_loading: true});
 
+        const {user} = this.store.get();
         _subscription = Nymph.getEntities({
           'class': Conversation.class,
           'sort': 'mdate',
           'reverse': true,
           'limit': CONVERSATION_PAGE_SIZE
+        }, {
+          'type': '&',
+          'ref': ['acFull', user.guid]
         }).subscribe(update => {
           if (this.destroyed) {
             return;
@@ -205,6 +210,7 @@
         this.set({_loadingEarlierConversations: true});
 
         try {
+          const {user} = this.store.get();
           const earlierConversations = await Nymph.getEntities({
             'class': Conversation.class,
             'sort': 'mdate',
@@ -212,6 +218,7 @@
             'limit': CONVERSATION_PAGE_SIZE
           }, {
             'type': '&',
+            'ref': ['acFull', user.guid],
             'lt': ['mdate', Math.min(...conversations.map(c => c.mdate))]
           });
 
