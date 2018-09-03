@@ -25,7 +25,6 @@
     "cordova-ios": "^4.5.5",
     "cordova-plugin-camera": "^4.0.3",
     "cordova-plugin-compat": "^1.2.0",
-    "cordova-plugin-context-menu": "^0.1.1",
     "cordova-plugin-file": "^4.3.3",
     "cordova-plugin-keyboard": "^1.2.0",
     "cordova-plugin-media-capture-mp4video": "^1.0.5",
@@ -45,7 +44,6 @@
       "cordova-plugin-nativestorage": {},
       "cordova-plugin-media-capture-mp4video": {},
       "cordova-plugin-keyboard": {},
-      "cordova-plugin-context-menu": {},
       "cordova-plugin-camera": {}
     },
     "platforms": [

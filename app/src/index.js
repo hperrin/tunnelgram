@@ -80,7 +80,8 @@ const store = new UserStore({
   },
   beforeInstallPromptEvent: null,
   webPushSubscription: null,
-  inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+  inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
+  inCordova: window.inCordova
 });
 
 store.constructor.prototype.navigate = (...args) => {

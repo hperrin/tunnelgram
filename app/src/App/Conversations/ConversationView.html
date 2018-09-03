@@ -72,9 +72,27 @@
     {/if}
     <div class="d-flex align-items-stretch border-dark border-top">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/*" multiple>
-      <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="getMedia()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
+      {#if $inCordova}
+        <div class="btn-group dropup p-0" ref:addMediaDropdown>
+          <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center dropdown-toggle" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" title="Add picture/video" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
+          </button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item p-3" type="button" on:click="cordovaCapturePhoto()">Take a photo</button>
+            <button class="dropdown-item p-3" type="button" on:click="cordovaCaptureVideo()">Take a video</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item p-3" type="button" on:click="refs.fileInput.click()">Browse library</button>
+          </div>
+        </div>
+      {:else}
+        <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video">
+          <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
+        </button>
+      {/if}
       <textarea class="form-control border-0 text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
-      <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty || _mediaLoading}" title="Send message"><i class="fas fa-comment"></i></button>
+      <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty || _mediaLoading}" title="Send message">
+        <i class="fas fa-comment"></i>
+      </button>
     </div>
   </form>
 </div>
@@ -85,6 +103,7 @@
   import Message from '../../Entities/Tunnelgram/Message';
   import MessageList from '../Messages/MessageList.html';
   import LoadingIndicator from '../LoadingIndicator.html';
+  import {Dropdown} from '../../Services/Val/BSN';
   import {crypt} from '../../Services/EncryptionService';
   import {EditImageService} from '../../Services/EditImageService';
   import {VideoService} from '../../Services/VideoService';
@@ -103,6 +122,14 @@
       }
       if (this.timeout) {
         window.clearTimeout(this.timeout);
+      }
+    },
+
+    onupdate () {
+      if (this.refs.addMediaDropdown && !this.addMediaDropdown) {
+        this.addMediaDropdown = new Dropdown(this.refs.addMediaDropdown);
+      } else if (!this.refs.addMediaDropdown && this.addMediaDropdown) {
+        delete this.addMediaDropdown;
       }
     },
 
@@ -272,116 +299,78 @@
         this.handleFiles(event.dataTransfer.files);
       },
 
-      async getMedia () {
-        if (window.inCordova) {
-          const entries = [{
-            title: 'Take a photo',
-            id: 'capture-photo'
-          }, {
-            title: 'Take a video',
-            id: 'capture-video'
-          }, {
-            title: 'Browse photo library',
-            id: 'browse'
-          }, {
-            title: '',
-            id: '',
-            isSeparator: true
-          }, {
-            title: 'Cancel',
-            id: 'cancel'
-          }];
-
-          const context = {
-            title: 'Attach Media',
-            items: entries,
-            x: 0,
-            y: 0
-          }
-
-          let resolve;
-          const p = new Promise(res => resolve = res);
-          ContextMenu.open(context, id => {
-            resolve(id);
-          });
-          const selected = await p;
-
-          if (selected === 'capture-photo') {
-            navigator.camera.getPicture(
-              imageURI => {
-                window.resolveLocalFileSystemURL(imageURI, entry => {
-                  entry.file(async file => {
-                    file.localURL = imageURI;
-                    const lfile = imageURI.toLowerCase();
-                    if (lfile.endsWith('.png')) {
-                      file.type = 'image/png';
-                    } else if (lfile.endsWith('.gif')) {
-                      file.type = 'image/gif';
-                    } else if (lfile.endsWith('.jpeg') || lfile.endsWith('.jpg')) {
-                      file.type = 'image/jpeg';
-                    } else {
-                      file.type = '';
-                    }
-                    await this.handleFiles([file]);
-                    navigator.camera.cleanup();
-                  });
-                });
-              },
-              err => {
-                // TODO (hperrin): Error handling.
-              },
-              {
-                correctOrientation: true,
-                saveToPhotoAlbum: false
-              }
-            );
-          } else if (selected === 'capture-video') {
-            navigator.device.capture.captureVideo(
-              mediaFiles => {
-                window.resolveLocalFileSystemURL(mediaFiles[0].localURL, entry => {
-                  entry.file(file => {
-                    file.type = mediaFiles[0].type;
-                    file.localURL = entry.toURL();
-                    this.handleFiles([file]);
-                  });
-                });
-              },
-              err => {
-                const errObj = {
-                  textStatus: ''
-                };
-                switch (err.code) {
-                  case CaptureError.CAPTURE_INTERNAL_ERR:
-                    errObj.textStatus = 'The camera or microphone failed to capture image or sound.';
-                    break;
-                  case CaptureError.CAPTURE_APPLICATION_BUSY:
-                    errObj.textStatus = 'The camera or audio capture application is currently serving another capture request.';
-                    break;
-                  case CaptureError.CAPTURE_INVALID_ARGUMENT:
-                    errObj.textStatus = 'Invalid use of the API (e.g., the value of limit is less than one).';
-                    break;
-                  case CaptureError.CAPTURE_NO_MEDIA_FILES:
-                    // errObj.textStatus = 'The user exits the camera or audio capture application before capturing anything.';
-                    return;
-                  case CaptureError.CAPTURE_PERMISSION_DENIED:
-                    // errObj.textStatus = 'The user denied a permission required to perform the given capture request.';
-                    return;
-                  case CaptureError.CAPTURE_NOT_SUPPORTED:
-                    errObj.textStatus = 'The requested capture operation is not supported.';
-                    break;
+      cordovaCapturePhoto () {
+        navigator.camera.getPicture(
+          imageURI => {
+            window.resolveLocalFileSystemURL(imageURI, entry => {
+              entry.file(async file => {
+                file.localURL = imageURI;
+                const lfile = imageURI.toLowerCase();
+                if (lfile.endsWith('.png')) {
+                  file.type = 'image/png';
+                } else if (lfile.endsWith('.gif')) {
+                  file.type = 'image/gif';
+                } else if (lfile.endsWith('.jpeg') || lfile.endsWith('.jpg')) {
+                  file.type = 'image/jpeg';
+                } else {
+                  file.type = '';
                 }
-                ErrHandler(errObj);
-              },
-              {
-                quality: 0
-              }
-            );
-          } else if (selected === 'browse') {
-            this.refs.fileInput.click();
+                await this.handleFiles([file]);
+                navigator.camera.cleanup();
+              });
+            });
+          },
+          err => {
+            // TODO (hperrin): Error handling.
+          },
+          {
+            correctOrientation: true,
+            saveToPhotoAlbum: false
           }
-        } else {
-          this.refs.fileInput.click();
-        }
+        );
+      },
+
+      cordovaCaptureVideo () {
+        navigator.device.capture.captureVideo(
+          mediaFiles => {
+            window.resolveLocalFileSystemURL(mediaFiles[0].localURL, entry => {
+              entry.file(file => {
+                file.type = mediaFiles[0].type;
+                file.localURL = entry.toURL();
+                this.handleFiles([file]);
+              });
+            });
+          },
+          err => {
+            const errObj = {
+              textStatus: ''
+            };
+            switch (err.code) {
+              case CaptureError.CAPTURE_INTERNAL_ERR:
+                errObj.textStatus = 'The camera or microphone failed to capture image or sound.';
+                break;
+              case CaptureError.CAPTURE_APPLICATION_BUSY:
+                errObj.textStatus = 'The camera or audio capture application is currently serving another capture request.';
+                break;
+              case CaptureError.CAPTURE_INVALID_ARGUMENT:
+                errObj.textStatus = 'Invalid use of the API (e.g., the value of limit is less than one).';
+                break;
+              case CaptureError.CAPTURE_NO_MEDIA_FILES:
+                // errObj.textStatus = 'The user exits the camera or audio capture application before capturing anything.';
+                return;
+              case CaptureError.CAPTURE_PERMISSION_DENIED:
+                // errObj.textStatus = 'The user denied a permission required to perform the given capture request.';
+                return;
+              case CaptureError.CAPTURE_NOT_SUPPORTED:
+                errObj.textStatus = 'The requested capture operation is not supported.';
+                break;
+            }
+            ErrHandler(errObj);
+          },
+          {
+            quality: 0
+          }
+        );
       },
 
       async handleFiles (files) {
@@ -629,6 +618,14 @@
 </script>
 
 <style>
+  ref:addMediaDropdown .dropdown-toggle:after {
+    display: none;
+  }
+  ref:addMediaDropdown .dropdown-menu {
+    width: 100vw;
+    max-width: 520px;
+  }
+
   ref:textEditor:focus {
     box-shadow: none;
   }
