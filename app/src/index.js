@@ -238,9 +238,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       // This won't resolve until the user allows notifications and OneSignal
       // registers the device and returns a player ID. This should only happen
       // after the user has logged in, so we can safely save it to the server.
-      console.log('Waiting for Push Player ID.');
       let playerId = await window.appPushPlayerIdPromise;
-      console.log('Push Player ID: ', playerId);
       if (playerId == null) {
         return;
       }

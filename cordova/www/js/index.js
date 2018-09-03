@@ -53,21 +53,17 @@ class CordovaApp {
 
     window.plugins.OneSignal.getPermissionSubscriptionState(status => {
       if (status.subscriptionStatus.subscribed) {
-        console.log('Already Subscribed for OneSignal push notifications.');
         // get player ID
         resolve(status.subscriptionStatus.userId);
       }
-      console.log('Push Subscription status: ', status);
     });
 
 
     window.plugins.OneSignal.addSubscriptionObserver(state => {
       if (state.to.subscribed) {
-        console.log('Subscribed for OneSignal push notifications!');
         // get player ID
         resolve(state.to.userId);
       }
-      console.log('Push Subscription state changed: ', state);
     });
 
     window.plugins.OneSignal
