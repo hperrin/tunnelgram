@@ -78,7 +78,6 @@ class CordovaApp {
 
   initKeyboardHandling () {
     Keyboard.shrinkView(true);
-    Keyboard.hideFormAccessoryBar(true);
     Keyboard.automaticScrollToTopOnHiding = true;
     // iOS keyboard open will cause white bar at bottom if this is 100%.
     document.body.style.minHeight = '100vh';

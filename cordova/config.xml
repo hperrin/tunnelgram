@@ -35,6 +35,9 @@
         <config-file parent="NSPhotoLibraryUsageDescription" target="*-Info.plist">
             <string>Photo library access is required to attach photos from your library to messages.</string>
         </config-file>
+        <config-file parent="NSPhotoLibraryAddUsageDescription" target="*-Info.plist">
+            <string>Photos that you take must be added to your library to attach to messages.</string>
+        </config-file>
     </platform>
     <hook src="hook-icon.js" type="after_platform_add" />
     <hook src="hook-splash.js" type="after_platform_add" />
@@ -50,7 +53,10 @@
     <plugin name="onesignal-cordova-plugin" spec="~2.4.1" />
     <plugin name="cordova-plugin-statusbar" spec="~2.4.2" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
+    <plugin name="cordova-plugin-media-capture-mp4video" spec="^1.0.5" />
     <plugin name="cordova-plugin-keyboard" spec="^1.2.0" />
-    <engine name="ios" spec="^4.5.5" />
+    <plugin name="cordova-plugin-context-menu" spec="^0.1.1" />
+    <plugin name="cordova-plugin-camera" spec="^4.0.3" />
     <engine name="android" spec="^7.1.0" />
+    <engine name="ios" spec="^4.5.5" />
 </widget>

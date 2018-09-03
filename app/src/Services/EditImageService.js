@@ -8,7 +8,7 @@ export class EditImageService {
     this.offscreenCanvasSupport = !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
-      this.resizeImageWorker = new Worker('/dist/Workers/ResizeImage.js');
+      this.resizeImageWorker = new Worker('dist/Workers/ResizeImage.js');
       this.resizeImageWorkerCounter = 0;
       this.resizeImageWorkerCallbacks = {};
       this.resizeImageWorker.onmessage = (e) => {

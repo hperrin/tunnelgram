@@ -2,7 +2,7 @@ import localforage from 'localforage/src/localforage';
 
 export class StorageService {
   constructor () {
-    if ('inCordova' in window && window.inCordova) {
+    if (window.inCordova) {
       this.cordovaAPI = true;
       this.storage = NativeStorage;
     } else {

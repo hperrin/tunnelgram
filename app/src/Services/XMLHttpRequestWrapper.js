@@ -174,7 +174,7 @@ XMLHttpRequestWrapper.tilmeldAuthToken = null;
 
 // In Cordova, cookies don't persist, so we need to wrap XMLHttpRequest to look
 // for Tilmeld auth token header and save it.
-if ('inCordova' in window && window.inCordova) {
+if (window.inCordova) {
   window.XMLHttpRequest = XMLHttpRequestWrapper;
   XMLHttpRequestWrapper._resolve;
   XMLHttpRequestWrapper._ready = new Promise(res => XMLHttpRequestWrapper._resolve = res);

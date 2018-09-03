@@ -72,7 +72,7 @@
     {/if}
     <div class="d-flex align-items-stretch border-dark border-top">
       <input class="d-none" type="file" ref:fileInput on:change="handleFiles(event.target.files)" accept="image/*, video/*" multiple>
-      <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="refs.fileInput.click()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
+      <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click="getMedia()" title="Add picture/video"><i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i></button>
       <textarea class="form-control border-0 text-dark" bind:value="text" placeholder="New message" on:keydown="handleKeyDown(event)" on:keyup="handleKeyUp()" ref:textEditor></textarea>
       <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled="{messageIsEmpty || _mediaLoading}" title="Send message"><i class="fas fa-comment"></i></button>
     </div>
@@ -272,6 +272,118 @@
         this.handleFiles(event.dataTransfer.files);
       },
 
+      async getMedia () {
+        if (window.inCordova) {
+          const entries = [{
+            title: 'Take a photo',
+            id: 'capture-photo'
+          }, {
+            title: 'Take a video',
+            id: 'capture-video'
+          }, {
+            title: 'Browse photo library',
+            id: 'browse'
+          }, {
+            title: '',
+            id: '',
+            isSeparator: true
+          }, {
+            title: 'Cancel',
+            id: 'cancel'
+          }];
+
+          const context = {
+            title: 'Attach Media',
+            items: entries,
+            x: 0,
+            y: 0
+          }
+
+          let resolve;
+          const p = new Promise(res => resolve = res);
+          ContextMenu.open(context, id => {
+            resolve(id);
+          });
+          const selected = await p;
+
+          if (selected === 'capture-photo') {
+            navigator.camera.getPicture(
+              imageURI => {
+                window.resolveLocalFileSystemURL(imageURI, entry => {
+                  entry.file(async file => {
+                    file.localURL = imageURI;
+                    const lfile = imageURI.toLowerCase();
+                    if (lfile.endsWith('.png')) {
+                      file.type = 'image/png';
+                    } else if (lfile.endsWith('.gif')) {
+                      file.type = 'image/gif';
+                    } else if (lfile.endsWith('.jpeg') || lfile.endsWith('.jpg')) {
+                      file.type = 'image/jpeg';
+                    } else {
+                      file.type = '';
+                    }
+                    await this.handleFiles([file]);
+                    navigator.camera.cleanup();
+                  });
+                });
+              },
+              err => {
+                // TODO (hperrin): Error handling.
+              },
+              {
+                correctOrientation: true,
+                saveToPhotoAlbum: false
+              }
+            );
+          } else if (selected === 'capture-video') {
+            navigator.device.capture.captureVideo(
+              mediaFiles => {
+                window.resolveLocalFileSystemURL(mediaFiles[0].localURL, entry => {
+                  entry.file(file => {
+                    file.type = mediaFiles[0].type;
+                    file.localURL = entry.toURL();
+                    this.handleFiles([file]);
+                  });
+                });
+              },
+              err => {
+                const errObj = {
+                  textStatus: ''
+                };
+                switch (err.code) {
+                  case CaptureError.CAPTURE_INTERNAL_ERR:
+                    errObj.textStatus = 'The camera or microphone failed to capture image or sound.';
+                    break;
+                  case CaptureError.CAPTURE_APPLICATION_BUSY:
+                    errObj.textStatus = 'The camera or audio capture application is currently serving another capture request.';
+                    break;
+                  case CaptureError.CAPTURE_INVALID_ARGUMENT:
+                    errObj.textStatus = 'Invalid use of the API (e.g., the value of limit is less than one).';
+                    break;
+                  case CaptureError.CAPTURE_NO_MEDIA_FILES:
+                    // errObj.textStatus = 'The user exits the camera or audio capture application before capturing anything.';
+                    return;
+                  case CaptureError.CAPTURE_PERMISSION_DENIED:
+                    // errObj.textStatus = 'The user denied a permission required to perform the given capture request.';
+                    return;
+                  case CaptureError.CAPTURE_NOT_SUPPORTED:
+                    errObj.textStatus = 'The requested capture operation is not supported.';
+                    break;
+                }
+                ErrHandler(errObj);
+              },
+              {
+                quality: 0
+              }
+            );
+          } else if (selected === 'browse') {
+            this.refs.fileInput.click();
+          }
+        } else {
+          this.refs.fileInput.click();
+        }
+      },
+
       async handleFiles (files) {
         let imageCount = 0;
         const currentImageCount = this.get().images.length;
@@ -306,16 +418,20 @@
             // Read the video into a temporary video element to check it and
             // generate a thumbnail.
             const video = document.createElement('video');
-            const tempObjectURL = URL.createObjectURL(file);
+            const tempObjectURL = file.localURL || URL.createObjectURL(file);
             let resolve;
-            const p = new Promise(r => resolve = r);
+            let p = new Promise(r => resolve = r);
             video.onloadeddata = () => resolve();
             if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
               video.autoplay = true;
-              video.playsinline = true;
             }
+            video.setAttribute('playsinline', '');
+            video.setAttribute('webkit-playsinline', '');
             video.src = tempObjectURL;
             await p;
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+              video.pause();
+            }
 
             // Make sure it's valid.
             if (!video.videoWidth || !video.videoHeight || !video.duration) {
@@ -329,81 +445,87 @@
 
             // Now read the video fully into memory.
             const reader = new FileReader();
-            reader.onload = async e => {
-              let data;
-
-              // Does the video need to be transcoded?
-              let transcoded = false;
-              if (file.type === 'video/mp4' && file.size < 20971520) {
-                data = new Uint8Array(e.target.result);
-              } else {
-                transcoded = true;
-                PNotify.info({
-                  title: 'Transcoding',
-                  text: file.size < 20971520
-                    ? 'Your video is formatted as '+file.type+'. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
-                    : 'Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it\'s too big.'
-                });
-                try {
-                  const _transcoder = new VideoService();
-                  this.set({_transcoder});
-                  data = await _transcoder.transcode(new Uint8Array(e.target.result), video.duration, progress => this.set({_transcodeProgress: progress}));
-                } catch (err) {
-                  PNotify.error({
-                    title: 'Transcoding Failed',
-                    text: err
-                  });
-                  this.set({
-                    _mediaLoading: false,
-                    _transcoder: null,
-                    _transcodeProgress: null
-                  });
-                  return;
-                }
-              }
-
-              const blob = new Blob([data], {type: 'video/mp4'});
-              const objectURL = URL.createObjectURL(blob);
-
-              if (transcoded) {
-                // Reload the transcoded video to get a proper thumbnail.
-                let resolve;
-                const p = new Promise(r => resolve = r);
-                video.onloadeddata = () => resolve();
-                video.src = objectURL;
-                await p;
-              }
-
-              let dataType = 'video/mp4';
-              let resizeImage = new EditImageService(video, 'image/jpeg');
-              const thumbnailImg = await resizeImage.resizeContain(300, 300);
-              resizeImage.destroy();
-              const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-              const thumbnailType = thumbnailMatch[1];
-              const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
-
-              this.set({
-                video: {
-                  name: file.name + (transcoded ? '-transcoded.mp4' : ''),
-                  dataType,
-                  dataWidth: '' + video.videoWidth,
-                  dataHeight: '' + video.videoHeight,
-                  dataDuration: '' + video.duration,
-                  data,
-                  thumbnailType,
-                  thumbnailWidth: '' + thumbnailImg.width,
-                  thumbnailHeight: '' + thumbnailImg.height,
-                  thumbnail,
-                  thumbnailImg: thumbnailImg.data,
-                  objectURL
-                },
-                images: [],
-                _mediaLoading: false,
-                _transcoder: null,
-                _transcodeProgress: null
-              });
-            };
+            p = new Promise(r => resolve = r);
+            if (window.inCordova) {
+              reader.onloadend = () => resolve(reader.result);
+            } else {
+              reader.onload = () => resolve(e.target.result);
+            }
             reader.readAsArrayBuffer(file);
+
+            let data;
+            const result = await p;
+
+            // Does the video need to be transcoded?
+            let transcoded = false;
+            if (file.type === 'video/mp4' && file.size < 20971520) {
+              data = new Uint8Array(result);
+            } else {
+              transcoded = true;
+              PNotify.info({
+                title: 'Transcoding',
+                text: file.size < 20971520
+                  ? 'Your video is formatted as '+file.type+'. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
+                  : 'Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it\'s too big.'
+              });
+              try {
+                const _transcoder = new VideoService();
+                this.set({_transcoder});
+                data = await _transcoder.transcode(new Uint8Array(result), video.duration, progress => this.set({_transcodeProgress: progress}));
+              } catch (err) {
+                PNotify.error({
+                  title: 'Transcoding Failed',
+                  text: err
+                });
+                this.set({
+                  _mediaLoading: false,
+                  _transcoder: null,
+                  _transcodeProgress: null
+                });
+                return;
+              }
+            }
+
+            const blob = new Blob([data], {type: 'video/mp4'});
+            const objectURL = URL.createObjectURL(blob);
+
+            if (transcoded) {
+              // Reload the transcoded video to get a proper thumbnail.
+              let resolve;
+              const p = new Promise(r => resolve = r);
+              video.onloadeddata = () => resolve();
+              video.src = objectURL;
+              await p;
+            }
+
+            let dataType = 'video/mp4';
+            let resizeImage = new EditImageService(video, 'image/jpeg');
+            const thumbnailImg = await resizeImage.resizeContain(300, 300);
+            resizeImage.destroy();
+            const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+            const thumbnailType = thumbnailMatch[1];
+            const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
+
+            this.set({
+              video: {
+                name: file.name + (transcoded ? '-transcoded.mp4' : ''),
+                dataType,
+                dataWidth: '' + video.videoWidth,
+                dataHeight: '' + video.videoHeight,
+                dataDuration: '' + video.duration,
+                data,
+                thumbnailType,
+                thumbnailWidth: '' + thumbnailImg.width,
+                thumbnailHeight: '' + thumbnailImg.height,
+                thumbnail,
+                thumbnailImg: thumbnailImg.data,
+                objectURL
+              },
+              images: [],
+              _mediaLoading: false,
+              _transcoder: null,
+              _transcodeProgress: null
+            });
 
             break;
           } else if (!file.type.startsWith('image/')) {
@@ -424,7 +546,7 @@
             // Read the image into an Image to resize it and generate a
             // thumbnail.
             const image = new Image();
-            const tempObjectURL = URL.createObjectURL(file);
+            const tempObjectURL = file.localURL || URL.createObjectURL(file);
             let resolve;
             const p = new Promise(r => resolve = r);
             image.onload = () => resolve();
@@ -478,6 +600,11 @@
 
       cancelVideoTranscode () {
         this.get()._transcoder.cancel();
+        this.set({
+          _mediaLoading: false,
+          _transcoder: null,
+          _transcodeProgress: null
+        });
       }
     },
 
