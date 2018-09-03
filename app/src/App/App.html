@@ -80,6 +80,12 @@
 
   export default {
     oncreate () {
+      if (window.inCordova) {
+        window.plugins.OneSignal.userProvidedPrivacyConsent(consent => {
+          this.set({_hideNotificationPrompt: consent});
+        });
+      }
+
       (async () => {
         if (navigator.storage && navigator.storage.persist) {
           this.set({_hidePersistentStoragePrompt: await navigator.storage.persisted()});

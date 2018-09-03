@@ -39,6 +39,8 @@ class CordovaApp {
     // Enable to debug issues.
     // window.plugins.OneSignal.setLogLevel({logLevel: 4, visualLevel: 4});
 
+    window.plugins.OneSignal.setRequiresUserPrivacyConsent(true);
+
     let resolve;
     window.appPushPlayerIdPromise = new Promise(res => resolve = res);
 

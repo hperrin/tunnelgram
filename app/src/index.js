@@ -73,6 +73,8 @@ const store = new UserStore({
   disconnected: !navigator.onLine,
   decryption: true,
   requestNotificationPermission: () => {
+    // This is the deault permission asker for sending desktop notifications
+    // when the page is open in the browser.
     PNotify.modules.Desktop.permission();
   },
   requestPersistentStorage: () => {
@@ -229,6 +231,13 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   (async () => {
     if (window.inCordova) {
       // Cordova OneSignal Push Subscriptions
+
+      // When user consents to notifications, tell OneSignal.
+      store.set({requestNotificationPermission: () => window.plugins.OneSignal.provideUserConsent(true)});
+
+      // This won't resolve until the user allows notifications and OneSignal
+      // registers the device and returns a player ID. This should only happen
+      // after the user has logged in, so we can safely save it to the server.
       console.log('Waiting for Push Player ID.');
       let playerId = await window.appPushPlayerIdPromise;
       console.log('Push Player ID: ', playerId);
