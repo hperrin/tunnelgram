@@ -22,6 +22,7 @@ body {
   -webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
   -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
   -webkit-user-select: 'text'; /* prevent copy paste, to allow, change 'none' to 'text' */
+  -webkit-overflow-scrolling: touch; /* Provide smooth scrolling on the front page when the user is not logged in. */
 }
 body > :first-child {
   /* iPhone X notch padding */
