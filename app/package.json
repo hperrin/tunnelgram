@@ -36,6 +36,8 @@
     "bootswatch": "^4.1.3",
     "core-js": "^2.5.7",
     "css-loader": "^1.0.0",
+    "hammer-timejs": "^1.1.0",
+    "hammerjs": "^2.0.8",
     "hash.js": "^1.1.5",
     "html-loader": "^0.5.5",
     "jsencrypt": "^3.0.0-rc.1",

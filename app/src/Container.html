@@ -21,7 +21,7 @@
           {#if $user}
             <ul class="navbar-nav d-lg-none">
               <li class="nav-item">
-                <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="handleConvoClick()" title="Conversations">
+                <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})" title="Conversations">
                   <i class="fas fa-comments"></i>
                 </a>
               </li>
@@ -175,17 +175,6 @@
       return {
         _cryptoAvailable: cryptoAvailable()
       };
-    },
-
-    methods: {
-      handleConvoClick () {
-        const {convosOut} = this.store.get();
-        if (convosOut) {
-          window.history.back();
-        } else {
-          this.store.navigate('/pwa-home');
-        }
-      }
     },
 
     components: {

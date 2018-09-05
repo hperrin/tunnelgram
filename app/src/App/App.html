@@ -42,13 +42,13 @@
     </a>
   </div>
 {/if}
-<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative">
-  <div class="w-100 bg-dark text-light d-lg-block {$convosOut ? '' : 'd-none'}" ref:convos>
+<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative hammertime">
+  <div class="bg-dark text-light d-lg-block {$convosOut ? 'convos-out' : ''}" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
       on:tunnelgram-navigate="navigate(event.conversation)" />
   </div>
-  <div class="flex-grow-1 d-lg-block bg-light text-dark {!$convosOut ? '' : 'd-none'}">
+  <div class="flex-grow-1 d-lg-block bg-light text-dark" ref:mainUi>
     {#if $loadingConversation || $loadingUser}
       <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
         <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -67,6 +67,8 @@
 <script>
   import PNotify from 'pnotify/dist/es/PNotify';
   import 'pnotify/dist/es/PNotifyDesktop';
+  import * as Hammer from 'hammerjs';
+  import 'hammer-timejs';
   import Conversation from '../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationList from './Conversations/ConversationList.html';
@@ -91,6 +93,39 @@
           this.set({_hidePersistentStoragePrompt: await navigator.storage.persisted()});
         }
       })();
+    },
+
+    onupdate ({previous}) {
+      // Initialize swipe gestures.
+      const newHammerManager = el => new Hammer.Manager(el, {
+        touchAction: 'auto',
+        inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput,
+        recognizers: [
+          [Hammer.Swipe, {
+            direction: Hammer.DIRECTION_HORIZONTAL
+          }]
+        ]
+      });
+      if (this.refs.mainUi && !this.mainUiHammer) {
+        this.mainUiHammer = newHammerManager(this.refs.mainUi);
+        this.mainUiHammer.on('swipe', e => {
+          if (e.direction === Hammer.DIRECTION_RIGHT) {
+            this.store.set({convosOut: true});
+          }
+        });
+      } else if (!this.refs.mainUi && this.mainUiHammer) {
+        delete this.mainUiHammer;
+      }
+      if (this.refs.convos && !this.convosHammer) {
+        this.convosHammer = newHammerManager(this.refs.convos);
+        this.convosHammer.on('swipe', e => {
+          if (e.direction === Hammer.DIRECTION_LEFT) {
+            this.store.set({convosOut: false});
+          }
+        });
+      } else if (!this.refs.convos && this.convosHammer) {
+        delete this.convosHammer;
+      }
     },
 
     data () {
@@ -218,9 +253,24 @@
 </script>
 
 <style>
+  ref:convos {
+    position: absolute;
+    width: 100%;
+    right: 100%;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    transition: transform ease .15s;
+    transform: translateX(0);
+  }
+  ref:convos.convos-out {
+    transform: translateX(100%);
+  }
   @media (min-width: 991.98px) {
-    ref:convos {
+    ref:convos, ref:convos.convos-out {
+      position: static;
       max-width: 350px;
+      transform: none;
     }
   }
 
