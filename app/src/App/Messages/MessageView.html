@@ -30,7 +30,8 @@
       tabindex="0"
       role="button"
       on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
-      on:dblclick="set({_showActions: !_showActions})" title="{_createdDate}">
+      on:dblclick="toggleActions()" title="{_createdDate}"
+      ref:messageContainer>
       {#if shouldEmbiggen}
         <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
           {#if message.decrypted.text != null}
@@ -86,6 +87,7 @@
   import moment from 'moment';
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
+  import * as Hammer from 'hammerjs';
   import ImageGrid from './Media/ImageGrid.html';
   import Video from './Media/Video.html';
   import Avatar from '../Users/Avatar.html';
@@ -148,6 +150,27 @@
             }
           });
         }
+      }
+    },
+
+    onupdate ({previous}) {
+      // Initialize swipe gestures.
+      const newHammerManager = el => {
+        const man = new Hammer.Manager(el, {
+          touchAction: 'auto',
+          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+        });
+        const press = new Hammer.Press();
+        man.add(press);
+        return man;
+      };
+      if (this.refs.messageContainer && !this.messageContainerHammer) {
+        this.messageContainerHammer = newHammerManager(this.refs.messageContainer);
+        this.messageContainerHammer.on('press', e => {
+          this.toggleActions();
+        });
+      } else if (!this.refs.messageContainer && this.messageContainerHammer) {
+        delete this.messageContainerHammer;
       }
     },
 
@@ -243,6 +266,10 @@
           createdDateRelative = cdateMoment.fromNow();
         }
         this.set({createdDateRelative});
+      },
+
+      toggleActions () {
+        this.set({_showActions: !this.get()._showActions})
       }
     },
 
