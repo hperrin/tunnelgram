@@ -42,13 +42,14 @@
     </a>
   </div>
 {/if}
-<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative hammertime {$convosOut ? 'convos-out' : ''}">
+<div class="d-flex flex-row flex-grow-1 h-100 position-relative hammertime {$convosOut ? 'convos-out' : ''}">
   <div class="bg-dark text-light d-lg-block" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
       on:tunnelgram-navigate="navigate(event.conversation)" />
   </div>
-  <div class="flex-grow-1 d-lg-block bg-light text-dark" ref:mainUi>
+  <!-- This needs the width:0 style, or it will offset the list during loading. -->
+  <div class="flex-grow-1 d-lg-block bg-light text-dark" style="width: 0;" ref:mainUi>
     {#if $loadingConversation || $loadingUser}
       <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
         <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -96,6 +97,8 @@
     },
 
     onupdate ({previous}) {
+      // Set the mainUi width to the proper value.
+      this.refs.mainUi.style.width = '100%';
       // Initialize swipe gestures.
       const newHammerManager = el => {
         const man = new Hammer.Manager(el, {
@@ -273,9 +276,11 @@
 </script>
 
 <style>
+  ref:convos {
+    width: 100%;
+  }
   ref:mainUi {
     position: absolute;
-    width: 100%;
     left: 100%;
     top: 0;
     bottom: 0;
