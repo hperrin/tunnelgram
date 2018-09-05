@@ -42,8 +42,8 @@
     </a>
   </div>
 {/if}
-<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative hammertime">
-  <div class="bg-dark text-light d-lg-block {$convosOut ? 'convos-out' : ''}" ref:convos>
+<div class="d-flex flex-small-row flex-grow-1 h-100 position-relative hammertime {$convosOut ? 'convos-out' : ''}">
+  <div class="bg-dark text-light d-lg-block" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
       on:tunnelgram-navigate="navigate(event.conversation)" />
@@ -97,21 +97,35 @@
 
     onupdate ({previous}) {
       // Initialize swipe gestures.
-      const newHammerManager = el => new Hammer.Manager(el, {
-        touchAction: 'auto',
-        inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput,
-        recognizers: [
-          [Hammer.Swipe, {
-            direction: Hammer.DIRECTION_HORIZONTAL
-          }]
-        ]
-      });
+      const newHammerManager = el => {
+        const man = new Hammer.Manager(el, {
+          touchAction: 'auto',
+          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+        });
+        const pan = new Hammer.Pan({
+          threshold: 45,
+          pointers: 0
+        });
+        const swipe = new Hammer.Swipe({
+          direction: Hammer.DIRECTION_HORIZONTAL
+        });
+        swipe.recognizeWith(pan);
+        man.add(pan);
+        man.add(swipe);
+        return man;
+      };
       if (this.refs.mainUi && !this.mainUiHammer) {
         this.mainUiHammer = newHammerManager(this.refs.mainUi);
         this.mainUiHammer.on('swipe', e => {
           if (e.direction === Hammer.DIRECTION_RIGHT) {
             this.store.set({convosOut: true});
           }
+        });
+        this.mainUiHammer.on('panstart panmove', e => {
+          this.refs.mainUi.style.transform = 'translateX(calc(-100% + '+Math.max(e.deltaX, 0)+'px))';
+        });
+        this.mainUiHammer.on('panend', e => {
+          this.refs.mainUi.style.transform = null;
         });
       } else if (!this.refs.mainUi && this.mainUiHammer) {
         delete this.mainUiHammer;
@@ -122,6 +136,12 @@
           if (e.direction === Hammer.DIRECTION_LEFT) {
             this.store.set({convosOut: false});
           }
+        });
+        this.convosHammer.on('panstart panmove', e => {
+          this.refs.mainUi.style.transform = 'translateX('+e.deltaX+'px)';
+        });
+        this.convosHammer.on('panend', e => {
+          this.refs.mainUi.style.transform = null;
         });
       } else if (!this.refs.convos && this.convosHammer) {
         delete this.convosHammer;
@@ -253,23 +273,25 @@
 </script>
 
 <style>
-  ref:convos {
+  ref:mainUi {
     position: absolute;
     width: 100%;
-    right: 100%;
+    left: 100%;
     top: 0;
     bottom: 0;
-    z-index: 1;
+    z-index: 2;
     transition: transform ease .15s;
+    transform: translateX(-100%);
+  }
+  .convos-out ref:mainUi {
     transform: translateX(0);
   }
-  ref:convos.convos-out {
-    transform: translateX(100%);
-  }
   @media (min-width: 991.98px) {
-    ref:convos, ref:convos.convos-out {
-      position: static;
+    ref:convos {
       max-width: 350px;
+    }
+    ref:mainUi, .convos-out ref:mainUi {
+      position: static;
       transform: none;
     }
   }
