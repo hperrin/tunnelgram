@@ -106,11 +106,12 @@
           inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
         });
         const pan = new Hammer.Pan({
-          threshold: 45,
-          pointers: 0
+          pointers: 0,
+          threshold: 90,
+          direction: Hammer.DIRECTION_HORIZONTAL
         });
         const swipe = new Hammer.Swipe({
-          direction: Hammer.DIRECTION_HORIZONTAL
+          threshold: 90
         });
         swipe.recognizeWith(pan);
         man.add(pan);
@@ -124,10 +125,14 @@
             this.store.set({convosOut: true});
           }
         });
+        this.mainUiHammer.on('panstart', e => {
+          this.refs.mainUi.style.transition = 'none';
+        });
         this.mainUiHammer.on('panstart panmove', e => {
           this.refs.mainUi.style.transform = 'translateX(calc(-100% + '+Math.max(e.deltaX, 0)+'px))';
         });
         this.mainUiHammer.on('panend', e => {
+          this.refs.mainUi.style.transition = null;
           this.refs.mainUi.style.transform = null;
         });
       } else if (!this.refs.mainUi && this.mainUiHammer) {
