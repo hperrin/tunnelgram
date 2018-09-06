@@ -115,12 +115,6 @@
   import ErrHandler from '../../ErrHandler';
 
   export default {
-    oncreate () {
-      if (!this.store.get().conversation.guid) {
-        this.focusUsername();
-      }
-    },
-
     onupdate ({changed, current}) {
       if (changed.addUsername) {
         let users = [];
