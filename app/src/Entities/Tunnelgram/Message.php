@@ -59,13 +59,23 @@ class Message extends \Nymph\Entity {
   public function jsonSerialize($clientClassName = true) {
     $object = parent::jsonSerialize($clientClassName);
 
-    if (Tilmeld::$currentUser !== null) {
-      $ownGuid = Tilmeld::$currentUser->guid;
-      $newKeys = [];
-      if (array_key_exists($ownGuid, $object->data['keys'])) {
-        $newKeys[$ownGuid] = $object->data['keys'][$ownGuid];
+    if ($this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC) {
+      $object->encryption = false;
+    } else {
+      if ($this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE) {
+        $object->data['keys'] = $this->conversation->keys;
       }
-      $object->data['keys'] = $newKeys;
+
+      if (Tilmeld::$currentUser !== null) {
+        $ownGuid = Tilmeld::$currentUser->guid;
+        $newKeys = [];
+        if (array_key_exists($ownGuid, $object->data['keys'])) {
+          $newKeys[$ownGuid] = $object->data['keys'][$ownGuid];
+        }
+        $object->data['keys'] = $newKeys;
+      }
+
+      $object->encryption = true;
     }
 
     return $object;

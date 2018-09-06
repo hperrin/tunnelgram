@@ -23,14 +23,15 @@ export class Conversation extends Entity {
       name: null
     };
     this.data.name = null;
+    this.mode = Conversation.MODE_CONVERSATION;
     this.data.acFull = [];
   }
 
   // === Instance Methods ===
 
-  init (entityData) {
+  init (entityData, ...args) {
     const savedEntities = saveEntities(this);
-    super.init(entityData);
+    super.init(entityData, ...args);
     this.containsSleepingReference = restoreEntities(this, savedEntities);
 
     if (entityData == null) {
@@ -42,14 +43,14 @@ export class Conversation extends Entity {
     }
 
     // Decrypt the conversation name.
-    if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
-      if (this.data.name == null) {
-        delete this.data.keys;
-        this.save();
-      } else {
+    if (this.data.name != null) {
+      let decrypt = input => input;
+      if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
         const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
-        this.decrypted.name = crypt.decrypt(this.data.name, key);
+        decrypt = input => crypt.decrypt(input, key);
       }
+
+      this.decrypted.name = decrypt(this.data.name);
     }
 
     this.unreadCountPromise = null;
@@ -153,6 +154,9 @@ export class Conversation extends Entity {
 
 // The name of the server class
 Conversation.class = 'Tunnelgram\\Conversation';
+Conversation.MODE_CONVERSATION = 0;
+Conversation.MODE_CHANNEL_PRIVATE = 1;
+Conversation.MODE_CHANNEL_PUBLIC = 2;
 
 Nymph.setEntityClass(Conversation.class, Conversation);
 

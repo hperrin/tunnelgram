@@ -32,97 +32,57 @@ export class Message extends Entity {
 
   // === Instance Methods ===
 
-  init (...args) {
+  init (entityData, ...args) {
     const savedEntities = saveEntities(this);
-    super.init(...args);
+    super.init(entityData, ...args);
     this.containsSleepingReference = restoreEntities(this, savedEntities);
 
-    // Decrypt the message text, images, and/or video.
-    if (currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
+    let decrypt = input => input;
+    let decryptBytesAsync = async input => input;
+    if (entityData.encryption && currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
       const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
-      if (this.data.text != null) {
-        let match;
+      decrypt = input => crypt.decrypt(input, key);
+      decryptBytesAsync = input => crypt.decryptBytesAsync(input, key);
+    }
 
-        this.decrypted.text = crypt.decrypt(this.data.text, key);
-        if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
-          match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
-          this.decrypted.text = match[1];
-          this.decrypted.secretText = match[2];
-        }
+    // Decrypt the message text, images, and/or video.
+    if (this.data.text != null) {
+      let match;
 
-        const elevationRegEx = /(?:\n|^)e> ([0-3])(?:\n|$)/m;
-        match = this.decrypted.text.match(elevationRegEx);
-        this.textElevation = match ? parseFloat(match[1]) : 1;
-        this.decrypted.text = this.decrypted.text.replace(elevationRegEx, '');
-        if (this.decrypted.secretText != null) {
-          match = this.decrypted.secretText.match(elevationRegEx);
-          this.secretTextElevation = match ? parseFloat(match[1]) : 1;
-          this.decrypted.secretText = this.decrypted.secretText.replace(elevationRegEx, '');
-        }
-      } else if (this.data.images || this.data.video) {
-        this.decrypted.text = null;
+      this.decrypted.text = decrypt(this.data.text);
+      if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
+        match = this.decrypted.text.match(/^1> ((?:.|\n)*)\n2> ((?:.|\n)*)$/);
+        this.decrypted.text = match[1];
+        this.decrypted.secretText = match[2];
       }
-      if (this.data.images && this.data.images.length) {
-        this.decrypted.images = this.data.images.map(image => {
-          // Don't fetch the full image until the user requests it.
-          let fullSizePromise;
-          const data = {
-            promise: () => {
-              if (!fullSizePromise) {
-                fullSizePromise = new Promise((resolve, reject) => {
-                  window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
-                    mode: 'cors'
-                  }).then(response => {
-                    return response.arrayBuffer();
-                  }).then(arrayBuffer => {
-                    // This is purposefully returned as Uint8Array, not Base64.
-                    return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
-                  }).then(result => {
-                    resolve(result);
-                  });
-                });
-              }
-              return fullSizePromise;
-            }
-          }
-          const thumbnail = new Promise((resolve, reject) => {
-            window.fetch(image.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
-              mode: 'cors'
-            }).then(response => {
-              return response.arrayBuffer();
-            }).then(arrayBuffer => {
-              // This is purposefully returned as Uint8Array, not Base64.
-              return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
-            }).then(result => {
-              resolve(result);
-            });
-          });
-          return {
-            name: crypt.decrypt(image.name, key),
-            dataType: crypt.decrypt(image.dataType, key),
-            dataWidth: crypt.decrypt(image.dataWidth, key),
-            dataHeight: crypt.decrypt(image.dataHeight, key),
-            data,
-            thumbnailType: crypt.decrypt(image.thumbnailType, key),
-            thumbnailWidth: crypt.decrypt(image.thumbnailWidth, key),
-            thumbnailHeight: crypt.decrypt(image.thumbnailHeight, key),
-            thumbnail
-          };
-        });
-      } else if (this.data.video != null) {
-        // Don't fetch the full video until the user requests it.
+
+      const elevationRegEx = /(?:\n|^)e> ([0-3])(?:\n|$)/m;
+      match = this.decrypted.text.match(elevationRegEx);
+      this.textElevation = match ? parseFloat(match[1]) : 1;
+      this.decrypted.text = this.decrypted.text.replace(elevationRegEx, '');
+      if (this.decrypted.secretText != null) {
+        match = this.decrypted.secretText.match(elevationRegEx);
+        this.secretTextElevation = match ? parseFloat(match[1]) : 1;
+        this.decrypted.secretText = this.decrypted.secretText.replace(elevationRegEx, '');
+      }
+    } else if (this.data.images || this.data.video) {
+      this.decrypted.text = null;
+    }
+    if (this.data.images && this.data.images.length) {
+      this.decrypted.images = this.data.images.map(image => {
+        // Don't fetch the full image until the user requests it.
         let fullSizePromise;
         const data = {
           promise: () => {
             if (!fullSizePromise) {
               fullSizePromise = new Promise((resolve, reject) => {
-                window.fetch(this.data.video.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+                window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
                   mode: 'cors'
                 }).then(response => {
                   return response.arrayBuffer();
                 }).then(arrayBuffer => {
                   // This is purposefully returned as Uint8Array, not Base64.
-                  return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+                  return decryptBytesAsync(new Uint8Array(arrayBuffer));
                 }).then(result => {
                   resolve(result);
                 });
@@ -132,30 +92,75 @@ export class Message extends Entity {
           }
         }
         const thumbnail = new Promise((resolve, reject) => {
-          window.fetch(this.data.video.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+          window.fetch(image.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
             mode: 'cors'
           }).then(response => {
             return response.arrayBuffer();
           }).then(arrayBuffer => {
             // This is purposefully returned as Uint8Array, not Base64.
-            return crypt.decryptBytesAsync(new Uint8Array(arrayBuffer), key);
+            return decryptBytesAsync(new Uint8Array(arrayBuffer));
           }).then(result => {
             resolve(result);
           });
         });
-        this.decrypted.video = {
-          name: crypt.decrypt(this.data.video.name, key),
-          dataType: crypt.decrypt(this.data.video.dataType, key),
-          dataWidth: crypt.decrypt(this.data.video.dataWidth, key),
-          dataHeight: crypt.decrypt(this.data.video.dataHeight, key),
-          dataDuration: crypt.decrypt(this.data.video.dataDuration, key),
+        return {
+          name: decrypt(image.name),
+          dataType: decrypt(image.dataType),
+          dataWidth: decrypt(image.dataWidth),
+          dataHeight: decrypt(image.dataHeight),
           data,
-          thumbnailType: crypt.decrypt(this.data.video.thumbnailType, key),
-          thumbnailWidth: crypt.decrypt(this.data.video.thumbnailWidth, key),
-          thumbnailHeight: crypt.decrypt(this.data.video.thumbnailHeight, key),
+          thumbnailType: decrypt(image.thumbnailType),
+          thumbnailWidth: decrypt(image.thumbnailWidth),
+          thumbnailHeight: decrypt(image.thumbnailHeight),
           thumbnail
         };
+      });
+    } else if (this.data.video != null) {
+      // Don't fetch the full video until the user requests it.
+      let fullSizePromise;
+      const data = {
+        promise: () => {
+          if (!fullSizePromise) {
+            fullSizePromise = new Promise((resolve, reject) => {
+              window.fetch(this.data.video.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+                mode: 'cors'
+              }).then(response => {
+                return response.arrayBuffer();
+              }).then(arrayBuffer => {
+                // This is purposefully returned as Uint8Array, not Base64.
+                return decryptBytesAsync(new Uint8Array(arrayBuffer));
+              }).then(result => {
+                resolve(result);
+              });
+            });
+          }
+          return fullSizePromise;
+        }
       }
+      const thumbnail = new Promise((resolve, reject) => {
+        window.fetch(this.data.video.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+          mode: 'cors'
+        }).then(response => {
+          return response.arrayBuffer();
+        }).then(arrayBuffer => {
+          // This is purposefully returned as Uint8Array, not Base64.
+          return decryptBytesAsync(new Uint8Array(arrayBuffer));
+        }).then(result => {
+          resolve(result);
+        });
+      });
+      this.decrypted.video = {
+        name: decrypt(this.data.video.name),
+        dataType: decrypt(this.data.video.dataType),
+        dataWidth: decrypt(this.data.video.dataWidth),
+        dataHeight: decrypt(this.data.video.dataHeight),
+        dataDuration: decrypt(this.data.video.dataDuration),
+        data,
+        thumbnailType: decrypt(this.data.video.thumbnailType),
+        thumbnailWidth: decrypt(this.data.video.thumbnailWidth),
+        thumbnailHeight: decrypt(this.data.video.thumbnailHeight),
+        thumbnail
+      };
     }
 
     return this;

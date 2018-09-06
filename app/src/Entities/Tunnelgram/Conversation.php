@@ -7,8 +7,15 @@ use Respect\Validation\Validator as v;
 class Conversation extends \Nymph\Entity {
   use SendPushNotificationsTrait;
   const ETYPE = 'conversation';
+  const MODE_CONVERSATION = 0;
+  const MODE_CHANNEL_PRIVATE = 1;
+  const MODE_CHANNEL_PUBLIC = 2;
   protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations', 'clearReadline'];
-  protected $whitelistData = ['name', 'keys', 'acFull'];
+  protected $whitelistData = [
+    'name',
+    'keys',
+    'acFull'
+  ];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
@@ -22,9 +29,16 @@ class Conversation extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->name = null;
+    $this->mode = Conversation::MODE_CONVERSATION;
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
+    if (!isset($this->mode)) {
+      $this->mode = Conversation::MODE_CONVERSATION;
+    }
+    if (!isset($this->guid)) {
+      $this->whitelistData[] = 'mode';
+    }
   }
 
   public function findMatchingConversations() {
@@ -127,6 +141,16 @@ class Conversation extends \Nymph\Entity {
     } else {
       $object->readline = null;
     }
+
+    if (Tilmeld::$currentUser !== null && $this->keys) {
+      $ownGuid = Tilmeld::$currentUser->guid;
+      $newKeys = [];
+      if (array_key_exists($ownGuid, $object->data['keys'])) {
+        $newKeys[$ownGuid] = $object->data['keys'][$ownGuid];
+      }
+      $object->data['keys'] = $newKeys;
+    }
+
     return $object;
   }
 
