@@ -42,7 +42,7 @@
     </a>
   </div>
 {/if}
-<div class="d-flex flex-row flex-grow-1 h-100 position-relative hammertime {$convosOut ? 'convos-out' : ''}">
+<div class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
   <div class="bg-dark text-light d-lg-block" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
@@ -68,8 +68,6 @@
 <script>
   import PNotify from 'pnotify/dist/es/PNotify';
   import 'pnotify/dist/es/PNotifyDesktop';
-  import * as Hammer from 'hammerjs';
-  import 'hammer-timejs';
   import Conversation from '../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationList from './Conversations/ConversationList.html';
@@ -77,6 +75,7 @@
   import UserView from './Users/UserView.html';
   import PushSubscriptionsView from './Users/PushSubscriptionsView.html';
   import {getCookieValue} from '../Services/getCookieValue';
+  import {GestureService} from '../Services/GestureService';
   import ErrHandler from '../ErrHandler';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
@@ -100,59 +99,48 @@
       // Set the mainUi width to the proper value.
       this.refs.mainUi.style.width = '100%';
       // Initialize swipe gestures.
-      const newHammerManager = el => {
-        const man = new Hammer.Manager(el, {
-          touchAction: 'auto',
-          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+      if (this.refs.mainUi && !this.mainUiGesture) {
+        this.mainUiGesture = new GestureService(this.refs.mainUi);
+        this.mainUiGesture.onSwipeRight(() => {
+          this.store.set({convosOut: true});
         });
-        const pan = new Hammer.Pan({
-          pointers: 0,
-          threshold: 90,
-          direction: Hammer.DIRECTION_HORIZONTAL
-        });
-        const swipe = new Hammer.Swipe({
-          threshold: 90
-        });
-        swipe.recognizeWith(pan);
-        man.add(pan);
-        man.add(swipe);
-        return man;
-      };
-      if (this.refs.mainUi && !this.mainUiHammer) {
-        this.mainUiHammer = newHammerManager(this.refs.mainUi);
-        this.mainUiHammer.on('swipe', e => {
-          if (e.direction === Hammer.DIRECTION_RIGHT) {
-            this.store.set({convosOut: true});
+        this.mainUiGesture.onSwipeMove(() => {
+          if (Math.abs(this.mainUiGesture.touchMoveX) > Math.abs(this.mainUiGesture.touchMoveY) && Math.abs(this.mainUiGesture.touchMoveX) > this.mainUiGesture.threshold) {
+            this.refs.mainUi.style.transition = 'none';
+            this.refs.mainUi.style.transform = 'translate3d(calc(-100% + '+Math.max(this.mainUiGesture.touchMoveX, 0)+'px), 0, 0)';
+            this.refs.mainUi.style.transition = null;
+          } else if (this.refs.mainUi.style.transform != null) {
+            this.refs.mainUi.style.transform = null;
           }
         });
-        this.mainUiHammer.on('panstart', e => {
-          this.refs.mainUi.style.transition = 'none';
-        });
-        this.mainUiHammer.on('panstart panmove', e => {
-          this.refs.mainUi.style.transform = 'translateX(calc(-100% + '+Math.max(e.deltaX, 0)+'px))';
-        });
-        this.mainUiHammer.on('panend', e => {
+        this.mainUiGesture.onSwipeEnd(() => {
           this.refs.mainUi.style.transition = null;
           this.refs.mainUi.style.transform = null;
         });
-      } else if (!this.refs.mainUi && this.mainUiHammer) {
-        delete this.mainUiHammer;
+      } else if (!this.refs.mainUi && this.mainUiGesture) {
+        this.mainUiGesture.destroy();
+        delete this.mainUiGesture;
       }
-      if (this.refs.convos && !this.convosHammer) {
-        this.convosHammer = newHammerManager(this.refs.convos);
-        this.convosHammer.on('swipe', e => {
-          if (e.direction === Hammer.DIRECTION_LEFT) {
-            this.store.set({convosOut: false});
+      if (this.refs.convos && !this.convosGesture) {
+        this.convosGesture = new GestureService(this.refs.convos);
+        this.convosGesture.onSwipeLeft(() => {
+          this.store.set({convosOut: false});
+        });
+        this.convosGesture.onSwipeMove(() => {
+          if (Math.abs(this.convosGesture.touchMoveX) > Math.abs(this.convosGesture.touchMoveY) && Math.abs(this.convosGesture.touchMoveX) > this.convosGesture.threshold) {
+            this.refs.mainUi.style.transition = 'none';
+            this.refs.mainUi.style.transform = 'translate3d('+this.convosGesture.touchMoveX+'px, 0, 0)';
+            this.refs.mainUi.style.transition = null;
+          } else if (this.refs.mainUi.style.transform != null) {
+            this.refs.mainUi.style.transform = null;
           }
         });
-        this.convosHammer.on('panstart panmove', e => {
-          this.refs.mainUi.style.transform = 'translateX('+e.deltaX+'px)';
-        });
-        this.convosHammer.on('panend', e => {
+        this.convosGesture.onSwipeEnd(() => {
           this.refs.mainUi.style.transform = null;
         });
-      } else if (!this.refs.convos && this.convosHammer) {
-        delete this.convosHammer;
+      } else if (!this.refs.convos && this.convosGesture) {
+        this.convosGesture.destroy();
+        delete this.convosGesture;
       }
     },
 

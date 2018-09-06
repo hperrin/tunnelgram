@@ -87,10 +87,10 @@
   import moment from 'moment';
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
-  import * as Hammer from 'hammerjs';
   import ImageGrid from './Media/ImageGrid.html';
   import Video from './Media/Video.html';
   import Avatar from '../Users/Avatar.html';
+  import {GestureService} from '../../Services/GestureService';
   import ErrHandler from '../../ErrHandler';
 
   const converter = new showdown.Converter({
@@ -155,22 +155,14 @@
 
     onupdate ({previous}) {
       // Initialize swipe gestures.
-      const newHammerManager = el => {
-        const man = new Hammer.Manager(el, {
-          touchAction: 'auto',
-          inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
-        });
-        const press = new Hammer.Press();
-        man.add(press);
-        return man;
-      };
-      if (this.refs.messageContainer && !this.messageContainerHammer) {
-        this.messageContainerHammer = newHammerManager(this.refs.messageContainer);
-        this.messageContainerHammer.on('press', e => {
+      if (this.refs.messageContainer && !this.messageContainerGesture) {
+        this.messageContainerGesture = new GestureService(this.refs.messageContainer);
+        this.messageContainerGesture.onLongPress(() => {
           this.toggleActions();
         });
-      } else if (!this.refs.messageContainer && this.messageContainerHammer) {
-        delete this.messageContainerHammer;
+      } else if (!this.refs.messageContainer && this.messageContainerGesture) {
+        this.messageContainerGesture.destroy();
+        delete this.messageContainerGesture;
       }
     },
 
