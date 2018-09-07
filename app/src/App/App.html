@@ -99,45 +99,51 @@
       // Set the mainUi width to the proper value.
       this.refs.mainUi.style.width = '100%';
       // Initialize swipe gestures.
-      if (this.refs.mainUi && !this.mainUiGesture) {
-        this.mainUiGesture = new GestureService(this.refs.mainUi);
-        this.mainUiGesture.onSwipeRight(() => {
-          this.store.set({convosOut: true});
-        });
-        this.mainUiGesture.onSwipeMove(() => {
-          if (Math.abs(this.mainUiGesture.touchMoveX) > Math.abs(this.mainUiGesture.touchMoveY) && Math.abs(this.mainUiGesture.touchMoveX) > this.mainUiGesture.threshold) {
+      const onGestureMove = (gesture, transform) => {
+        if (gesture.animationFrame) {
+          return;
+        }
+        gesture.animationFrame = window.requestAnimationFrame(() => {
+          if (gesture.swipingDirection === 'horizontal') {
             this.refs.mainUi.style.transition = 'none';
-            this.refs.mainUi.style.transform = 'translate3d(calc(-100% + '+Math.max(this.mainUiGesture.touchMoveX, 0)+'px), 0, 0)';
-            this.refs.mainUi.style.transition = null;
+            this.refs.mainUi.style.transform = transform();
+            window.requestAnimationFrame(() => {
+              this.refs.mainUi.style.transition = null;
+            });
           } else if (this.refs.mainUi.style.transform != null) {
             this.refs.mainUi.style.transform = null;
           }
+          gesture.animationFrame = null;
         });
-        this.mainUiGesture.onSwipeEnd(() => {
-          this.refs.mainUi.style.transition = null;
-          this.refs.mainUi.style.transform = null;
-        });
+      };
+      const onGestureEnd = gesture => {
+        window.cancelAnimationFrame(gesture.animationFrame);
+        gesture.animationFrame = null;
+        this.refs.mainUi.style.transition = null;
+        this.refs.mainUi.style.transform = null;
+      };
+      if (this.refs.mainUi && !this.mainUiGesture) {
+        this.mainUiGesture = new GestureService(this.refs.mainUi, {mouseSupport: false});
+        this.mainUiGesture.on('swiperight', () => this.store.set({convosOut: true}));
+        this.mainUiGesture.on('gesturemove', onGestureMove.bind(
+          this,
+          this.mainUiGesture,
+          () => 'translate3d(calc(-100% + '+Math.max(this.mainUiGesture.touchMoveX, 0)+'px), 0, 0)'
+        ));
+        this.mainUiGesture.on('gestureend', onGestureEnd.bind(this, this.mainUiGesture));
       } else if (!this.refs.mainUi && this.mainUiGesture) {
         this.mainUiGesture.destroy();
         delete this.mainUiGesture;
       }
       if (this.refs.convos && !this.convosGesture) {
-        this.convosGesture = new GestureService(this.refs.convos);
-        this.convosGesture.onSwipeLeft(() => {
-          this.store.set({convosOut: false});
-        });
-        this.convosGesture.onSwipeMove(() => {
-          if (Math.abs(this.convosGesture.touchMoveX) > Math.abs(this.convosGesture.touchMoveY) && Math.abs(this.convosGesture.touchMoveX) > this.convosGesture.threshold) {
-            this.refs.mainUi.style.transition = 'none';
-            this.refs.mainUi.style.transform = 'translate3d('+this.convosGesture.touchMoveX+'px, 0, 0)';
-            this.refs.mainUi.style.transition = null;
-          } else if (this.refs.mainUi.style.transform != null) {
-            this.refs.mainUi.style.transform = null;
-          }
-        });
-        this.convosGesture.onSwipeEnd(() => {
-          this.refs.mainUi.style.transform = null;
-        });
+        this.convosGesture = new GestureService(this.refs.convos, {mouseSupport: false});
+        this.convosGesture.on('swipeleft', () => this.store.set({convosOut: false}));
+        this.convosGesture.on('gesturemove', onGestureMove.bind(
+          this,
+          this.convosGesture,
+          () => 'translate3d('+this.convosGesture.touchMoveX+'px, 0, 0)'
+        ));
+        this.convosGesture.on('gestureend', onGestureEnd.bind(this, this.convosGesture));
       } else if (!this.refs.convos && this.convosGesture) {
         this.convosGesture.destroy();
         delete this.convosGesture;
@@ -278,11 +284,11 @@
     top: 0;
     bottom: 0;
     z-index: 2;
-    transition: transform ease .15s;
-    transform: translateX(-100%);
+    transition: transform ease .1s;
+    transform: translate3d(-100%, 0, 0);
   }
   .convos-out ref:mainUi {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   @media (min-width: 991.98px) {
     ref:convos {

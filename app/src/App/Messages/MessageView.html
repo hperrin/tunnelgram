@@ -157,7 +157,7 @@
       // Initialize swipe gestures.
       if (this.refs.messageContainer && !this.messageContainerGesture) {
         this.messageContainerGesture = new GestureService(this.refs.messageContainer);
-        this.messageContainerGesture.onLongPress(() => {
+        this.messageContainerGesture.on('longpress', () => {
           this.toggleActions();
         });
       } else if (!this.refs.messageContainer && this.messageContainerGesture) {

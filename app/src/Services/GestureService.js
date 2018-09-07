@@ -1,39 +1,41 @@
-// Passive feature detection.
-let passiveIfSupported = false;
-
-try {
-  window.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: true }; } }));
-} catch(err) {}
-
-// Adapted from https://gist.github.com/SleepWalker/da5636b1abcbaff48c4d
-// and https://github.com/uxitten/xwiper
-
+/**
+ * Gesture Service
+ *
+ * This service uses passive listeners, so you can't call event.preventDefault()
+ * on any of the events.
+ *
+ * Adapted from https://gist.github.com/SleepWalker/da5636b1abcbaff48c4d
+ * and https://github.com/uxitten/xwiper
+ */
 export class GestureService {
-  constructor (element) {
+  constructor (element, options) {
+    options = Object.assign({}, GestureService.defaults, options);
     this.element = element;
-    this.touchStartX = 0;
-    this.touchStartY = 0;
-    this.touchEndX = 0;
-    this.touchEndY = 0;
-    const pageWidth = window.innerWidth || document.body.clientWidth;
-    this.threshold = Math.max(25, Math.floor(0.15 * pageWidth));
-    this.velocityThreshold = 10;
-    this.disregardVelocityThresholdX = Math.floor(0.5 * element.clientWidth);
-    this.disregardVelocityThresholdY = Math.floor(0.5 * element.clientHeight);
-    this.pressThreshold = 4;
-    this.limit = Math.tan(45 * 1.5 / 180 * Math.PI);
+    this.threshold = options.threshold;
+    this.velocityThreshold = options.velocityThreshold;
+    this.disregardVelocityThreshold = options.disregardVelocityThreshold;
+    this.pressThreshold = options.pressThreshold;
+    this.diagonalSwipes = options.diagonalSwipes;
+    this.diagonalLimit = options.diagonalLimit;
+    this.mouseSupport = options.mouseSupport;
+    this.touchStartX = null;
+    this.touchStartY = null;
+    this.touchEndX = null;
+    this.touchEndY = null;
     this.velocityX = null;
     this.velocityY = null;
     this.longPressTimer = null;
-    this.onSwipeStartAgent = null;
-    this.onSwipeMoveAgent = null;
-    this.onSwipeEndAgent = null;
-    this.onSwipeLeftAgent = null;
-    this.onSwipeRightAgent = null;
-    this.onSwipeUpAgent = null;
-    this.onSwipeDownAgent = null;
-    this.onTapAgent = null;
-    this.onLongPressAgent = null;
+    this.handlers = {
+      'gesturestart': [],
+      'gesturemove': [],
+      'gestureend': [],
+      'swipeleft': [],
+      'swiperight': [],
+      'swipeup': [],
+      'swipedown': [],
+      'tap': [],
+      'longpress': []
+    };
 
     this._onTouchStart = this.onTouchStart.bind(this);
     this._onTouchMove = this.onTouchMove.bind(this);
@@ -42,110 +44,144 @@ export class GestureService {
     this.element.addEventListener('touchstart', this._onTouchStart, passiveIfSupported);
     this.element.addEventListener('touchmove', this._onTouchMove, passiveIfSupported);
     this.element.addEventListener('touchend', this._onTouchEnd, passiveIfSupported);
-  }
 
-  onTouchStart (event) {
-    this.touchStartX = event.changedTouches[0].screenX;
-    this.touchStartY = event.changedTouches[0].screenY;
-    this.touchMoveX = null;
-    this.touchMoveY = null;
-    this.touchEndX = null;
-    this.touchEndY = null;
-    this.longPressTimer = setTimeout(() => this.onLongPressAgent && this.onLongPressAgent(), 500);
-    this.onSwipeStartAgent && this.onSwipeStartAgent();
-  }
-
-  onTouchMove (event) {
-    const touchMoveX = event.changedTouches[0].screenX - this.touchStartX;
-    this.velocityX = touchMoveX - this.touchMoveX;
-    this.touchMoveX = touchMoveX;
-    const touchMoveY = event.changedTouches[0].screenY - this.touchStartY;
-    this.velocityY = touchMoveY - this.touchMoveY;
-    this.touchMoveY = touchMoveY;
-    if (Math.max(Math.abs(this.touchMoveX), Math.abs(this.touchMoveY)) > this.pressThreshold) {
-      clearTimeout(this.longPressTimer);
+    if (this.mouseSupport) {
+      this.element.addEventListener('mousedown', this._onTouchStart, passiveIfSupported);
+      this.element.addEventListener('mousemove', this._onTouchMove, passiveIfSupported);
+      this.element.addEventListener('mouseup', this._onTouchEnd, passiveIfSupported);
     }
-    this.onSwipeMoveAgent && this.onSwipeMoveAgent();
-  }
-
-  onTouchEnd (event) {
-    this.touchEndX = event.changedTouches[0].screenX;
-    this.touchEndY = event.changedTouches[0].screenY;
-    this.onSwipeEndAgent && this.onSwipeEndAgent();
-    clearTimeout(this.longPressTimer);
-    this.handleGesture();
-  }
-
-  onSwipeStart (func) {
-    this.onSwipeStartAgent = func;
-  }
-  onSwipeMove (func) {
-    this.onSwipeMoveAgent = func;
-  }
-  onSwipeEnd (func) {
-    this.onSwipeEndAgent = func;
-  }
-  onSwipeLeft (func) {
-    this.onSwipeLeftAgent = func;
-  }
-  onSwipeRight (func) {
-    this.onSwipeRightAgent = func;
-  }
-  onSwipeUp (func) {
-    this.onSwipeUpAgent = func;
-  }
-  onSwipeDown (func) {
-    this.onSwipeDownAgent = func;
-  }
-  onTap (func) {
-    this.onTapAgent = func;
-  }
-  onLongPress (func) {
-    this.onLongPressAgent = func;
   }
 
   destroy () {
     this.element.removeEventListener('touchstart', this._onTouchStart);
     this.element.removeEventListener('touchmove', this._onTouchMove);
     this.element.removeEventListener('touchend', this._onTouchEnd);
+    this.element.removeEventListener('mousedown', this._onTouchStart);
+    this.element.removeEventListener('mousemove', this._onTouchMove);
+    this.element.removeEventListener('mouseup', this._onTouchEnd);
     clearTimeout(this.longPressTimer);
   }
 
-  handleGesture () {
+  on (type, fn) {
+    if (this.handlers[type]) {
+      this.handlers[type].push(fn);
+      return {
+        cancel: () => this.off(type, fn)
+      };
+    }
+  }
+
+  off (type, fn) {
+    if (this.handlers[type]) {
+      const idx = this.handlers[type].indexOf(fn);
+      if (idx !== -1) {
+        this.handlers[type].splice(idx, 1);
+      }
+    }
+  }
+
+  fire (type, event) {
+    for (let i = 0; i < this.handlers[type].length; i++) {
+      this.handlers[type][i](event);
+    }
+  }
+
+  onTouchStart (event) {
+    this.thresholdX = this.threshold('x', this);
+    this.thresholdY = this.threshold('y', this);
+    this.disregardVelocityThresholdX = this.disregardVelocityThreshold('x', this);
+    this.disregardVelocityThresholdY = this.disregardVelocityThreshold('y', this);
+    this.touchStartX = (event.type === 'mousedown' ? event.screenX : event.changedTouches[0].screenX);
+    this.touchStartY = (event.type === 'mousedown' ? event.screenY : event.changedTouches[0].screenY);
+    this.touchMoveX = null;
+    this.touchMoveY = null;
+    this.touchEndX = null;
+    this.touchEndY = null;
+    // Long press.
+    this.longPressTimer = setTimeout(() => this.fire('longpress', event), 500);
+    this.fire('gesturestart', event);
+  }
+
+  onTouchMove (event) {
+    if (event.type === 'mousemove' && (!this.touchStartX || this.touchEndX !== null)) {
+      return;
+    }
+    const touchMoveX = (event.type === 'mousemove' ? event.screenX : event.changedTouches[0].screenX) - this.touchStartX;
+    this.velocityX = touchMoveX - this.touchMoveX;
+    this.touchMoveX = touchMoveX;
+    const touchMoveY = (event.type === 'mousemove' ? event.screenY : event.changedTouches[0].screenY) - this.touchStartY;
+    this.velocityY = touchMoveY - this.touchMoveY;
+    this.touchMoveY = touchMoveY;
+    const absTouchMoveX = Math.abs(this.touchMoveX);
+    const absTouchMoveY = Math.abs(this.touchMoveY);
+    this.swipingHorizontal = absTouchMoveX > this.thresholdX;
+    this.swipingVertical = absTouchMoveY > this.thresholdY;
+    this.swipingDirection = absTouchMoveX > absTouchMoveY
+      ? (this.swipingHorizontal ? 'horizontal' : 'pre-horizontal')
+      : (this.swipingVertical ? 'vertical' : 'pre-vertical');
+    if (Math.max(absTouchMoveX, absTouchMoveY) > this.pressThreshold) {
+      clearTimeout(this.longPressTimer);
+    }
+    this.fire('gesturemove', event);
+  }
+
+  onTouchEnd (event) {
+    this.touchEndX = (event.type === 'mouseup' ? event.screenX : event.changedTouches[0].screenX);
+    this.touchEndY = (event.type === 'mouseup' ? event.screenY : event.changedTouches[0].screenY);
+    this.fire('gestureend', event);
+    clearTimeout(this.longPressTimer);
+
     const x = this.touchEndX - this.touchStartX;
     const y = this.touchEndY - this.touchStartY;
-    const xy = Math.abs(x / y);
-    const yx = Math.abs(y / x);
-    if (Math.abs(x) > this.threshold || Math.abs(y) > this.threshold) {
-      if (yx <= this.limit) {
+    if (Math.abs(x) > this.thresholdX || Math.abs(y) > this.thresholdY) {
+      const swipeH = this.diagonalSwipes ? Math.abs(x / y) <= this.diagonalLimit : Math.abs(x) >= Math.abs(y);
+      const swipeV = this.diagonalSwipes ? Math.abs(y / x) <= this.diagonalLimit : Math.abs(y) > Math.abs(x);
+      if (swipeH) {
         if (x < 0) {
           // Left swipe.
           if (this.velocityX < -this.velocityThreshold || x < -this.disregardVelocityThresholdX) {
-            this.onSwipeLeftAgent && this.onSwipeLeftAgent();
+            this.fire('swipeleft', event);
           }
         } else {
           // Right swipe.
           if (this.velocityX > this.velocityThreshold || x > this.disregardVelocityThresholdX) {
-            this.onSwipeRightAgent && this.onSwipeRightAgent();
+            this.fire('swiperight', event);
           }
         }
       }
-      if (xy <= this.limit) {
+      if (swipeV) {
         if (y < 0) {
           // Upward swipe.
           if (this.velocityY < -this.velocityThreshold || y < -this.disregardVelocityThresholdY) {
-            this.onSwipeUpAgent && this.onSwipeUpAgent();
+            this.fire('swipeup', event);
           }
         } else {
           // Downward swipe.
           if (this.velocityY > this.velocityThreshold || y > this.disregardVelocityThresholdY) {
-            this.onSwipeDownAgent && this.onSwipeDownAgent();
+            this.fire('swipedown', event);
           }
         }
       }
     } else {
       // Tap.
-      this.onTapAgent && this.onTapAgent();
+      this.fire('tap', event);
     }
   }
 }
+
+GestureService.defaults = {
+  threshold: (type, self) => Math.max(25, Math.floor(0.15 * (type === 'x' ? window.innerWidth || document.body.clientWidth : window.innerHeight || document.body.clientHeight))),
+  velocityThreshold: 10,
+  disregardVelocityThreshold: (type, self) => Math.floor(0.5 * (type === 'x' ? self.element.clientWidth : self.element.clientHeight)),
+  pressThreshold: 4,
+  diagonalSwipes: false,
+  diagonalLimit: Math.tan(45 * 1.5 / 180 * Math.PI),
+  mouseSupport: true
+};
+
+// Passive feature detection.
+let passiveIfSupported = false;
+
+try {
+  window.addEventListener('test', null, Object.defineProperty({}, 'passive', { get: function() { passiveIfSupported = { passive: true }; } }));
+} catch(err) {}
