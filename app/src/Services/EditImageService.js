@@ -5,7 +5,7 @@ export class EditImageService {
     this.canvas = document.createElement('canvas');
     this.canvasCopy = document.createElement('canvas');
 
-    this.offscreenCanvasSupport = !!this.canvas.transferControlToOffscreen;
+    this.offscreenCanvasSupport = false && !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
       this.resizeImageWorker = new Worker('dist/Workers/ResizeImage.js');
