@@ -438,7 +438,7 @@
             if (window.inCordova) {
               reader.onloadend = () => resolve(reader.result);
             } else {
-              reader.onload = () => resolve(e.target.result);
+              reader.onload = e => resolve(e.target.result);
             }
             reader.readAsArrayBuffer(file);
 
