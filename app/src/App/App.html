@@ -68,6 +68,7 @@
 <script>
   import PNotify from 'pnotify/dist/es/PNotify';
   import 'pnotify/dist/es/PNotifyDesktop';
+  import TinyGesture from 'tinygesture';
   import Conversation from '../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from './LoadingIndicator.html';
   import ConversationList from './Conversations/ConversationList.html';
@@ -75,7 +76,6 @@
   import UserView from './Users/UserView.html';
   import PushSubscriptionsView from './Users/PushSubscriptionsView.html';
   import {getCookieValue} from '../Services/getCookieValue';
-  import {GestureService} from '../Services/GestureService';
   import ErrHandler from '../ErrHandler';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
@@ -99,7 +99,7 @@
       // Set the mainUi width to the proper value.
       this.refs.mainUi.style.width = '100%';
       // Initialize swipe gestures.
-      const onGestureMove = (gesture, transform) => {
+      const onPanMove = (gesture, transform) => {
         if (gesture.animationFrame) {
           return;
         }
@@ -116,34 +116,34 @@
           gesture.animationFrame = null;
         });
       };
-      const onGestureEnd = gesture => {
+      const onPanEnd = gesture => {
         window.cancelAnimationFrame(gesture.animationFrame);
         gesture.animationFrame = null;
         this.refs.mainUi.style.transition = null;
         this.refs.mainUi.style.transform = null;
       };
       if (this.refs.mainUi && !this.mainUiGesture) {
-        this.mainUiGesture = new GestureService(this.refs.mainUi, {mouseSupport: false});
+        this.mainUiGesture = new TinyGesture(this.refs.mainUi, {mouseSupport: false});
         this.mainUiGesture.on('swiperight', () => this.store.set({convosOut: true}));
-        this.mainUiGesture.on('gesturemove', onGestureMove.bind(
+        this.mainUiGesture.on('panmove', onPanMove.bind(
           this,
           this.mainUiGesture,
           () => 'translate3d(calc(-100% + '+Math.max(this.mainUiGesture.touchMoveX, 0)+'px), 0, 0)'
         ));
-        this.mainUiGesture.on('gestureend', onGestureEnd.bind(this, this.mainUiGesture));
+        this.mainUiGesture.on('panend', onPanEnd.bind(this, this.mainUiGesture));
       } else if (!this.refs.mainUi && this.mainUiGesture) {
         this.mainUiGesture.destroy();
         delete this.mainUiGesture;
       }
       if (this.refs.convos && !this.convosGesture) {
-        this.convosGesture = new GestureService(this.refs.convos, {mouseSupport: false});
+        this.convosGesture = new TinyGesture(this.refs.convos, {mouseSupport: false});
         this.convosGesture.on('swipeleft', () => this.store.set({convosOut: false}));
-        this.convosGesture.on('gesturemove', onGestureMove.bind(
+        this.convosGesture.on('panmove', onPanMove.bind(
           this,
           this.convosGesture,
           () => 'translate3d('+this.convosGesture.touchMoveX+'px, 0, 0)'
         ));
-        this.convosGesture.on('gestureend', onGestureEnd.bind(this, this.convosGesture));
+        this.convosGesture.on('panend', onPanEnd.bind(this, this.convosGesture));
       } else if (!this.refs.convos && this.convosGesture) {
         this.convosGesture.destroy();
         delete this.convosGesture;

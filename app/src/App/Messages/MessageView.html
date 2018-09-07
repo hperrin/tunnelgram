@@ -87,10 +87,10 @@
   import moment from 'moment';
   import showdown from 'showdown';
   import xssFilter from 'showdown-xss-filter';
+  import TinyGesture from 'tinygesture';
   import ImageGrid from './Media/ImageGrid.html';
   import Video from './Media/Video.html';
   import Avatar from '../Users/Avatar.html';
-  import {GestureService} from '../../Services/GestureService';
   import ErrHandler from '../../ErrHandler';
 
   const converter = new showdown.Converter({
@@ -156,7 +156,7 @@
     onupdate ({previous}) {
       // Initialize swipe gestures.
       if (this.refs.messageContainer && !this.messageContainerGesture) {
-        this.messageContainerGesture = new GestureService(this.refs.messageContainer);
+        this.messageContainerGesture = new TinyGesture(this.refs.messageContainer);
         this.messageContainerGesture.on('longpress', () => {
           this.toggleActions();
         });
