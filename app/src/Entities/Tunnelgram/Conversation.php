@@ -268,6 +268,7 @@ class Conversation extends \Nymph\Entity {
           array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
           [
             'conversationGuid' => $this->guid,
+            'conversationNamed' => isset($this->name),
             'senderName' => Tilmeld::$currentUser->name,
             'names' => $names,
             'type' => 'newConversation'

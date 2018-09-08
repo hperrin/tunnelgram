@@ -43,9 +43,11 @@ trait SendPushNotificationsTrait {
       ]);
       if ($pushSubscriptions) {
         // Construct the notification title for this user.
-        $title = $options['type'] === 'newConversation'
-          ? 'New conversation with '
-          : 'Conversation with ';
+        $title = $options['conversationNamed'] ? (
+            $options['type'] === 'newConversation'
+              ? 'New conversation with '
+              : 'Conversation with '
+          ) : '';
         $title .= implode(
             ', ',
             array_filter($options['names'], function ($k) use ($guid) {
