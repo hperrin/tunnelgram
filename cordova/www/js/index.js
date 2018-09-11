@@ -51,16 +51,20 @@ class CordovaApp {
       window.router.navigate('/c/'+openedResult.notification.payload.additionalData.conversationGuid);
     };
 
-    window.plugins.OneSignal.getPermissionSubscriptionState(status => {
-      if (status.subscriptionStatus.subscribed) {
-        // get player ID
-        resolve(status.subscriptionStatus.userId);
-      }
+    const checkState = () => {
+      window.plugins.OneSignal.getPermissionSubscriptionState(status => {
+        if (status.subscriptionStatus.subscribed && status.subscriptionStatus.userId) {
+          // get player ID
+          resolve(status.subscriptionStatus.userId);
+        }
+      });
+    };
+    checkState();
+    window.plugins.OneSignal.addPermissionObserver(state => {
+      checkState();
     });
-
-
     window.plugins.OneSignal.addSubscriptionObserver(state => {
-      if (state.to.subscribed) {
+      if (state.to.subscribed && state.to.userId) {
         // get player ID
         resolve(state.to.userId);
       }
