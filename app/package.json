@@ -1,6 +1,6 @@
 {
   "name": "tunnelgram",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "description": "An easy, secure, end to end encrypted messenger.",
   "author": "Hunter Perrin <hperrin@gmail.com>",
   "license": "Apache-2.0",
