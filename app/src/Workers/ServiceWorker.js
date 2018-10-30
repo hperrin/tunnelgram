@@ -29,10 +29,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  function addToCache (cacheType, cache, request) {
+  function fetchAndAddToCache (cacheType, cache, request) {
     return fetch(request).then(response => {
       console.log('['+cacheType+' Cache] add item to offline: '+response.url);
-      cache.put(request, response);
+      cache.put(request, response.clone());
+      return response;
     });
   }
 
@@ -48,8 +49,7 @@ self.addEventListener('fetch', event => {
       return cache.match(event.request).then(matching => {
         if (!matching) {
           console.log('[Static Cache] Not found in cache. Requesting from network: ' + event.request.url);
-          event.waitUntil(addToCache('Static', cache, event.request));
-          return fetch(event.request);
+          return fetchAndAddToCache('Static', cache, event.request);
         }
         console.log('[Static Cache] Serving request from cache: ' + event.request.url);
         var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
@@ -60,8 +60,7 @@ self.addEventListener('fetch', event => {
     // Check in the cache second, return response.
     // If not in the cache, return error page.
     event.respondWith(caches.open('tunnelgram-content').then(cache => {
-      event.waitUntil(addToCache('Content', cache, event.request));
-      return fetch(event.request).catch(error => {
+      return fetchAndAddToCache('Content', cache, event.request).catch(error => {
         console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
         return cache.match(event.request).then(matching => {
           var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
