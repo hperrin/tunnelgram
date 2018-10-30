@@ -4,15 +4,24 @@
 self.addEventListener('install', event => {
   var indexPage = new Request('/');
   var pwaPage = new Request('/#/pwa-home');
-  event.waitUntil(caches.open('tunnelgram-static').then(cache => {
-    return Promise.all([fetch(indexPage).then(response => {
-      console.log('[Content Cache] Cached index page during Install '+ response.url);
-      return cache.put(indexPage, response);
-    }), fetch(pwaPage).then(response => {
-      console.log('[Content Cache] Cached PWA page during Install '+ response.url);
-      return cache.put(pwaPage, response);
-    })]);
-  }).then(() => caches.open('tunnelgram-content')).then(() => self.skipWaiting()));
+
+  event.waitUntil(
+    caches.open('tunnelgram-static')
+    .then(cache => {
+      return Promise.all([fetch(indexPage).then(response => {
+        console.log('[Content Cache] Cached index page during Install '+ response.url);
+        return Promise.all([
+          caches.delete('tunnelgram-content'),
+          cache.put(indexPage, response)
+        ]);
+      }), fetch(pwaPage).then(response => {
+        console.log('[Content Cache] Cached PWA page during Install '+ response.url);
+        return cache.put(pwaPage, response);
+      })]);
+    })
+    .then(() => caches.open('tunnelgram-content'))
+    .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('fetch', event => {
