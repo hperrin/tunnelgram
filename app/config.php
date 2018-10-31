@@ -83,7 +83,9 @@ if (getenv('MYSQL_CA_CERT')) {
   'jwt_secret' => base64_decode(
       getenv('TILMELD_SECRET')
         ?: trim(file_get_contents(getenv('TILMELD_SECRET_FILE')))
-  )
+  ),
+ 'jwt_expire' => 60*60*24*182 // About 6 months
+ 'jwt_renew' => 60*60*24*60 // About 2 months
 ]);
 
 require __DIR__.'/src/HookMethods.php';
