@@ -33,6 +33,7 @@ services:
     build:
       context: ./config
       dockerfile: Dockerfile-mysql
+    command: "--innodb_use_native_aio=0"
     volumes:
       - ./db_data:/var/lib/mysql
     networks:
