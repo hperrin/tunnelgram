@@ -678,16 +678,16 @@
         },
         {
             "name": "react/socket",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/socket.git",
-                "reference": "476e2644a634c6301b8111e6d22a61679e6e6bd0"
+                "reference": "34381d9282d12670eb56b45981aad82e033ed58f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/socket/zipball/476e2644a634c6301b8111e6d22a61679e6e6bd0",
-                "reference": "476e2644a634c6301b8111e6d22a61679e6e6bd0",
+                "url": "https://api.github.com/repos/reactphp/socket/zipball/34381d9282d12670eb56b45981aad82e033ed58f",
+                "reference": "34381d9282d12670eb56b45981aad82e033ed58f",
                 "shasum": ""
             },
             "require": {
@@ -721,7 +721,7 @@
                 "reactphp",
                 "stream"
             ],
-            "time": "2018-07-11T14:38:22+00:00"
+            "time": "2018-10-01T12:20:53+00:00"
         },
         {
             "name": "react/stream",
@@ -771,16 +771,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.22",
+            "version": "1.1.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "19d6ec893994912d21b390c43d287816ab070772"
+                "reference": "48b06254c4af1a2d6c1715eb3a2bb3cb72e08bfc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/19d6ec893994912d21b390c43d287816ab070772",
-                "reference": "19d6ec893994912d21b390c43d287816ab070772",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/48b06254c4af1a2d6c1715eb3a2bb3cb72e08bfc",
+                "reference": "48b06254c4af1a2d6c1715eb3a2bb3cb72e08bfc",
                 "shasum": ""
             },
             "require": {
@@ -788,7 +788,7 @@
                 "symfony/polyfill-mbstring": "^1.2"
             },
             "require-dev": {
-                "egulias/email-validator": "~1.2",
+                "egulias/email-validator": "~1.2 || ~2.1",
                 "mikey179/vfsstream": "^1.5",
                 "phpunit/phpunit": "~4.0",
                 "symfony/validator": "~2.6.9",
@@ -815,7 +815,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD Style"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
@@ -830,7 +830,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-08-01T13:06:54+00:00"
+            "time": "2018-10-11T12:18:10+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -940,16 +940,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.18",
+            "version": "3.0.0-beta.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269"
+                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/9414fd7f754d4a4890f88ac4a66e9339d817d269",
-                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
+                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
                 "shasum": ""
             },
             "require-dev": {
@@ -990,20 +990,20 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-08-07T00:00:00+00:00"
+            "time": "2018-11-02T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.25",
+            "version": "1.0.0-beta.26",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "05f5b30a714eb0f6e356734f61a19b73a3f91969"
+                "reference": "da658e85327166a701da57c8801cc9e0a07f3277"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/05f5b30a714eb0f6e356734f61a19b73a3f91969",
-                "reference": "05f5b30a714eb0f6e356734f61a19b73a3f91969",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/da658e85327166a701da57c8801cc9e0a07f3277",
+                "reference": "da658e85327166a701da57c8801cc9e0a07f3277",
                 "shasum": ""
             },
             "require": {
@@ -1049,7 +1049,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-07-23T00:00:00+00:00"
+            "time": "2018-08-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1099,16 +1099,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.1.3",
+            "version": "v4.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "7d93e3547660ec7ee3dad1428ba42e8076a0e5f1"
+                "reference": "d528136617ff24f530e70df9605acc1b788b08d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/7d93e3547660ec7ee3dad1428ba42e8076a0e5f1",
-                "reference": "7d93e3547660ec7ee3dad1428ba42e8076a0e5f1",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/d528136617ff24f530e70df9605acc1b788b08d4",
+                "reference": "d528136617ff24f530e70df9605acc1b788b08d4",
                 "shasum": ""
             },
             "require": {
@@ -1149,20 +1149,20 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2018-08-01T14:07:44+00:00"
+            "time": "2018-10-03T08:48:45+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.9.0",
+            "version": "v1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8"
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/d0cd638f4634c16d8df4508e847f14e9e43168b8",
-                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/c79c051f5b3a46be09205c73b80b346e4153e494",
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494",
                 "shasum": ""
             },
             "require": {
@@ -1208,20 +1208,20 @@
                 "portable",
                 "shim"
             ],
-            "time": "2018-08-06T14:22:27+00:00"
+            "time": "2018-09-21T13:07:52+00:00"
         },
         {
             "name": "symfony/routing",
-            "version": "v4.1.3",
+            "version": "v4.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b"
+                "reference": "537803f0bdfede36b9acef052d2e4d447d9fa0e9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b",
-                "reference": "6912cfebc0ea4e7a46fdd15c9bd1f427dd39ff1b",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/537803f0bdfede36b9acef052d2e4d447d9fa0e9",
+                "reference": "537803f0bdfede36b9acef052d2e4d447d9fa0e9",
                 "shasum": ""
             },
             "require": {
@@ -1285,7 +1285,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-07-26T11:24:31+00:00"
+            "time": "2018-10-02T12:40:59+00:00"
         },
         {
             "name": "textalk/websocket",
@@ -1467,16 +1467,16 @@
         },
         {
             "name": "zendframework/zend-stdlib",
-            "version": "3.2.0",
+            "version": "3.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-stdlib.git",
-                "reference": "cd164b4a18b5d1aeb69be2c26db035b5ed6925ae"
+                "reference": "66536006722aff9e62d1b331025089b7ec71c065"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-stdlib/zipball/cd164b4a18b5d1aeb69be2c26db035b5ed6925ae",
-                "reference": "cd164b4a18b5d1aeb69be2c26db035b5ed6925ae",
+                "url": "https://api.github.com/repos/zendframework/zend-stdlib/zipball/66536006722aff9e62d1b331025089b7ec71c065",
+                "reference": "66536006722aff9e62d1b331025089b7ec71c065",
                 "shasum": ""
             },
             "require": {
@@ -1509,7 +1509,7 @@
                 "stdlib",
                 "zf"
             ],
-            "time": "2018-04-30T13:50:40+00:00"
+            "time": "2018-08-28T21:34:05+00:00"
         }
     ],
     "packages-dev": [],
