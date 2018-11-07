@@ -1,5 +1,5 @@
 <div class="d-flex flex-column align-items-center pt-3 mb-3">
-  <ConversationHeader conversation="{$conversation}" />
+  <ConversationHeader bind:conversation="$conversation" />
   <h2>Conversation Settings</h2>
   <form class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;" on:submit="save(event.preventDefault())">
     <div class="form-group">

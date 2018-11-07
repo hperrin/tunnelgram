@@ -38,7 +38,7 @@
                     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}">
                       {#each users as user}
                         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click="addUser(user)">
-                          <span><span class="mr-2"><Avatar user="{user}" /></span> <DisplayName user="{user}" /> ({user.data.username})</span>
+                          <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
                         </a>
                       {/each}
                     </div>
@@ -59,7 +59,7 @@
         <ul class="list-group mt-3 text-body">
           {#each usersOtherThanCurrent as user (user.guid)}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span><span class="mr-2"><Avatar user="{user}" /></span> <DisplayName user="{user}" /></span>
+              <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /></span>
               <button class="btn btn-danger btn-sm" on:click="removeUser(user)">
                 <i class="fas fa-minus"></i>
               </button>
@@ -82,7 +82,7 @@
               <div class="list-group mt-3 text-body">
                 {#each conversations as conversation (conversation.guid)}
                   <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
-                    <ConversationPreview conversation="{conversation}" />
+                    <ConversationPreview bind:conversation="conversation" />
                   </a>
                 {/each}
               </div>

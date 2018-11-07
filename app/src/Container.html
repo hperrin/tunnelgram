@@ -36,7 +36,7 @@
               <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown" ref:menuDropdown>
                   <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <Avatar user="{$user}" />
+                    <Avatar bind:user="$user" />
                   </a>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
                     <h6 class="dropdown-header">

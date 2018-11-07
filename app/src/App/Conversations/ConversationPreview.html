@@ -1,7 +1,7 @@
 <div class="d-flex w-100 justify-content-center align-items-center">
   <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px; height: 60px;">
     {#each avatarUsersAndWidth.users as user}
-      <Avatar user="{user}" size="{avatarUsersAndWidth.width}" />
+      <Avatar bind:user="user" size="{avatarUsersAndWidth.width}" />
     {/each}
   </div>
   <div class="pl-2" style="width: calc(100% - 60px);">

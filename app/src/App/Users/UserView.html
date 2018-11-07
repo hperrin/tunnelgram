@@ -12,7 +12,7 @@
           <LoadingIndicator width="160" height="160" />
         </div>
       {/if}
-      <Avatar user="{$viewUser}" size="160" />
+      <Avatar bind:user="$viewUser" size="160" />
     </div>
     <h2>{$viewUser.data.name}</h2>
     <div>{$viewUser.data.username}, member since {moment.unix($viewUser.cdate).format('MMM D, YYYY')}</div>
@@ -93,7 +93,7 @@
             <div class="list-group mt-3 text-body px-2" style="width: 600px; max-width: 100vw;">
               {#each conversations as conversation (conversation.guid)}
                 <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click="$navigate('/c/'+conversation.guid)">
-                  <ConversationPreview conversation="{conversation}" />
+                  <ConversationPreview bind:conversation="conversation" />
                 </a>
               {/each}
             </div>
