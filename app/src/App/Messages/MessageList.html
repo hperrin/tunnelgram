@@ -7,7 +7,7 @@
     </div>
   {:else}
     {#if _reachedEarliestMessage}
-      <ConversationHeader bind:conversation="$conversation" />
+      <ConversationHeader bind:conversation="conversation" />
     {:else}
       <div class="d-flex align-items-center justify-content-center {_loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
         <div class="col-auto">
@@ -23,7 +23,7 @@
       {/each}
     </div>
     <div class="d-flex flex-column align-items-start">
-      {#each $conversation.pending as message}
+      {#each conversation.pending as message}
         <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[0].cdate)}"></MessageView>
       {/each}
     </div>
@@ -43,7 +43,7 @@
   export default {
     oncreate () {
       this.subscribe();
-      const {conversation} = this.store.get();
+      const {conversation} = this.get();
       this.set({
         _initialReadline: conversation.readline,
         _latestReadline: conversation.readline
@@ -60,8 +60,7 @@
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
-          const {messages} = this.get();
-          const {conversation} = this.store.get();
+          const {messages, conversation} = this.get();
           Nymph.getEntities({
             'class': Message.class,
             'sort': 'cdate',
@@ -171,7 +170,7 @@
 
         this.set({_loading: true});
 
-        const {conversation} = this.store.get();
+        const {conversation} = this.get();
         _subscription = Nymph.getEntities({
           'class': Message.class,
           'sort': 'cdate',
@@ -199,13 +198,14 @@
 
             if (update.added) {
               // Remove the message from pending messages.
-              const {user, conversation} = this.store.get();
+              const {conversation} = this.get();
+              const {user} = this.store.get();
               const ent = update.data;
               for (let i = 0; i < conversation.pending.length; i++) {
                 const cur = conversation.pending[i];
                 if (ent.data.keys[user.guid] === cur.data.keys[user.guid]) {
                   conversation.pending.splice(i, 1);
-                  this.store.set({conversation});
+                  this.set({conversation});
                   break;
                 }
               }
@@ -246,8 +246,7 @@
           return;
         }
 
-        const {messages} = this.get();
-        const {conversation} = this.store.get();
+        const {conversation, messages} = this.get();
 
         if (!messages.length) {
           return;
@@ -306,9 +305,9 @@
               const updateReadline = JSON.parse(latestReadMessageBox.dataset.cdate);
               if (updateReadline > _latestReadline) {
                 this.set({_latestReadline: updateReadline});
-                const {conversation} = this.store.get();
+                const {conversation} = this.get();
                 await conversation.saveReadline(updateReadline);
-                this.store.set({conversation});
+                this.set({conversation});
               }
             }
           }
@@ -316,8 +315,7 @@
       },
 
       async createNewReadlineIfNeeded () {
-        const {conversation} = this.store.get();
-        const {messages} = this.get();
+        const {conversation, messages} = this.get();
         if (conversation.readline == null && messages.length) {
           const updateReadline = messages[0].cdate;
           this.set({
@@ -325,7 +323,7 @@
             _latestReadline: updateReadline
           });
           await conversation.saveReadline(updateReadline);
-          this.store.set({conversation});
+          this.set({conversation});
         }
       },
 

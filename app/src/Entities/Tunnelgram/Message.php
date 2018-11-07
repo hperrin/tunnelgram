@@ -14,8 +14,7 @@ class Message extends \Nymph\Entity {
     'images',
     'video',
     'keys',
-    'conversation',
-    'acRead'
+    'conversation'
   ];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -101,6 +100,19 @@ class Message extends \Nymph\Entity {
     }
 
     if (!isset($this->guid)) {
+      if ($this->conversation->mode === Conversation::MODE_CONVERSATION) {
+        $this->acRead = $this->conversation->acFull;
+        $this->acOther = Tilmeld::NO_ACCESS;
+      } else if ($this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE) {
+        $this->acRead = [$this->conversation->group];
+        $this->acOther = Tilmeld::NO_ACCESS;
+        unset($this->keys);
+      } else {
+        $this->acRead = [];
+        $this->acOther = Tilmeld::READ_ACCESS;
+        unset($this->keys);
+      }
+
       foreach ($this->images as &$curImg) {
         $curImg['id'] = Uuid::uuid4()->toString();
       }
@@ -124,7 +136,8 @@ class Message extends \Nymph\Entity {
             v::arrayVal()->each(
                 v::stringType()->notEmpty()->prnt()->length(1, 2048),
                 v::intVal()->in($recipientGuids)
-            )
+            ),
+            $this->conversation->mode !== Conversation::MODE_CONVERSATION
         )
         ->when(
             v::attribute('text', v::nullType(), false),
@@ -304,6 +317,7 @@ class Message extends \Nymph\Entity {
     if ($ret) {
       $this->conversation->refresh();
       $this->conversation->lastMessage = $this;
+      $this->conversation->saveReadline($this->cdate);
       $this->conversation->save();
 
       if (count($recipientGuids) > 1) {

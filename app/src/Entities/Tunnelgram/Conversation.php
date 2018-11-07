@@ -33,9 +33,6 @@ class Conversation extends \Nymph\Entity {
     $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
-    if (!isset($this->mode)) {
-      $this->mode = Conversation::MODE_CONVERSATION;
-    }
     if (!isset($this->guid)) {
       $this->whitelistData[] = 'mode';
     }
@@ -125,6 +122,10 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function jsonSerialize($clientClassName = true) {
+    if (!isset($this->mode)) {
+      $this->mode = Conversation::MODE_CONVERSATION;
+    }
+
     $object = parent::jsonSerialize($clientClassName);
 
     $readline = Nymph::getEntity([
@@ -152,6 +153,13 @@ class Conversation extends \Nymph\Entity {
     }
 
     return $object;
+  }
+
+  public function putData($data, $sdata = []) {
+    parent::putData($data, $sdata);
+    if (!isset($this->mode)) {
+      $this->mode = Conversation::MODE_CONVERSATION;
+    }
   }
 
   public function clearReadline() {
@@ -230,15 +238,20 @@ class Conversation extends \Nymph\Entity {
       $recipientGuids[] = $user->guid;
     }
 
+    if (!isset($this->mode)) {
+      $this->mode = Conversation::MODE_CONVERSATION;
+    }
+
     try {
       v::notEmpty()
+        ->attribute('mode', v::intType()->between(0, 2))
         ->attribute(
             'keys',
             v::arrayVal()->each(
                 v::stringType()->notEmpty()->prnt()->length(1, 1024),
                 v::intVal()->in($recipientGuids)
             ),
-            false
+            $this->mode === Conversation::MODE_CHANNEL_PUBLIC
         )
         ->attribute('name', v::when(
             v::nullType(),
@@ -248,7 +261,11 @@ class Conversation extends \Nymph\Entity {
                 ceil(256 * 4 / 3) // Base64 of 256B
             )
         ))
-        ->attribute('lastMessage', v::when(v::nullType(), v::alwaysValid(), v::instance('Tunnelgram\Message')))
+        ->attribute('lastMessage', v::when(
+            v::nullType(),
+            v::alwaysValid(),
+            v::instance('Tunnelgram\Message')
+        ))
         ->setName('conversation')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

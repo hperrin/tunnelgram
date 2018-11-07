@@ -59,23 +59,31 @@ export class Conversation extends Entity {
   }
 
   async save () {
-    if (this.decrypted.name != null) {
-      // Encrypt the conversation name for all recipients (which should include the current user).
-      const key = crypt.generateKey();
-      this.data.name = crypt.encrypt(this.decrypted.name, key);
-
-      const encryptPromises = [];
-      for (let user of this.data.acFull) {
-        const pad = crypt.generatePad();
-        encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
-      }
-      this.data.keys = {};
-      for (let entry of encryptPromises) {
-        this.data.keys[entry.user.guid] = await entry.promise;
-      }
-    } else {
-      this.data.name = null;
+    if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      this.data.name = this.decrypted.name;
       delete this.data.keys;
+    } else {
+      let key;
+
+      if (this.decrypted.name != null || this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
+        key = crypt.generateKey();
+        const encryptPromises = [];
+        for (let user of this.data.acFull) {
+          const pad = crypt.generatePad();
+          encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
+        }
+        this.data.keys = {};
+        for (let entry of encryptPromises) {
+          this.data.keys[entry.user.guid] = await entry.promise;
+        }
+      }
+
+      // Encrypt the conversation name for all recipients (which should include the current user).
+      if (this.decrypted.name != null) {
+        this.data.name = crypt.encrypt(this.decrypted.name, key);
+      } else {
+        this.data.name = null;
+      }
     }
 
     return await super.save();
