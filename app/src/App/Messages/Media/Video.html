@@ -3,18 +3,20 @@
     {#await resource.thumbnailPromise}
       <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
     {:then thumbnail}
-      {#if _loading}
-        <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
-      {:elseif _source}
-        <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay playsinline>
-          <source src="{_source}" type="{resource.dataType}" />
-        </video>
-      {:else}
-        <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click="loadVideo()" style="cursor: pointer;">
-          <i class="fas fa-play-circle position-absolute h1 text-white"></i>
-          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;" title="{resource.name}">&nbsp;</div>
-        </div>
-      {/if}
+      <div>
+        {#if _loading}
+          <LoadingIndicator width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" text="Decrypting..." />
+        {:elseif _source}
+          <video poster="{resource.thumbnailSrc}" width="{resource.thumbnailWidth}" height="{resource.thumbnailHeight}" title="{resource.name}" controls autoplay playsinline>
+            <source src="{_source}" type="{resource.dataType}" />
+          </video>
+        {:else}
+          <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click="loadVideo()" style="cursor: pointer;">
+            <i class="fas fa-play-circle position-absolute h1 text-white"></i>
+            <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;" title="{resource.name}">&nbsp;</div>
+          </div>
+        {/if}
+      </div>
     {:catch e}
       <span class="badge badge-warning">error</span>
     {/await}
