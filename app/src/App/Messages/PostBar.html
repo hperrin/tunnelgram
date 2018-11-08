@@ -180,7 +180,7 @@
 
         this.set({conversation, text: '', images: [], video: null});
         // Scroll to the bottom when the user adds a pending message.
-        this.refs.messageList.fire('scrollToBottom');
+        this.fire('scrollToBottom');
         this.focus();
       },
 
