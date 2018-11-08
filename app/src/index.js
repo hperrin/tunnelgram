@@ -8,9 +8,9 @@ import 'pnotify/dist/es/PNotifyDesktop';
 import {Nymph, PubSub} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
 import './Services/OfflineServerCallsService';
+import {cache} from './Services/EntityCacheService';
 import {crypt} from './Services/EncryptionService';
 import {storage} from './Services/StorageService';
-import {SleepyCacheService} from './Services/SleepyCacheService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
 import {VideoService} from './Services/VideoService';
 import UserStore from './UserStore';
@@ -47,12 +47,6 @@ if ('serviceWorker' in navigator) {
 PNotify.defaults.styling = 'bootstrap4';
 PNotify.defaults.icons = 'fontawesome5';
 PNotify.modules.Buttons.defaults.sticker = false;
-
-// Sleepy caches.
-const sleepyUserCacheService = new SleepyCacheService(User);
-const sleepyGroupCacheService = new SleepyCacheService(Group);
-const sleepyConversationCacheService = new SleepyCacheService(Conversation);
-const sleepyMessageCacheService = new SleepyCacheService(Message);
 
 // Router.
 const router = new Navigo(null, true, '#');
@@ -91,10 +85,7 @@ store.constructor.prototype.navigate = (...args) => {
 };
 
 store.constructor.prototype.refreshAll = function () {
-  sleepyUserCacheService.clear();
-  sleepyGroupCacheService.clear();
-  sleepyConversationCacheService.clear();
-  sleepyMessageCacheService.clear();
+  cache.clear();
 
   const {settings} = store.get();
   if (settings != null) {
@@ -506,7 +497,5 @@ window.store = store;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;
-window.sleepyUserCacheService = sleepyUserCacheService;
-window.sleepyGroupCacheService = sleepyGroupCacheService;
 window.VideoService = VideoService;
 window.storage = storage;
