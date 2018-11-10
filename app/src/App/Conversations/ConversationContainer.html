@@ -1,6 +1,6 @@
-<div class="bg-light text-dark h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" on:click="checkToHideUserSearchDropdown(event)">
+<div class="bg-light text-dark h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
   {#if !$conversation.guid}
-    <ConversationCreate ref:conversationCreate />
+    <ConversationCreate />
   {:elseif $view === 'conversation'}
     <ConversationView />
   {:elseif $view === 'people'}
@@ -17,14 +17,6 @@
   import ConversationSettings from './ConversationSettings.html';
 
   export default {
-    methods: {
-      checkToHideUserSearchDropdown (event) {
-        if (this.refs.conversationCreate) {
-          this.refs.conversationCreate.checkToHideUserSearchDropdown(event);
-        }
-      }
-    },
-
     components: {
       ConversationCreate,
       ConversationView,

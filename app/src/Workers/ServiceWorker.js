@@ -120,7 +120,7 @@ self.addEventListener('message', event => {
 });
 
 self.addEventListener('push', event => {
-  console.log({pushEvent: event});
+  console.log('Push Event: ', event});
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     return;
