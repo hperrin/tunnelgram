@@ -132,7 +132,8 @@ export class Conversation extends Entity {
       }, {
         'type': '&',
         'ref': ['conversation', this.guid],
-        'gt': ['cdate', this.readline]
+        'gt': ['cdate', this.readline],
+        '!strict': ['informational', true]
       });
     }
 

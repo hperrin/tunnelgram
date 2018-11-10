@@ -101,8 +101,29 @@ class Conversation extends \Nymph\Entity {
 
     if (count($this->acFull) === 1) {
       // If the user is the only user, delete it.
+
+      // Delete all the informational messages associated with it.
+      $infoMessages = Nymph::getEntities([
+        'class' => 'Tunnelgram\Message',
+        'return' => 'guid'
+      ], ['&',
+        'ref' => ['conversation', $this],
+        'strict' => ['informational', true]
+      ]);
+      foreach ($infoMessages as $guid) {
+        // Gotta bypass Tilmeld's hooks to delete informational messages.
+        Nymph::$driver->_hookObject()->deleteEntityById($guid, 'Tunnelgram\Message');
+      }
+
       return true;
     }
+
+    // Send an informational message that the user has left.
+    $leftMessage = new Message();
+    $leftMessage->conversation = $this;
+    $leftMessage->informational = true;
+    $leftMessage->text = 'left';
+    $leftMessage->saveSkipAC();
 
     // Remove the user from the conversation.
     $index = Tilmeld::$currentUser->arraySearch($this->acFull);
@@ -251,7 +272,10 @@ class Conversation extends \Nymph\Entity {
                 v::stringType()->notEmpty()->prnt()->length(1, 1024),
                 v::intVal()->in($recipientGuids)
             ),
-            $this->mode === Conversation::MODE_CHANNEL_PUBLIC
+            (
+              $this->name !== null &&
+              $this->mode !== Conversation::MODE_CHANNEL_PUBLIC
+            )
         )
         ->attribute('name', v::when(
             v::nullType(),
