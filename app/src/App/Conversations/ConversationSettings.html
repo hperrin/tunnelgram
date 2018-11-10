@@ -1,16 +1,16 @@
-<div class="d-flex flex-column align-items-center pt-3 mb-3">
+<div class="d-flex flex-column align-items-center p-3">
   <ConversationHeader bind:conversation="$conversation" />
-  <h2>Conversation Settings</h2>
-  <form class="d-flex flex-column justify-content-start px-2" style="width: 600px; max-width: 100vw;" on:submit="save(event.preventDefault())">
+  <form class="d-flex flex-column justify-content-start " style="width: 600px; max-width: 100%;" on:submit="save(event.preventDefault())">
+    <h3 class="mt-3">Conversation Settings</h3>
     <div class="form-group">
       <label for="name">Name</label>
       <input type="text" class="form-control" bind:value="name" id="name" aria-describedby="nameHelp" placeholder="Name">
-      <small id="nameHelp" class="form-text text-muted">Leave blank to use auto-generated name based on participants.</small>
+      <small id="nameHelp" class="form-text text-muted">Visible to everyone. Leave blank to use auto-generated name based on participants.</small>
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
   </form>
   <hr />
-  <div class="d-flex flex-column justify-content-start px-2 mt-3" style="width: 600px; max-width: 100vw;">
+  <div class="d-flex flex-column justify-content-start mt-3" style="width: 600px; max-width: 100%;">
     <div class="alert alert-info">
       If you want to start fresh, you can clear your readline. Try this if you
       keep getting notified of new messages here, even though you've seen them
@@ -19,22 +19,20 @@
     <button type="button" class="btn btn-info" on:click="clearReadline()" disabled="{_clearingReadline}">Clear my Readline</button>
   </div>
   <hr />
-  {#if !_confirmLeave}
-    <div class="d-flex flex-column justify-content-start px-2 mt-3" style="width: 600px; max-width: 100vw;">
+  <div class="d-flex flex-column justify-content-start mt-3" style="width: 600px; max-width: 100%;">
+    {#if !_confirmLeave}
       <div class="alert alert-danger">
         If you leave a conversation, all of your messages in it will be deleted.
         It may take a while, so the conversation will still be in your list for a bit.
       </div>
       <button type="button" class="btn btn-danger" on:click="confirmLeave()" disabled="{_leavingConversation}">Leave Conversation</button>
-    </div>
-  {:else}
-    <div class="d-flex flex-column justify-content-start px-2 mt-3" style="width: 600px; max-width: 100vw;">
+    {:else}
       <div class="alert alert-danger">
         Are you sure you want to leave? This can't be undone.
       </div>
       <button type="button" class="btn btn-danger" on:click="leave()" disabled="{_leavingConversation}">Yes, Leave Conversation</button>
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <script>
