@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.71.0",
+            "version": "3.71.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "8585a1b39db65ed393dff4018fe545ea44005532"
+                "reference": "fa7f498cb41c7eb47e952355b8be2061816a9a60"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/8585a1b39db65ed393dff4018fe545ea44005532",
-                "reference": "8585a1b39db65ed393dff4018fe545ea44005532",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/fa7f498cb41c7eb47e952355b8be2061816a9a60",
+                "reference": "fa7f498cb41c7eb47e952355b8be2061816a9a60",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-11-06T22:04:52+00:00"
+            "time": "2018-11-09T21:57:53+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -2068,16 +2068,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.19",
+            "version": "3.0.0-beta.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f"
+                "reference": "f5087868239d496e9196bfd7b87efacd2a0b7faf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
-                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/f5087868239d496e9196bfd7b87efacd2a0b7faf",
+                "reference": "f5087868239d496e9196bfd7b87efacd2a0b7faf",
                 "shasum": ""
             },
             "require-dev": {
@@ -2118,7 +2118,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-11-02T00:00:00+00:00"
+            "time": "2018-11-09T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
