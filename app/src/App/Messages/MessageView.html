@@ -6,7 +6,9 @@
 {#if message.data.informational}
   <small class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if message.data.text === 'left'}
-      <Avatar class="mx-2" user="{message.data.user}" size="18" /> {displayName} left the conversation.
+      <Avatar class="mx-2" user="{message.data.user}" size="18" /> <DisplayName bind:user="message.data.user" /> left the conversation.
+    {:elseif message.data.text === 'added'}
+      <Avatar class="mx-2" user="{message.data.user}" size="18" /> <DisplayName bind:user="message.data.user" /> added <Avatar class="mx-2" user="{message.data.relatedUser}" size="18" /> <DisplayName bind:user="message.data.relatedUser" /> to the conversation.
     {:else}
       <Avatar class="mx-2" user="{message.data.user}" size="18" /> {message.data.text}
     {/if}
@@ -101,6 +103,7 @@
   import ImageGrid from './Media/ImageGrid.html';
   import Video from './Media/Video.html';
   import Avatar from '../Users/Avatar.html';
+  import DisplayName from '../Users/DisplayName.html';
   import ErrHandler from '../../ErrHandler';
 
   const converter = new showdown.Converter({
@@ -278,7 +281,8 @@
     components: {
       ImageGrid,
       Video,
-      Avatar
+      Avatar,
+      DisplayName
     }
   };
 </script>

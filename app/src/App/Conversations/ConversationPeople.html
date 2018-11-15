@@ -1,6 +1,13 @@
 <div class="d-flex flex-column align-items-center p-3">
   <ConversationHeader bind:conversation="$conversation" />
   <div class="d-flex flex-column justify-content-start" style="width: 600px; max-width: 100%;">
+    <h3 class="mt-3">Add People</h3>
+    <UserSearchSelector ref:userSearchSelector class="d-block" disabled="{_addingUser}" on:userSelected="addUser(event.user)" />
+    {#if _addUserError != null}
+      <div class="alert alert-danger mt-3 mb-0" role="alert">
+        {_addUserError}
+      </div>
+    {/if}
     <h3 class="mt-3">People in this Conversation</h3>
     <div class="list-group mt-3 text-body">
       {#each $conversation.data.acFull as user, i (user.guid)}
@@ -17,12 +24,76 @@
 
 <script>
   import ConversationHeader from './ConversationHeader.html';
+  import UserSearchSelector from '../Users/UserSearchSelector.html';
   import Avatar from '../Users/Avatar.html';
   import DisplayName from '../Users/DisplayName.html';
+  import ErrHandler from '../../ErrHandler';
 
   export default {
+    oncreate () {
+      let loading = false;
+      for (let user of this.store.get().conversation.data.acFull) {
+        if (user.isASleepingReference) {
+          loading = true;
+          break;
+        }
+      }
+
+      if (loading) {
+        const {conversation} = this.store.get();
+        conversation.readyAll(() => {
+          this.store.set({conversation});
+        }, undefined, 1);
+      }
+    },
+
+    data () {
+      return {
+        _addingUser: false,
+        _addUserError: null
+      };
+    },
+
+    methods: {
+      addUser (user) {
+        this.set({
+          _addUserError: null,
+          _addingUser: false
+        });
+
+        if (this.store.get().user.is(user)) {
+          this.set({
+            _addUserError: 'You\'re already in this conversation.'
+          });
+          this.refs.userSearchSelector.focus();
+          return;
+        }
+
+        const {conversation} = this.store.get();
+
+        if (user.inArray(conversation.data.acFull)) {
+          this.set({
+            _addUserError: 'They\'re already in this conversation.'
+          });
+          this.refs.userSearchSelector.focus();
+          return;
+        }
+
+        conversation.data.acFull.push(user);
+        this.store.set({conversation});
+        this.set({_addingUser: true});
+        conversation.save().then(() => {
+          this.refs.userSearchSelector.clear();
+          this.refs.userSearchSelector.focus();
+        }, ErrHandler).finally(() => this.set({
+          _addingUser: false
+        }));
+      }
+    },
+
     components: {
       ConversationHeader,
+      UserSearchSelector,
       Avatar,
       DisplayName
     }

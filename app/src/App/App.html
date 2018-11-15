@@ -185,7 +185,11 @@
             // Don't notify if the user is on the conversation and not hidden.
             return;
           }
-          await conversation.data.lastMessage.ready();
+          try {
+            await conversation.data.lastMessage.ready();
+          } catch (e) {
+            console.log(e);
+          }
           if (this.store.get().user.is(conversation.data.lastMessage.data.user)) {
             // Don't notify if the user made the message.
             return;

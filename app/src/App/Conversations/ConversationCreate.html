@@ -2,7 +2,7 @@
   <h2>Start a Conversation</h2>
   <form class="d-flex flex-column justify-content-start" style="width: 600px; max-width: 100%;" on:submit="save(event.preventDefault())">
     <h3 class="mt-3">Add People</h3>
-    <UserSearchSelector ref:userSearchSelector class="d-block" disabled="{_loadingUser}" on:userSelected="addUser(event.user)" />
+    <UserSearchSelector ref:userSearchSelector class="d-block" disabled="{_startingConversation}" on:userSelected="addUser(event.user)" />
     {#if _addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
         {_addUserError}
@@ -73,7 +73,6 @@
     data () {
       return {
         _startingConversation: false,
-        _loadingUser: false,
         _addUserError: null
       };
     },
@@ -86,7 +85,7 @@
 
         if (this.store.get().user.is(user)) {
           this.set({
-            _addUserError: 'You\'re already in any conversation that you start.'
+            _addUserError: 'You\'re already in conversations you start.'
           });
           this.refs.userSearchSelector.focus();
           return;
@@ -96,7 +95,7 @@
 
         if (user.inArray(conversation.data.acFull)) {
           this.set({
-            _addUserError: 'Looks like you\'ve already added that user.'
+            _addUserError: 'Looks like you\'ve already added them.'
           });
           this.refs.userSearchSelector.focus();
           return;

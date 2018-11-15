@@ -71,8 +71,17 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function handleDelete() {
-    // Delete all the user's messages.
     $this->refresh();
+
+    // Remove the user from the conversation.
+    $index = Tilmeld::$currentUser->arraySearch($this->acFull);
+    if ($index === false) {
+      throw new \Exception('You can only remove yourself from conversations you are in.');
+    }
+    unset($this->acFull[$index]);
+    $this->acFull = array_values($this->acFull);
+
+    // Delete all the user's messages.
     $messages = Nymph::getEntities([
       'class' => 'Tunnelgram\Message',
       'return' => 'guid'
@@ -80,7 +89,8 @@ class Conversation extends \Nymph\Entity {
       'ref' => [
         ['conversation', $this],
         ['user', Tilmeld::$currentUser]
-      ]
+      ],
+      '!strict' => ['informational', true]
     ]);
     foreach ($messages as $guid) {
       Nymph::deleteEntityById($guid, 'Tunnelgram\Message');
@@ -125,17 +135,12 @@ class Conversation extends \Nymph\Entity {
     $leftMessage->text = 'left';
     $leftMessage->saveSkipAC();
 
-    // Remove the user from the conversation.
-    $index = Tilmeld::$currentUser->arraySearch($this->acFull);
-    if ($index === false) {
-      return false;
-    }
-    unset($this->acFull[$index]);
-    $this->acFull = array_values($this->acFull);
-
+    // Remove the user's access if they started the conversation.
     if (Tilmeld::$currentUser->is($this->user)) {
-      $this->user = $this->acFull[0];
-      $this->group = $this->acFull[0]->group;
+      $this->acUser = Tilmeld::NO_ACCESS;
+    }
+    if (Tilmeld::$currentUser->group->is($this->group)) {
+      $this->acGroup = Tilmeld::NO_ACCESS;
     }
 
     $this->saveSkipAC();
@@ -246,8 +251,57 @@ class Conversation extends \Nymph\Entity {
       return false;
     }
 
+    if (!isset($this->mode)) {
+      $this->mode = Conversation::MODE_CONVERSATION;
+    }
+
     $newConversation = false;
-    if (!$this->guid) {
+    if ($this->guid) {
+      // Calculate removed or added users.
+      $originalAcFull = $this->getOriginalAcValues()['acFull'];
+      $newUsers = [];
+      foreach ($this->acFull as $curUser) {
+        if (!$curUser->inArray($originalAcFull)) {
+          $newUsers[] = $curUser;
+        }
+      }
+      $removedUsers = [];
+      foreach ($originalAcFull as $curUser) {
+        if (!$curUser->inArray($this->acFull)) {
+          $removedUsers[] = $curUser;
+        }
+      }
+
+      $removedCount = count($removedUsers);
+
+      if (
+        $removedCount &&
+        $this->mode === Conversation::MODE_CONVERSATION &&
+        (
+          $removedCount > 1 ||
+          !Tilmeld::$currentUser->is($removedUsers[0])
+        )
+      ) {
+        throw new \Exception('You can only remove yourself from a conversation.');
+      }
+
+      foreach ($removedUsers as $curUser) {
+        // Remove their key.
+        if (isset($this->keys) && isset($this->keys[$curUser->guid])) {
+          unset($this->keys[$curUser->guid]);
+        }
+      }
+
+      foreach ($newUsers as $curUser) {
+        // Send an informational message that the user has been added.
+        $addedMessage = new Message();
+        $addedMessage->conversation = $this;
+        $addedMessage->informational = true;
+        $addedMessage->text = 'added';
+        $addedMessage->relatedUser = $curUser;
+        $addedMessage->saveSkipAC();
+      }
+    } else {
       $newConversation = true;
       if (!Tilmeld::$currentUser->inArray($this->acFull)) {
         $this->acFull[] = Tilmeld::$currentUser;
@@ -257,10 +311,6 @@ class Conversation extends \Nymph\Entity {
     $recipientGuids = [];
     foreach ($this->acFull as $user) {
       $recipientGuids[] = $user->guid;
-    }
-
-    if (!isset($this->mode)) {
-      $this->mode = Conversation::MODE_CONVERSATION;
     }
 
     try {
@@ -282,7 +332,7 @@ class Conversation extends \Nymph\Entity {
             v::alwaysValid(),
             v::stringType()->notEmpty()->prnt()->length(
                 1,
-                ceil(256 * 4 / 3) // Base64 of 256B
+                ceil(128 * 4 / 3) // Base64 of 128B
             )
         ))
         ->attribute('lastMessage', v::when(
