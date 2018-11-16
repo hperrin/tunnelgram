@@ -30,7 +30,6 @@ class Conversation extends \Nymph\Entity {
   public function __construct($id = 0) {
     $this->name = null;
     $this->mode = Conversation::MODE_CONVERSATION;
-    $this->lastMessage = null;
     $this->acFull = [];
     parent::__construct($id);
     if (!isset($this->guid)) {
@@ -73,13 +72,11 @@ class Conversation extends \Nymph\Entity {
   public function handleDelete() {
     $this->refresh();
 
-    // Remove the user from the conversation.
+    // Is the user in the conversation?
     $index = Tilmeld::$currentUser->arraySearch($this->acFull);
     if ($index === false) {
       throw new \Exception('You can only remove yourself from conversations you are in.');
     }
-    unset($this->acFull[$index]);
-    $this->acFull = array_values($this->acFull);
 
     // Delete all the user's messages.
     $messages = Nymph::getEntities([
@@ -143,6 +140,10 @@ class Conversation extends \Nymph\Entity {
       $this->acGroup = Tilmeld::NO_ACCESS;
     }
 
+    // Remove the user from the conversation.
+    unset($this->acFull[$index]);
+    $this->acFull = array_values($this->acFull);
+
     $this->saveSkipAC();
     return false;
   }
@@ -176,6 +177,19 @@ class Conversation extends \Nymph\Entity {
         $newKeys[$ownGuid] = $object->data['keys'][$ownGuid];
       }
       $object->data['keys'] = $newKeys;
+    }
+
+    if (
+      isset($object->data['lastMessage']) &&
+      Nymph::getEntity([
+        'class' => 'Tunnelgram\Message'
+      ], ['&',
+        'guid' => $this->lastMessage->guid
+      ]) === null
+    ) {
+      // If a user is added to a regular conversation, they may not be able to
+      // see the last message.
+      unset($object->data['lastMessage']);
     }
 
     return $object;
@@ -313,6 +327,11 @@ class Conversation extends \Nymph\Entity {
       $recipientGuids[] = $user->guid;
     }
 
+    // This is for old conversations that have a null lastMessage.
+    if (!isset($this->lastMessage)) {
+      unset($this->lastMessage);
+    }
+
     try {
       v::notEmpty()
         ->attribute('mode', v::intType()->between(0, 2))
@@ -335,11 +354,7 @@ class Conversation extends \Nymph\Entity {
                 ceil(128 * 4 / 3) // Base64 of 128B
             )
         ))
-        ->attribute('lastMessage', v::when(
-            v::nullType(),
-            v::alwaysValid(),
-            v::instance('Tunnelgram\Message')
-        ))
+        ->attribute('lastMessage', v::instance('Tunnelgram\Message'), false)
         ->setName('conversation')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

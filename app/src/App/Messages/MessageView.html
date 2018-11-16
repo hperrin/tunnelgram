@@ -8,7 +8,7 @@
     {#if message.data.text === 'left'}
       <Avatar class="mx-2" user="{message.data.user}" size="18" /> <DisplayName bind:user="message.data.user" /> left the conversation.
     {:elseif message.data.text === 'added'}
-      <Avatar class="mx-2" user="{message.data.user}" size="18" /> <DisplayName bind:user="message.data.user" /> added <Avatar class="mx-2" user="{message.data.relatedUser}" size="18" /> <DisplayName bind:user="message.data.relatedUser" /> to the conversation.
+      <Avatar class="mx-2" user="{message.data.relatedUser}" size="18" /> <DisplayName bind:user="message.data.relatedUser" /> was added to the conversation by <DisplayName bind:user="message.data.user" />. 
     {:else}
       <Avatar class="mx-2" user="{message.data.user}" size="18" /> {message.data.text}
     {/if}

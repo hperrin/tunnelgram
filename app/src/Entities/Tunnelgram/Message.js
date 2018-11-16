@@ -198,7 +198,7 @@ export class Message extends Entity {
             this.decrypted.secretText = match[2];
           }
         }
-        if (this.decrypted.images.length) {
+        if (this.decrypted.images && this.decrypted.images.length) {
           this.data.images = await Promise.all(this.decrypted.images.map(async image => ({
             name: encrypt(image.name, key),
             dataType: encrypt(image.dataType, key),
