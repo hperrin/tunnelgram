@@ -170,7 +170,7 @@ class Message extends \Nymph\Entity {
                 'text',
                 v::stringType()->notEmpty()->prnt()->length(
                     1,
-                    ceil(4096 * 4 / 3) // Base64 of 4KiB
+                    ceil(4096 * 1.4) // Base64 of 4KiB
                 )
             )
         )
@@ -186,14 +186,14 @@ class Message extends \Nymph\Entity {
                         'name',
                         v::stringType()->notEmpty()->prnt()->length(
                             1,
-                            ceil(2048 * 4 / 3) // Base64 of 2KiB
+                            ceil(2048 * 1.4) // Base64 of 2KiB
                         )
                     ),
                     v::key(
                         'thumbnail',
                         v::stringType()->notEmpty()->prnt()->length(
                             1,
-                            ceil(102400 * 4 / 3) // Base64 of 100KiB
+                            ceil(102400 * 1.4) // Base64 of 100KiB
                         )
                     ),
                     v::key(
@@ -212,7 +212,7 @@ class Message extends \Nymph\Entity {
                         'data',
                         v::stringType()->notEmpty()->prnt()->length(
                             1,
-                            ceil(2097152 * 4 / 3) // Base64 of 2MiB
+                            ceil(2097152 * 1.4) // Base64 of 2MiB
                         )
                     ),
                     v::key(
@@ -243,14 +243,14 @@ class Message extends \Nymph\Entity {
                       'name',
                       v::stringType()->notEmpty()->prnt()->length(
                           1,
-                          ceil(2048 * 4 / 3) // Base64 of 2KiB
+                          ceil(2048 * 1.4) // Base64 of 2KiB
                       )
                   ),
                   v::key(
                       'thumbnail',
                       v::stringType()->notEmpty()->prnt()->length(
                           1,
-                          ceil(409600 * 4 / 3) // Base64 of 400KiB
+                          ceil(409600 * 1.4) // Base64 of 400KiB
                       )
                   ),
                   v::key(
@@ -269,7 +269,7 @@ class Message extends \Nymph\Entity {
                       'data',
                       v::stringType()->notEmpty()->prnt()->length(
                           1,
-                          ceil(20971520 * 4 / 3) // Base64 of 20MiB
+                          ceil(20971520 * 1.4) // Base64 of 20MiB
                       )
                   ),
                   v::key(

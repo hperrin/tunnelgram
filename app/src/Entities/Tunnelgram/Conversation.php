@@ -282,7 +282,7 @@ class Conversation extends \Nymph\Entity {
             v::alwaysValid(),
             v::stringType()->notEmpty()->prnt()->length(
                 1,
-                ceil(256 * 4 / 3) // Base64 of 256B
+                ceil(256 * 1.4) // Base64 of 256B
             )
         ))
         ->attribute('lastMessage', v::when(
