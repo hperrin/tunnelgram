@@ -11,6 +11,7 @@
         <div class="pswp__counter"></div>
 
         <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+        <button class="pswp__button pswp__button--share" title="Download"></button>
         <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
         <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
 
@@ -44,7 +45,18 @@
   export default {
     oncreate () {
       const pswpElement = this.refs.photoswipe;
-      this.pswp = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, this.get().items, this.get().options);
+      const defaultOptions = {
+        shareButtons: [
+          {id:'download', label:'Download photo', url:'{{raw_image_url}}', download:true}
+        ]
+      };
+
+      this.pswp = new PhotoSwipe(
+        pswpElement,
+        PhotoSwipeUI_Default,
+        this.get().items,
+        Object.assign({}, defaultOptions, this.get().options)
+      );
     },
 
     data () {
