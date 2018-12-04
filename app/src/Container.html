@@ -21,7 +21,7 @@
             <ul class="navbar-nav d-lg-none">
               <li class="nav-item">
                 <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="$set({convosOut: !$convosOut})" title="Conversations">
-                  <i class="fas fa-comments"></i>
+                  <span class="{$convosOut ? 'rotate-180' : ''}"><i class="fas fa-arrow-left"></i></span>
                 </a>
               </li>
             </ul>
@@ -188,7 +188,14 @@
 </script>
 
 <style>
+  ref:navbarCollapse {
+    border: 0;
+  }
   ref:loginContainer :global(.login-dialog-container, .login-dialog) {
     width: 100%;
+  }
+  .rotate-180 {
+    display: inline-block;
+    transform: rotateY(180deg);
   }
 </style>
