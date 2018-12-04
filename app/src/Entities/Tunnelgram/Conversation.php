@@ -351,7 +351,7 @@ class Conversation extends \Nymph\Entity {
             v::alwaysValid(),
             v::stringType()->notEmpty()->prnt()->length(
                 1,
-                ceil(128 * 4 / 3) // Base64 of 128B
+                ceil(128 * 1.4) // Base64 of 128B
             )
         ))
         ->attribute('lastMessage', v::instance('Tunnelgram\Message'), false)
