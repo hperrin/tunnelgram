@@ -8,11 +8,10 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "npm run copy && npm run build-android",
-    "copy": "npm run copy-code && npm run copy-media && npm run prepare-packages && npm run remove-unnecessary",
+    "copy": "npm run copy-code && npm run copy-media && npm run prepare-packages",
     "copy-code": "(rm -r ./www/dist || true) && cp -r ../app/dist ./www/ && cp ../app/package.json ./www/dist/",
     "copy-media": "(rm -r ./www/images || true) && cp -r ../app/images ./www/",
     "prepare-packages": "cd ./www/dist/ && npm install --only=prod",
-    "remove-unnecessary": "rm -rf ./www/dist/node_modules/material-design-icons && rm -rf ./www/dist/node_modules/animate.css && rm -rf ./www/dist/node_modules/nonblockjs",
     "build-ios": "cordova build ios",
     "build-android": "cordova build android",
     "emulate-android": "adb kill-server && cordova emulate android",
