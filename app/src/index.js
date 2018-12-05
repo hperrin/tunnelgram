@@ -295,35 +295,52 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
 
           // See if there is a subscription already.
-          const existingSubscription = await getSubscription();
+          let subscription = await getSubscription();
 
-          if (existingSubscription) {
-            store.set({webPushSubscription: existingSubscription});
-            return;
+          if (subscription) {
+            store.set({webPushSubscription: subscription});
+
+            try {
+              const webPushSubscriptionServerCheck = await Nymph.getEntity({
+                class: WebPushSubscription.class
+              }, {
+                'type': '&',
+                'strict': ['endpoint', subscription.endpoint]
+              });
+
+              if (webPushSubscriptionServerCheck != null) {
+                return;
+              }
+            } catch (e) {
+              if (e.status !== 404) {
+                throw e;
+              }
+            }
+          } else {
+            // The vapid key from the server.
+            const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+            if (!vapidPublicKey) {
+              return;
+            }
+            const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
+
+            // Make the subscription.
+            const subscription = await subscribeFromWorker({
+              userVisibleOnly: true,
+              applicationServerKey: convertedVapidKey
+            });
+
+            store.set({webPushSubscription: subscription});
           }
-
-          // The vapid key from the server.
-          const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-          if (!vapidPublicKey) {
-            return;
-          }
-          const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
-
-          // Make the subscription.
-          const subscription = JSON.parse(JSON.stringify(await subscribeFromWorker({
-            userVisibleOnly: true,
-            applicationServerKey: convertedVapidKey
-          })));
-
-          store.set({webPushSubscription: subscription});
 
           // And push it up to the server.
           const webPushSubscription = new WebPushSubscription();
+          const subscriptionData = JSON.parse(JSON.stringify(subscription));
           webPushSubscription.set({
-            endpoint: subscription.endpoint,
+            endpoint: subscriptionData.endpoint,
             keys: {
-              p256dh: subscription.keys.p256dh,
-              auth: subscription.keys.auth
+              p256dh: subscriptionData.keys.p256dh,
+              auth: subscriptionData.keys.auth
             }
           });
           webPushSubscription.save().catch(ErrHandler);
