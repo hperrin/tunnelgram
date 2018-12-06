@@ -427,7 +427,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
     const {username} = params;
     const {user} = store.get();
     store.set({loadingUser: true});
-    if (user.data.username === username) {
+    if (user.data.username.trim() === username) {
       store.set({
         viewUser: user,
         viewUserIsSelf: true,
@@ -437,7 +437,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       });
     } else {
       crypt.ready.then(() => {
-        User.byUsername(username).then(viewUser => {
+        User.byUsername(username.trim()).then(viewUser => {
           store.set({
             viewUser,
             viewUserIsSelf: false,
