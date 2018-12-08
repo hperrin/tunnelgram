@@ -3,7 +3,7 @@
 set -e
 
 if [ ! -d "app/vendor" ]; then
-  ./composer.sh install
+  ./composer.sh install --ignore-platform-reqs
 fi
 
 if [ ! -d "app/node_modules" ]; then
