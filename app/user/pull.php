@@ -124,6 +124,9 @@ try {
     foreach ($conversation->acFull as $user) {
       if (!isset($users[$user->guid])) {
         $users[$user->guid] = $user;
+        if ($user->isASleepingReference) {
+          $user->referenceWake();
+        }
       }
     }
   }
