@@ -53,11 +53,12 @@ if (getenv('MYSQL_CA_CERT')) {
 \Nymph\Nymph::configure($nymphConfig);
 
 // Nymph PubSub's configuration.
-\Nymph\PubSub\Server::configure(
-    ['entries' => [
-      (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
-    ]]
-);
+\Nymph\PubSub\Server::configure([
+  'port' => 8000,
+  'entries' => [
+    (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
+  ]
+]);
 
 // uMailPHP's configuration.
 \uMailPHP\Mail::configure([
