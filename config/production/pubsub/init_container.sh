@@ -9,4 +9,4 @@ service ssh start
 
 export PUBSUB_PORT=$PORT
 
-php /home/app/pubsub.php
+php /app/pubsub.php

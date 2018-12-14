@@ -44,9 +44,9 @@ RUN { \
 
 RUN { \
                 echo 'error_log=/home/LogFiles/php-error.log'; \
-                echo 'display_errors=Off'; \
+                echo 'display_errors=On'; \
                 echo 'log_errors=On'; \
-                echo 'display_startup_errors=Off'; \
+                echo 'display_startup_errors=On'; \
                 echo 'date.timezone=UTC'; \
     } > /usr/local/etc/php/conf.d/php.ini
 
@@ -59,8 +59,11 @@ EXPOSE 2222 8080
 ENV PORT 8080
 ENV WEBSITE_ROLE_INSTANCE_ID localRoleInstance
 ENV WEBSITE_INSTANCE_ID localInstance
-ENV PATH ${PATH}:/home/app
 
-WORKDIR /home/app
+RUN mkdir /app
+
+COPY app /app
+
+WORKDIR /app
 
 ENTRYPOINT ["/bin/init_container.sh"]
