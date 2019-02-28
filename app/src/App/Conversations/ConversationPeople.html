@@ -31,19 +31,25 @@
 
   export default {
     oncreate () {
-      let loading = false;
-      for (let user of this.store.get().conversation.data.acFull) {
-        if (user.isASleepingReference) {
-          loading = true;
-          break;
+      this.storeStateListener = this.store.on('state', ({changed, current}) => {
+        if (changed.conversation && current.conversation) {
+          // Ready the conversation's referenced entities.
+          const {conversation} = current;
+          if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+            conversation._tgCalledReadyAll = true;
+            conversation.readyAll(null, ErrHandler, 1).then(() => {
+              conversation.containsSleepingReference = false;
+              conversation._tgCalledReadyAll = false;
+              this.store.set({conversation});
+            });
+          }
         }
-      }
+      });
+    },
 
-      if (loading) {
-        const {conversation} = this.store.get();
-        conversation.readyAll(() => {
-          this.store.set({conversation});
-        }, undefined, 1);
+    ondestroy() {
+      if (this.storeStateListener) {
+        this.storeStateListener.cancel();
       }
     },
 
