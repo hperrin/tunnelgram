@@ -27,6 +27,13 @@ class Conversation extends \Nymph\Entity {
    */
   private $skipAcWhenSaving = false;
 
+  /**
+   * Store the readline for this session once it's read from the DB.
+   * @var /Tunnelgram/Readline|null
+   * @access private
+   */
+  private $curReadline;
+
   public function __construct($id = 0) {
     $this->name = null;
     $this->mode = Conversation::MODE_CONVERSATION;
@@ -223,25 +230,30 @@ class Conversation extends \Nymph\Entity {
       return false;
     }
 
-    $readlines = Nymph::getEntities([
-      'class' => 'Tunnelgram\Readline'
-    ], ['&',
-      'ref' => [
-        ['user', Tilmeld::$currentUser],
-        ['conversation', $this]
-      ]
-    ]);
-
     $readline = null;
-    $count = count($readlines);
-    if ($count) {
-      $readline = $readlines[0];
-    }
-    if ($count > 1) {
-      // Only 1 readline per user per conversation.
-      for ($i = 1; $i < $count; $i++) {
-        $readlines[$i]->delete();
+
+    if (!$this->curReadline) {
+      $readlines = Nymph::getEntities([
+        'class' => 'Tunnelgram\Readline'
+      ], ['&',
+        'ref' => [
+          ['user', Tilmeld::$currentUser],
+          ['conversation', $this]
+        ]
+      ]);
+
+      $count = count($readlines);
+      if ($count) {
+        $readline = $readlines[0];
       }
+      if ($count > 1) {
+        // Only 1 readline per user per conversation.
+        for ($i = 1; $i < $count; $i++) {
+          $readlines[$i]->delete();
+        }
+      }
+    } else {
+      $readline = $this->curReadline;
     }
 
     if ($readline) {
@@ -255,6 +267,8 @@ class Conversation extends \Nymph\Entity {
       $readline->readline = (float) $newReadline;
       $readline->save();
     }
+
+    $this->curReadline = $readline;
 
     return $readline->readline;
   }
