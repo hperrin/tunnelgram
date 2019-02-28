@@ -18,7 +18,7 @@
       <div class="m-3"><canvas ref:code></canvas></div>
     </div>
     <h2>{$viewUser.data.name}</h2>
-    <div>{$viewUser.data.username}, member since {moment.unix($viewUser.cdate).format('MMM D, YYYY')}</div>
+    <div>{$viewUser.data.username}, member since {simpleDateFormatter($viewUser.cdate, 'ymd', 'short')}</div>
     <div><button class="btn btn-link" title="Share" on:click="shareShortLink()">{shortLinkPreview}&nbsp;<i class="fas fa-share"></i></button></div>
 
     <div class="d-flex flex-column justify-content-start" style="width: 600px; max-width: 100%;">
@@ -105,7 +105,6 @@
 <script>
   import {Nymph} from 'nymph-client';
   import {TilmeldChangePassword} from 'tilmeld-client';
-  import moment from 'moment';
   import QRCode from 'qrcode';
   import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
@@ -115,6 +114,7 @@
   import {Dropdown} from '../../Services/Val/BSN';
   import {EditImageService} from '../../Services/EditImageService';
   import {getCookieValue} from '../../Services/getCookieValue';
+  import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
 
   export default {
@@ -297,7 +297,7 @@
     },
 
     helpers: {
-      moment
+      simpleDateFormatter: (date, style, length) => new SimpleDateFormatter(date).format(style, length)
     }
   }
 </script>

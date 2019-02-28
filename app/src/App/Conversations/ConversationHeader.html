@@ -6,13 +6,13 @@
 </div>
 
 <script>
-  import moment from 'moment';
+  import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
 
   export default {
     oncreate () {
       const {conversation} = this.get();
       this.set({
-        _startedDate: moment.unix(conversation.cdate).format('llll')
+        _startedDate: (new SimpleDateFormatter(conversation.cdate)).format('wymdhms', 'long')
       });
     },
 

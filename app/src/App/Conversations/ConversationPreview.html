@@ -45,9 +45,9 @@
 </div>
 
 <script>
-  import moment from 'moment';
   import Avatar from '../Users/Avatar.html';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
+  import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
 
   export default {
@@ -134,8 +134,8 @@
       updateTime () {
         const {conversation} = this.get();
         this.set({
-          _modifiedDate: moment(new Date(Math.min(conversation.mdate * 1000, +new Date()))).fromNow(true),
-          _longModifiedDate: moment.unix(conversation.mdate).format('llll')
+          _modifiedDate: new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short'),
+          _longModifiedDate: new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short')
         });
       }
     },

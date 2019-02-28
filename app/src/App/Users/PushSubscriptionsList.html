@@ -25,8 +25,8 @@
             </button>
           </div>
           <p class="mb-1">Device: {subscription.agent.device.vendor || ''} {subscription.agent.device.model || 'Unknown'}</p>
-          <small title="{moment.unix(subscription.cdate).format('llll')}">Created: {moment.unix(subscription.cdate).fromNow()}</small>,
-          <small title="{moment.unix(subscription.mdate).format('llll')}">Last used: {moment.unix(subscription.mdate).fromNow()}</small>
+          <small title="{simpleDateFormatter(subscription.cdate, 'wymdhms', 'short')}">Created: {simpleDateFormatter(subscription.cdate, 'ago', 'long')}</small>,
+          <small title="{simpleDateFormatter(subscription.mdate, 'wymdhms', 'short')}">Last used: {simpleDateFormatter(subscription.mdate, 'ago', 'long')}</small>
         </div>
       {/each}
     </div>
@@ -39,9 +39,9 @@
 
 <script>
   import {Nymph} from 'nymph-client';
-  import moment from 'moment';
   import UAParser from 'ua-parser-js';
   import LoadingIndicator from '../LoadingIndicator.html';
+  import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
 
   export default {
@@ -86,7 +86,7 @@
 
     helpers: {
       stringify: JSON.stringify,
-      moment
+      simpleDateFormatter: (date, style, length) => new SimpleDateFormatter(date).format(style, length)
     }
   };
 </script>
