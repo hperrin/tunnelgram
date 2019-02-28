@@ -33,6 +33,9 @@ class CordovaApp {
     const script = document.createElement('script');
     script.src = 'dist/main.js';
     document.getElementsByTagName('head')[0].appendChild(script);
+    const script2 = document.createElement('script');
+    script2.src = 'dist/showdown.js';
+    document.getElementsByTagName('head')[0].appendChild(script2);
   }
 
   initOneSignal () {

@@ -7,9 +7,8 @@ module.exports = {
   mode: devMode ? 'development' : 'production',
   devtool: devMode && 'source-map',
   entry: {
-    main: [
-      path.resolve(__dirname, 'src', 'index.js')
-    ],
+    main: path.resolve(__dirname, 'src', 'index.js'),
+    showdown: path.resolve(__dirname, 'src', 'index.showdown.js'),
     '../ServiceWorker': path.resolve(__dirname, 'src', 'Workers', 'ServiceWorker.js'),
     'Workers/ResizeImage': path.resolve(__dirname, 'src', 'Workers', 'ResizeImage.js'),
     'Workers/AESEncryption': path.resolve(__dirname, 'src', 'Workers', 'AESEncryption.js')
