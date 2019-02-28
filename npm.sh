@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 if which npm; then
   # We have npm, so run on the host.
   cd ./app/

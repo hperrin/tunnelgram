@@ -1,5 +1,7 @@
 #! /bin/bash
 
+set -e
+
 if which composer; then
   # We have composer, so run on the host.
   cd ./app/

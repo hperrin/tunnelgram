@@ -7,6 +7,7 @@
 /onesignal_rest_api_key.txt
 /maintenance/entities-export-*.nex
 /app/ServiceWorker.js*
+/config/production/pubsub/app
 
 /cordova/node_modules
 /cordova/platforms
