@@ -88,8 +88,7 @@ try {
         'class' => 'Tunnelgram\Message'
       ], ['&',
         'ref' => ['conversation', $readline->conversation],
-        'gt' => ['cdate', $readline->readline],
-        '!strict' => ['informational', true]
+        'gt' => ['cdate', $readline->readline]
       ])
     ];
   }, $unreadReadlines);
@@ -111,8 +110,7 @@ try {
       'messages' => Nymph::getEntities([
         'class' => 'Tunnelgram\Message'
       ], ['&',
-        'ref' => ['conversation', $conversation],
-        '!strict' => ['informational', true]
+        'ref' => ['conversation', $conversation]
       ])
     ];
   }, $newConversations);

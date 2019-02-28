@@ -10,7 +10,7 @@
     disabled="{disabled}"
     autocomplete="off"
     on:focus="set({_showUserSearchDropdown: true})" />
-  {#if searchUsers.length || _userSearchPromiseServer}
+  {#if !disabled && (searchUsers.length || _userSearchPromiseServer)}
     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" ref:userSearchDropdown>
       {#each searchUsers as user}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click="fire('userSelected', {user})" on:keydown="handleUserSearchResultKeyDown(event)">

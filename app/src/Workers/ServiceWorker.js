@@ -166,23 +166,28 @@ self.addEventListener('push', event => {
           }
         });
         users = users.map(guid => payload.users[guid].data.name);
-        const messageCount = entry.messages.length;
-        const message = (
-          messageCount === 0
-            ? payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.'
-            : (messageCount === 1
-                ? (entry.messages[0].data.images.length
-                    ? 'Photo from '
-                    : (entry.messages[0].data.video !== null
-                        ? 'Video from '
-                        : 'Message from '
-                      )
-                  )
-                : messageCount + ' messages from '
-              )
-        ) + (
-          users.join(', ')
-        ) + '.';
+
+        // Build a message for the notification.
+        let message;
+        if (entry.messages.length === 0) {
+          message = payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.';
+        } else {
+          if (entry.messages.length === 1) {
+            if (entry.messages[0].data.informational) {
+              message = 'Update from ';
+            } else if (entry.messages[0].data.images.length) {
+              message = 'Photo from ';
+            } else if (entry.messages[0].data.video !== null) {
+              message = 'Video from ';
+            } else {
+              message = 'Message from ';
+            }
+          } else {
+            message = entry.messages.length + ' messages from ';
+          }
+
+          message += users.join(', ') + '.';
+        }
 
         return sendNotification(title, message, entry.conversation.guid, entry.conversation.mdate * 1000);
       });

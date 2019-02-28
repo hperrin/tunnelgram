@@ -56,9 +56,13 @@ trait SendPushNotificationsTrait {
         );
 
         // Construct the notification message.
-        $message = $options['type'] === 'newConversation'
-          ? $options['senderName'].' started a conversation.'
-          : $options['messageType'].' from '.$options['senderName'].'.';
+        if ($options['type'] === 'newConversation') {
+          $message = $options['senderName'].' started a conversation.';
+        } elseif ($options['type'] === 'info') {
+          $message = $options['senderName'].' updated the conversation.';
+        } else {
+          $message = $options['messageType'].' from '.$options['senderName'].'.';
+        }
 
         // Send the notification to each subscription.
         foreach ($pushSubscriptions as $appPushSubscription) {

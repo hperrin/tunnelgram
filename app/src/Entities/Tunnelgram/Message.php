@@ -368,13 +368,13 @@ class Message extends \Nymph\Entity {
     $ret = parent::save();
 
     if ($ret) {
-      $this->conversation->refresh();
       if (!$this->informational) {
+        $this->conversation->refresh();
         $this->conversation->lastMessage = $this;
         $this->conversation->save();
       }
 
-      if (!$this->informational && count($recipientGuids) > 1) {
+      if (count($recipientGuids) > 1) {
         $showNameProp = count($this->conversation->acFull) > 2 ? 'nameFirst' : 'name';
         $names = [];
         foreach ($this->conversation->acFull as $curUser) {
@@ -389,7 +389,7 @@ class Message extends \Nymph\Entity {
               'conversationNamed' => isset($this->conversation->name),
               'senderName' => Tilmeld::$currentUser->name,
               'names' => $names,
-              'type' => 'message',
+              'type' => $this->informational ? 'info' : 'message',
               'messageType' => $this->images
                 ? 'Photo'
                 : ($this->video ? 'Video' : 'Message')
