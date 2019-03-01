@@ -58,18 +58,17 @@
             classSubmit="btn btn-primary"
             classButton="btn btn-secondary" />
         </div>
-        <div class="dropdown" ref:experimentsDropdown>
-          <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Experiments
-          </button>
-          <div class="dropdown-menu" aria-labelledby="experimentsButton">
-            <!-- <a class="dropdown-item" href="javascript:void(0)" on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><input type="checkbox" checked="{EXPERIMENT_WEB_PUSH}" /> Web Push Notifications</a> -->
-            <span class="dropdown-item">No experiments right now.</span>
-          </div>
+
+        <div>
+          Experiments {EXPERIMENT_WEB_PUSH}
         </div>
+        <List>
+          <LinkListItem on:click="setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)"><Checkbox bind:checked="EXPERIMENT_WEB_PUSH" /> Web Push Notifications</LinkListItem>
+          <ListItem>No experiments right now.</ListItem>
+        </List>
 
         <div class="mt-3">
-          <button type="button" class="btn btn-primary w-100" on:click="saveUser()">Save changes</button>
+          <Button ripple raised class="w-100" on:click="saveUser()">Save changes</Button>
         </div>
       {:else}
         <div>
@@ -89,12 +88,12 @@
               </div>
               <h3 class="mt-3">Or Start a New One</h3>
             {/if}
-            <button type="button" class="btn {conversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click="newConversation()" disabled="{_startingConversation}">Start a Conversation with {$viewUser.data.nameFirst}</button>
+            <Button ripple raised={!!conversations.length} class="btn  mt-3 w-100" on:click="newConversation()" disabled="{_startingConversation}">Start a Conversation with {$viewUser.data.nameFirst}</Button>
           {:catch e}
             <div class="alert alert-danger my-3" role="alert">
               Oops... something went wrong.
             </div>
-            <button type="button" class="btn btn-light mt-3 w-100" on:click="newConversation()" disabled="{_startingConversation}">Start a Conversation with {$viewUser.data.nameFirst}</button>
+            <Button ripple class="mt-3 w-100" on:click="newConversation()" disabled="{_startingConversation}">Start a Conversation with {$viewUser.data.nameFirst}</Button>
           {/await}
         </div>
       {/if}
@@ -103,6 +102,8 @@
 </div>
 
 <script>
+  import {Button, List, LinkListItem, ListItem, Checkbox} from "svelte-material-components";
+
   import {Nymph} from 'nymph-client';
   import {TilmeldChangePassword} from 'tilmeld-client';
   import QRCode from 'qrcode';
@@ -111,13 +112,20 @@
   import Avatar from './Avatar.html';
   import ConversationPreview from '../Conversations/ConversationPreview.html';
   import LoadingIndicator from '../LoadingIndicator.html';
-  import {Dropdown} from '../../Services/Val/BSN';
   import {EditImageService} from '../../Services/EditImageService';
   import {getCookieValue} from '../../Services/getCookieValue';
   import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
 
   export default {
+    components: {
+			Button, List, LinkListItem, ListItem, Checkbox,
+      LoadingIndicator,
+      TilmeldChangePassword,
+      Avatar,
+      ConversationPreview
+		},
+
     oncreate () {
       QRCode.toCanvas(
         this.refs.code,
@@ -144,14 +152,6 @@
       const {settings, viewUser} = this.store.get();
       if (settings && viewUser && viewUser.guid in settings.decrypted.nicknames) {
         this.set({nickname: settings.decrypted.nicknames[viewUser.guid]});
-      }
-    },
-
-    onupdate () {
-      if (this.refs.experimentsDropdown && !this.experimentsDropdown) {
-        this.experimentsDropdown = new Dropdown(this.refs.experimentsDropdown);
-      } else if (!this.refs.experimentsDropdown && this.experimentsDropdown) {
-        delete this.experimentsDropdown;
       }
     },
 
@@ -192,7 +192,7 @@
         _mouseOverAvatar: false,
         _avatarLoading: false,
         nickname: '',
-        // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
+        EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
       };
     },
 
@@ -287,13 +287,6 @@
         this.store.set({viewUser});
         this.set({_avatarLoading: false});
       }
-    },
-
-    components: {
-      LoadingIndicator,
-      TilmeldChangePassword,
-      Avatar,
-      ConversationPreview
     },
 
     helpers: {

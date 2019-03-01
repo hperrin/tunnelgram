@@ -56,6 +56,7 @@
 
   <!-- Bundled Styles -->
   <link rel="stylesheet" href="/dist/main.css" />
+  <link rel="preload" href="/node_modules/material-components-web/dist/material-components-web.min.css" as="style" />
   <link rel="preload" href="/node_modules/pform/css/pform.css" as="style" />
   <link rel="preload" href="/node_modules/pform/css/pform-bootstrap.css" as="style" />
   <link rel="preload" href="/node_modules/github-markdown-css/github-markdown.css" as="style" />
@@ -103,6 +104,8 @@
         var prev = document.getElementsByTagName('link')[0];
         prev.parentNode.insertBefore(link, prev);
       }
+      // Material Components Web
+      include('/node_modules/material-components-web/dist/material-components-web.min.css');
       // PForm
       include('/node_modules/pform/css/pform.css');
       include('/node_modules/pform/css/pform-bootstrap.css');
