@@ -82,8 +82,16 @@ class CordovaApp {
   }
 
   initKeyboardHandling () {
-    Keyboard.shrinkView(true);
+    Keyboard.shrinkView(false);
     Keyboard.hideFormAccessoryBar(true);
+    window.addEventListener('keyboardHeightWillChange', function (event) {
+      document.body.style.paddingBottom = event.keyboardHeight+'px';
+      document.body.scrollTop = 0;
+
+      // Fire a resize event.
+      let resize = new UIEvent('resize');
+      window.dispatchEvent(resize);
+    });
   }
 
   initDeferredStyles () {
