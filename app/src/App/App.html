@@ -67,7 +67,7 @@
 
 <script>
   import {Nymph, PubSub} from 'nymph-client';
-  import Todo from '../Entities/Todo';
+  import Todo from '../Entities/MyApp/Todo';
   import LoadingIndicator from './LoadingIndicator.html';
   import TodoEl from './TodoEl.html';
   import ErrHandler from '../ErrHandler';
@@ -89,9 +89,8 @@
     },
 
     ondestroy () {
-      let {_subscription} = this.get();
-      if (_subscription) {
-        _subscription.unsubscribe();
+      if (this.subscription) {
+        this.subscription.unsubscribe();
       }
     },
 
@@ -114,15 +113,14 @@
 
     methods: {
       subscribe () {
-        let {_subscription} = this.get();
-        if (_subscription) {
-          _subscription.unsubscribe();
+        if (this.subscription) {
+          this.subscription.unsubscribe();
         }
 
         this.set({_loading: true});
 
         const {archived, user} = this.store.get();
-        _subscription = Nymph.getEntities(
+        this.subscription = Nymph.getEntities(
             {'class': Todo.class},
             {
               'type': archived ? '&' : '!&',
@@ -130,7 +128,7 @@
             },
             {
               'type': '|',
-              'ref': [
+              'ref': [ // Request per user to have per user userCount.
                 ['user', user.guid],
                 ['acWrite', user.guid]
               ]
@@ -146,7 +144,6 @@
         }, ErrHandler, (count) => {
           this.set({userCount: count});
         });
-        this.set({_subscription});
       },
 
       addTodo () {
