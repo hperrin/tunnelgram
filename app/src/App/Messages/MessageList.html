@@ -286,7 +286,11 @@
           return;
         }
         // Update readline on next animation frame (so that the DOM can be updated).
-        window.requestAnimationFrame(async () => {
+        if (this.updateReadlineRaf) {
+          window.cancelAnimationFrame(this.updateReadlineRaf);
+        }
+        this.updateReadlineRaf = window.requestAnimationFrame(async () => {
+          delete this.updateReadlineRaf;
           if (!this.refs.messageContainer) {
             return;
           }

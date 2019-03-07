@@ -368,6 +368,9 @@ class Message extends \Nymph\Entity {
     $ret = parent::save();
 
     if ($ret) {
+      // Update the user's readline.
+      $this->conversation->saveReadline($this->mdate);
+
       if (!$this->informational) {
         $this->conversation->refresh();
         $this->conversation->lastMessage = $this;
@@ -396,9 +399,6 @@ class Message extends \Nymph\Entity {
             ]
         );
       }
-
-      // Update the user's readline.
-      $this->conversation->saveReadline($this->cdate);
     }
 
     return $ret;

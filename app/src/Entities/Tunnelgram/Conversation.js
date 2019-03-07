@@ -17,6 +17,7 @@ export class Conversation extends Entity {
     super(id);
     this.containsSleepingReference = false;
     this.pending = [];
+    this.readline = null;
     this.unreadCountPromise = null;
     this.unreadCountPromiseReadline = null;
     this.decrypted = {
@@ -38,7 +39,7 @@ export class Conversation extends Entity {
       return this;
     }
 
-    if (entityData.readline != null) {
+    if (entityData.readline != null && (this.readline == null || this.readline < entityData.readline)) {
       this.readline = entityData.readline;
     }
 
@@ -132,8 +133,7 @@ export class Conversation extends Entity {
       }, {
         'type': '&',
         'ref': ['conversation', this.guid],
-        'gt': ['cdate', this.readline],
-        '!strict': ['informational', true]
+        'gt': ['cdate', this.readline]
       });
     }
 
@@ -141,7 +141,7 @@ export class Conversation extends Entity {
   }
 
   saveReadline (...args) {
-    if (this.readline < args[0]) {
+    if (this.readline == null || this.readline < args[0]) {
       this.readline = args[0];
       this.unreadCountPromise = null;
     }

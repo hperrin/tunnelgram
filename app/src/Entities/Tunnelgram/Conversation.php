@@ -162,17 +162,22 @@ class Conversation extends \Nymph\Entity {
 
     $object = parent::jsonSerialize($clientClassName);
 
-    $readline = Nymph::getEntity([
-      'class' => 'Tunnelgram\Readline'
-    ], ['&',
-      'ref' => [
-        ['user', Tilmeld::$currentUser],
-        ['conversation', $this]
-      ]
-    ]);
+    if ($this->curReadline) {
+      $readline = $this->curReadline;
+    } else {
+      $readline = Nymph::getEntity([
+        'class' => 'Tunnelgram\Readline'
+      ], ['&',
+        'ref' => [
+          ['user', Tilmeld::$currentUser],
+          ['conversation', $this]
+        ]
+      ]);
+    }
 
     if ($readline) {
       $object->readline = (float) $readline->readline;
+      $this->curReadline = $readline;
     } else {
       $object->readline = null;
     }
@@ -232,7 +237,9 @@ class Conversation extends \Nymph\Entity {
 
     $readline = null;
 
-    if (!$this->curReadline) {
+    if ($this->curReadline) {
+      $readline = $this->curReadline;
+    } else {
       $readlines = Nymph::getEntities([
         'class' => 'Tunnelgram\Readline'
       ], ['&',
@@ -252,8 +259,6 @@ class Conversation extends \Nymph\Entity {
           $readlines[$i]->delete();
         }
       }
-    } else {
-      $readline = $this->curReadline;
     }
 
     if ($readline) {

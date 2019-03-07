@@ -31,10 +31,8 @@
         {:then count}
           {#if count === 0}
             <span>&nbsp;</span>
-          {:elseif count === true}
-            <span class="badge badge-primary">New</span>
           {:else}
-            <span class="badge badge-primary">{count}</span>
+            <span class="badge badge-primary">{count === true ? 'New' : count}</span>
           {/if}
         {:catch e}
           <span>&nbsp;</span>
@@ -52,21 +50,18 @@
 
   export default {
     oncreate () {
+      const {conversation} = this.get();
+
       this.interval = window.setInterval(() => this.updateTime(), 10000);
       this.updateTime();
-
-      this.storeStateListener = this.store.on('state', ({changed}) => {
-        if (changed.conversations && this.get()._readline < this.get().conversation.readline) {
-          this.set({
-            _unreadCount: this.get().conversation.unreadCount(),
-            _readline: this.get().conversation.readline
-          });
-        }
+      this.set({
+        _unreadCount: conversation.unreadCount(),
+        _readline: conversation.readline
       });
     },
 
     onstate ({changed, current, previous}) {
-      if (changed.mdate && current.conversation && previous != null) {
+      if (changed.conversation && current._readline !== current.conversation.readline && previous != null) {
         this.updateTime();
         this.set({
           _unreadCount: current.conversation.unreadCount(),
@@ -95,9 +90,6 @@
       if (this.interval) {
         clearInterval(this.interval);
       }
-      if (this.storeStateListener) {
-        this.storeStateListener.cancel();
-      }
     },
 
     computed: {
@@ -118,13 +110,12 @@
         }
         const width = Math.floor(60 / i);
         return {users, width};
-      },
-      mdate: ({conversation}) => conversation.mdate
+      }
     },
 
     data () {
       return {
-        _readline: 0,
+        _readline: null,
         _unreadCount: null,
         conversation: new Conversation()
       }

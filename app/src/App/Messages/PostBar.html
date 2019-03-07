@@ -156,13 +156,6 @@
 
         conversation.pending.push(message);
 
-        const saveSuccess = () => {
-          conversation.readline = message.cdate;
-          conversation.unreadCountPromise = null;
-
-          removePending();
-        };
-
         const removePending = () => {
           const idx = message.arraySearch(conversation.pending);
           if (idx !== false) {
@@ -176,7 +169,7 @@
 
         message.retrySave = () => message.save(true).then(saveSuccess, ErrHandler);
         message.cancelSave = () => removePending();
-        message.save().then(saveSuccess, ErrHandler);
+        message.save().then(removePending, ErrHandler);
 
         this.set({conversation, text: '', images: [], video: null});
         // Scroll to the bottom when the user adds a pending message.
