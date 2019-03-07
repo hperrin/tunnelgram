@@ -259,10 +259,6 @@ class EncryptionService extends AESEncryptionService {
   }
 
   async decryptAsync (text, key) {
-    if (!this.decryption) {
-      return text;
-    }
-
     return await this.callAESEncryptionWorker('decrypt', [text, key]);
   }
 
@@ -271,10 +267,6 @@ class EncryptionService extends AESEncryptionService {
   }
 
   async decryptBytesAsync (bytes, key) {
-    if (!this.decryption) {
-      return bytes;
-    }
-
     const returnBytes = await this.callAESEncryptionWorker('decryptBytes', [bytes, key], [bytes.buffer]);
 
     return returnBytes;

@@ -49,10 +49,6 @@
                       Push Subscriptions
                     </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="javascript:void(0)" on:click="$set({decryption: !$decryption})" use:tooltip data-toggle="tooltip" data-html="true" title="See what a <strong>hacker</strong> would see if they hacked into your account.">
-                      <input type="checkbox" checked="{!$decryption}" readonly /> Hacker Mode
-                    </a>
-                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
                       Log Out
                     </a>
@@ -131,17 +127,13 @@
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
   import Avatar from './App/Users/Avatar.html';
-  import {Tooltip, Dropdown, Collapse} from './Services/Val/BSN';
+  import {Dropdown, Collapse} from './Services/Val/BSN';
 
   const cryptoAvailable = () => {
     return !!((window.crypto || window.msCrypto).getRandomValues);
   };
 
   export default {
-    actions: {
-      tooltip: node => new Tooltip(node)
-    },
-
     onupdate () {
       if (this.refs.navbarCollapse && !this.navbarCollapse) {
         this.navbarCollapse = new Collapse(this.refs.navbarCollapse);

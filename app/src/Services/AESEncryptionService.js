@@ -5,15 +5,7 @@ import utf8 from 'utf8';
 const root = (self || window);
 
 export class AESEncryptionService {
-  constructor () {
-    this.decryption = true; // Turning this off causes the decrypt functions to just return what they are given.
-  }
-
   decrypt (text, key) {
-    if (!this.decryption) {
-      return text;
-    }
-
     // Decrypt the text.
     const encryptedBytes = this.decodeBase64(text);
     const bytes = this.decryptBytes(encryptedBytes, key);
@@ -21,10 +13,6 @@ export class AESEncryptionService {
   }
 
   decryptBytes (bytes, key) {
-    if (!this.decryption) {
-      return bytes;
-    }
-
     const cryptKey = key.substr(0, 64);
     const cryptIV = key.substr(64, 32);
     const keyBytes = aesjs.utils.hex.toBytes(cryptKey);

@@ -65,7 +65,6 @@ const store = new UserStore({
   crypt: crypt,
   settings: null,
   disconnected: !navigator.onLine,
-  decryption: true,
   requestNotificationPermission: () => {
     // This is the deault permission asker for sending desktop notifications
     // when the page is open in the browser.
@@ -166,11 +165,6 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
     if (changed.conversations && conversations.length === 0) {
       router.navigate('/c');
-    }
-
-    if (changed.decryption) {
-      crypt.decryption = current.decryption;
-      store.refreshAll();
     }
 
     if (changed.user) {
