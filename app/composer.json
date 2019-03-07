@@ -1,4 +1,19 @@
 {
+  "repositories-usefortesting...": [
+    {
+        "type":"vcs",
+        "url":"/Users/hperrin/repos/nymph/server"
+    },
+    {
+        "type":"vcs",
+        "url":"/Users/hperrin/repos/nymph/pubsub"
+    },
+    {
+        "type":"vcs",
+        "url":"/Users/hperrin/repos/nymph/tilmeld-server"
+    },
+    "remove this line and change versions in require to dev-master for testing"
+  ],
   "require": {
     "sciactive/nymph-server": "^3.0@beta",
     "sciactive/nymph-pubsub": "^3.0@beta",

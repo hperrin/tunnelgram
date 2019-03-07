@@ -19,9 +19,11 @@
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
     "ffmpeg.js-hperrin": "^3.1.9001",
     "github-markdown-css": "^3.0.1",
+    "nymph-client": "^4.0.0-beta.16",
     "pform": "^3.3.0",
     "photoswipe": "^4.1.3",
-    "pnotify": "^4.0.0-beta.2"
+    "pnotify": "^4.0.0-beta.2",
+    "tilmeld-client": "^1.0.0-beta.23"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -44,7 +46,6 @@
     "navigo": "^7.1.2",
     "node-emoji": "^1.10.0",
     "node-sass": "^4.11.0",
-    "nymph-client": "^4.0.0-beta.16",
     "qrcode": "^1.3.3",
     "sass-loader": "^7.1.0",
     "showdown": "^1.9.0",
@@ -52,7 +53,6 @@
     "style-loader": "^0.23.1",
     "svelte": "^2.16.1",
     "svelte-loader": "^2.13.3",
-    "tilmeld-client": "^1.0.0-beta.23",
     "timeago.js": "^4.0.0-beta.2",
     "tinygesture": "^1.1.4",
     "ua-parser-js": "^0.7.19",

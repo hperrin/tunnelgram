@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.87.20",
+            "version": "3.88.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6d313ff80b1b6084adc088e000dac1eefadd4f83"
+                "reference": "875786bf50f3b014fdef62cf4fce79ad5068dd40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6d313ff80b1b6084adc088e000dac1eefadd4f83",
-                "reference": "6d313ff80b1b6084adc088e000dac1eefadd4f83",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/875786bf50f3b014fdef62cf4fce79ad5068dd40",
+                "reference": "875786bf50f3b014fdef62cf4fce79ad5068dd40",
                 "shasum": ""
             },
             "require": {
@@ -86,7 +86,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-02-27T19:20:03+00:00"
+            "time": "2019-03-06T19:50:55+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -775,23 +775,24 @@
         },
         {
             "name": "norkunas/onesignal-php-api",
-            "version": "1.9.0",
+            "version": "1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/norkunas/onesignal-php-api.git",
-                "reference": "b379b8732614ada842435309a1b34c7f56db6eff"
+                "reference": "8712a0b8ed087bc980d2c9982b2fce617bc551c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/norkunas/onesignal-php-api/zipball/b379b8732614ada842435309a1b34c7f56db6eff",
-                "reference": "b379b8732614ada842435309a1b34c7f56db6eff",
+                "url": "https://api.github.com/repos/norkunas/onesignal-php-api/zipball/8712a0b8ed087bc980d2c9982b2fce617bc551c6",
+                "reference": "8712a0b8ed087bc980d2c9982b2fce617bc551c6",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "php": ">=5.6",
-                "php-http/client-common": "^1",
+                "php-http/client-common": "^1.9",
                 "php-http/client-implementation": "^1.0",
-                "php-http/message": "^1.0",
+                "php-http/message": "^1.7",
                 "symfony/options-resolver": "~2.7|^3.0|^4.0"
             },
             "require-dev": {
@@ -825,7 +826,7 @@
                 "notifications",
                 "onesignal"
             ],
-            "time": "2019-01-10T12:17:45+00:00"
+            "time": "2019-03-03T15:04:36+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -874,21 +875,21 @@
         },
         {
             "name": "paragonie/sodium_compat",
-            "version": "v1.8.1",
+            "version": "v1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/sodium_compat.git",
-                "reference": "57bb5ef079d3724148da3d5c99e30695ab17afda"
+                "reference": "f261f50c84d20b1364723dbd21e668f4e40b2140"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/sodium_compat/zipball/57bb5ef079d3724148da3d5c99e30695ab17afda",
-                "reference": "57bb5ef079d3724148da3d5c99e30695ab17afda",
+                "url": "https://api.github.com/repos/paragonie/sodium_compat/zipball/f261f50c84d20b1364723dbd21e668f4e40b2140",
+                "reference": "f261f50c84d20b1364723dbd21e668f4e40b2140",
                 "shasum": ""
             },
             "require": {
                 "paragonie/random_compat": ">=1",
-                "php": "^5.2.4|^5.3|^5.4|^5.5|^5.6|^7"
+                "php": "^5.2.4|^5.3|^5.4|^5.5|^5.6|^7|^8"
             },
             "require-dev": {
                 "phpunit/phpunit": "^3|^4|^5"
@@ -952,7 +953,7 @@
                 "secret-key cryptography",
                 "side-channel resistant"
             ],
-            "time": "2019-01-03T21:00:55+00:00"
+            "time": "2019-03-06T17:16:38+00:00"
         },
         {
             "name": "php-http/client-common",
@@ -2054,16 +2055,16 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.0-beta.4",
+            "version": "3.0.0-beta.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "f20d5f6ce55a0e5378949270d79c8b0cffbc4aec"
+                "reference": "e2d66a2148199c141f6d48ede5fa938917a50886"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/f20d5f6ce55a0e5378949270d79c8b0cffbc4aec",
-                "reference": "f20d5f6ce55a0e5378949270d79c8b0cffbc4aec",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/e2d66a2148199c141f6d48ede5fa938917a50886",
+                "reference": "e2d66a2148199c141f6d48ede5fa938917a50886",
                 "shasum": ""
             },
             "require": {
@@ -2106,7 +2107,7 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2018-05-04T00:00:00+00:00"
+            "time": "2019-03-06T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
@@ -2164,16 +2165,16 @@
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.27",
+            "version": "1.0.0-beta.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "9ab31afb881a73d910dafac90d880820f9692d37"
+                "reference": "702c79027585b2d7cc4735ccd20090e65957eedc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/9ab31afb881a73d910dafac90d880820f9692d37",
-                "reference": "9ab31afb881a73d910dafac90d880820f9692d37",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/702c79027585b2d7cc4735ccd20090e65957eedc",
+                "reference": "702c79027585b2d7cc4735ccd20090e65957eedc",
                 "shasum": ""
             },
             "require": {
@@ -2219,7 +2220,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2018-11-07T00:00:00+00:00"
+            "time": "2019-03-06T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -2321,16 +2322,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "8d2318b73e0a1bc75baa699d00ebe2ae8b595a39"
+                "reference": "850a667d6254ccf6c61d853407b16f21c4579c77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/8d2318b73e0a1bc75baa699d00ebe2ae8b595a39",
-                "reference": "8d2318b73e0a1bc75baa699d00ebe2ae8b595a39",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/850a667d6254ccf6c61d853407b16f21c4579c77",
+                "reference": "850a667d6254ccf6c61d853407b16f21c4579c77",
                 "shasum": ""
             },
             "require": {
@@ -2371,20 +2372,20 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-01-29T09:49:29+00:00"
+            "time": "2019-02-26T08:03:39+00:00"
         },
         {
             "name": "symfony/options-resolver",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
-                "reference": "831b272963a8aa5a0613a1a7f013322d8161bbbb"
+                "reference": "3896e5a7d06fd15fa4947694c8dcdd371ff147d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/831b272963a8aa5a0613a1a7f013322d8161bbbb",
-                "reference": "831b272963a8aa5a0613a1a7f013322d8161bbbb",
+                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/3896e5a7d06fd15fa4947694c8dcdd371ff147d1",
+                "reference": "3896e5a7d06fd15fa4947694c8dcdd371ff147d1",
                 "shasum": ""
             },
             "require": {
@@ -2425,7 +2426,7 @@
                 "configuration",
                 "options"
             ],
-            "time": "2019-01-16T21:31:25+00:00"
+            "time": "2019-02-23T15:17:42+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -2546,16 +2547,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.2.3",
+            "version": "v4.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "7f8e44fc498972466f0841c3e48dc555f23bdf53"
+                "reference": "ff03eae644e6b1e26d4a04b2385fe3a1a7f04e42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/7f8e44fc498972466f0841c3e48dc555f23bdf53",
-                "reference": "7f8e44fc498972466f0841c3e48dc555f23bdf53",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/ff03eae644e6b1e26d4a04b2385fe3a1a7f04e42",
+                "reference": "ff03eae644e6b1e26d4a04b2385fe3a1a7f04e42",
                 "shasum": ""
             },
             "require": {
@@ -2619,7 +2620,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-01-29T09:49:29+00:00"
+            "time": "2019-02-23T15:17:42+00:00"
         },
         {
             "name": "textalk/websocket",
