@@ -43,13 +43,13 @@
   </div>
 {/if}
 <div class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
-  <div class="bg-dark text-light d-lg-block" ref:convos>
+  <div class="bg-dark text-light d-md-block" ref:convos>
     <ConversationList
       on:tunnelgram-notification="notification(event.update)"
       on:tunnelgram-navigate="navigate(event.conversation)" />
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
-  <div class="flex-grow-1 d-lg-block bg-light text-dark" style="width: 0;" ref:mainUi>
+  <div class="flex-grow-1 d-md-block bg-light text-dark" style="width: 0;" ref:mainUi>
     {#if $loadingConversation || $loadingUser}
       <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
         <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -290,9 +290,9 @@
   .convos-out ref:mainUi {
     transform: translate3d(0, 0, 0);
   }
-  @media (min-width: 991.98px) {
+  @media (min-width: 767.98px) {
     ref:convos {
-      max-width: 350px;
+      max-width: 330px;
     }
     ref:mainUi, .convos-out ref:mainUi {
       position: static;

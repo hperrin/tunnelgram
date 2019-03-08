@@ -1,8 +1,6 @@
 <div class="d-flex flex-column align-items-center p-3">
-  <div style="width: 600px; max-width: 100%;">
-    <ConversationHeader bind:conversation="$conversation" />
-  </div>
-  <form class="d-flex flex-column justify-content-start " style="width: 600px; max-width: 100%;" on:submit="save(event.preventDefault())">
+  <ConversationHeader bind:conversation="$conversation" />
+  <form class="d-flex flex-column justify-content-start w-std-page" on:submit="save(event.preventDefault())">
     <h3 class="mt-3">Conversation Settings</h3>
     <div class="form-group">
       <label for="name">Name</label>
@@ -12,7 +10,7 @@
     <button type="submit" class="btn btn-primary">Save</button>
   </form>
   <hr />
-  <div class="d-flex flex-column justify-content-start mt-3" style="width: 600px; max-width: 100%;">
+  <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
     <div class="alert alert-info">
       If you want to start fresh, you can clear your readline. Try this if you
       keep getting notified of new messages here, even though you've seen them
@@ -21,7 +19,7 @@
     <button type="button" class="btn btn-info" on:click="clearReadline()" disabled="{_clearingReadline}">Clear my Readline</button>
   </div>
   <hr />
-  <div class="d-flex flex-column justify-content-start mt-3" style="width: 600px; max-width: 100%;">
+  <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
     {#if !_confirmLeave}
       <div class="alert alert-danger">
         If you leave a conversation, all of your messages in it will be deleted.

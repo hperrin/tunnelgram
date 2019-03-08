@@ -29,6 +29,12 @@ $dark:          #031926;
 }
 // }
 
+// Standard page width
+.w-std-page {
+  width: 100%;
+  max-width: 600px;
+}
+
 // Cosmo
 // html[theme=cosmo] {
 //   $primary:       #2780E3;

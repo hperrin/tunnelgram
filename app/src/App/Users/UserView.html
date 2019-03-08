@@ -21,7 +21,7 @@
     <div>{$viewUser.data.username}, member since {simpleDateFormatter($viewUser.cdate, 'ymd', 'short')}</div>
     <div><button class="btn btn-link" title="Share" on:click="shareShortLink()">{shortLinkPreview}&nbsp;<i class="fas fa-share"></i></button></div>
 
-    <div class="d-flex flex-column justify-content-start" style="width: 600px; max-width: 100%;">
+    <div class="d-flex flex-column justify-content-start w-std-page">
       {#if !$viewUserIsSelf}
         <div class="form-group">
           <label for="viewUserNickname">Nickname</label>
