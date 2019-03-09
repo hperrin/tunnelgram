@@ -1,4 +1,4 @@
-<div style="height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" ref:container on:scroll="handleScroll()">
+<div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" ref:container on:scroll="handleScroll()">
   <div class="list-group">
     <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click="$navigate('/c')">
       <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>

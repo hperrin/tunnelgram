@@ -1,5 +1,4 @@
 <div class="d-flex flex-column align-items-center p-3">
-  <ConversationHeader bind:conversation="$conversation" />
   <div class="d-flex flex-column justify-content-start w-std-page">
     <h3 class="mt-3">Add People</h3>
     <p>
@@ -32,7 +31,6 @@
 </div>
 
 <script>
-  import ConversationHeader from './ConversationHeader.html';
   import UserSearchSelector from '../Users/UserSearchSelector.html';
   import Avatar from '../Users/Avatar.html';
   import DisplayName from '../Users/DisplayName.html';
@@ -109,7 +107,6 @@
     },
 
     components: {
-      ConversationHeader,
       UserSearchSelector,
       Avatar,
       DisplayName

@@ -1,80 +1,25 @@
-<div class="d-flex flex-column h-100 position-relative" on:dragover="handleDrag(event, true)">
-  {#if _showDropbox}
-    <div class="position-absolute w-100 h-100" style="z-index: 200;" on:dragleave="handleDrag(event, false)" on:drop="handleDrop(event)"></div>
-    <div class="d-flex justify-content-center align-items-center position-absolute w-100 h-100 bg-white" style="opacity: .9; z-index: 100;">
-      <div class="d-flex flex-column justify-content-center align-items-center">
-        <span class="fa-layers fa-fw fa-5x">
-          <i class="fas fa-file"></i>
-          <i class="fa-inverse fas fa-plus" data-fa-transform="shrink-10"></i>
-        </span>
-
-        <div class="h1 mt-2">
-          Drop files to upload to conversation.
-        </div>
-      </div>
-    </div>
-  {/if}
-  <div class="flex-grow-1 position-relative">
-    <MessageList bind:conversation="$conversation" ref:messageList />
-  </div>
-  <PostBar bind:conversation="$conversation" ref:postBar on:scrollToBottom="refs.messageList.fire('scrollToBottom')" />
-</div>
+{#if !$conversation.guid}
+  <ConversationCreate />
+{:elseif $view === 'conversation'}
+  <ConversationMessages />
+{:elseif $view === 'people'}
+  <ConversationPeople />
+{:elseif $view === 'settings'}
+  <ConversationSettings />
+{/if}
 
 <script>
-  import MessageList from '../Messages/MessageList.html';
-  import PostBar from '../Messages/PostBar.html';
+  import ConversationCreate from './ConversationCreate.html';
+  import ConversationMessages from './ConversationMessages.html';
+  import ConversationPeople from './ConversationPeople.html';
+  import ConversationSettings from './ConversationSettings.html';
 
   export default {
-    ondestroy () {
-      if (this.timeout) {
-        window.clearTimeout(this.timeout);
-      }
-    },
-
-    data () {
-      return {
-        _showDropbox: false
-      };
-    },
-
-    methods: {
-      clearTimeout () {
-        if (this.timeout) {
-          window.clearTimeout(this.timeout);
-          this.timeout = null;
-        }
-      },
-
-      showTimedDropbox () {
-        this.clearTimeout();
-
-        this.set({_showDropbox: true});
-
-        this.timeout = window.setTimeout(() => {
-          this.set({_showDropbox: false});
-          this.timeout = null;
-        }, 2000);
-      },
-
-      handleDrag (event, _showDropbox) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        this.set({_showDropbox});
-      },
-
-      handleDrop (event) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        this.set({_showDropbox: false});
-        this.refs.postBar.handleFiles(event.dataTransfer.files);
-      }
-    },
-
     components: {
-      MessageList,
-      PostBar
+      ConversationCreate,
+      ConversationMessages,
+      ConversationPeople,
+      ConversationSettings
     }
   };
 </script>

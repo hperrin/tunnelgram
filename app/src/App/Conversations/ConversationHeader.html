@@ -1,4 +1,4 @@
-<div class="d-flex flex-column justify-content-center align-items-center w-std-page" style="min-height: 150px;">
+<div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 150px;">
   <h1>{name}</h1>
   <p>
     Started {_startedDate}
@@ -8,7 +8,7 @@
     <button class="btn btn-sm btn-link" on:click="set({_showModeHelp: !_showModeHelp})">(?)</button>
   </p>
   {#if _showModeHelp}
-    <p class="alert alert-info">
+    <p class="alert alert-info m-3">
       {_Conversation.MODE_DESCRIPTION[$conversation.data.mode]}
     </p>
   {/if}

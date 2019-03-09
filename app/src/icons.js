@@ -15,6 +15,10 @@ import fasPlayCircle from '@fortawesome/fontawesome-free-solid/faPlayCircle';
 import fasShare from '@fortawesome/fontawesome-free-solid/faShare';
 import fasUndo from '@fortawesome/fontawesome-free-solid/faUndo';
 import fasArrowLeft from '@fortawesome/fontawesome-free-solid/faArrowLeft';
+import fasArrowRight from '@fortawesome/fontawesome-free-solid/faArrowRight';
+import fasComments from '@fortawesome/fontawesome-free-solid/faComments';
+import fasUsers from '@fortawesome/fontawesome-free-solid/faUsers';
+import fasCog from '@fortawesome/fontawesome-free-solid/faCog';
 
 // For PNotify
 import fasExclamationCircle from '@fortawesome/fontawesome-free-solid/faExclamationCircle';
@@ -39,6 +43,10 @@ fontawesome.library.add(
   fasShare,
   fasUndo,
   fasArrowLeft,
+  fasArrowRight,
+  fasComments,
+  fasUsers,
+  fasCog,
 
   // For PNotify
   fasExclamationCircle,
