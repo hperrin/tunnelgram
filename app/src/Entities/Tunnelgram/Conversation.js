@@ -18,6 +18,7 @@ export class Conversation extends Entity {
     this.containsSleepingReference = false;
     this.pending = [];
     this.readline = null;
+    this.notifications = Conversation.NOTIFICATIONS_ALL;
     this.unreadCountPromise = null;
     this.unreadCountPromiseReadline = null;
     this.decrypted = {
@@ -41,6 +42,10 @@ export class Conversation extends Entity {
 
     if (entityData.readline != null && (this.readline == null || this.readline < entityData.readline)) {
       this.readline = entityData.readline;
+    }
+
+    if (entityData.notifications != null) {
+      this.notifications = entityData.notifications;
     }
 
     // Decrypt the conversation name.
@@ -154,6 +159,11 @@ export class Conversation extends Entity {
     return this.serverCall('clearReadline', args, true);
   }
 
+  saveNotificationSetting (...args) {
+    this.notifications = args[0];
+    return this.serverCall('saveNotificationSetting', args, true);
+  }
+
   findMatchingConversations(...args) {
     return this.serverCall('findMatchingConversations', args, true);
   }
@@ -166,7 +176,6 @@ Conversation.class = 'Tunnelgram\\Conversation';
 Conversation.MODE_CONVERSATION = 0;
 Conversation.MODE_CHANNEL_PRIVATE = 1;
 Conversation.MODE_CHANNEL_PUBLIC = 2;
-
 Conversation.MODE_NAME = {
   [Conversation.MODE_CONVERSATION]: `Conversation`,
   [Conversation.MODE_CHANNEL_PRIVATE]: `Private Channel`,
@@ -176,6 +185,16 @@ Conversation.MODE_DESCRIPTION = {
   [Conversation.MODE_CONVERSATION]: `A conversation is end to end encrypted on a per-user level. When a message is sent, the decryption key is copied and encrypted for each person in the conversation. This means that if someone is added to a conversation later, they won't be able to read any previous messages.`,
   [Conversation.MODE_CHANNEL_PRIVATE]: `A private channel is end to end encrypted on a channel level. When a message is sent, the decryption key is derived from the channel's encryption key, which is encrypted for each person. This means that if someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
   [Conversation.MODE_CHANNEL_PUBLIC]: `A public channel is not encrypted. Anyone can search for a public channel and read its messages before joining it.`
+};
+Conversation.NOTIFICATIONS_ALL = 0;
+Conversation.NOTIFICATIONS_MENTIONS = 1;
+Conversation.NOTIFICATIONS_DIRECT = 2;
+Conversation.NOTIFICATIONS_NONE = 4;
+Conversation.NOTIFICATIONS_NAME = {
+  [Conversation.NOTIFICATIONS_ALL]: `Every Message`,
+  [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Channel Callouts (@here)`,
+  [Conversation.NOTIFICATIONS_DIRECT]: `Direct Mentions`,
+  [Conversation.NOTIFICATIONS_NONE]: `No Notifications`
 };
 
 Nymph.setEntityClass(Conversation.class, Conversation);

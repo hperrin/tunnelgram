@@ -36,7 +36,7 @@ class Conversation extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->name = null;
-    $this->mode = Conversation::MODE_CONVERSATION;
+    $this->mode = self::MODE_CONVERSATION;
     $this->acFull = [];
     parent::__construct($id);
     if (!isset($this->guid)) {
@@ -157,7 +157,7 @@ class Conversation extends \Nymph\Entity {
 
   public function jsonSerialize($clientClassName = true) {
     if (!isset($this->mode)) {
-      $this->mode = Conversation::MODE_CONVERSATION;
+      $this->mode = self::MODE_CONVERSATION;
     }
 
     $object = parent::jsonSerialize($clientClassName);
@@ -177,9 +177,11 @@ class Conversation extends \Nymph\Entity {
 
     if ($readline) {
       $object->readline = (float) $readline->readline;
+      $object->notifications = (int) $readline->notifications;
       $this->curReadline = $readline;
     } else {
       $object->readline = null;
+      $object->notifications = Readline::NOTIFICATIONS_ALL;
     }
 
     if (Tilmeld::$currentUser !== null && $this->keys) {
@@ -210,11 +212,12 @@ class Conversation extends \Nymph\Entity {
   public function putData($data, $sdata = []) {
     parent::putData($data, $sdata);
     if (!isset($this->mode)) {
-      $this->mode = Conversation::MODE_CONVERSATION;
+      $this->mode = self::MODE_CONVERSATION;
     }
   }
 
   public function clearReadline() {
+    // This also clears notification settings.
     $readlines = Nymph::getEntities([
       'class' => 'Tunnelgram\Readline'
     ], ['&',
@@ -229,12 +232,7 @@ class Conversation extends \Nymph\Entity {
     }
   }
 
-  public function saveReadline($newReadline) {
-    if (!Tilmeld::$currentUser->inArray($this->acFull)) {
-      // For the admin user.
-      return false;
-    }
-
+  private function getReadline() {
     $readline = null;
 
     if ($this->curReadline) {
@@ -261,21 +259,34 @@ class Conversation extends \Nymph\Entity {
       }
     }
 
-    if ($readline) {
-      if ($readline->readline < $newReadline) {
-        $readline->readline = (float) $newReadline;
-        $readline->save();
-      }
-    } else {
+    if (!$readline) {
       $readline = Readline::factory();
       $readline->conversation = $this;
-      $readline->readline = (float) $newReadline;
-      $readline->save();
     }
 
     $this->curReadline = $readline;
 
+    return $readline;
+  }
+
+  public function saveReadline($newReadline) {
+    $readline = $this->getReadline();
+
+    if (!isset($readline->readline) || $readline->readline < $newReadline) {
+      $readline->readline = (float) $newReadline;
+      $readline->save();
+    }
+
     return $readline->readline;
+  }
+
+  public function saveNotificationSetting($setting) {
+    $readline = $this->getReadline();
+
+    $readline->notifications = (int) $setting;
+    $readline->save();
+
+    return $readline->notifications;
   }
 
   public function save() {
@@ -285,7 +296,7 @@ class Conversation extends \Nymph\Entity {
     }
 
     if (!isset($this->mode)) {
-      $this->mode = Conversation::MODE_CONVERSATION;
+      $this->mode = self::MODE_CONVERSATION;
     }
 
     $newConversation = false;
@@ -309,7 +320,7 @@ class Conversation extends \Nymph\Entity {
 
       if (
         $removedCount &&
-        $this->mode === Conversation::MODE_CONVERSATION &&
+        $this->mode === self::MODE_CONVERSATION &&
         (
           $removedCount > 1 ||
           !Tilmeld::$currentUser->is($removedUsers[0])
@@ -362,7 +373,7 @@ class Conversation extends \Nymph\Entity {
             ),
             (
               $this->name !== null &&
-              $this->mode !== Conversation::MODE_CHANNEL_PUBLIC
+              $this->mode !== self::MODE_CHANNEL_PUBLIC
             )
         )
         ->attribute('name', v::when(

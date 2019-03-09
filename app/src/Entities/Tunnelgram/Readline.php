@@ -5,6 +5,10 @@ use Respect\Validation\Validator as v;
 
 class Readline extends \Nymph\Entity {
   const ETYPE = 'readline';
+  const NOTIFICATIONS_ALL = 0;
+  const NOTIFICATIONS_MENTIONS = 1;
+  const NOTIFICATIONS_DIRECT = 2;
+  const NOTIFICATIONS_NONE = 4;
   protected $clientEnabledMethods = [];
   public static $clientEnabledStaticMethods = [];
   protected $protectedData = ['readline', 'conversation'];
@@ -15,6 +19,7 @@ class Readline extends \Nymph\Entity {
   public function __construct($id = 0) {
     $this->readline = null;
     $this->conversation = null;
+    $this->notifications = self::NOTIFICATIONS_ALL;
     $this->acUser = Tilmeld::FULL_ACCESS;
     $this->acGroup = Tilmeld::NO_ACCESS;
     $this->acOther = Tilmeld::NO_ACCESS;
@@ -30,6 +35,12 @@ class Readline extends \Nymph\Entity {
       v::notEmpty()
         ->attribute('readline', v::floatType())
         ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
+        ->attribute('notifications', v::intType()->in([
+          self::NOTIFICATIONS_ALL,
+          self::NOTIFICATIONS_MENTIONS,
+          self::NOTIFICATIONS_DIRECT,
+          self::NOTIFICATIONS_NONE
+        ]))
         ->setName('readline')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
