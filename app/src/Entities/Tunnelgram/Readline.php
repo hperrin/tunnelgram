@@ -27,6 +27,10 @@ class Readline extends \Nymph\Entity {
   }
 
   public function save() {
+    if (!isset($this->notifications)) {
+      $this->notifications = self::NOTIFICATIONS_ALL;
+    }
+
     if (!Tilmeld::gatekeeper()) {
       // Only allow logged in users to save.
       return false;
