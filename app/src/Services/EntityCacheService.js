@@ -15,11 +15,11 @@ class EntityCacheService {
   async loadCache () {
     try {
       this.cache = await storage.getItem('tgEntityCache');
-      if (!this.cache) {
-        this.cache = {};
+      if (!this.cache || this.cache.version !== 2) {
+        this.cache = {version: 2};
       }
     } catch (e) {
-      this.cache = {};
+      this.cache = {version: 2};
     }
   }
 
@@ -34,7 +34,7 @@ class EntityCacheService {
     if (this.cache.hasOwnProperty(guid)) {
       this.cache[guid].lastAccessed = new Date();
       this.saveCache();
-      return JSON.parse(JSON.stringify(this.cache[guid].data));
+      return JSON.parse(this.cache[guid].data);
     }
     return null;
   }
@@ -43,7 +43,7 @@ class EntityCacheService {
     this.cache[guid] ={
       retrieved: new Date(),
       lastAccessed: new Date(),
-      data: JSON.parse(JSON.stringify(data))
+      data: JSON.stringify(data)
     };
     if (this.pendingCache.hasOwnProperty(guid)) {
       this.pendingCache[guid].resolve(true);
@@ -82,7 +82,7 @@ class EntityCacheService {
 
 const cache = new EntityCacheService();
 
-// Override Nymph functions to return entities that are cached.
+// Override Nymph function to return entities that are cached.
 const _getEntityData = Nymph.getEntityData;
 Nymph.getEntityData = async (...args) => {
   // Determine if this is a request for a single entity.
@@ -120,6 +120,35 @@ Nymph.getEntityData = async (...args) => {
   }
 
   return entityData;
+};
+
+// Override Nymph functions to update cached entities.
+const _serverCall = Nymph.serverCall;
+Nymph.serverCall = async (...args) => {
+  const result = await _serverCall.apply(Nymph, args);
+
+  if ('entity' in result && result.entity.guid) {
+    cache.setEntityData(result.entity.guid, result.entity.toJSON());
+  }
+
+  return result;
+};
+
+const _getEntities = Nymph.getEntities;
+Nymph.getEntities = (...args) => {
+  const promise = _getEntities.apply(Nymph, args);
+  // Have to use a promise, because of PubSub.
+  promise.then(result => {
+    if (result && result.length) {
+      for (let i = 0; i < result.length; i++) {
+        const entity = result[i];
+        cache.setEntityData(entity.guid, entity.toJSON());
+      }
+    }
+    return result;
+  });
+
+  return promise;
 };
 
 export {EntityCacheService, cache};

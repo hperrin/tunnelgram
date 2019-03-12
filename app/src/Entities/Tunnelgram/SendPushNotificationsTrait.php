@@ -14,7 +14,7 @@ use Minishlink\WebPush\Subscription;
 trait SendPushNotificationsTrait {
   public function sendPushNotifications($recipientGuids, $options) {
     $this->sendAppPushNotifications($recipientGuids, $options);
-    $this->sendWebPushNotifications($recipientGuids);
+    $this->sendWebPushNotifications($recipientGuids, $options);
   }
 
   public function sendAppPushNotifications($recipientGuids, $options) {
@@ -35,6 +35,11 @@ trait SendPushNotificationsTrait {
     $api = new OneSignal($config, $client);
 
     foreach ($recipientGuids as $guid) {
+      if (!$this->checkNotificationsSettingForPush($guid, $options['conversationGuid'])) {
+        // They're not having fun at this party.
+        continue;
+      }
+
       $pushSubscriptions = Nymph::getEntities([
         'class' => 'Tunnelgram\AppPushSubscription',
         'skip_ac' => true
@@ -89,7 +94,7 @@ trait SendPushNotificationsTrait {
     }
   }
 
-  public function sendWebPushNotifications($recipientGuids) {
+  public function sendWebPushNotifications($recipientGuids, $options) {
     $auth = [
       'VAPID' => [
         'subject' => Tilmeld::$config['app_url'],
@@ -100,6 +105,11 @@ trait SendPushNotificationsTrait {
     $webPush = new WebPush($auth);
     // $webPush->setAutomaticPadding(false);
     foreach ($recipientGuids as $guid) {
+      if (!$this->checkNotificationsSettingForPush($guid, $options['conversationGuid'])) {
+        // They're not having fun at this party.
+        continue;
+      }
+
       $pushSubscriptions = Nymph::getEntities([
         'class' => 'Tunnelgram\WebPushSubscription',
         'skip_ac' => true
@@ -120,5 +130,21 @@ trait SendPushNotificationsTrait {
       }
     }
     $webPush->flush();
+  }
+
+  private function checkNotificationsSettingForPush($userGuid, $conversationGuid) {
+    // Check that they haven't turned notifications off.
+    $readline = Nymph::getEntity([
+      'class' => 'Tunnelgram\Readline',
+      'skip_ac' => true
+    ], ['&',
+      'ref' => [
+        ['user', $userGuid],
+        ['conversation', $conversationGuid]
+      ],
+      'strict' => ['notifications', Readline::NOTIFICATIONS_NONE]
+    ]);
+
+    return !$readline;
   }
 }

@@ -64,6 +64,15 @@ export class Conversation extends Entity {
     return this;
   }
 
+  toJSON () {
+    const obj = super.toJSON();
+
+    obj.readline = this.readline;
+    obj.notifications = this.notifications;
+
+    return obj;
+  }
+
   async save () {
     if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
       this.data.name = this.decrypted.name;
@@ -192,8 +201,8 @@ Conversation.NOTIFICATIONS_DIRECT = 2;
 Conversation.NOTIFICATIONS_NONE = 4;
 Conversation.NOTIFICATIONS_NAME = {
   [Conversation.NOTIFICATIONS_ALL]: `Every Message`,
-  [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Channel Callouts (@here)`,
-  [Conversation.NOTIFICATIONS_DIRECT]: `Direct Mentions`,
+  // [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Channel Callouts (@here)`,
+  // [Conversation.NOTIFICATIONS_DIRECT]: `Direct Mentions`,
   [Conversation.NOTIFICATIONS_NONE]: `No Notifications`
 };
 

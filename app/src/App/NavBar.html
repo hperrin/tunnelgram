@@ -1,4 +1,28 @@
-{#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
+<ul class="navbar-nav ml-auto">
+  <li class="nav-item dropdown" ref:notificationsDropdown>
+    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="notificationsDropdown" title="Notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      {#if $conversation.notifications === _Conversation.NOTIFICATIONS_ALL}
+        <span><i class="fas fa-bell"></i></span>
+      {:elseif $conversation.notifications === _Conversation.NOTIFICATIONS_MENTIONS}
+        <span><i class="far fa-bell"></i></span>
+      {:elseif $conversation.notifications === _Conversation.NOTIFICATIONS_DIRECT}
+        <span><i class="far fa-bell"></i></span>
+      {:elseif $conversation.notifications === _Conversation.NOTIFICATIONS_NONE}
+        <span><i class="fas fa-bell-slash"></i></span>
+      {/if}
+      <span class="sr-only">({_Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
+      <h6 class="dropdown-header">
+        Notification Setting
+      </h6>
+      {#each _keys as key}
+        <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click="setNotifications(key)">
+          {_Conversation.NOTIFICATIONS_NAME[key]}
+        </a>
+      {/each}
+    </div>
+  </li>
   <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
     <a class="nav-link" href="javascript:void(0)" on:click="$navigate('/c/'+$conversation.guid)" title="Conversation">
       <i class="fas fa-comments"></i>
@@ -26,4 +50,37 @@
       {/if}
     </a>
   </li>
-{/if}
+</ul>
+
+<script>
+  import Conversation from '../Entities/Tunnelgram/Conversation';
+  import {Dropdown} from '../Services/Val/BSN';
+
+  export default {
+    onupdate () {
+      if (this.refs.notificationsDropdown && !this.notificationsDropdown) {
+        this.notificationsDropdown = new Dropdown(this.refs.notificationsDropdown);
+      } else if (!this.refs.notificationsDropdown && this.notificationsDropdown) {
+        delete this.notificationsDropdown;
+      }
+    },
+
+    data () {
+      return {
+        _Conversation: Conversation,
+        _keys: Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat)
+      };
+    },
+
+    methods: {
+      async setNotifications (key) {
+        const {conversation} = this.store.get();
+
+        const notif = conversation.saveNotificationSetting(key);
+        this.store.set({conversation});
+        await notif;
+        this.store.set({conversation});
+      }
+    }
+  };
+</script>

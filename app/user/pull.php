@@ -47,11 +47,12 @@ try {
   $webPushSubscription->uaString = $_SERVER['HTTP_USER_AGENT'] ?? '';
   $webPushSubscription->save();
 
-  // Get all of the user's readlines.
+  // Get all of the user's readlines that they have notifications on for.
   $readlines = Nymph::getEntities([
     'class' => 'Tunnelgram\Readline'
   ], ['&',
-    'ref' => ['user', Tilmeld::$currentUser]
+    'ref' => ['user', Tilmeld::$currentUser],
+    '!strict' => ['notifications', Tunnelgram\Readline::NOTIFICATIONS_NONE]
   ]);
 
   // foreach ($readlines as $readline) {

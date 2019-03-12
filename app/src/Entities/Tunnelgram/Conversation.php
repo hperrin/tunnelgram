@@ -10,7 +10,12 @@ class Conversation extends \Nymph\Entity {
   const MODE_CONVERSATION = 0;
   const MODE_CHANNEL_PRIVATE = 1;
   const MODE_CHANNEL_PUBLIC = 2;
-  protected $clientEnabledMethods = ['saveReadline', 'findMatchingConversations', 'clearReadline'];
+  protected $clientEnabledMethods = [
+    'saveReadline',
+    'findMatchingConversations',
+    'clearReadline',
+    'saveNotificationSetting'
+  ];
   protected $whitelistData = [
     'name',
     'keys',

@@ -102,9 +102,9 @@
         <span class="navbar-text">
           <span>{name}&nbsp;</span>
         </span>
-        <ul class="navbar-nav ml-auto">
-          <NavBar></NavBar>
-        </ul>
+        {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
+          <NavBar />
+        {/if}
       </div>
     </nav>
     <div style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; height: 100%; flex-basis: 0; flex-grow: 1;">
