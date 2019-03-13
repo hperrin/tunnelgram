@@ -182,6 +182,9 @@ export class Conversation extends Entity {
 
 // The name of the server class
 Conversation.class = 'Tunnelgram\\Conversation';
+// Cache expiry time. 3 hours.
+Conversation.CACHE_EXPIRY = 1000*60*60*3;
+// Conversation modes.
 Conversation.MODE_CONVERSATION = 0;
 Conversation.MODE_CHANNEL_PRIVATE = 1;
 Conversation.MODE_CHANNEL_PUBLIC = 2;
@@ -195,6 +198,7 @@ Conversation.MODE_DESCRIPTION = {
   [Conversation.MODE_CHANNEL_PRIVATE]: `A private channel is end to end encrypted on a channel level. When a message is sent, the decryption key is derived from the channel's encryption key, which is encrypted for each person. This means that if someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
   [Conversation.MODE_CHANNEL_PUBLIC]: `A public channel is not encrypted. Anyone can search for a public channel and read its messages before joining it.`
 };
+// Notification settings.
 Conversation.NOTIFICATIONS_ALL = 0;
 Conversation.NOTIFICATIONS_MENTIONS = 1;
 Conversation.NOTIFICATIONS_DIRECT = 2;

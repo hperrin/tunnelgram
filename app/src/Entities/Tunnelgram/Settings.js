@@ -79,6 +79,8 @@ export class Settings extends Entity {
 
 // The name of the server class
 Settings.class = 'Tunnelgram\\Settings';
+// Cache expiry time. 2 days.
+Settings.CACHE_EXPIRY = 1000*60*60*24*2;
 
 Nymph.setEntityClass(Settings.class, Settings);
 

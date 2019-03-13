@@ -15,11 +15,11 @@ class EntityCacheService {
   async loadCache () {
     try {
       this.cache = await storage.getItem('tgEntityCache');
-      if (!this.cache || this.cache.version !== 2) {
-        this.cache = {version: 2};
+      if (!this.cache || this.cache.version !== EntityCacheService.CACHE_VERSION) {
+        this.cache = {version: EntityCacheService.CACHE_VERSION};
       }
     } catch (e) {
-      this.cache = {version: 2};
+      this.cache = {version: EntityCacheService.CACHE_VERSION};
     }
   }
 
@@ -31,24 +31,44 @@ class EntityCacheService {
     if (this.pendingCache.hasOwnProperty(guid)) {
       await this.pendingCache[guid];
     }
+
     if (this.cache.hasOwnProperty(guid)) {
-      this.cache[guid].lastAccessed = new Date();
-      this.saveCache();
-      return JSON.parse(this.cache[guid].data);
+      if (this.cache[guid].retrieved < (new Date() - this.cache[guid].expiry)) {
+        // Retrieved longer ago than the expiry.
+        delete this.cache[guid];
+        this.saveCache();
+      } else {
+        return JSON.parse(this.cache[guid].data);
+      }
     }
+
     return null;
   }
 
   setEntityData (guid, data) {
-    this.cache[guid] ={
+    // 10 days is the default expiry.
+    let expiry = 1000*60*60*24*10;
+    const entityClass = Nymph.getEntityClass(data.class);
+
+    if (entityClass.CACHE_EXPIRY) {
+      expiry = entityClass.CACHE_EXPIRY;
+    }
+
+    this.cache[guid] = {
       retrieved: new Date(),
-      lastAccessed: new Date(),
-      data: JSON.stringify(data)
+      data: JSON.stringify(data),
+      expiry
     };
     if (this.pendingCache.hasOwnProperty(guid)) {
       this.pendingCache[guid].resolve(true);
       delete this.pendingCache[guid];
     }
+    this.saveCache();
+  }
+
+  deleteEntityData (guid) {
+    delete this.cache[guid];
+    delete this.pendingCache[guid];
     this.saveCache();
   }
 
@@ -61,12 +81,8 @@ class EntityCacheService {
 
   cleanup () {
     for (let guid in this.cache) {
-      if (
-        // Retrieved more than a week ago.
-        this.cache[guid].retrieved < (new Date() - 1000*60*60*24*7) ||
-        // Last accessed more than two weeks ago.
-        this.cache[guid].lastAccessed < (new Date() - 1000*60*60*24*14)
-      ) {
+      if (this.cache[guid].retrieved < (new Date() - this.cache[guid].expiry)) {
+        // Retrieved longer ago than the expiry.
         delete this.cache[guid];
       }
     }
@@ -74,11 +90,13 @@ class EntityCacheService {
   }
 
   clear () {
-    this.cache = {};
+    this.cache = {version: EntityCacheService.CACHE_VERSION};
     this.pendingCache = {};
     this.saveCache();
   }
 }
+
+EntityCacheService.CACHE_VERSION = 3;
 
 const cache = new EntityCacheService();
 
@@ -137,6 +155,8 @@ Nymph.serverCall = async (...args) => {
 const _getEntities = Nymph.getEntities;
 Nymph.getEntities = (...args) => {
   const promise = _getEntities.apply(Nymph, args);
+  const _subscribe = promise.subscribe;
+
   // Have to use a promise, because of PubSub.
   promise.then(result => {
     if (result && result.length) {
@@ -147,6 +167,28 @@ Nymph.getEntities = (...args) => {
     }
     return result;
   });
+
+  promise.subscribe = (callback, error) => {
+    return _subscribe(update => {
+      if (Array.isArray(update)) {
+        for (let i = 0; i < update.length; i++) {
+          const entity = update[i];
+          cache.setEntityData(entity.guid, entity.toJSON());
+        }
+      } else {
+        if (update.added) {
+          cache.setEntityData(update.added, update.data);
+        }
+        if (update.updated) {
+          cache.setEntityData(update.updated, update.data);
+        }
+        if (update.removed) {
+          cache.deleteEntityData(update.deleted);
+        }
+      }
+      callback(update);
+    }, error);
+  };
 
   return promise;
 };

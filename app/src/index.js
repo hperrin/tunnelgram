@@ -516,3 +516,4 @@ window.Readline = Readline;
 window.Settings = Settings;
 window.VideoService = VideoService;
 window.storage = storage;
+window.cache = cache;

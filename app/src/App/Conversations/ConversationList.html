@@ -93,9 +93,8 @@
 
     ondestroy () {
       this.destroyed = true;
-      let {_subscription} = this.get();
-      if (_subscription) {
-        _subscription.unsubscribe();
+      if (this.subscription) {
+        this.subscription.unsubscribe();
       }
 
       if (this.storeStateListener) {
@@ -147,15 +146,14 @@
 
     methods: {
       subscribe () {
-        let {_subscription} = this.get();
-        if (_subscription) {
-          _subscription.unsubscribe();
+        if (this.subscription) {
+          this.subscription.unsubscribe();
         }
 
         this.set({_loading: true});
 
         const {user} = this.store.get();
-        _subscription = Nymph.getEntities({
+        this.subscription = Nymph.getEntities({
           'class': Conversation.class,
           'sort': 'mdate',
           'reverse': true,
@@ -182,7 +180,6 @@
             this.handleScroll();
           }
         }, ErrHandler);
-        this.set({_subscription});
       },
 
       navigate (conversation) {
