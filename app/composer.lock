@@ -927,16 +927,16 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.0-beta.6",
+            "version": "3.0.0-beta.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "0bc220827de3d056b07868c258530c3948dc23f8"
+                "reference": "aa23cd985d8ea32a0ac3e60861c02aa155961b5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/0bc220827de3d056b07868c258530c3948dc23f8",
-                "reference": "0bc220827de3d056b07868c258530c3948dc23f8",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/aa23cd985d8ea32a0ac3e60861c02aa155961b5b",
+                "reference": "aa23cd985d8ea32a0ac3e60861c02aa155961b5b",
                 "shasum": ""
             },
             "require": {
@@ -979,7 +979,7 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2019-05-01T00:00:00+00:00"
+            "time": "2019-05-02T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
