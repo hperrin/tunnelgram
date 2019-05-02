@@ -11,7 +11,7 @@
         <div class="list-group">
           {#if $todos.length}
             {#each $todos as todo (todo.guid)}
-              <TodoEl bind:todo="todo"></TodoEl>
+              <TodoEl bind:todo={todo}></TodoEl>
             {/each}
           {:else}
             <div class="alert alert-secondary">You have no todos yet.</div>
@@ -34,9 +34,9 @@
           {#if $todos.length > 0}
             <span class="d-block mt-2">
               {#if $archived}
-                <button type="button" class="btn btn-danger btn-sm" style="white-space: normal;" on:click="deleteTodos()">delete archived todos</button>
+                <button type="button" class="btn btn-danger btn-sm" style="white-space: normal;" on:click={deleteTodos}>delete archived todos</button>
               {:else}
-                <button type="button" class="btn btn-success btn-sm" style="white-space: normal;" on:click="archive()">archive completed todos</button>
+                <button type="button" class="btn btn-success btn-sm" style="white-space: normal;" on:click={archive}>archive completed todos</button>
               {/if}
             </span>
           {/if}
@@ -45,17 +45,17 @@
           <div>
             Sort: <br>
             <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortTodos()" name="sort" value="name"> Alpha</label>
+              <input type="radio" bind:group={$sort} on:change={sortTodos} name="sort" value="name"> Alpha</label>
             &nbsp;&nbsp;&nbsp;
             <label class="font-weight-normal">
-              <input type="radio" bind:group="$sort" on:change="sortTodos()" name="sort" value="cdate"> Created</label>
+              <input type="radio" bind:group={$sort} on:change={sortTodos} name="sort" value="cdate"> Created</label>
           </div>
         {/if}
       </div>
     </div>
     {#if !$archived}
-      <form class="d-flex my-3" on:submit="addTodo(event.preventDefault())">
-        <input class="form-control mr-2" style="flex-grow: 1;" type="text" bind:value="todoText" placeholder="add new todo here">
+      <form class="d-flex my-3" on:submit|preventDefault={addTodo}>
+        <input class="form-control mr-2" style="flex-grow: 1;" type="text" bind:value={todoText} placeholder="add new todo here">
         <input class="btn btn-primary" type="submit" value="add #{$todos.length + 1}">
       </form>
     {/if}
@@ -66,129 +66,101 @@
 </div>
 
 <script>
+  import {onMount, onDestroy} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Todo from '../Entities/MyApp/Todo';
-  import LoadingIndicator from './LoadingIndicator.html';
-  import TodoEl from './TodoEl.html';
+  import LoadingIndicator from './LoadingIndicator';
+  import TodoEl from './TodoEl';
   import ErrHandler from '../ErrHandler';
+  import {todos, sort, archived, user} from '../stores';
 
-  export default {
-    oncreate () {
-      this.store.on('state', ({changed, current, previous}) => {
-        if (changed.archived ||
-            (
-              changed.user &&
-              current.user &&
-              !current.user.is(previous.user)
-            )
-          ) {
-          this.subscribe();
-        }
-      });
-      this.subscribe();
-    },
+  let userCount = null;
+  let todoText = '';
+  let subscription;
+  let _loading = false;
 
-    ondestroy () {
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-    },
+  $: remaining = $todos.filter(todo => !todo.get().done).length;
 
-    data () {
-      return {
-        userCount: null,
-        todoText: ''
-      }
-    },
-
-    computed: {
-      remaining: ({$todos}) => {
-        var count = 0;
-        for (var i = 0; i < $todos.length; i++) {
-          count += $todos[i].get().done ? 0 : 1;
-        }
-        return count;
-      }
-    },
-
-    methods: {
-      subscribe () {
-        if (this.subscription) {
-          this.subscription.unsubscribe();
-        }
-
-        this.set({_loading: true});
-
-        const {archived, user} = this.store.get();
-        this.subscription = Nymph.getEntities(
-            {'class': Todo.class},
-            {
-              'type': archived ? '&' : '!&',
-              'tag': 'archived'
-            },
-            {
-              'type': '|',
-              'ref': [ // Request per user to have per user userCount.
-                ['user', user.guid],
-                ['acWrite', user.guid]
-              ]
-            }
-        ).subscribe(update => {
-          this.set({_loading: false});
-          if (update) {
-            const {todos, sort} = this.store.get();
-            PubSub.updateArray(todos, update);
-            Nymph.sort(todos, sort);
-            this.store.set({todos});
-          }
-        }, ErrHandler, (count) => {
-          this.set({userCount: count});
-        });
-      },
-
-      addTodo () {
-        const {todoText} = this.get();
-        if (todoText === undefined || todoText === '') {
-          return;
-        }
-        const todo = new Todo();
-        todo.set('name', todoText);
-        todo.save().then(() => {
-          this.set({todoText: ''});
-        }, ErrHandler);
-      },
-
-      sortTodos () {
-        const {todos, sort} = this.store.get();
-        this.store.set({todos: Nymph.sort(todos, sort)});
-      },
-
-      save (todo) {
-        todo.save().then(null, ErrHandler);
-      },
-
-      archive () {
-        const oldTodos = this.store.get().todos;
-        for (let i = 0; i < oldTodos.length; i++) {
-          const todo = oldTodos[i];
-          if (todo.get().done) {
-            todo.archive().then(success => {
-              if (!success) {
-                alert("Couldn't save changes to "+todo.get().name);
-              }
-            }, ErrHandler);
-          }
-        }
-      },
-
-      deleteTodos () {
-        Nymph.deleteEntities(this.store.get().todos);
-      }
-    },
-
-    components: {
-      LoadingIndicator,
-      TodoEl
+  $: [$archived, subscribe()];
+  let previousUser;
+  $: {
+    if ($user && !$user.is(previousUser)) {
+      subscribe();
     }
-  };
+    previousUser = $user;
+  }
+
+  onMount(subscribe);
+
+  onDestroy(() => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+  });
+
+  function subscribe () {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    _loading = true;
+
+    subscription = Nymph.getEntities({
+      'class': Todo.class
+    }, {
+      'type': $archived ? '&' : '!&',
+      'tag': 'archived'
+    }, {
+      'type': '|',
+      'ref': [ // Request per user to have per user userCount.
+        ['user', $user.guid],
+        ['acWrite', $user.guid]
+      ]
+    }).subscribe(update => {
+      _loading = false;
+      if (update) {
+        PubSub.updateArray($todos, update);
+        $todos = Nymph.sort($todos, $sort);
+      }
+    }, ErrHandler, count => {
+      userCount = count;
+    });
+  }
+
+  function addTodo () {
+    if (todoText === undefined || todoText === '') {
+      return;
+    }
+    const todo = new Todo();
+    todo.set('name', todoText);
+    todo.save().then(() => {
+      todoText = '';
+    }, ErrHandler);
+  }
+
+  function sortTodos () {
+    $todos = Nymph.sort($todos, $sort);
+  }
+
+  function save (todo) {
+    todo.save().then(null, ErrHandler);
+  }
+
+  function archive () {
+    const oldTodos = [...$todos];
+    for (let i = 0; i < oldTodos.length; i++) {
+      const todo = oldTodos[i];
+      if (todo.get().done) {
+        todo.archive().then(success => {
+          if (!success) {
+            alert("Couldn't save changes to "+todo.get().name);
+          }
+        }, ErrHandler);
+      }
+    }
+  }
+
+  function deleteTodos () {
+    Nymph.deleteEntities($todos);
+  }
 </script>

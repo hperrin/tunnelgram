@@ -16,7 +16,9 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav mr-auto" use:navbar="{}"></ul>
+          <ul class="navbar-nav mr-auto">
+            <NavBar />
+          </ul>
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -33,7 +35,7 @@
                   Account Info
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
+                <a class="dropdown-item" href="javascript:void(0)" on:click={logout}>
                   Log Out
                 </a>
                 {#if $userIsTilmeldAdmin}
@@ -57,7 +59,7 @@
   <div class="container mt-3">
     <div class="row">
       <div class="col-sm-4 order-sm-2">
-        <TilmeldLogin
+        <Login
           layout="small"
           classInput="form-control"
           classSelect="form-control"
@@ -91,24 +93,24 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="accountDetailsEmail">Email address</label>
-            <input type="email" class="form-control" id="accountDetailsEmail" bind:value="$user.data.username" placeholder="Enter email">
+            <input type="email" class="form-control" id="accountDetailsEmail" bind:value={$user.data.username} placeholder="Enter email">
           </div>
           <div class="form-group">
             <label for="accountDetailsFirstName">First name</label>
-            <input type="text" class="form-control" id="accountDetailsFirstName" bind:value="$user.data.nameFirst" placeholder="Enter name">
+            <input type="text" class="form-control" id="accountDetailsFirstName" bind:value={$user.data.nameFirst} placeholder="Enter name">
           </div>
           <div class="form-group">
             <label for="accountDetailsLastName">Last name</label>
-            <input type="text" class="form-control" id="accountDetailsLastName" bind:value="$user.data.nameLast" placeholder="Enter name">
+            <input type="text" class="form-control" id="accountDetailsLastName" bind:value={$user.data.nameLast} placeholder="Enter name">
           </div>
           <div class="form-group">
             <label for="accountDetailsPhone">Phone</label>
-            <input type="tel" class="form-control" id="accountDetailsPhone" bind:value="$user.data.phone" placeholder="Enter phone number">
+            <input type="tel" class="form-control" id="accountDetailsPhone" bind:value={$user.data.phone} placeholder="Enter phone number">
           </div>
           {#if clientConfig.timezones}
             <div class="form-group">
               <label for="accountDetailsTimezone">Timezone</label>
-              <select class="form-control" id="accountDetailsTimezone" bind:value="$user.data.timezone">
+              <select class="form-control" id="accountDetailsTimezone" bind:value={$user.data.timezone}>
                 <option value="">--Default--</option>
                 {#each clientConfig.timezones as tz}
                   <option value="{tz}">{tz}</option>
@@ -118,7 +120,7 @@
           {/if}
           <div class="form-group">
             <span>Password</span>
-            <TilmeldChangePassword
+            <ChangePassword
               layout="compact"
               classInput="form-control"
               classSubmit="btn btn-primary"
@@ -126,7 +128,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal" on:click="saveUser()">Save changes</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" on:click={saveUser}>Save changes</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -135,56 +137,42 @@
 {/if}
 
 <script>
-  import {User, TilmeldLogin, TilmeldChangePassword} from 'tilmeld-client';
-  import LoadingIndicator from './App/LoadingIndicator.html';
-  import NavBar from './App/NavBar.html';
-  import FrontPage from './App/FrontPage.html'
+  import {onMount} from 'svelte';
+  import {User} from 'tilmeld-client';
+  import Login from 'tilmeld-components/src/Login';
+  import ChangePassword from 'tilmeld-components/src/ChangePassword';
+  import App from './App/App';
+  import LoadingIndicator from './App/LoadingIndicator';
+  import NavBar from './App/NavBar';
+  import FrontPage from './App/FrontPage';
   import ErrHandler from './ErrHandler';
+  import {user, userAvatar, userIsTilmeldAdmin, logout} from './stores';
 
-  import App from './App/App.html';
+  export let brand;
+  let clientConfig = {};
 
-  export default {
-    oncreate () {
-      // Get the client config (for timezones).
-      User.getClientConfig().then(clientConfig => {
-        this.set({clientConfig});
-      });
-    },
+  onMount(() => {
+    // Get the client config (for timezones).
+    User.getClientConfig().then(config => {
+      clientConfig = config;
+    });
+  });
 
-    data () {
-      return {
-        clientConfig: {}
-      };
-    },
+  function saveUser () {
+    $user.save().then(userValue => {
+      $user = userValue;
+    }, ErrHandler);
+  }
 
-    methods: {
-      saveUser () {
-        this.store.get().user.save().then(user => {
-          this.store.set({user});
-        }, ErrHandler);
+  function navbar (node) {
+    const navbar = new NavBar({target: node});
+    return {
+      update (data) {
+        navbar.update(data);
+      },
+      destroy () {
+        navbar.destroy();
       }
-    },
-
-    actions: {
-      navbar (node, data) {
-        const navbar = new NavBar({target: node, data, store: this.store});
-        return {
-          update (data) {
-            navbar.update(data);
-          },
-          destroy () {
-            navbar.destroy();
-          }
-        };
-      }
-    },
-
-    components: {
-      LoadingIndicator,
-      FrontPage,
-      TilmeldLogin,
-      TilmeldChangePassword,
-      App
-    }
-  };
+    };
+  }
 </script>

@@ -2,9 +2,9 @@
   <span class="d-flex flex-md-row align-items-md-center flex-column align-items-start justify-content-between">
     <span class="d-flex align-items-center" style="flex-grow: 1;">
       {#if !$archived}
-        <input class="mr-2" type="checkbox" bind:checked="todo.data.done" on:change="save()" />
+        <input class="mr-2" type="checkbox" bind:checked={todo.data.done} on:change={save} />
       {/if}
-      <input class="d-inline border-0 {todo.data.done ? 'text-muted' : ''}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" bind:value="todo.data.name" on:change="save()" />
+      <input class="d-inline border-0 {todo.data.done ? 'text-muted' : ''}" style="flex-grow: 1; background: transparent; color: inherit;" type="text" bind:value={todo.data.name} on:change={save} />
     </span>
     {#if !isOwner}
       <span class="ml-md-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
@@ -19,7 +19,7 @@
     <span class="ml-md-2 {todo.data.done ? 'text-muted' : ''}" style="flex-shrink: 1;">
       {createdDate}
     </span>
-    <button type="button" on:click="set({expanded: !expanded})" class="ml-md-2 btn btn-link btn-sm" style="flex-shrink: 1;">
+    <button type="button" on:click={() => expanded = !expanded} class="ml-md-2 btn btn-link btn-sm" style="flex-shrink: 1;">
       <i class="fas fa-caret-{expanded ? 'up' : 'down'}"></i>
     </button>
   </span>
@@ -45,7 +45,7 @@
               <span style="flex-grow: 1">{curUser.data.name || 'Loading...'}</span>
               {#if isOwner}
                 <span>
-                  <button class="btn btn-sm btn-danger" on:click="unshare(curUser.guid)">&times;</button>
+                  <button class="btn btn-sm btn-danger" on:click={() => unshare(curUser.guid)}>&times;</button>
                 </span>
               {/if}
             </li>
@@ -56,8 +56,8 @@
         <div class="my-2">
           Share
         </div>
-        <form class="form-inline" on:submit="share(event.preventDefault())">
-          <input type="text" bind:value="shareUsername" class="form-control" placeholder="username" />
+        <form class="form-inline" on:submit|preventDefault={share}>
+          <input type="text" bind:value={shareUsername} class="form-control" placeholder="username" />
           <button type="submit" class="btn btn-secondary ml-sm-2 mt-sm-0 mt-2">share</button>
         </form>
       {/if}
@@ -68,56 +68,46 @@
 <script>
   import Todo from '../Entities/MyApp/Todo';
   import ErrHandler from '../ErrHandler';
+  import {user, archived} from '../stores';
 
-  const formatDate = date => `${date.getFullYear()}-${date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1}-${date.getDate() < 10 ? '0'+date.getDate() : date.getDate()} ${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+  export let todo = new Todo();
+  let shareUsername = '';
+  let expanded = false;
 
-  export default {
-    onstate ({changed, current}) {
-      if (changed.todo && !changed._todoReady && current.todo) {
-        const {todo} = current;
-        if (todo.data.user.isASleepingReference) {
-          todo.readyAll(() => this.set({todo, _todoReady: null}), ErrHandler, 1);
-        }
-      }
-    },
-
-    data () {
-      return {
-        todo: new Todo(),
-        shareUsername: ''
-      }
-    },
-
-    computed: {
-      createdDate: ({todo}) => formatDate(new Date(todo.cdate * 1000)),
-      modifiedDate: ({todo}) => formatDate(new Date(todo.mdate * 1000)),
-      isOwner: ({todo, $user}) => $user.is(todo.data.user)
-    },
-
-    methods: {
-      share () {
-        const {shareUsername, todo} = this.get();
-        todo.share(shareUsername).then(result => {
-          if (result) {
-            this.set({shareUsername: ''});
-          } else {
-            alert('Invalid user.');
-          }
-        }, ErrHandler);
-      },
-
-      unshare (guid) {
-        const {todo} = this.get();
-        todo.unshare(guid).then(result => {
-          if (!result) {
-            alert('Invalid user.');
-          }
-        }, ErrHandler);
-      },
-
-      save () {
-        this.get().todo.save().then(todo => this.set({todo}), ErrHandler);
-      }
+  $: createdDate = formatDate(new Date(todo.cdate * 1000));
+  $: modifiedDate = formatDate(new Date(todo.mdate * 1000));
+  $: isOwner = $user.is(todo.data.user);
+  $: {
+    if (todo && todo.data.user.isASleepingReference) {
+      todo.readyAll(1).then(() => {
+        todo = todo;
+      }, ErrHandler);
     }
-  };
+  }
+
+  function formatDate (date) {
+    return `${date.getFullYear()}-${date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1}-${date.getDate() < 10 ? '0'+date.getDate() : date.getDate()} ${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+  }
+
+  function share () {
+    todo.share(shareUsername).then(result => {
+      if (result) {
+        shareUsername = '';
+      } else {
+        alert('Invalid user.');
+      }
+    }, ErrHandler);
+  }
+
+  function unshare (guid) {
+    todo.unshare(guid).then(result => {
+      if (!result) {
+        alert('Invalid user.');
+      }
+    }, ErrHandler);
+  }
+
+  function save () {
+    todo.save().then(() => todo = todo, ErrHandler);
+  }
 </script>

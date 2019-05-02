@@ -1,31 +1,28 @@
-import Container from './Container.html';
-import UserStore from './UserStore';
+import Container from './Container';
+import * as stores from './stores';
 import {Nymph} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
 import {SleepyCacheService} from './Services/SleepyCacheService';
 
+import 'pform/css/pform.css';
+import 'pform/css/pform-bootstrap.css';
+
 const sleepyUserCacheService = new SleepyCacheService(User);
 const sleepyGroupCacheService = new SleepyCacheService(Group);
 
-const store = new UserStore({
-  todos: [],
-  sort: 'name',
-  archived: false
-});
-
-store.constructor.prototype.refreshAll = function () {
+export function refreshAll () {
   sleepyUserCacheService.clear();
   sleepyGroupCacheService.clear();
-};
+}
 
 const app = new Container({
   target: document.querySelector('main'),
-  data: {
+  props: {
     brand: 'App Template'
-  },
-  store
+  }
 });
 
 // useful for debugging!
-window.store = store;
+window.stores = stores;
 window.Nymph = Nymph;
+window.refreshAll = refreshAll;

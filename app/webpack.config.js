@@ -8,21 +8,35 @@ module.exports = {
     filename: 'bundle.js'
   },
   resolve: {
-    mainFields: ['svelte', 'browser', 'module', 'main']
+    extensions: ['.wasm', '.mjs', '.js', '.json', '.html', '.css'],
   },
   module: {
     rules: [
       {
         test: /\.(html|svelte)$/,
-        exclude: /node_modules/,
         use: {
           loader: 'svelte-loader'
         }
       },
       {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      },
+      {
         test: /\.js$/,
         use: {
-          loader: 'babel-loader'
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: [
+              ['@babel/transform-classes', {
+                builtins: ['Error']
+              }]
+            ]
+          }
         }
       }
     ]
