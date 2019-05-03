@@ -151,13 +151,13 @@
         const {message} = current;
         if (message.containsSleepingReference && !message._tgCalledReadyAll) {
           message._tgCalledReadyAll = true;
-          message.readyAll(null, ErrHandler, 1).then(() => {
+          message.readyAll(1).then(() => {
             message.containsSleepingReference = false;
             message._tgCalledReadyAll = false;
             if (!this.destroyed) {
               this.set({message});
             }
-          });
+          }, ErrHandler);
         }
       }
     },

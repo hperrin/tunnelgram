@@ -70,7 +70,15 @@ module.exports = {
         exclude: /\/node_modules\/localforage\//,
         test: /\.js$/,
         use: {
-          loader: 'babel-loader'
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env'],
+            plugins: [
+              ['@babel/transform-classes', {
+                builtins: ['Error']
+              }]
+            ]
+          }
         }
       }
     ]

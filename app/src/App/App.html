@@ -283,7 +283,7 @@
             // Don't notify if the user made a new conversation.
             return;
           }
-          await conversation.readyAll(null, ErrHandler, 1);
+          await conversation.readyAll(1).catch(ErrHandler);
         } else {
           return;
         }

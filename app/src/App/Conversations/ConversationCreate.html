@@ -64,7 +64,7 @@
         }
 
         return $conversation.findMatchingConversations().then(async conversations => {
-          await Promise.all(conversations.map(conversation => conversation.readyAll(null, ErrHandler, 1)));
+          await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
           return conversations;
         })
       }

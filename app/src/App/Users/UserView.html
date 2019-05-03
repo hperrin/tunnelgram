@@ -52,11 +52,12 @@
         </div>
         <div class="form-group">
           <span>Password</span>
-          <TilmeldChangePassword
-            layout="compact"
-            classInput="form-control"
-            classSubmit="btn btn-primary"
-            classButton="btn btn-secondary" />
+          <div use:changepassword="{
+            layout: 'compact',
+            classInput: 'form-control',
+            classSubmit: 'btn btn-primary',
+            classButton: 'btn btn-secondary'
+          }" />
         </div>
         <div class="dropdown" ref:experimentsDropdown>
           <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -104,7 +105,7 @@
 
 <script>
   import {Nymph} from 'nymph-client';
-  import {TilmeldChangePassword} from 'tilmeld-client';
+  import {ChangePassword} from 'tilmeld-components/dist/TilmeldComponents';
   import QRCode from 'qrcode';
   import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
@@ -180,7 +181,7 @@
             ['acFull', $user.guid]
           ]
         }).then(async conversations => {
-          await Promise.all(conversations.map(conversation => conversation.readyAll(null, ErrHandler, 1)));
+          await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
           return conversations;
         });
       }
@@ -289,9 +290,24 @@
       }
     },
 
+    actions: {
+      changepassword (target, props) {
+        const login = new ChangePassword({target, props});
+
+        return {
+          update (props) {
+            login.$set(props);
+          },
+
+          destroy () {
+            login.$destroy();
+          }
+        };
+      }
+    },
+
     components: {
       LoadingIndicator,
-      TilmeldChangePassword,
       Avatar,
       ConversationPreview
     },

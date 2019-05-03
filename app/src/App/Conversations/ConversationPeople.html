@@ -45,11 +45,11 @@
           const {conversation} = current;
           if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
             conversation._tgCalledReadyAll = true;
-            conversation.readyAll(null, ErrHandler, 1).then(() => {
+            conversation.readyAll(1).then(() => {
               conversation.containsSleepingReference = false;
               conversation._tgCalledReadyAll = false;
               this.store.set({conversation});
-            });
+            }, ErrHandler);
           }
         }
       });
