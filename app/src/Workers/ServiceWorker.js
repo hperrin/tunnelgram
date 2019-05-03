@@ -49,21 +49,6 @@ self.addEventListener('fetch', event => {
     });
   }
 
-  // Old.
-  // if (event.request.url === 'https://tunnelgram.com/'
-  //     || event.request.url === 'http://localhost:8080/'
-  //     || event.request.url === 'https://tunnelgram.com/favicon.ico'
-  //     || event.request.url === 'http://localhost:8080/favicon.ico'
-  //     || event.request.url.startsWith('https://tunnelgram.com/#')
-  //     || event.request.url.startsWith('http://localhost:8080/#')
-  //     || event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/')
-  //     || event.request.url.startsWith('http://localhost:8082/')
-  //     || event.request.url.startsWith('https://tunnelgram.com/images/')
-  //     || event.request.url.startsWith('http://localhost:8080/images/')
-  //     || event.request.url.startsWith('https://tunnelgram.com/dist/')
-  //     || event.request.url.startsWith('http://localhost:8080/dist/')
-  //     || event.request.url.startsWith('https://tunnelgram.com/node_modules/')
-  //     || event.request.url.startsWith('http://localhost:8080/node_modules/')) {
   if (event.request.url.startsWith('https://tunnelgram.com/rest.php')
       || event.request.url.startsWith('http://localhost:8080/rest.php')
       || event.request.url.startsWith('https://tunnelgram.com/dist/')
