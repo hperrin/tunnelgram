@@ -319,7 +319,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
             const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
 
             // Make the subscription.
-            const subscription = await subscribeFromWorker({
+            subscription = await subscribeFromWorker({
               userVisibleOnly: true,
               applicationServerKey: convertedVapidKey
             });
