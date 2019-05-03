@@ -33,6 +33,11 @@ export class Conversation extends Entity {
 
   init (entityData, ...args) {
     const savedEntities = saveEntities(this);
+
+    if (this.readline !== entityData.readline || (this.data.lastMessage && this.data.lastMessage.guid) !== (entityData.data.lastMessage && entityData.data.lastMessage.guid)) {
+      this.unreadCountPromise = null;
+    }
+
     super.init(entityData, ...args);
     this.containsSleepingReference = restoreEntities(this, savedEntities);
 
@@ -40,7 +45,7 @@ export class Conversation extends Entity {
       return this;
     }
 
-    if (entityData.readline != null && (this.readline == null || this.readline < entityData.readline)) {
+    if (entityData.readline != null) {
       this.readline = entityData.readline;
     }
 
@@ -58,8 +63,6 @@ export class Conversation extends Entity {
 
       this.decrypted.name = decrypt(this.data.name);
     }
-
-    this.unreadCountPromise = null;
 
     return this;
   }
@@ -155,10 +158,8 @@ export class Conversation extends Entity {
   }
 
   saveReadline (...args) {
-    if (this.readline == null || this.readline < args[0]) {
-      this.readline = args[0];
-      this.unreadCountPromise = null;
-    }
+    this.readline = args[0];
+    this.unreadCountPromise = null;
     return this.serverCall('saveReadline', args, true);
   }
 

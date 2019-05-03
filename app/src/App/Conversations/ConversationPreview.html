@@ -55,17 +55,15 @@
       this.interval = window.setInterval(() => this.updateTime(), 10000);
       this.updateTime();
       this.set({
-        _unreadCount: conversation.unreadCount(),
-        _readline: conversation.readline
+        _unreadCount: conversation.unreadCount()
       });
     },
 
     onstate ({changed, current, previous}) {
-      if (changed.conversation && current._readline !== current.conversation.readline && previous != null) {
+      if (changed.conversation && previous != null) {
         this.updateTime();
         this.set({
-          _unreadCount: current.conversation.unreadCount(),
-          _readline: current.conversation.readline
+          _unreadCount: current.conversation.unreadCount()
         });
       }
 
@@ -115,7 +113,6 @@
 
     data () {
       return {
-        _readline: null,
         _unreadCount: null,
         conversation: new Conversation()
       }
