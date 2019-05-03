@@ -20,6 +20,7 @@ export class Message extends Entity {
     this.savePromise = null;
     this.textElevation = 1;
     this.secretTextElevation = 1;
+    this.encryption = false;
     this.decrypted = {
       text: '[Encrypted text]',
       images: [],
@@ -37,6 +38,10 @@ export class Message extends Entity {
     const savedEntities = saveEntities(this);
     super.init(entityData, ...args);
     this.containsSleepingReference = restoreEntities(this, savedEntities);
+
+    if (entityData.encryption != null) {
+      this.encryption = entityData.encryption;
+    }
 
     let decrypt = input => input;
     let decryptBytesAsync = async input => input;
@@ -165,6 +170,14 @@ export class Message extends Entity {
     }
 
     return this;
+  }
+
+  toJSON() {
+    const obj = super.toJSON();
+
+    obj.encryption = this.encryption;
+
+    return obj;
   }
 
   save (skipEncryption) {

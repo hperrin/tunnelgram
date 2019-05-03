@@ -96,7 +96,7 @@ class EntityCacheService {
   }
 }
 
-EntityCacheService.CACHE_VERSION = 3;
+EntityCacheService.CACHE_VERSION = 4;
 
 const cache = new EntityCacheService();
 
