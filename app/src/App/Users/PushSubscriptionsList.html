@@ -16,15 +16,21 @@
           <div class="d-flex w-100 justify-content-between align-items-start">
             <h5 class="mb-1">
               {#if showBrowser}
-                {subscription.agent.browser.name || ''} {subscription.agent.browser.version || ''} on
+                {subscription.agent.browser.name || ''} {subscription.agent.browser.version || ''}
+              {:else}
+                {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}
               {/if}
-              {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}
             </h5>
             <button type="button" class="btn btn-sm btn-danger rounded-circle" on:click="remove(subscription)" disabled="{subscription.deleting}">
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
           </div>
-          <p class="mb-1">Device: {subscription.agent.device.vendor || ''} {subscription.agent.device.model || 'Unknown'}</p>
+          <p class="mb-1 d-flex flex-column">
+            {#if showBrowser}
+              <span>{subscription.agent.os.name || ''} {subscription.agent.os.version || ''}</span>
+            {/if}
+            <span>{subscription.agent.device.vendor || ''} {subscription.agent.device.model || ''}</span>
+          </p>
           <small title="{simpleDateFormatter(subscription.cdate, 'wymdhms', 'short')}">Created: {simpleDateFormatter(subscription.cdate, 'ago', 'long')}</small>,
           <small title="{simpleDateFormatter(subscription.mdate, 'wymdhms', 'short')}">Last used: {simpleDateFormatter(subscription.mdate, 'ago', 'long')}</small>
         </div>
