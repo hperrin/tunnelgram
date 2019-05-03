@@ -12,7 +12,7 @@
     on:focus="set({_showUserSearchDropdown: true})" />
   {#if !disabled && (searchUsers.length || _userSearchPromiseServer)}
     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" ref:userSearchDropdown>
-      {#each searchUsers as user}
+      {#each searchUsers as user (user.guid)}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click="fire('userSelected', {user})" on:keydown="handleUserSearchResultKeyDown(event)">
           <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
         </a>
@@ -27,7 +27,7 @@
             Others
           </span>
         {/if}
-        {#each serverUsers as user}
+        {#each serverUsers as user (user.guid)}
           <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click="fire('userSelected', {user})" on:keydown="handleUserSearchResultKeyDown(event)">
             <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
           </a>

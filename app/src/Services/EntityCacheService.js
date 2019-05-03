@@ -183,7 +183,7 @@ Nymph.getEntities = (...args) => {
           cache.setEntityData(update.updated, update.data);
         }
         if (update.removed) {
-          cache.deleteEntityData(update.deleted);
+          cache.deleteEntityData(update.removed);
         }
       }
       callback(update);
