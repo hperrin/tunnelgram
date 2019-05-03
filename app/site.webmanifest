@@ -49,7 +49,7 @@
     }
   ],
   "scope": "/",
-  "start_url": "/#/pwa-home",
+  "start_url": "/",
   "theme_color": "#031926",
   "background_color": "#031926",
   "display": "standalone",

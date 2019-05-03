@@ -60,7 +60,7 @@ const store = new UserStore({
   conversations: [],
   conversation: new Conversation(),
   view: 'conversation',
-  convosOut: false,
+  convosOut: true,
   router: router,
   crypt: crypt,
   settings: null,
@@ -468,7 +468,11 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
     }
   });
 
-  router.on({
+  router.on(() => {
+    store.set({
+      convosOut: true
+    });
+  }).on({
     'c/:id': {uses: conversationHandler},
     'c/:id/:view': {uses: conversationHandler},
     'c': () => {
@@ -492,12 +496,9 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       store.set({
         convosOut: true
       });
-    },
-    '*': () => {
-      if (store.get().user) {
-        router.navigate('/pwa-home');
-      }
     }
+  }).notFound(() => {
+    router.navigate('/');
   }).resolve();
 })();
 
