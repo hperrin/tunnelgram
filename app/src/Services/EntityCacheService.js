@@ -103,6 +103,10 @@ const cache = new EntityCacheService();
 // Override Nymph function to return entities that are cached.
 const _getEntityData = Nymph.getEntityData;
 Nymph.getEntityData = async (...args) => {
+  if (args[0].return === 'guid') {
+    return await _getEntityData.apply(Nymph, args);
+  }
+
   // Determine if this is a request for a single entity.
   // Nymph.getEntityData(
   //   {'class': this.sleepingReference[2]},
@@ -155,6 +159,11 @@ Nymph.serverCall = async (...args) => {
 const _getEntities = Nymph.getEntities;
 Nymph.getEntities = (...args) => {
   const promise = _getEntities.apply(Nymph, args);
+
+  if (args[0].return === 'guid') {
+    return promise;
+  }
+
   const _subscribe = promise.subscribe;
 
   // Have to use a promise, because of PubSub.
