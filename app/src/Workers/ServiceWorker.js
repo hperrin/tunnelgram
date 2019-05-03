@@ -1,26 +1,38 @@
 // Offline Cache
 
-// Install stage sets up the index page (home page) in the cache and opens a new cache
+const CACHE_STATIC = 'tunnelgram-static-v2';
+const CACHE_CONTENT = 'tunnelgram-content-v2'
+
+// Open new caches.
 self.addEventListener('install', event => {
-  var indexPage = new Request('/');
-  var pwaPage = new Request('/#/pwa-home');
+  event.waitUntil(
+    Promise.all([
+      caches.open(CACHE_STATIC).then(cache => {
+        return cache.addAll([
+          '/',
+          '/#/pwa-home',
+          '/dist/main.js',
+          '/dist/main.css',
+          '/dist/showdown.js'
+        ]);
+      }),
+      caches.open(CACHE_CONTENT)
+    ])
+    .then(() => self.skipWaiting())
+  );
+});
+
+// Remove old caches.
+self.addEventListener('activate', event => {
+  var cacheKeeplist = [CACHE_STATIC, CACHE_CONTENT];
 
   event.waitUntil(
-    caches.open('tunnelgram-static')
-    .then(cache => {
-      return Promise.all([fetch(indexPage).then(response => {
-        console.log('[Content Cache] Cached index page during Install '+ response.url);
-        return Promise.all([
-          caches.delete('tunnelgram-content'),
-          cache.put(indexPage, response)
-        ]);
-      }), fetch(pwaPage).then(response => {
-        console.log('[Content Cache] Cached PWA page during Install '+ response.url);
-        return cache.put(pwaPage, response);
-      })]);
-    })
-    .then(() => caches.open('tunnelgram-content'))
-    .then(() => self.skipWaiting())
+    caches.keys().then(keyList => Promise.all(keyList.map(key => {
+      if (cacheKeeplist.indexOf(key) === -1) {
+        return caches.delete(key);
+      }
+    })))
+    .then(() => self.clients.claim())
   );
 });
 
@@ -37,35 +49,48 @@ self.addEventListener('fetch', event => {
     });
   }
 
-  if (event.request.url === 'https://tunnelgram.com/'
-      || event.request.url === 'http://localhost:8080/'
-      || event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/')
-      || event.request.url.startsWith('http://localhost:8082/')
-      || event.request.url.startsWith('https://tunnelgram.com/node_modules/')
-      || event.request.url.startsWith('http://localhost:8080/node_modules/')) {
+  // Old.
+  // if (event.request.url === 'https://tunnelgram.com/'
+  //     || event.request.url === 'http://localhost:8080/'
+  //     || event.request.url === 'https://tunnelgram.com/favicon.ico'
+  //     || event.request.url === 'http://localhost:8080/favicon.ico'
+  //     || event.request.url.startsWith('https://tunnelgram.com/#')
+  //     || event.request.url.startsWith('http://localhost:8080/#')
+  //     || event.request.url.startsWith('https://tunnelgram.blob.core.windows.net/')
+  //     || event.request.url.startsWith('http://localhost:8082/')
+  //     || event.request.url.startsWith('https://tunnelgram.com/images/')
+  //     || event.request.url.startsWith('http://localhost:8080/images/')
+  //     || event.request.url.startsWith('https://tunnelgram.com/dist/')
+  //     || event.request.url.startsWith('http://localhost:8080/dist/')
+  //     || event.request.url.startsWith('https://tunnelgram.com/node_modules/')
+  //     || event.request.url.startsWith('http://localhost:8080/node_modules/')) {
+  if (event.request.url.startsWith('https://tunnelgram.com/rest.php')
+      || event.request.url.startsWith('http://localhost:8080/rest.php')
+      || event.request.url.startsWith('https://tunnelgram.com/dist/')
+      || event.request.url.startsWith('http://localhost:8080/dist/')) {
+    // Check in the cache second, return response.
+    // If not in the cache, return error page.
+    event.respondWith(caches.open(CACHE_CONTENT).then(cache => {
+      return fetchAndAddToCache('Content', cache, event.request).catch(error => {
+        console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
+        return cache.match(event.request).then(matching => {
+          const report = (!matching || matching.status == 404) ? Promise.reject('no-match') : matching;
+          return report;
+        });
+      });
+    }));
+  } else {
     // Check in the cache first, return response.
     // If not in the cache, return error page.
-    event.respondWith(caches.open('tunnelgram-static').then(cache => {
+    event.respondWith(caches.open(CACHE_STATIC).then(cache => {
       return cache.match(event.request).then(matching => {
         if (!matching) {
           console.log('[Static Cache] Not found in cache. Requesting from network: ' + event.request.url);
           return fetchAndAddToCache('Static', cache, event.request);
         }
         console.log('[Static Cache] Serving request from cache: ' + event.request.url);
-        var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
+        const report = matching.status == 404 ? Promise.reject('no-match') : matching;
         return report;
-      });
-    }));
-  } else {
-    // Check in the cache second, return response.
-    // If not in the cache, return error page.
-    event.respondWith(caches.open('tunnelgram-content').then(cache => {
-      return fetchAndAddToCache('Content', cache, event.request).catch(error => {
-        console.log('[Content Cache] Network request Failed. Serving content from cache: ' + error);
-        return cache.match(event.request).then(matching => {
-          var report = !matching || matching.status == 404 ? Promise.reject('no-match') : matching;
-          return report;
-        });
       });
     }));
   }
@@ -85,10 +110,6 @@ function sendMessageToAllClients(command, message) {
     });
   });
 }
-
-self.addEventListener('activate', event => {
-  event.waitUntil(clients.claim());
-});
 
 self.addEventListener('message', event => {
   switch (event.data.command) {
