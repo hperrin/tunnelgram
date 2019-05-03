@@ -85,7 +85,7 @@
     },
 
     onstate ({changed, current}) {
-      const {_showReadline, _initialReadline, messages} = current;
+      const {_showReadline, _initialReadline, messages, conversation} = current;
       if (_showReadline === null && _initialReadline !== 0 && messages.length) {
         const visibleReadLine = _initialReadline > 0
           && _initialReadline < messages[0].cdate;
@@ -99,6 +99,10 @@
           }, 500);
           this.scrollWaitBottom = false;
         }
+      }
+
+      if (changed.conversation) {
+        this.set({_latestReadline: conversation.readline});
       }
     },
 
@@ -295,11 +299,10 @@
           if (_latestReadline !== null) {
             const messageBoxes = this.refs.messageContainer.querySelectorAll('.message-box[data-cdate]');
             const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
-                const containerTop = this.refs.container.scrollTop;
-                const containerBottom = containerTop + this.refs.container.clientHeight;
-                const elBottom = el.offsetTop + el.offsetHeight;
-                return (elBottom >= containerTop)
-                       && (elBottom <= containerBottom);
+              const containerTop = this.refs.container.scrollTop;
+              const containerBottom = containerTop + this.refs.container.clientHeight;
+              const elBottom = el.offsetTop + el.offsetHeight;
+              return (elBottom + 10 >= containerTop) && (elBottom - 10 <= containerBottom); // 10 pixel buffer.
             });
             if (messageBoxesInViewport.length) {
               const latestReadMessageBox = messageBoxesInViewport[0];
