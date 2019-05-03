@@ -1,11 +1,20 @@
 const webpack = require('webpack');
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const devMode = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   mode: devMode ? 'development' : 'production',
-  devtool: devMode && 'source-map',
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        sourceMap: true,
+      })
+    ],
+  },
+  // devtool: devMode && 'source-map',
+  devtool: 'source-map',
   entry: {
     main: path.resolve(__dirname, 'src', 'index.js'),
     showdown: path.resolve(__dirname, 'src', 'index.showdown.js'),
@@ -22,8 +31,6 @@ module.exports = {
       filename: 'dist/[name].css',
       chunkFilename: 'dist/[id].css',
     }),
-    // load `moment/locale/ja.js` and `moment/locale/it.js`
-    new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/),
     new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': devMode || JSON.stringify('production')
@@ -46,12 +53,13 @@ module.exports = {
         use: {
           loader: 'svelte-loader',
           options: {
+            dev: devMode,
             emitCss: true,
           }
         }
       },
       {
-        test: /\.(s[ac]|c)ss$/,
+        test: /\.(sa|sc|c)ss$/,
         use: [
           devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',

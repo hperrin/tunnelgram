@@ -54,6 +54,7 @@
     "style-loader": "^0.23.1",
     "svelte": "^2.16.1",
     "svelte-loader": "^2.13.3",
+    "terser-webpack-plugin": "^1.2.3",
     "timeago.js": "^4.0.0-beta.2",
     "tinygesture": "^1.1.4",
     "ua-parser-js": "^0.7.19",
