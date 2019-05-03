@@ -99,7 +99,7 @@
             </a>
           </li>
         </ul>
-        <span class="navbar-text">
+        <span class="navbar-text" ref:pageName>
           <span>{name}&nbsp;</span>
         </span>
         {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
@@ -383,6 +383,12 @@
       position: static;
       transform: none;
     }
+  }
+
+  ref:pageName {
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
   }
 
   .network-waiting-container {
