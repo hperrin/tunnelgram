@@ -14,7 +14,7 @@
     {/if}
   </small>
 {:else}
-  <div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};" ref:container>
+  <div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};">
     {#if _showActions && isOwner}
       <div class="h1 my-0" style="font-size: 0;">
         <button type="button" class="btn btn-sm btn-danger mr-2" on:click={deleteMessage} title="Delete message"><i class="fas fa-trash-alt"></i></button>

@@ -3,8 +3,8 @@
     <div class="d-flex justify-content-center flex-wrap w-100">
       <div class="d-inline-block position-relative m-3" on:mouseenter={() => _mouseOverAvatar = true} on:mouseleave={() => _mouseOverAvatar = false}>
         {#if $viewUserIsSelf}
-          <input class="d-none" type="file" ref:avatarInput on:change={event => handleAvatar(event.target.files)} />
-          <button class="position-absolute btn btn-primary btn-sm rounded" on:click={() => refs.avatarInput.click()} style="right: 0; bottom: 0;">
+          <input class="d-none" type="file" bind:this={avatarInput} on:change={event => handleAvatar(event.target.files)} />
+          <button class="position-absolute btn btn-primary btn-sm rounded" on:click={() => avatarInput.click()} style="right: 0; bottom: 0;">
             <i class="fas fa-upload fa-2x"></i>
           </button>
         {/if}
@@ -134,6 +134,7 @@
   let _startingConversation = false;
   let _mouseOverAvatar = false;
   let _avatarLoading = false;
+  let avatarInput;
   // let EXPERIMENT_WEB_PUSH = getCookieValue('EXPERIMENT_WEB_PUSH') === 'true';
 
   $: shortLink = 'http://tngm.me/'+encodeURIComponent($viewUser.data.username);
