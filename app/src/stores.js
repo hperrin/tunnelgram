@@ -9,7 +9,6 @@ export const conversations = writable([]);
 export const conversation = writable(new Conversation());
 export const view = writable('conversation');
 export const convosOut = writable(true);
-export const router = writable(router);
 export const crypt = writable(crypt);
 export const settings = writable(null);
 export const disconnected = writable(!navigator.onLine);

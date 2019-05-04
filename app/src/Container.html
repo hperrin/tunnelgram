@@ -59,7 +59,7 @@
             <h3>Setting up encryption...</h3>
           </div>
           <div class="text-center text-muted">
-            <small>Stuck? <a href="javascript:void(0)" on:click="$logout()">Log Out</a></small>
+            <small>Stuck? <a href="javascript:void(0)" on:click="logout()">Log Out</a></small>
           </div>
         {:then data}
           <App />
@@ -68,7 +68,7 @@
             Error during encryption setup: {error}
           </div>
           <div>
-            <a href="javascript:void(0)" on:click="$logout()">Log Out</a>
+            <a href="javascript:void(0)" on:click="logout()">Log Out</a>
           </div>
         {/await}
       </div>
@@ -82,6 +82,7 @@
   import LoadingIndicator from './App/LoadingIndicator.html';
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
+  import {logout, brand, user, crypt} from './stores';
 
   const cryptoAvailable = () => {
     return !!((window.crypto || window.msCrypto).getRandomValues);

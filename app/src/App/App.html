@@ -58,10 +58,10 @@
               <h6 class="dropdown-header">
                 {$user.data.name}
               </h6>
-              <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/u/' + $user.data.username)">
+              <a class="dropdown-item" href="javascript:void(0)" on:click="navigate('/u/' + $user.data.username)">
                 Your Account
               </a>
-              <a class="dropdown-item" href="javascript:void(0)" on:click="$navigate('/pushSubscriptions')">
+              <a class="dropdown-item" href="javascript:void(0)" on:click="navigate('/pushSubscriptions')">
                 Push Subscriptions
               </a>
               <div class="dropdown-divider"></div>
@@ -85,7 +85,7 @@
     <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
       <ConversationList
         on:tunnelgram-notification="notification(event.update)"
-        on:tunnelgram-navigate="navigate(event.conversation)" />
+        on:tunnelgram-navigate="navigateConversation(event.conversation)" />
     </div>
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
@@ -136,9 +136,11 @@
   import Avatar from './Users/Avatar.html';
   import UserView from './Users/UserView.html';
   import PushSubscriptionsView from './Users/PushSubscriptionsView.html';
+  import {router, navigate} from '../Services/router';
   import {getCookieValue} from '../Services/getCookieValue';
   import {Dropdown} from '../Services/Val/BSN';
   import ErrHandler from '../ErrHandler';
+  import {disconnected, beforeInstallPromptEvent, brandWeb, convosOut, brand, user, userIsTilmeldAdmin, view, conversation, loadingConversation, loadingUser} from '../stores';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
 
@@ -242,9 +244,9 @@
     },
 
     methods: {
-      navigate (conversation) {
-        if (this.store.get().router.lastRouteResolved().url !== '/c/'+conversation.guid) {
-          this.store.navigate('/c/'+conversation.guid);
+      navigateConversation (conversation) {
+        if (router.lastRouteResolved().url !== '/c/'+conversation.guid) {
+          navigate('/c/'+conversation.guid);
         } else {
           this.store.set({convosOut: false});
         }
@@ -339,7 +341,7 @@
           }
           if (!conversation.is(this.store.get().conversation)) {
             window.requestAnimationFrame(() => {
-              this.navigate(conversation);
+              this.navigateConversation(conversation);
             });
           }
           notice.close();

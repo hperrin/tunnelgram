@@ -1,6 +1,6 @@
 <div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" ref:container on:scroll="handleScroll()">
   <div class="list-group">
-    <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click="$navigate('/c')">
+    <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click="navigate('/c')">
       <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
     </div>
     {#if $conversations.length > 1}
@@ -10,7 +10,7 @@
     {/if}
     {#if !_loading}
       {#each $conversations as conversation (conversation.guid)}
-        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''} {conversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click="navigate(conversation)">
+        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''} {conversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click="navigateConversation(conversation)">
           <ConversationPreview bind:conversation />
         </div>
       {/each}
@@ -39,7 +39,9 @@
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from '../LoadingIndicator.html';
   import ConversationPreview from './ConversationPreview.html';
+  import {navigate} from '../../Services/router';
   import ErrHandler from '../../ErrHandler';
+  import {conversation, conversations, user, settings} from '../../stores';
 
   const CONVERSATION_PAGE_SIZE = 8;
 
@@ -182,7 +184,7 @@
         }, ErrHandler);
       },
 
-      navigate (conversation) {
+      navigateConversation (conversation) {
         this.fire('tunnelgram-navigate', {conversation});
         this.set({_search: ''});
       },

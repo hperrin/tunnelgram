@@ -1,25 +1,17 @@
 {#if !$conversation.guid}
   <ConversationCreate />
-{:elseif $view === 'conversation'}
+{:else if $view === 'conversation'}
   <ConversationMessages />
-{:elseif $view === 'people'}
+{:else if $view === 'people'}
   <ConversationPeople />
-{:elseif $view === 'settings'}
+{:else if $view === 'settings'}
   <ConversationSettings />
 {/if}
 
 <script>
-  import ConversationCreate from './ConversationCreate.html';
-  import ConversationMessages from './ConversationMessages.html';
-  import ConversationPeople from './ConversationPeople.html';
-  import ConversationSettings from './ConversationSettings.html';
-
-  export default {
-    components: {
-      ConversationCreate,
-      ConversationMessages,
-      ConversationPeople,
-      ConversationSettings
-    }
-  };
+  import ConversationCreate from './ConversationCreate';
+  import ConversationMessages from './ConversationMessages';
+  import ConversationPeople from './ConversationPeople';
+  import ConversationSettings from './ConversationSettings';
+  import {conversation, view} from '../../stores';
 </script>

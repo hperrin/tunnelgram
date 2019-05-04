@@ -1,12 +1,9 @@
 import './Services/XMLHttpRequestWrapper';
-import './icons';
-import Navigo from 'navigo';
-import PNotify from 'pnotify/dist/es/PNotify';
-import 'pnotify/dist/es/PNotifyMobile';
-import 'pnotify/dist/es/PNotifyButtons';
-import 'pnotify/dist/es/PNotifyDesktop';
+import './setup/icons';
+import './setup/pnotify';
 import {Nymph, PubSub} from 'nymph-client';
 import {User, Group} from 'tilmeld-client';
+import {router} from './Services/router';
 import './Services/OfflineServerCallsService';
 import {cache} from './Services/EntityCacheService';
 import {crypt} from './Services/EncryptionService';
@@ -43,20 +40,8 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// PNotify defaults.
-PNotify.defaults.styling = 'bootstrap4';
-PNotify.defaults.icons = 'fontawesome5';
-PNotify.modules.Buttons.defaults.sticker = false;
-
-// Router.
-const router = new Navigo(null, true, '#');
-
 // This stores the function to set up the Web Push Notification subscription.
 let setupSubscription;
-
-store.constructor.prototype.navigate = (...args) => {
-  router.navigate(...args);
-};
 
 export function refreshAll = function () {
   cache.clear();
