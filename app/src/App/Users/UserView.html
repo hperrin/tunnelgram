@@ -52,12 +52,12 @@
         </div>
         <div class="form-group">
           <span>Password</span>
-          <div use:changepassword={
-            layout: 'compact',
-            classInput: 'form-control',
-            classSubmit: 'btn btn-primary',
-            classButton: 'btn btn-secondary'
-          } />
+          <ChangePassword
+            layout="compact"
+            classInput="form-control"
+            classSubmit="btn btn-primary"
+            classButton="btn btn-secondary"
+          />
         </div>
         <div class="dropdown" ref:experimentsDropdown>
           <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -105,7 +105,7 @@
 
 <script>
   import {Nymph} from 'nymph-client';
-  import {ChangePassword} from 'tilmeld-components/dist/TilmeldComponents';
+  import {ChangePassword} from 'tilmeld-components/src/ChangePassword';
   import QRCode from 'qrcode';
   import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
@@ -290,28 +290,6 @@
         this.store.set({viewUser});
         this.set({_avatarLoading: false});
       }
-    },
-
-    actions: {
-      changepassword (target, props) {
-        const login = new ChangePassword({target, props});
-
-        return {
-          update (props) {
-            login.$set(props);
-          },
-
-          destroy () {
-            login.$destroy();
-          }
-        };
-      }
-    },
-
-    components: {
-      LoadingIndicator,
-      Avatar,
-      ConversationPreview
     },
 
     helpers: {

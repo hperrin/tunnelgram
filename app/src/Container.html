@@ -25,18 +25,18 @@
             <div class="col-md-4 order-md-2 mb-3 d-flex justify-content-center align-items-start flex-grow-1" ref:loginContainer>
               <div class="card" style="width: 100%;">
                 <div class="card-body pb-0">
-                  <div use:login="{
-                    layout: 'small',
-                    classInput: 'form-control w-100',
-                    classSelect: 'form-control w-100',
-                    classTextarea: 'form-control w-100',
-                    classSubmit: 'btn btn-primary w-100',
-                    classButtonGroup: 'btn-group d-flex',
-                    classButton: 'btn btn-secondary',
-                    classButtonToggle: 'flex-grow-1',
-                    classButtonActive: 'active',
-                    disableActiveButton: false
-                  }" />
+                  <Login
+                    layout="small"
+                    classInput="form-control w-100"
+                    classSelect="form-control w-100"
+                    classTextarea="form-control w-100"
+                    classSubmit="btn btn-primary w-100"
+                    classButtonGroup="btn-group d-flex"
+                    classButton="btn btn-secondary"
+                    classButtonToggle="flex-grow-1"
+                    classButtonActive="active"
+                    disableActiveButton={false}
+                  />
                 </div>
               </div>
             </div>
@@ -78,7 +78,7 @@
 
 <script>
   import {User} from 'tilmeld-client';
-  import {Login} from 'tilmeld-components/dist/TilmeldComponents';
+  import {Login} from 'tilmeld-components/src/Login';
   import LoadingIndicator from './App/LoadingIndicator.html';
   import FrontPage from './App/FrontPage.html';
   import App from './App/App.html';
@@ -93,28 +93,6 @@
       return {
         _cryptoAvailable: cryptoAvailable()
       };
-    },
-
-    actions: {
-      login (target, props) {
-        const login = new Login({target, props});
-
-        return {
-          update (props) {
-            login.$set(props);
-          },
-
-          destroy () {
-            login.$destroy();
-          }
-        };
-      }
-    },
-
-    components: {
-      LoadingIndicator,
-      FrontPage,
-      App
     }
   };
 </script>
