@@ -54,17 +54,16 @@
   let userSearchDropdown;
   let _showUserSearchDropdown = false;
   let _userSearchTimer = null;
+  let _userSearchPromiseServer = null;
 
+  let previousUsername = username;
   $: {
-    if (changed.username) {
-      const {username} = this.get();
+    if (username !== previousUsername) {
+      previousUsername = username;
       const searchQuery = username.toLowerCase();
-      this.set({
-        searchUsers: [],
-        _userSearchPromiseServer: null,
-      });
+      searchUsers = [];
+      _userSearchPromiseServer = null;
       if (searchQuery.length >= 2) {
-        let searchUsers = [];
         // Search for users in the conversations in cache.
         let startsWithUsers = [];
         let containUsers = [];
@@ -77,11 +76,11 @@
             if (searchUser.guid in $settings.decrypted.nicknames) {
               name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
             }
-            if (name.startsWith(searchQuery) || searchUser.data.username.startsWith(searchQuery)) {
+            if (name.startsWith(searchQuery) || searchUser.data.username.toLowerCase().startsWith(searchQuery)) {
               if (!searchUser.inArray(startsWithUsers)) {
                 startsWithUsers.push(searchUser);
               }
-            } else if (name.includes(searchQuery) || searchUser.data.username.includes(searchQuery)) {
+            } else if (name.includes(searchQuery) || searchUser.data.username.toLowerCase().includes(searchQuery)) {
               if (!searchUser.inArray(containUsers)) {
                 containUsers.push(searchUser);
               }
@@ -89,64 +88,61 @@
           });
         });
         searchUsers = [...startsWithUsers, ...containUsers];
-        this.set({
-          searchUsers,
-          _userSearchPromiseServer: new Promise(resolve => {
-            window.clearTimeout(this.get()._userSearchTimer);
-            this.set({
-              _userSearchTimer: window.setTimeout(async () => {
-                const guids = [];
-                for (let guid in $settings.decrypted.nicknames) {
-                  if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
-                    guids.push(guid);
-                  }
-                }
-                const nickPromise = guids.length ? Nymph.getEntities({
-                  'class': User.class
-                }, {
-                  'type': '|',
-                  'guid': guids
-                }) : Promise.resolve([]);
+        _userSearchPromiseServer = new Promise(resolve => {
+          if (_userSearchTimer) {
+            window.clearTimeout(_userSearchTimer);
+          }
+          _userSearchTimer = window.setTimeout(async () => {
+            const guids = [];
+            for (let guid in $settings.decrypted.nicknames) {
+              if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+                guids.push(guid);
+              }
+            }
+            const nickPromise = guids.length ? Nymph.getEntities({
+              'class': User.class
+            }, {
+              'type': '|',
+              'guid': guids
+            }) : Promise.resolve([]);
 
-                const firstArgs = [{
-                  'class': User.class,
-                  'limit': 10
-                }, {
-                  'type': '&',
-                  '!guid': [
-                    ...Object.keys($settings.decrypted.nicknames),
-                    $user.guid,
-                    ...searchUsers.map(user => user.guid)
-                  ]
-                }];
-                const unPromise = Nymph.getEntities(...firstArgs, {
-                  'type': '&',
-                  'ilike': ['username', searchQuery+'%']
-                });
-                const namePromise = Nymph.getEntities(...firstArgs, {
-                  'type': '&',
-                  'ilike': ['name', '%'+searchQuery+'%']
-                });
-
-                const nickUsers = await nickPromise;
-                const unUsers = await unPromise;
-                const nameUsers = await namePromise;
-
-                for (let i in nickUsers) {
-                  if (nickUsers[i].inArray(searchUsers)) {
-                    nickUsers.splice(i, 1);
-                  }
-                }
-                for (let i in nameUsers) {
-                  if (nameUsers[i].inArray(unUsers)) {
-                    nameUsers.splice(i, 1);
-                  }
-                }
-
-                resolve([...nickUsers, ...unUsers, ...nameUsers]);
-              }, 150)
+            const firstArgs = [{
+              'class': User.class,
+              'limit': 10
+            }, {
+              'type': '&',
+              '!guid': [
+                ...Object.keys($settings.decrypted.nicknames),
+                $user.guid,
+                ...searchUsers.map(user => user.guid)
+              ]
+            }];
+            const unPromise = Nymph.getEntities(...firstArgs, {
+              'type': '&',
+              'ilike': ['username', searchQuery+'%']
             });
-          })
+            const namePromise = Nymph.getEntities(...firstArgs, {
+              'type': '&',
+              'ilike': ['name', '%'+searchQuery+'%']
+            });
+
+            const nickUsers = await nickPromise;
+            const unUsers = await unPromise;
+            const nameUsers = await namePromise;
+
+            for (let i = nickUsers.length; i >= 0; i--) {
+              if (nickUsers[i].inArray(searchUsers)) {
+                nickUsers.splice(i, 1);
+              }
+            }
+            for (let i = nameUsers.length; i >= 0; i--) {
+              if (nameUsers[i].inArray(unUsers)) {
+                nameUsers.splice(i, 1);
+              }
+            }
+
+            resolve([...nickUsers, ...unUsers, ...nameUsers]);
+          }, 150);
         });
       }
     }

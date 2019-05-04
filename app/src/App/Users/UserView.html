@@ -15,10 +15,10 @@
         {/if}
         <Avatar bind:user="$viewUser" size="160" />
       </div>
-      <div class="m-3"><canvas ref:code></canvas></div>
+      <div class="m-3"><canvas bind:this={code}></canvas></div>
     </div>
     <h2>{$viewUser.data.name}</h2>
-    <div>{$viewUser.data.username}, member since {simpleDateFormatter($viewUser.cdate, 'ymd', 'short')}</div>
+    <div>{$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}</div>
     <div><button class="btn btn-link" title="Share" on:click={shareShortLink}>{shortLinkPreview}&nbsp;<i class="fas fa-share"></i></button></div>
 
     <div class="d-flex flex-column justify-content-start w-std-page">
@@ -59,12 +59,12 @@
             classButton="btn btn-secondary"
           />
         </div>
-        <div class="dropdown" ref:experimentsDropdown>
+        <div class="dropdown" bind:this={experimentsDropdown}>
           <button class="btn btn-secondary dropdown-toggle" type="button" id="experimentsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Experiments
           </button>
           <div class="dropdown-menu" aria-labelledby="experimentsButton">
-            <!-- <a class="dropdown-item" href="javascript:void(0)" on:click={() => setExperiment('EXPERIMENT_WEB_PUSH', !EXPERIMENT_WEB_PUSH)}><input type="checkbox" checked={EXPERIMENT_WEB_PUSH} /> Web Push Notifications</a> -->
+            <!-- <a class="dropdown-item" href="javascript:void(0)" on:click={() => setExperiment('EXPERIMENT_WEB_PUSH', EXPERIMENT_WEB_PUSH = !EXPERIMENT_WEB_PUSH)}><input type="checkbox" checked={EXPERIMENT_WEB_PUSH} /> Web Push Notifications</a> -->
             <span class="dropdown-item">No experiments right now.</span>
           </div>
         </div>
@@ -104,6 +104,7 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
   import {Nymph} from 'nymph-client';
   import {ChangePassword} from 'tilmeld-components/src/ChangePassword';
   import QRCode from 'qrcode';
@@ -128,175 +129,157 @@
     brand
   } from '../../stores';
 
+  let nickname = '';
+  let code;
+  let _startingConversation = false;
+  let _mouseOverAvatar = false;
+  let _avatarLoading = false;
+  // let EXPERIMENT_WEB_PUSH = getCookieValue('EXPERIMENT_WEB_PUSH') === 'true';
+
+  $: shortLink = 'http://tngm.me/'+encodeURIComponent($viewUser.data.username);
+  $: shortLinkPreview = 'tngm.me/'+encodeURIComponent($viewUser.data.username);
+  $: existingConversations = (() => {
+    if ($viewUserIsSelf) {
+      return null;
+    }
+
+    return Nymph.getEntities({
+      'class': Conversation.class,
+      'sort': 'mdate',
+      'reverse': true
+    }, {
+      'type': '&',
+      'ref': [
+        ['acFull', $viewUser.guid],
+        ['acFull', $user.guid]
+      ]
+    }).then(async conversations => {
+      await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
+      return conversations;
+    });
+  })();
   $: {
-    if ($settings && $viewUser) {
+    if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
       nickname = $settings.decrypted.nicknames[$viewUser.guid];
     }
   }
 
-  export default {
-    oncreate () {
-      QRCode.toCanvas(
-        this.refs.code,
-        this.get().shortLink,
-        {
-          errorCorrectionLevel: 'M',
-          margin: 1,
-          scale: 6,
-          color: {
-            dark: '#031926',
-            light: '#F7F9F9'
-          }
-        },
-        error => {
-          if (error) console.error(error);
-        }
-      );
-
-      if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
-        this.set({nickname: $settings.decrypted.nicknames[$viewUser.guid]});
-      }
-    },
-
-    onupdate () {
-      if (this.refs.experimentsDropdown && !this.experimentsDropdown) {
-        this.experimentsDropdown = new Dropdown(this.refs.experimentsDropdown);
-      } else if (!this.refs.experimentsDropdown && this.experimentsDropdown) {
-        delete this.experimentsDropdown;
-      }
-    },
-
-    computed: {
-      shortLink: ({$viewUser}) => 'http://tngm.me/'+encodeURIComponent($viewUser.data.username),
-      shortLinkPreview: ({$viewUser}) => 'tngm.me/'+encodeURIComponent($viewUser.data.username),
-      existingConversations: ({$viewUser, $viewUserIsSelf, $user}) => {
-        if ($viewUserIsSelf) {
-          return null;
-        }
-
-        return Nymph.getEntities({
-          'class': Conversation.class,
-          'sort': 'mdate',
-          'reverse': true
-        }, {
-          'type': '&',
-          'ref': [
-            ['acFull', $viewUser.guid],
-            ['acFull', $user.guid]
-          ]
-        }).then(async conversations => {
-          await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
-          return conversations;
-        });
-      }
-    },
-
-    data () {
-      return {
-        _startingConversation: false,
-        _mouseOverAvatar: false,
-        _avatarLoading: false,
-        nickname: '',
-        // EXPERIMENT_WEB_PUSH: getCookieValue('EXPERIMENT_WEB_PUSH') === 'true'
-      };
-    },
-
-    methods: {
-      saveUser () {
-        $viewUser.save().then(user => {
-          $user = user;
-          $viewUser = user;
-        }, ErrHandler);
-      },
-
-      saveSettings () {
-        if ($settings && $viewUser) {
-          const {nickname} = this.get();
-          if (nickname.match(/^\s*$/)) {
-            delete $settings.decrypted.nicknames[$viewUser.guid];
-          } else {
-            $settings.decrypted.nicknames[$viewUser.guid] = nickname;
-          }
-          $settings.save().then(settings => {
-            $settings = settings;
-            $viewUser = $viewUser;
-            $conversation = $conversation;
-            $conversations = $conversations
-            $user = $user;
-          }, ErrHandler);
-        }
-      },
-
-      shareShortLink () {
-        const baseText = 'Message '+($viewUserIsSelf ? 'me' : $viewUser.data.name)+' on '+$brand;
-        if (navigator.share !== undefined) {
-          navigator.share({
-            text: baseText,
-            url: this.get().shortLink
-          })
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = baseText+' at '+this.get().shortLink;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          PNotify.info({
-            text: 'Copied to Clipboard'
-          });
-        }
-      },
-
-      newConversation () {
-        const conversation = new Conversation();
-        conversation.data.acFull.push($viewUser);
-
-        this.set({_startingConversation: true});
-        conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
-          this.set({_startingConversation: false});
-        });
-      },
-
-      setExperiment (name, value) {
-        document.cookie = `${name}=${value ? 'true' : ''}`;
-        this.set({[name]: value});
-      },
-
-      async handleAvatar (files) {
-        const file = files[0];
-
-        if (!file.type.startsWith('image/')) {
-          PNotify.notice({
-            title: 'Only Image',
-            text: 'What are you doing? You can only use an image as an avatar.'
-          });
-          return;
-        }
-
-        this.set({_avatarLoading: true});
-
-        // Read the image into an Image to resize it and generate a thumbnail.
-        const image = new Image();
-        const tempObjectURL = URL.createObjectURL(file);
-        let resolve;
-        const p = new Promise(r => resolve = r);
-        image.onload = () => resolve();
-        image.src = tempObjectURL;
-        await p;
-
-        let resizeImage = new EditImageService(image, file.type);
-        const avatarImg = await resizeImage.resizeCrop(500, 500);
-        resizeImage.destroy();
-
-        $viewUser.set({avatar: avatarImg.data});
-
-        $viewUser = $viewUser;
-        this.set({_avatarLoading: false});
-      }
-    },
-
-    helpers: {
-      simpleDateFormatter: (date, style, length) => new SimpleDateFormatter(date).format(style, length)
+  let experimentsDropdown;
+  let experimentsDropdownComponent;
+  $: {
+    if (experimentsDropdown && !experimentsDropdownComponent) {
+      experimentsDropdownComponent = new Dropdown(experimentsDropdown);
+    } else if (!experimentsDropdown && experimentsDropdownComponent) {
+      experimentsDropdownComponent = null;
     }
+  }
+
+  onMount(() => {
+    QRCode.toCanvas(
+      code,
+      shortLink,
+      {
+        errorCorrectionLevel: 'M',
+        margin: 1,
+        scale: 6,
+        color: {
+          dark: '#031926',
+          light: '#F7F9F9'
+        }
+      },
+      error => {
+        if (error) console.error(error);
+      }
+    );
+  });
+
+  function saveUser () {
+    $viewUser.save().then(user => {
+      $user = user;
+      $viewUser = user;
+    }, ErrHandler);
+  }
+
+  function saveSettings () {
+    if ($settings && $viewUser) {
+      if (nickname.match(/^\s*$/)) {
+        delete $settings.decrypted.nicknames[$viewUser.guid];
+      } else {
+        $settings.decrypted.nicknames[$viewUser.guid] = nickname;
+      }
+      $settings.save().then(settings => {
+        $settings = settings;
+        $viewUser = $viewUser;
+        $conversation = $conversation;
+        $conversations = $conversations
+        $user = $user;
+      }, ErrHandler);
+    }
+  }
+
+  function shareShortLink () {
+    const baseText = 'Message ' + ($viewUserIsSelf ? 'me' : $viewUser.data.name) + ' on ' + $brand;
+    if (navigator.share !== undefined) {
+      navigator.share({
+        text: baseText,
+        url: shortLink
+      })
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = baseText + ' at ' + shortLink;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      PNotify.info({
+        text: 'Copied to Clipboard'
+      });
+    }
+  }
+
+  function newConversation () {
+    const conversation = new Conversation();
+    conversation.data.acFull.push($viewUser);
+
+    _startingConversation = true;
+    conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
+      _startingConversation = false;
+    });
+  }
+
+  function setExperiment (name, value) {
+    document.cookie = `${name}=${value ? 'true' : ''}`;
+  }
+
+  async function handleAvatar (files) {
+    const file = files[0];
+
+    if (!file.type.startsWith('image/')) {
+      PNotify.notice({
+        title: 'Only Image',
+        text: 'What are you doing? You can only use an image as an avatar.'
+      });
+      return;
+    }
+
+    _avatarLoading = true;
+
+    // Read the image into an Image to resize it and generate a thumbnail.
+    const image = new Image();
+    const tempObjectURL = URL.createObjectURL(file);
+    let resolve;
+    const p = new Promise(r => resolve = r);
+    image.onload = () => resolve();
+    image.src = tempObjectURL;
+    await p;
+
+    let resizeImage = new EditImageService(image, file.type);
+    const avatarImg = await resizeImage.resizeCrop(500, 500);
+    resizeImage.destroy();
+
+    avatar = avatarImg.data;
+
+    $viewUser = $viewUser;
+    _avatarLoading = false;
   }
 </script>
