@@ -70,7 +70,7 @@
         <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
       </button>
     {/if}
-    <textarea class="form-control border-0 text-dark" bind:value="text" placeholder="New message" on:keydown={event => handleKeyDown(event)} on:keyup={handleKeyUp} ref:textEditor></textarea>
+    <textarea class="form-control border-0 text-dark" bind:value={text} placeholder="New message" on:keydown={event => handleKeyDown(event)} on:keyup={handleKeyUp} ref:textEditor></textarea>
     <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled={messageIsEmpty || _mediaLoading} title="Send message">
       <i class="fas fa-comment"></i>
     </button>

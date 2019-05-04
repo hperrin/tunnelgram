@@ -13,7 +13,7 @@
             <LoadingIndicator width="160" height="160" />
           </div>
         {/if}
-        <Avatar bind:user="$viewUser" size="160" />
+        <Avatar bind:user={$viewUser} size="160" />
       </div>
       <div class="m-3"><canvas bind:this={code}></canvas></div>
     </div>
@@ -26,7 +26,7 @@
         <div class="form-group">
           <label for="viewUserNickname">Nickname</label>
           <div class="d-flex">
-            <input type="text" class="form-control flex-grow-1" id="viewUserNickname" bind:value="nickname" aria-describedby="viewUserNicknameHelp" placeholder="Enter nickname" autocomplete="nickname" />
+            <input type="text" class="form-control flex-grow-1" id="viewUserNickname" bind:value={nickname} aria-describedby="viewUserNicknameHelp" placeholder="Enter nickname" autocomplete="nickname" />
             <button type="button" class="btn btn-primary ml-2" style="width: 100px;" on:click={saveSettings}>Save</button>
           </div>
           <small id="viewUserNicknameHelp" class="form-text text-muted">Only visible to you.</small>
@@ -36,19 +36,19 @@
       {#if $viewUserIsSelf}
         <div class="form-group">
           <label for="accountDetailsUsername">Username</label>
-          <input type="text" class="form-control" id="accountDetailsUsername" bind:value="$viewUser.data.username" placeholder="Enter username" autocomplete="username" />
+          <input type="text" class="form-control" id="accountDetailsUsername" bind:value={$viewUser.data.username} placeholder="Enter username" autocomplete="username" />
         </div>
         <div class="form-group">
           <label for="accountDetailsFirstName">First name</label>
-          <input type="text" class="form-control" id="accountDetailsFirstName" bind:value="$viewUser.data.nameFirst" placeholder="Enter name" autocomplete="given-name" />
+          <input type="text" class="form-control" id="accountDetailsFirstName" bind:value={$viewUser.data.nameFirst} placeholder="Enter name" autocomplete="given-name" />
         </div>
         <div class="form-group">
           <label for="accountDetailsLastName">Last name</label>
-          <input type="text" class="form-control" id="accountDetailsLastName" bind:value="$viewUser.data.nameLast" placeholder="Enter name" autocomplete="family-name" />
+          <input type="text" class="form-control" id="accountDetailsLastName" bind:value={$viewUser.data.nameLast} placeholder="Enter name" autocomplete="family-name" />
         </div>
         <div class="form-group">
           <label for="accountDetailsPhone">Phone</label>
-          <input type="tel" class="form-control" id="accountDetailsPhone" bind:value="$viewUser.data.phone" placeholder="Enter phone number" autocomplete="tel" />
+          <input type="tel" class="form-control" id="accountDetailsPhone" bind:value={$viewUser.data.phone} placeholder="Enter phone number" autocomplete="tel" />
         </div>
         <div class="form-group">
           <span>Password</span>
@@ -84,7 +84,7 @@
               <div class="list-group mt-3 text-body">
                 {#each conversations as conversation (conversation.guid)}
                   <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
-                    <ConversationPreview bind:conversation="conversation" />
+                    <ConversationPreview bind:conversation={conversation} />
                   </a>
                 {/each}
               </div>

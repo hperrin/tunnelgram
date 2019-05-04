@@ -14,7 +14,7 @@
     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
       {#each searchUsers as user (user.guid)}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => fire('userSelected', {user})} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-          <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
+          <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
         </a>
       {/each}
       {#await _userSearchPromiseServer}
@@ -29,7 +29,7 @@
         {/if}
         {#each serverUsers as user (user.guid)}
           <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => fire('userSelected', {user})} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-            <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
+            <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
           </a>
         {/each}
       {/await}

@@ -15,9 +15,9 @@
     </div>
   {/if}
   <div class="flex-grow-1 position-relative">
-    <MessageList bind:conversation="$conversation" ref:messageList />
+    <MessageList bind:conversation={$conversation} ref:messageList />
   </div>
-  <PostBar bind:conversation="$conversation" ref:postBar on:scrollToBottom={() => refs.messageList.fire('scrollToBottom')} />
+  <PostBar bind:conversation={$conversation} ref:postBar on:scrollToBottom={() => refs.messageList.fire('scrollToBottom')} />
 </div>
 
 <script>

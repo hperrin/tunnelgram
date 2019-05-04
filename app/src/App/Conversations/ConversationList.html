@@ -5,7 +5,7 @@
     </div>
     {#if $conversations.length > 1}
       <div class="list-group-item d-flex p-0 border-0">
-        <input type="text" class="form-control bg-secondary border-0 text-light" bind:value="_search" name="search" placeholder="Search people" autocomplete="off" />
+        <input type="text" class="form-control bg-secondary border-0 text-light" bind:value={_search} name="search" placeholder="Search people" autocomplete="off" />
       </div>
     {/if}
     {#if !_loading}

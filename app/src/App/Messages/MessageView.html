@@ -6,9 +6,9 @@
 {#if message.data.informational}
   <small class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if message.data.text === 'left'}
-      <Avatar className="mx-2" user={message.data.user} size="18" /> <DisplayName bind:user="message.data.user" /> left the conversation.
+      <Avatar className="mx-2" user={message.data.user} size="18" /> <DisplayName bind:user={message.data.user} /> left the conversation.
     {:else if message.data.text === 'added'}
-      <Avatar className="mx-2" user={message.data.relatedUser} size="18" /> <DisplayName bind:user="message.data.relatedUser" /> was added to the conversation by <DisplayName bind:user="message.data.user" />.
+      <Avatar className="mx-2" user={message.data.relatedUser} size="18" /> <DisplayName bind:user={message.data.relatedUser} /> was added to the conversation by <DisplayName bind:user={message.data.user} />.
     {:else}
       <Avatar className="mx-2" user={message.data.user} size="18" /> {message.data.text}
     {/if}

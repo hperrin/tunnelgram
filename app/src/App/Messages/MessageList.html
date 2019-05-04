@@ -7,7 +7,7 @@
     </div>
   {:else}
     {#if _reachedEarliestMessage}
-      <ConversationHeader bind:conversation="conversation" />
+      <ConversationHeader bind:conversation={conversation} />
     {:else}
       <div class="d-flex align-items-center justify-content-center {_loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
         <div class="col-auto">
