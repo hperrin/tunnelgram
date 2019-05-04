@@ -1,4 +1,4 @@
-<div ref:photoswipe class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+<div bind:this={photoswipe} class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="pswp__bg"></div>
   <div class="pswp__scroll-wrap">
     <div class="pswp__container">
@@ -39,49 +39,42 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
   import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
   import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
 
-  export default {
-    oncreate () {
-      const pswpElement = this.refs.photoswipe;
-      const defaultOptions = {
-        shareButtons: [
-          {id:'download', label:'Download photo', url:'{{raw_image_url}}', download:true}
-        ]
-      };
+  export let items = [];
+  export let options = {};
+  let photoswipe;
 
-      this.pswp = new PhotoSwipe(
-        pswpElement,
-        PhotoSwipeUI_Default,
-        this.get().items,
-        Object.assign({}, defaultOptions, this.get().options)
-      );
-    },
+  onMount(() => {
+    const defaultOptions = {
+      shareButtons: [
+        {id:'download', label:'Download photo', url:'{{raw_image_url}}', download:true}
+      ]
+    };
 
-    data () {
-      return {
-        items: [],
-        options: {}
-      };
-    },
+    this.pswp = new PhotoSwipe(
+      photoswipe,
+      PhotoSwipeUI_Default,
+      items,
+      Object.assign({}, defaultOptions, options)
+    );
+  });
 
-    methods: {
-      listen (event, callback) {
-        this.pswp.listen(event, callback);
-      },
+  export function listen (event, callback) {
+    this.pswp.listen(event, callback);
+  }
 
-      invalidateCurrItems () {
-        this.pswp.invalidateCurrItems();
-      },
+  export function invalidateCurrItems () {
+    this.pswp.invalidateCurrItems();
+  }
 
-      updateSize (value) {
-        this.pswp.updateSize(value);
-      },
+  export function updateSize (value) {
+    this.pswp.updateSize(value);
+  }
 
-      init () {
-        this.pswp.init();
-      }
-    }
-  };
+  export function init () {
+    this.pswp.init();
+  }
 </script>

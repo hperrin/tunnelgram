@@ -15,99 +15,89 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
   import PhotoSwipe from './PhotoSwipe';
   import LoadingIndicator from '../../LoadingIndicator';
   import {crypt} from '../../../Services/EncryptionService';
 
-  export default {
-    oncreate () {
-      const {resources} = this.get();
-      let setResource = false;
-      for (let resource of resources) {
-        if (resource.thumbnail instanceof Uint8Array) {
-          const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
+  export let resources;
+
+  $: thumbnailDimension = Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight)))),
+  $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length),
+  $: thumbnailPromises = resources.map(resource => resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail;
+
+  onMount(() => {
+    let setResource = false;
+    for (let resource of resources) {
+      if (resource.thumbnail instanceof Uint8Array) {
+        const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
+        const _source = URL.createObjectURL(blob);
+        resource.thumbnailSrc = _source;
+        setResource = true;
+      } else {
+        resource.thumbnail.then(data => {
+          const blob = new Blob([data], {type: resource.thumbnailType});
           const _source = URL.createObjectURL(blob);
           resource.thumbnailSrc = _source;
-          setResource = true;
-        } else {
-          resource.thumbnail.then(data => {
-            const blob = new Blob([data], {type: resource.thumbnailType});
-            const _source = URL.createObjectURL(blob);
-            resource.thumbnailSrc = _source;
-            this.set({resources});
-          });
-        }
-      }
-      if (setResource) {
-        this.set({resources});
-      }
-    },
-
-    computed: {
-      thumbnailDimension: ({resources}) => Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight)))),
-      thumbnailContainerMaxWidthMultiplier: ({resources}) => Math.min(3, resources.length),
-      thumbnailPromises: ({resources}) => resources.map(resource => {
-        if (resource.thumbnail instanceof Uint8Array) {
-          return Promise.resolve(resource.thumbnail);
-        } else {
-          return resource.thumbnail;
-        }
-      })
-    },
-
-    methods: {
-      showBigImage (index) {
-        let items = this.get().resources.map(resource => {
-          return {
-            w: resource.dataWidth,
-            h: resource.dataHeight,
-            src: resource.thumbnailSrc,
-            _loading: false,
-            _resource: resource
-          };
+          resources = resources;
         });
-
-        let options = {
-          index,
-          history: false,
-          showHideOpacity: true,
-          getThumbBoundsFn: index => {
-            const rect = this.refs.thumbnailContainer.children[index].getBoundingClientRect();
-            return {x: rect.x, y: rect.y, w: rect.width};
-          }
-        };
-
-        // Initializes and opens PhotoSwipe.
-        const pswp = new PhotoSwipe({
-          target: document.body,
-          data: {items, options}
-        });
-
-        pswp.listen('gettingData', function(index, item) {
-          if (item._loading) {
-            return;
-          }
-          item._loading = true;
-          const resourcePromise = ('promise' in item._resource.data) ? item._resource.data.promise() : Promise.resolve(item._resource.data);
-          resourcePromise.then(data => {
-            const blob = new Blob([data], {type: item._resource.dataType});
-            const _source = URL.createObjectURL(blob);
-            item.src = _source;
-            // Sets a flag that slides should be updated.
-            pswp.invalidateCurrItems();
-            // Updates the content of slides.
-            pswp.updateSize(true);
-          });
-        });
-
-        pswp.listen('destroy', function () {
-          pswp.destroy();
-        });
-
-        pswp.init();
       }
     }
-  };
+    if (setResource) {
+      resources = resources;
+    }
+  });
+
+  function showBigImage (index) {
+    let items = resources.map(resource => {
+      return {
+        w: resource.dataWidth,
+        h: resource.dataHeight,
+        src: resource.thumbnailSrc,
+        _loading: false,
+        _resource: resource
+      };
+    });
+
+    let options = {
+      index,
+      history: false,
+      showHideOpacity: true,
+      getThumbBoundsFn: index => {
+        const rect = this.refs.thumbnailContainer.children[index].getBoundingClientRect();
+        return {x: rect.x, y: rect.y, w: rect.width};
+      }
+    };
+
+    // Initializes and opens PhotoSwipe.
+    const pswp = new PhotoSwipe({
+      target: document.body,
+      props: {items, options}
+    });
+
+    pswp.listen('gettingData', function(index, item) {
+      if (item._loading) {
+        return;
+      }
+      item._loading = true;
+      const resourcePromise = ('promise' in item._resource.data) ? item._resource.data.promise() : Promise.resolve(item._resource.data);
+      resourcePromise.then(data => {
+        const blob = new Blob([data], {type: item._resource.dataType});
+        const _source = URL.createObjectURL(blob);
+        item.src = _source;
+        // Sets a flag that slides should be updated.
+        pswp.invalidateCurrItems();
+        // Updates the content of slides.
+        pswp.updateSize(true);
+      });
+    });
+
+    pswp.listen('destroy', function () {
+      pswp.$destroy();
+    });
+
+    pswp.init();
+  }
 </script>
 
 <style>

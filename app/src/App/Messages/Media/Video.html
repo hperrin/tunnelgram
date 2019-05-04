@@ -1,6 +1,6 @@
 <div class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: 450px; font-size: 1em;">
   <div class="d-flex justify-content-center align-items-center">
-    {#await resource.thumbnailPromise}
+    {#await thumbnailPromise}
       <LoadingIndicator width={resource.thumbnailWidth} height={resource.thumbnailHeight} text="Decrypting..." />
     {:then thumbnail}
       <div>
@@ -24,60 +24,39 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
   import LoadingIndicator from '../../LoadingIndicator';
   import {crypt} from '../../../Services/EncryptionService';
 
-  export default {
-    oncreate () {
-      const {resource} = this.get();
-      if (resource.thumbnail instanceof Uint8Array) {
-        const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
+  export let resource;
+  let _loading = false;
+  let _source = null;
+
+  $: thumbnailPromise = resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail;
+
+  onMount(() => {
+    if (resource.thumbnail instanceof Uint8Array) {
+      const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
+      const _source = URL.createObjectURL(blob);
+      resource.thumbnailSrc = _source;
+    } else {
+      resource.thumbnail.then(data => {
+        const blob = new Blob([data], {type: resource.thumbnailType});
         const _source = URL.createObjectURL(blob);
         resource.thumbnailSrc = _source;
-        this.set({resource});
-      } else {
-        resource.thumbnail.then(data => {
-          const blob = new Blob([data], {type: resource.thumbnailType});
-          const _source = URL.createObjectURL(blob);
-          resource.thumbnailSrc = _source;
-          this.set({resource});
-        });
-      }
-    },
-
-    computed: {
-      thumbnailPromises: ({resource}) => {
-        if (resource.thumbnail instanceof Uint8Array) {
-          return Promise.resolve(resource.thumbnail);
-        } else {
-          return resource.thumbnail;
-        }
-      }
-    },
-
-    data () {
-      return {
-        _loading: false,
-        _source: null
-      };
-    },
-
-    methods: {
-      loadVideo () {
-        const {resource} = this.get();
-        this.set({_loading: true});
-        const resourcePromise = ('promise' in resource.data) ? resource.data.promise() : Promise.resolve(resource.data);
-        resourcePromise.then(data => {
-          const blob = new Blob([data], {type: resource.dataType});
-          const _source = URL.createObjectURL(blob);
-          this.set({
-            _source,
-            _loading: false
-          });
-        });
-      }
+      });
     }
-  };
+  });
+
+  function loadVideo () {
+    _loading = true;
+    const resourcePromise = ('promise' in resource.data) ? resource.data.promise() : Promise.resolve(resource.data);
+    resourcePromise.then(data => {
+      const blob = new Blob([data], {type: resource.dataType});
+      _source = URL.createObjectURL(blob);
+      _loading = false;
+    });
+  }
 </script>
 
 <style>
