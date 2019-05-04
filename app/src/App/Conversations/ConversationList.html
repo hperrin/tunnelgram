@@ -45,19 +45,23 @@
 
   const CONVERSATION_PAGE_SIZE = 8;
 
+  let previousUser = $user;
+  $: {
+    if ($user && !$user.is(previousUser)) {
+      subscribe();
+      previousUser = $user;
+    }
+  }
+
+  $: {
+    if ($conversations) {
+      handleScroll();
+    }
+  }
+
   export default {
     oncreate () {
       this.subscribe();
-
-      this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {
-        if (changed.user && current.user && !current.user.is(previous.user)) {
-          this.subscribe();
-        }
-
-        if (changed.conversations) {
-          this.handleScroll();
-        }
-      });
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
@@ -95,10 +99,6 @@
       this.destroyed = true;
       if (this.subscription) {
         this.subscription.unsubscribe();
-      }
-
-      if (this.storeStateListener) {
-        this.storeStateListener.cancel();
       }
 
       if (this.onPubSubConnect) {

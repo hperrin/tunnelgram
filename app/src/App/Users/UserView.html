@@ -128,6 +128,12 @@
     brand
   } from '../../stores';
 
+  $: {
+    if ($settings && $viewUser) {
+      nickname = $settings.decrypted.nicknames[$viewUser.guid];
+    }
+  }
+
   export default {
     oncreate () {
       QRCode.toCanvas(
@@ -147,11 +153,6 @@
         }
       );
 
-      this.storeStateListener = this.store.on('state', ({changed, current, previous}) => {
-        if ((changed.settings || changed.viewUser) && current.settings && current.viewUser) {
-          this.set({nickname: current.settings.decrypted.nicknames[current.viewUser.guid]});
-        }
-      });
       if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
         this.set({nickname: $settings.decrypted.nicknames[$viewUser.guid]});
       }
@@ -162,12 +163,6 @@
         this.experimentsDropdown = new Dropdown(this.refs.experimentsDropdown);
       } else if (!this.refs.experimentsDropdown && this.experimentsDropdown) {
         delete this.experimentsDropdown;
-      }
-    },
-
-    ondestroy () {
-      if (this.storeStateListener) {
-        this.storeStateListener.cancel();
       }
     },
 
