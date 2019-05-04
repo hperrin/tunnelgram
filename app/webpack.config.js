@@ -38,6 +38,7 @@ module.exports = {
     })
   ],
   resolve: {
+    extensions: ['.wasm', '.mjs', '.js', '.json', '.html', '.css', '.sass', '.scss'],
     mainFields: ['svelte', 'browser', 'module', 'main']
   },
   module: {

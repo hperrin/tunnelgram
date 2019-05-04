@@ -13,7 +13,7 @@ import {crypt} from './Services/EncryptionService';
 import {storage} from './Services/StorageService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
 import {VideoService} from './Services/VideoService';
-import UserStore from './UserStore';
+import * as stores from './stores';
 import Conversation from './Entities/Tunnelgram/Conversation';
 import Message from './Entities/Tunnelgram/Message';
 import AppPushSubscription from './Entities/Tunnelgram/AppPushSubscription';
@@ -54,36 +54,11 @@ const router = new Navigo(null, true, '#');
 // This stores the function to set up the Web Push Notification subscription.
 let setupSubscription;
 
-const store = new UserStore({
-  brand: 'Tunnelgram',
-  brandWeb: 'Tunnelgram.com',
-  conversations: [],
-  conversation: new Conversation(),
-  view: 'conversation',
-  convosOut: true,
-  router: router,
-  crypt: crypt,
-  settings: null,
-  disconnected: !navigator.onLine,
-  requestNotificationPermission: () => {
-    // This is the deault permission asker for sending desktop notifications
-    // when the page is open in the browser.
-    PNotify.modules.Desktop.permission();
-  },
-  requestPersistentStorage: () => {
-    navigator.storage.persist();
-  },
-  beforeInstallPromptEvent: null,
-  webPushSubscription: null,
-  inPWA: window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true,
-  inCordova: window.inCordova
-});
-
 store.constructor.prototype.navigate = (...args) => {
   router.navigate(...args);
 };
 
-store.constructor.prototype.refreshAll = function () {
+export function refreshAll = function () {
   cache.clear();
 
   const {settings} = store.get();
@@ -505,7 +480,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 // Required for Cordova.
 window.router = router;
 // Useful for debugging.
-window.store = store;
+window.stores = stores;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;
@@ -518,3 +493,4 @@ window.Settings = Settings;
 window.VideoService = VideoService;
 window.storage = storage;
 window.cache = cache;
+window.refreshAll = refreshAll;
