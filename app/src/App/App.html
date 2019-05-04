@@ -138,6 +138,7 @@
   import PushSubscriptionsView from './Users/PushSubscriptionsView.html';
   import {router, navigate} from '../Services/router';
   import {getCookieValue} from '../Services/getCookieValue';
+  import {getDisplayName} from '../Services/getDisplayName';
   import {Dropdown} from '../Services/Val/BSN';
   import ErrHandler from '../ErrHandler';
   import {
@@ -154,7 +155,9 @@
     view,
     conversation,
     loadingConversation,
-    loadingUser
+    loadingUser,
+    webPushSubscription,
+    settings
   } from '../stores';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
@@ -209,7 +212,7 @@
       };
       if (this.refs.mainUi && !this.mainUiGesture) {
         this.mainUiGesture = new TinyGesture(this.refs.mainUi, {mouseSupport: false});
-        this.mainUiGesture.on('swiperight', () => this.store.set({convosOut: true}));
+        this.mainUiGesture.on('swiperight', () => $convosOut = true);
         this.mainUiGesture.on('panmove', onPanMove.bind(
           this,
           this.mainUiGesture,
@@ -222,7 +225,7 @@
       }
       if (this.refs.convos && !this.convosGesture) {
         this.convosGesture = new TinyGesture(this.refs.convos, {mouseSupport: false});
-        this.convosGesture.on('swipeleft', () => this.store.set({convosOut: false}));
+        this.convosGesture.on('swipeleft', () => $convosOut = false);
         this.convosGesture.on('panmove', onPanMove.bind(
           this,
           this.convosGesture,
@@ -263,12 +266,12 @@
         if (router.lastRouteResolved().url !== '/c/'+conversation.guid) {
           navigate('/c/'+conversation.guid);
         } else {
-          this.store.set({convosOut: false});
+          $convosOut = false;
         }
       },
 
       async notification (update) {
-        if (document.hidden && this.store.get().webPushSubscription) {
+        if (document.hidden && $webPushSubscription) {
           // They will get a push notification.
           return;
         }
@@ -281,12 +284,12 @@
         conversation.init(update.data);
 
         if (conversation.data.lastMessage) {
-          if (conversation.is(this.store.get().conversation) && !document.hidden) {
+          if (conversation.is($conversation) && !document.hidden) {
             // Don't notify if the user is on the conversation and not hidden.
             return;
           }
           await conversation.data.lastMessage.ready();
-          if (this.store.get().user.is(conversation.data.lastMessage.data.user)) {
+          if ($user.is(conversation.data.lastMessage.data.user)) {
             // Don't notify if the user made the message.
             return;
           }
@@ -296,7 +299,7 @@
           }
           await conversation.data.lastMessage.data.user.ready();
         } else if (update.added) {
-          if (this.store.get().user.is(conversation.data.user)) {
+          if ($user.is(conversation.data.user)) {
             // Don't notify if the user made a new conversation.
             return;
           }
@@ -321,9 +324,9 @@
         if (conversation.data.lastMessage) {
           // Notify the user of a new message.
           notice = PNotify.info(Object.assign({
-            title: this.store.getDisplayName(conversation.data.lastMessage.data.user, 'name')
+            title: getDisplayName(conversation.data.lastMessage.data.user, 'name')
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? ' - ' + conversation.getName(this.store.get().settings)
+                ? ' - ' + conversation.getName($settings)
                 : ''
               ),
             text:  conversation.data.lastMessage.decrypted.text.length > 40
@@ -334,9 +337,9 @@
           // Notify the user of a new conversation.
           notice = PNotify.info(Object.assign({
             title: 'New Conversation',
-            text: this.store.getDisplayName(conversation.data.user, 'name') + ' started '
+            text: getDisplayName(conversation.data.user, 'name') + ' started '
               + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? conversation.getName(this.store.get().settings)
+                ? conversation.getName($settings)
                 : 'a conversation'
               )
               + '.'
@@ -354,7 +357,7 @@
           if (document.hidden) {
             window.focus();
           }
-          if (!conversation.is(this.store.get().conversation)) {
+          if (!conversation.is($conversation)) {
             window.requestAnimationFrame(() => {
               this.navigateConversation(conversation);
             });

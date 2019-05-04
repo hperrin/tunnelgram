@@ -118,7 +118,15 @@
   import {getCookieValue} from '../../Services/getCookieValue';
   import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
-  import {viewUserIsSelf, viewUser, user} from '../../stores';
+  import {
+    viewUserIsSelf,
+    viewUser,
+    user,
+    settings,
+    conversation,
+    conversations,
+    brand
+  } from '../../stores';
 
   export default {
     oncreate () {
@@ -144,9 +152,8 @@
           this.set({nickname: current.settings.decrypted.nicknames[current.viewUser.guid]});
         }
       });
-      const {settings, viewUser} = this.store.get();
-      if (settings && viewUser && viewUser.guid in settings.decrypted.nicknames) {
-        this.set({nickname: settings.decrypted.nicknames[viewUser.guid]});
+      if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
+        this.set({nickname: $settings.decrypted.nicknames[$viewUser.guid]});
       }
     },
 
@@ -201,29 +208,32 @@
 
     methods: {
       saveUser () {
-        this.store.get().viewUser.save().then(user => {
-          this.store.set({user, viewUser: user});
+        $viewUser.save().then(user => {
+          $user = user;
+          $viewUser = user;
         }, ErrHandler);
       },
 
       saveSettings () {
-        const {settings, viewUser} = this.store.get();
-        if (settings && viewUser) {
+        if ($settings && $viewUser) {
           const {nickname} = this.get();
           if (nickname.match(/^\s*$/)) {
-            delete settings.decrypted.nicknames[viewUser.guid];
+            delete $settings.decrypted.nicknames[$viewUser.guid];
           } else {
-            settings.decrypted.nicknames[viewUser.guid] = nickname;
+            $settings.decrypted.nicknames[$viewUser.guid] = nickname;
           }
-          settings.save().then(settings => {
-            const {conversation, conversations, user} = this.store.get();
-            this.store.set({settings, viewUser, conversation, conversations, user});
+          $settings.save().then(settings => {
+            $settings = settings;
+            $viewUser = $viewUser;
+            $conversation = $conversation;
+            $conversations = $conversations
+            $user = $user;
           }, ErrHandler);
         }
       },
 
       shareShortLink () {
-        const baseText = 'Message '+(this.store.get().viewUserIsSelf ? 'me' : this.store.get().viewUser.data.name)+' on '+this.store.get().brand;
+        const baseText = 'Message '+($viewUserIsSelf ? 'me' : $viewUser.data.name)+' on '+$brand;
         if (navigator.share !== undefined) {
           navigator.share({
             text: baseText,
@@ -243,9 +253,8 @@
       },
 
       newConversation () {
-        const {viewUser} = this.store.get();
         const conversation = new Conversation();
-        conversation.data.acFull.push(viewUser);
+        conversation.data.acFull.push($viewUser);
 
         this.set({_startingConversation: true});
         conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
@@ -284,10 +293,9 @@
         const avatarImg = await resizeImage.resizeCrop(500, 500);
         resizeImage.destroy();
 
-        const {viewUser} = this.store.get();
-        viewUser.set({avatar: avatarImg.data});
+        $viewUser.set({avatar: avatarImg.data});
 
-        this.store.set({viewUser});
+        $viewUser = $viewUser;
         this.set({_avatarLoading: false});
       }
     },

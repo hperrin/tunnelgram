@@ -61,19 +61,17 @@
 
       this.onPubSubConnect = () => {
         if (this.get()._disconnected) {
-          const {conversations, user} = this.store.get();
           Nymph.getEntities({
             'class': Conversation.class,
             'sort': 'mdate',
             'reverse': true
           }, {
             'type': '&',
-            'ref': ['acFull', user.guid],
-            'gt': ['mdate', conversations.length ? Math.max(...conversations.map(c => c.mdate)) : 0]
+            'ref': ['acFull', $user.guid],
+            'gt': ['mdate', $conversations.length ? Math.max(...$conversations.map(c => c.mdate)) : 0]
           }).then(newConversations => {
-            const {conversations} = this.store.get();
-            const newArray = [...newConversations, ...conversations.filter(c => !c.inArray(newConversations))];
-            this.store.set({conversations: newArray});
+            const newArray = [...newConversations, ...$conversations.filter(c => !c.inArray(newConversations))];
+            $conversations = newArray;
           });
         }
         this.set({_disconnected: false});
@@ -154,7 +152,6 @@
 
         this.set({_loading: true});
 
-        const {user} = this.store.get();
         this.subscription = Nymph.getEntities({
           'class': Conversation.class,
           'sort': 'mdate',
@@ -162,14 +159,13 @@
           'limit': CONVERSATION_PAGE_SIZE
         }, {
           'type': '&',
-          'ref': ['acFull', user.guid]
+          'ref': ['acFull', $user.guid]
         }).subscribe(update => {
           if (this.destroyed) {
             return;
           }
           this.set({_loading: false});
           if (update) {
-            const {conversations} = this.store.get();
             if (Array.isArray(update)) {
               if (update.length < CONVERSATION_PAGE_SIZE) {
                 this.set({_reachedEarliestConversation: true});
@@ -177,8 +173,8 @@
             } else {
               this.fire('tunnelgram-notification', {update});
             }
-            PubSub.updateArray(conversations, update);
-            this.store.set({conversations});
+            PubSub.updateArray($conversations, update);
+            $conversations = $conversations;
             this.handleScroll();
           }
         }, ErrHandler);
@@ -200,16 +196,13 @@
           return;
         }
 
-        const {conversations} = this.store.get();
-
-        if (!conversations.length) {
+        if (!$conversations.length) {
           return;
         }
 
         this.set({_loadingEarlierConversations: true});
 
         try {
-          const {user} = this.store.get();
           const earlierConversations = await Nymph.getEntities({
             'class': Conversation.class,
             'sort': 'mdate',
@@ -217,13 +210,12 @@
             'limit': CONVERSATION_PAGE_SIZE
           }, {
             'type': '&',
-            'ref': ['acFull', user.guid],
-            'lt': ['mdate', Math.min(...conversations.map(c => c.mdate))]
+            'ref': ['acFull', $user.guid],
+            'lt': ['mdate', Math.min(...$conversations.map(c => c.mdate))]
           });
 
           if (earlierConversations && earlierConversations.length) {
-            const conversations = [...this.store.get().conversations, ...earlierConversations];
-            this.store.set({conversations});
+            $conversations = [...$conversations, ...earlierConversations];
           } else {
             this.set({_reachedEarliestConversation: true});
           }

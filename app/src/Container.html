@@ -1,4 +1,4 @@
-{#if !_cryptoAvailable}
+{#if !cryptoAvailable}
   <div class="container">
     <div class="lead py-3">Your browser doesn't support the Crypto API, and therefore can't do secure encryption. Unfortunately, this means {$brand} will not work on this browser.</div>
     <div class="lead py-3">You should update your browser to the latest version in order to use {$brand}.</div>
@@ -84,17 +84,9 @@
   import App from './App/App.html';
   import {logout, brand, user, crypt} from './stores';
 
-  const cryptoAvailable = () => {
+  const cryptoAvailable = (() => {
     return !!((window.crypto || window.msCrypto).getRandomValues);
-  };
-
-  export default {
-    data () {
-      return {
-        _cryptoAvailable: cryptoAvailable()
-      };
-    }
-  };
+  })();
 </script>
 
 <style>

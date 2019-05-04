@@ -37,6 +37,7 @@
   import LoadingIndicator from '../LoadingIndicator.html';
   import MessageView from './MessageView.html';
   import ErrHandler from '../../ErrHandler';
+  import {user} from '../../stores';
 
   const MESSAGE_PAGE_SIZE = 20;
 
@@ -201,11 +202,10 @@
             if (update.added) {
               // Remove the message from pending messages.
               const {conversation} = this.get();
-              const {user} = this.store.get();
               const ent = update.data;
               for (let i = 0; i < conversation.pending.length; i++) {
                 const cur = conversation.pending[i];
-                if (ent.data.keys[user.guid] === cur.data.keys[user.guid]) {
+                if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
                   conversation.pending.splice(i, 1);
                   this.set({conversation});
                   break;

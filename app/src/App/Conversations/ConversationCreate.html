@@ -85,7 +85,7 @@
           _addUserError: null
         });
 
-        if (this.store.get().user.is(user)) {
+        if ($user.is(user)) {
           this.set({
             _addUserError: 'You\'re already in conversations you start.'
           });
@@ -93,9 +93,7 @@
           return;
         }
 
-        const {conversation} = this.store.get();
-
-        if (user.inArray(conversation.data.acFull)) {
+        if (user.inArray($conversation.data.acFull)) {
           this.set({
             _addUserError: 'Looks like you\'ve already added them.'
           });
@@ -103,22 +101,20 @@
           return;
         }
 
-        conversation.data.acFull.push(user);
-        this.store.set({conversation});
+        $conversation.data.acFull.push(user);
+        $conversation = $conversation;
         this.refs.userSearchSelector.clear();
         this.refs.userSearchSelector.focus();
       },
 
       removeUser (userToRemove) {
-        const {conversation} = this.store.get();
-        conversation.set({acFull: conversation.data.acFull.filter(user => !userToRemove.is(user))});
-        this.store.set({conversation});
+        $conversation.set({acFull: $conversation.data.acFull.filter(user => !userToRemove.is(user))});
+        $conversation = $conversation;
       },
 
       save () {
-        const {conversation} = this.store.get();
         this.set({_startingConversation: true});
-        conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
+        $conversation.save().then(() => this.store.navigate('/c/'+$conversation.guid), ErrHandler).finally(() => {
           this.set({_startingConversation: false});
         });
       }

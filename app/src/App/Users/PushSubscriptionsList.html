@@ -49,10 +49,10 @@
   import LoadingIndicator from '../LoadingIndicator.html';
   import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
+  import {user} from '../../stores';
 
   export default {
     oncreate () {
-      const {user} = this.store.get();
       this.set({
         subscriptionsPromise: Nymph.getEntities({
           'class': this.get().entity.class,
@@ -60,7 +60,7 @@
           'reverse': true
         }, {
           'type': '&',
-          'ref': ['user', user.guid]
+          'ref': ['user', $user.guid]
         }).then(subs => this.set({subscriptions: subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs})).catch(ErrHandler)
       });
     },

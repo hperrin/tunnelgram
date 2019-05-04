@@ -10,7 +10,6 @@ import {crypt} from './Services/EncryptionService';
 import {storage} from './Services/StorageService';
 import {urlBase64ToUint8Array} from './Services/urlBase64';
 import {VideoService} from './Services/VideoService';
-import * as stores from './stores';
 import Conversation from './Entities/Tunnelgram/Conversation';
 import Message from './Entities/Tunnelgram/Message';
 import AppPushSubscription from './Entities/Tunnelgram/AppPushSubscription';
@@ -19,6 +18,9 @@ import Readline from './Entities/Tunnelgram/Readline';
 import Settings from './Entities/Tunnelgram/Settings';
 import Container from './Container.html';
 import ErrHandler from './ErrHandler';
+
+import {get} from 'svelte/store';
+import * as store from './stores';
 
 import './scss/styles.scss';
 
@@ -46,129 +48,126 @@ let setupSubscription;
 export function refreshAll = function () {
   cache.clear();
 
-  const {settings} = store.get();
+  const settings = get(store.settings);
   if (settings != null) {
     settings.init(settings.toJSON());
   }
 
-  const {conversation} = this.get();
+  const conversation = get(store.conversation);
   if (conversation.guid) {
     const newConv = new Conversation();
     newConv.init(conversation.toJSON());
-    this.set({conversation: new Conversation()});
-    this.set({conversation: newConv});
+    store.conversation.set(new Conversation());
+    store.conversation.set(newConv);
   }
 
-  const {conversations} = this.get();
+  const conversations = get(store.conversations);
   for (let i in conversations) {
     const newConv = new Conversation();
     newConv.init(conversations[i].toJSON());
     conversations[i] = newConv;
   }
-  this.set({conversations});
+  store.conversations.set(conversations);
 };
 
-store.constructor.prototype.getDisplayName = (user, prop, defaultValue = 'Loading...') => {
-  const {settings} = store.get();
-  if (settings != null && user.guid in settings.decrypted.nicknames) {
-    return settings.decrypted.nicknames[user.guid];
-  }
-  return (prop in user.data && user.data[prop] != null) ? user.data[prop] : defaultValue;
-};
-
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener('beforeinstallprompt', e => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // Stash the event so it can be triggered later.
-  store.set({beforeInstallPromptEvent: e});
+  store.beforeInstallPromptEvent.set(e);
 });
 
-PubSub.on('connect', () => store.set({disconnected: false}));
-PubSub.on('disconnect', () => store.set({disconnected: true}));
+PubSub.on('connect', () => store.disconnected.set(false));
+PubSub.on('disconnect', () => store.disconnected.set(true));
 
 // Everything is this function requires the logged in user status to be known.
 (async () => {
-  await store.get().ready;
+  await get(store.userReady);
 
-  store.on('state', ({changed, current, previous}) => {
-    let {conversation, conversations} = current;
-
-    if (changed.conversation && !changed.conversations && conversation && conversation.guid) {
+  store.conversation.subscribe(conversation => {
+    if (conversation && conversation.guid) {
+      const conversations = get(store.conversations);
       // Refresh conversations' readlines when current conversation changes.
       for (let curConv of conversations) {
         if (curConv != null && conversation != null && conversation === curConv) {
           // They are the same instance, so mark conversations as changed.
-          store.set({conversations});
+          store.conversations.set(conversations);
           break;
           // If they are the same entity, but different instances, the next code
           // block will update conversations.
         }
       }
     }
+  });
 
+  function syncConversations(conversation, conversations) {
     // 'conversation' and the corresponding entity in 'conversations' should be
     // the same instance, so check to make sure they are.
-    if ((changed.conversations || changed.conversation) && conversation && conversation.guid) {
+    if (conversation && conversation.guid) {
       const idx = conversation.arraySearch(conversations);
 
       if (idx !== false && conversation !== conversations[idx]) {
         // Check both of their modified dates. Whichever is most recent wins.
         if (conversations[idx].mdate > conversation.mdate) {
           conversation = conversations[idx];
-          store.set({conversation});
+          store.conversation.set(conversation);
         } else {
           conversations[idx] = conversation;
-          store.set({conversations});
+          store.conversations.set(conversations);
         }
       }
     }
+  }
+  store.conversation.subscribe(conversation => syncConversations(conversation, get(store.conversations)));
+  store.conversations.subscribe(conversations => syncConversations(get(store.conversation), conversations));
 
-    if (changed.conversations && conversations.length === 0) {
+  store.conversations.subscribe(conversations => {
+    if (conversations.length === 0) {
       router.navigate('/c');
-    }
-
-    if (changed.user) {
-      if (current.user) {
-        const route = router.lastRouteResolved();
-        const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
-        if (queryMatch) {
-          router.navigate(decodeURIComponent(queryMatch[1]));
-        }
-
-        if (setupSubscription) {
-          setupSubscription();
-        }
-
-        // If the user logs in, get their settings.
-        if (current.settings == null || !current.user.is(previous.user)) {
-          store.set({settings: null});
-          crypt.ready.then(() => {
-            Settings.current().then(settings => {
-              store.set({settings});
-            });
-          });
-        }
-      } else if (current.user === null) {
-        // If the user logs out, clear everything.
-        storage.clear();
-        store.set({
-          user: null,
-          conversations: [],
-          conversation: new Conversation(),
-          settings: null
-        });
-        store.refreshAll();
-        // And navigate to the home screen.
-        router.navigate('/');
-      }
     }
   });
 
-  if (store.get().user != null) {
+  let previousUser = get(store.user);
+  store.user.subscribe(user => {
+    if (user) {
+      const route = router.lastRouteResolved();
+      const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+      if (queryMatch) {
+        router.navigate(decodeURIComponent(queryMatch[1]));
+      }
+
+      if (setupSubscription) {
+        setupSubscription();
+      }
+
+      // If the user logs in, get their settings.
+      if (get(store.settings) == null || !user.is(previousUser)) {
+        crypt.ready.then(() => {
+          Settings.current().then(settings => {
+            store.settings.set(settings);
+          });
+        });
+      }
+    } else if (user === null) {
+      // If the user logs out, clear everything.
+      storage.clear();
+      store.user.set(null);
+      store.conversations.set([]);
+      store.conversation.set(new Conversation());
+      store.settings.set(null);
+      refreshAll();
+      // And navigate to the home screen.
+      router.navigate('/');
+    }
+
+    previousUser = user;
+  });
+
+  if (get(store.user) != null) {
     // Get the current settings.
     crypt.ready.then(() => {
       Settings.current().then(settings => {
-        store.set({settings});
+        store.settings.set(settings);
       });
     });
   }
@@ -178,7 +177,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
       // Cordova OneSignal Push Subscriptions
 
       // When user consents to notifications, tell OneSignal.
-      store.set({requestNotificationPermission: () => window.plugins.OneSignal.provideUserConsent(true)});
+      store.requestNotificationPermission.set(() => window.plugins.OneSignal.provideUserConsent(true));
 
       // This won't resolve until the user allows notifications and OneSignal
       // registers the device and returns a player ID. This should only happen
@@ -252,7 +251,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
           let subscription = await getSubscription();
 
           if (subscription) {
-            store.set({webPushSubscription: subscription});
+            store.webPushSubscription.set(subscription);
 
             try {
               const webPushSubscriptionServerCheck = await Nymph.getEntity({
@@ -284,7 +283,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
               applicationServerKey: convertedVapidKey
             });
 
-            store.set({webPushSubscription: subscription});
+            store.webPushSubscription.set(subscription);
           }
 
           // And push it up to the server.
@@ -301,7 +300,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         };
 
         // Set notification permission asker.
-        store.set({requestNotificationPermission: async () => {
+        store.requestNotificationPermission.set(async () => {
           const permissionResult = await new Promise(async resolve => {
             const promise = Notification.requestPermission(value => resolve(value));
             if (promise) {
@@ -314,10 +313,10 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
           }
 
           setupSubscription();
-        }});
+        });
 
         if (Notification.permission === 'granted') {
-          if (store.get().user) {
+          if (get(store.user)) {
             setupSubscription();
           }
         }
@@ -332,13 +331,13 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
   const app = new Container({
     target: document.querySelector('main'),
-    data: {},
+    props: {},
     store
   });
 
   const conversationHandler = params => {
-    const {conversations} = store.get();
     const guid = parseFloat(params.id);
+    const conversations = get(store.conversations);
     let conversation = null;
     for (let cur of conversations) {
       if (cur.guid === guid) {
@@ -346,14 +345,12 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
         break;
       }
     }
-    store.set({loadingConversation: true});
+    store.loadingConversation.set(true);
     if (conversation) {
-      store.set({
-        conversation: conversation,
-        view: params.view || 'conversation',
-        convosOut: false,
-        loadingConversation: false
-      });
+      store.conversation.set(conversation);
+      store.view.set(params.view || 'conversation');
+      store.convosOut.set(false);
+      store.loadingConversation.set(false);
     } else {
       crypt.ready.then(() => {
         Nymph.getEntity({
@@ -362,15 +359,13 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
           'type': '&',
           'guid': guid
         }).then(conversation => {
-          store.set({
-            conversation: conversation,
-            view: params.view || 'conversation',
-            convosOut: false,
-            loadingConversation: false
-          });
-        }, (err) => {
+          store.conversation.set(conversation);
+          store.view.set(params.view || 'conversation');
+          store.convosOut.set(false);
+          store.loadingConversation.set(false);
+        }, err => {
           ErrHandler(err);
-          store.set({loadingConversation: false});
+          store.loadingConversation.set(false);
           router.navigate('/');
         });
       });
@@ -379,29 +374,25 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 
   const userHandler = params => {
     const {username} = params;
-    const {user} = store.get();
-    store.set({loadingUser: true});
+    const user = get(store.user);
+    store.loadingUser.set(true);
     if (user.data.username === username) {
-      store.set({
-        viewUser: user,
-        viewUserIsSelf: true,
-        view: 'user',
-        convosOut: false,
-        loadingUser: false
-      });
+      store.viewUser.set(user);
+      store.viewUserIsSelf.set(true);
+      store.view.set('user');
+      store.convosOut.set(false);
+      store.loadingUser.set(false);
     } else {
       crypt.ready.then(() => {
         User.byUsername(username).then(viewUser => {
-          store.set({
-            viewUser,
-            viewUserIsSelf: false,
-            view: 'user',
-            convosOut: false,
-            loadingUser: false
-          });
-        }, (err) => {
+          store.viewUser.set(viewUser);
+          store.viewUserIsSelf.set(false);
+          store.view.set('user');
+          store.convosOut.set(false);
+          store.loadingUser.set(false);
+        }, err => {
           ErrHandler(err);
-          store.set({loadingUser: false});
+          store.loadingUser.set(false);
           router.navigate('/');
         });
       });
@@ -411,7 +402,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   let forwardCount = 0;
   router.hooks({
     before: (done, params) => {
-      if (!store.get().user) {
+      if (!get(store.user)) {
         const route = router.lastRouteResolved();
         if (route.url !== '/' && route.url !== '') {
           forwardCount++;
@@ -429,33 +420,25 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
   });
 
   router.on(() => {
-    store.set({
-      convosOut: true
-    });
+    store.convosOut.set(true);
   }).on({
     'c/:id': {uses: conversationHandler},
     'c/:id/:view': {uses: conversationHandler},
     'c': () => {
       const conversation = new Conversation();
-      store.set({
-        conversation: conversation,
-        view: 'conversation',
-        convosOut: false
-      });
+      store.conversation.set(conversation);
+      store.view.set('conversation');
+      store.convosOut.set(false);
     },
     'u/:username': {uses: userHandler},
     'pushSubscriptions': () => {
-      store.set({
-        view: 'pushSubscriptions',
-        convosOut: false,
-        loadingConversation: false,
-        loadingUser: false
-      });
+      store.view.set('pushSubscriptions');
+      store.convosOut.set(false);
+      store.loadingConversation.set(false);
+      store.loadingUser.set(false);
     },
     'pwa-home': () => {
-      store.set({
-        convosOut: true
-      });
+      store.convosOut.set(true);
     }
   }).notFound(() => {
     router.navigate('/');
@@ -465,7 +448,7 @@ PubSub.on('disconnect', () => store.set({disconnected: true}));
 // Required for Cordova.
 window.router = router;
 // Useful for debugging.
-window.stores = stores;
+window.store = store;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;

@@ -43,6 +43,7 @@
   import Avatar from './Avatar.html';
   import DisplayName from './DisplayName.html';
   import LoadingIndicator from '../LoadingIndicator.html';
+  import {conversations, settings, user} from '../../stores';
 
   export default {
     oncreate () {
@@ -84,15 +85,14 @@
           // Search for users in the conversations in cache.
           let startsWithUsers = [];
           let containUsers = [];
-          const {conversations, settings, user} = this.store.get();
-          conversations.map(conversation => {
+          $conversations.map(conversation => {
             conversation.data.acFull.map(searchUser => {
-              if (user.is(searchUser) || searchUser.isASleepingReference) {
+              if ($user.is(searchUser) || searchUser.isASleepingReference) {
                 return;
               }
               let name = searchUser.data.name.toLowerCase();
-              if (searchUser.guid in settings.decrypted.nicknames) {
-                name = settings.decrypted.nicknames[searchUser.guid].toLowerCase();
+              if (searchUser.guid in $settings.decrypted.nicknames) {
+                name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
               }
               if (name.startsWith(searchQuery) || searchUser.data.username.startsWith(searchQuery)) {
                 if (!searchUser.inArray(startsWithUsers)) {
@@ -113,8 +113,8 @@
               this.set({
                 _userSearchTimer: window.setTimeout(async () => {
                   const guids = [];
-                  for (let guid in settings.decrypted.nicknames) {
-                    if (settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+                  for (let guid in $settings.decrypted.nicknames) {
+                    if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
                       guids.push(guid);
                     }
                   }
@@ -131,8 +131,8 @@
                   }, {
                     'type': '&',
                     '!guid': [
-                      ...Object.keys(settings.decrypted.nicknames),
-                      user.guid,
+                      ...Object.keys($settings.decrypted.nicknames),
+                      $user.guid,
                       ...searchUsers.map(user => user.guid)
                     ]
                   }];

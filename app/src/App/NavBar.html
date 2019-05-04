@@ -76,12 +76,10 @@
 
     methods: {
       async setNotifications (key) {
-        const {conversation} = this.store.get();
-
-        const notif = conversation.saveNotificationSetting(key);
-        this.store.set({conversation});
+        const notif = $conversation.saveNotificationSetting(key);
+        $conversation = $conversation;
         await notif;
-        this.store.set({conversation});
+        $conversation = $conversation;
       }
     }
   };

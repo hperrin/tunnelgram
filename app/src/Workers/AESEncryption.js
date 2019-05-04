@@ -5,7 +5,7 @@ import {AESEncryptionService} from '../Services/AESEncryptionService';
 
 const crypt = new AESEncryptionService();
 
-onmessage = (e) => {
+onmessage = e => {
   const {counter, action, args} = e.data;
   if (!(action in crypt)) {
     return;

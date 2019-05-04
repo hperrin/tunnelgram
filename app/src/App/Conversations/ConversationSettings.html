@@ -35,10 +35,12 @@
 </div>
 
 <script>
+  import {conversation} from '../../stores';
+
   export default {
     oncreate () {
       this.set({
-        name: this.store.get().conversation.decrypted.name
+        name: $conversation.decrypted.name
       });
     },
 
@@ -51,21 +53,19 @@
     methods: {
       save () {
         const {name} = this.get();
-        const {conversation} = this.store.get();
         if (name === '') {
-          conversation.decrypted.name = null;
+          $conversation.decrypted.name = null;
         } else {
-          conversation.decrypted.name = name;
+          $conversation.decrypted.name = name;
         }
-        conversation.save();
-        this.store.set({conversation});
+        $conversation.save();
+        $conversation = $conversation;
       },
 
       async clearReadline () {
         this.set({_clearingReadline: true});
-        const {conversation} = this.store.get();
-        await conversation.clearReadline();
-        this.store.set({conversation});
+        await $conversation.clearReadline();
+        $conversation = $conversation;
         this.set({_clearingReadline: false});
       },
 
@@ -75,9 +75,8 @@
 
       leave () {
         this.set({_leavingConversation: true});
-        const {conversation} = this.store.get();
         this.store.navigate('/c');
-        conversation.delete();
+        $conversation.delete();
       }
     }
   };
