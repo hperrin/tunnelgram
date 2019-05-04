@@ -40,12 +40,9 @@
         style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
         tabindex="0"
         role="button"
-        on:animationend={() => _flipFirst && _flipSecond = true}
-        on:animationend={() => _flipFirst && _flipped = !_flipped}
-        on:animationend={() => _flipFirst && _flipFirst = false}
-        on:animationend={() => _flipFirst || _flipSecond = false}
-        on:animationend={() => _flipFirst || _flipFirst = false}
-        on:dblclick={toggleActions} title={_createdDateLong}
+        on:animationend={handleFlipAnimationEnd}
+        on:dblclick={toggleActions}
+        title={_createdDateLong}
         bind:this={messageContainer}>
         {#if shouldEmbiggen}
           <div class="d-inline-block" on:click={() => _flipFirst = !!flipper} style="font-size: 1.1rem">
@@ -124,6 +121,8 @@
   let _formattedSecretText = null;
   let _saveFailed = null;
   let _flipped = false;
+  let _flipSecond;
+  let _flipFirst;
   let createdDateRelative;
   let destroyed;
   let interval;
@@ -259,6 +258,17 @@
       createdDateRelative = cdateFormatter.format('wh', 'short');
     } else {
       createdDateRelative = cdateFormatter.format('ago', 'long');
+    }
+  }
+
+  function handleFlipAnimationEnd() {
+    if (_flipFirst) {
+      _flipSecond = true;
+      _flipped = !_flipped;
+      _flipFirst = false;
+    } else {
+      _flipSecond = false;
+      _flipFirst = false;
     }
   }
 

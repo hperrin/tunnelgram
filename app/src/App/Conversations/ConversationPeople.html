@@ -10,7 +10,7 @@
         channel.
       {/if}
     </p>
-    <UserSearchSelector bind:this={userSearchSelector} className="d-block" disabled={_addingUser} on:userSelected={event => addUser(event.detail.user)} />
+    <UserSearchSelector bind:this={userSearchSelector} className="d-block" disabled={_addingUser} on:user-selected={event => addUser(event.detail)} />
     {#if _addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
         {_addUserError}
@@ -18,10 +18,10 @@
     {/if}
     <h3 class="mt-3">People in this Conversation</h3>
     <div class="list-group mt-3 text-body">
-      {#each $conversation.data.acFull as user, i (user.guid)}
-        <a class="list-group-item d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click={() => navigate('/u/' + user.data.username)}>
-          <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
-          {#if $user.guid === user.guid}
+      {#each $conversation.data.acFull as curUser, i (curUser.guid)}
+        <a class="list-group-item d-flex justify-content-between align-items-center" href="javascript:void(0)" on:click={() => navigate('/u/' + curUser.data.username)}>
+          <span><span class="mr-2"><Avatar bind:user={curUser} /></span> <DisplayName bind:user={curUser} /> ({curUser.data.username})</span>
+          {#if $user.guid === curUser.guid}
             <span>(You)</span>
           {/if}
         </a>

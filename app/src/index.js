@@ -45,7 +45,7 @@ if ('serviceWorker' in navigator) {
 // This stores the function to set up the Web Push Notification subscription.
 let setupSubscription;
 
-export function refreshAll = function () {
+export function refreshAll () {
   cache.clear();
 
   const settings = get(store.settings);

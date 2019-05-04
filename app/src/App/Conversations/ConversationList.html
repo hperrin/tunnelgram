@@ -9,9 +9,9 @@
       </div>
     {/if}
     {#if !_loading}
-      {#each $conversations as conversation (conversation.guid)}
-        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {conversation.guid === $conversation.guid ? 'active' : ''} {conversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(conversation)}>
-          <ConversationPreview bind:conversation />
+      {#each $conversations as curConversation (curConversation.guid)}
+        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {curConversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(curConversation)}>
+          <ConversationPreview bind:conversation={curConversation} />
         </div>
       {/each}
       {#if !$conversations.length}

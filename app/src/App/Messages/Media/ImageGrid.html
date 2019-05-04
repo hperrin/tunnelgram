@@ -23,9 +23,9 @@
   export let resources;
   let thumbnailContainer;
 
-  $: thumbnailDimension = Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight)))),
-  $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length),
-  $: thumbnailPromises = resources.map(resource => resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail;
+  $: thumbnailDimension = Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight))));
+  $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length);
+  $: thumbnailPromises = resources.map(resource => resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail);
 
   onMount(() => {
     let setResource = false;

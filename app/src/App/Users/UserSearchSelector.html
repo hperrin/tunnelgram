@@ -13,7 +13,7 @@
   {#if !disabled && (searchUsers.length || _userSearchPromiseServer)}
     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
       {#each searchUsers as user (user.guid)}
-        <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => fire('userSelected', {user})} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+        <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
           <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
         </a>
       {/each}
@@ -28,7 +28,7 @@
           </span>
         {/if}
         {#each serverUsers as user (user.guid)}
-          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => fire('userSelected', {user})} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
             <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
           </a>
         {/each}
@@ -38,13 +38,15 @@
 </div>
 
 <script>
-  import {onMount, onDestroy} from 'svelte';
+  import {onMount, onDestroy, createEventDispatcher} from 'svelte';
   import {Nymph} from 'nymph-client';
   import {User} from 'tilmeld-client';
   import Avatar from './Avatar';
   import DisplayName from './DisplayName';
   import LoadingIndicator from '../LoadingIndicator';
   import {conversations, settings, user} from '../../stores';
+
+  const dispatch = createEventDispatcher();
 
   export let className = '';
   export let disabled = false;

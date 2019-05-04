@@ -2,7 +2,7 @@
   <h2>Start a Conversation</h2>
   <form class="d-flex flex-column justify-content-start w-std-page" on:submit|preventDefault={save}>
     <h3 class="mt-3">Add People</h3>
-    <UserSearchSelector bind:this={userSearchSelector} className="d-block" disabled={_startingConversation} on:userSelected={event => addUser(event.detail.user)} />
+    <UserSearchSelector bind:this={userSearchSelector} className="d-block" disabled={_startingConversation} on:user-selected={event => addUser(event.detail)} />
     {#if _addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
         {_addUserError}
