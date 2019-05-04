@@ -1,16 +1,16 @@
 <ul class="navbar-nav ml-auto">
-  <li class="nav-item dropdown" ref:notificationsDropdown>
+  <li class="nav-item dropdown" bind:this={notificationsDropdown}>
     <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="notificationsDropdown" title="Notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      {#if $conversation.notifications === _Conversation.NOTIFICATIONS_ALL}
+      {#if $conversation.notifications === Conversation.NOTIFICATIONS_ALL}
         <span><i class="fas fa-bell"></i></span>
-      {:else if $conversation.notifications === _Conversation.NOTIFICATIONS_MENTIONS}
+      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_MENTIONS}
         <span><i class="far fa-bell"></i></span>
-      {:else if $conversation.notifications === _Conversation.NOTIFICATIONS_DIRECT}
+      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_DIRECT}
         <span><i class="far fa-bell"></i></span>
-      {:else if $conversation.notifications === _Conversation.NOTIFICATIONS_NONE}
+      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_NONE}
         <span><i class="fas fa-bell-slash"></i></span>
       {/if}
-      <span class="sr-only">({_Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
+      <span class="sr-only">({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
     </a>
     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
       <h6 class="dropdown-header">
@@ -18,7 +18,7 @@
       </h6>
       {#each _keys as key}
         <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click={() => setNotifications(key)}>
-          {_Conversation.NOTIFICATIONS_NAME[key]}
+          {Conversation.NOTIFICATIONS_NAME[key]}
         </a>
       {/each}
     </div>
@@ -58,29 +58,22 @@
   import {Dropdown} from '../Services/Val/BSN';
   import {conversation, view} from '../stores';
 
-  export default {
-    onupdate () {
-      if (this.refs.notificationsDropdown && !this.notificationsDropdown) {
-        this.notificationsDropdown = new Dropdown(this.refs.notificationsDropdown);
-      } else if (!this.refs.notificationsDropdown && this.notificationsDropdown) {
-        delete this.notificationsDropdown;
-      }
-    },
+  const _keys = Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat);
 
-    data () {
-      return {
-        _Conversation: Conversation,
-        _keys: Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat)
-      };
-    },
-
-    methods: {
-      async setNotifications (key) {
-        const notif = $conversation.saveNotificationSetting(key);
-        $conversation = $conversation;
-        await notif;
-        $conversation = $conversation;
-      }
+  let notificationsDropdown;
+  let notificationsDropdownComponent;
+  $: {
+    if (notificationsDropdown && !notificationsDropdownComponent) {
+      notificationsDropdownComponent = new Dropdown(notificationsDropdown);
+    } else if (!notificationsDropdown && notificationsDropdownComponent) {
+      notificationsDropdownComponent = null;
     }
-  };
+  }
+
+  async function setNotifications (key) {
+    const notif = $conversation.saveNotificationSetting(key);
+    $conversation = $conversation;
+    await notif;
+    $conversation = $conversation;
+  }
 </script>

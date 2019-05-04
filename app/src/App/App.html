@@ -43,14 +43,14 @@
   </div>
 {/if}
 <div class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
-  <div class="convos d-flex flex-column h-100 bg-dark text-light" ref:convos>
+  <div class="convos d-flex flex-column h-100 bg-dark text-light" bind:this={convos}>
     <nav class="navbar navbar-expand navbar-dark bg-dark">
       <div class="container-fluid">
         <span class="navbar-brand align-items-center">
           <span>{$brand}</span>
         </span>
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item dropdown" ref:menuDropdown>
+          <li class="nav-item dropdown" bind:this={menuDropdown}>
             <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               <Avatar bind:user="$user" />
             </a>
@@ -84,12 +84,12 @@
     </nav>
     <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
       <ConversationList
-        on:tunnelgram-notification="notification(event.update)"
-        on:tunnelgram-navigate="navigateConversation(event.conversation)" />
+        on:tunnelgram-notification={event => notification(event.update)}
+        on:tunnelgram-navigate={event => navigateConversation(event.conversation)} />
     </div>
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
-  <div class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark" style="width: 0;" ref:mainUi>
+  <div class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark" style="width: 0;" bind:this={mainUi}>
     <nav class="navbar navbar-expand navbar-dark bg-dark">
       <div class="container-fluid">
         <ul class="navbar-nav d-md-none">
@@ -125,6 +125,7 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
   import PNotify from 'pnotify/dist/es/PNotify';
   import 'pnotify/dist/es/PNotifyDesktop';
   import TinyGesture from 'tinygesture';
@@ -160,213 +161,209 @@
     settings
   } from '../stores';
 
-  const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
+  let _hideInstallPrompt = false;
+  let _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
+  let _hidePersistentStoragePrompt = true;
 
-  export default {
-    oncreate () {
-      if (window.inCordova) {
-        window.plugins.OneSignal.userProvidedPrivacyConsent(consent => {
-          this.set({_hideNotificationPrompt: consent});
-        });
-      }
-
-      (async () => {
-        if (navigator.storage && navigator.storage.persist) {
-          this.set({_hidePersistentStoragePrompt: await navigator.storage.persisted()});
-        }
-      })();
-    },
-
-    onupdate ({previous}) {
-      if (this.refs.menuDropdown && !this.menuDropdown) {
-        this.menuDropdown = new Dropdown(this.refs.menuDropdown);
-      } else if (!this.refs.menuDropdown && this.menuDropdown) {
-        delete this.menuDropdown;
-      }
-
-      // Set the mainUi width to the proper value.
-      this.refs.mainUi.style.width = '100%';
-      // Initialize swipe gestures.
-      const onPanMove = (gesture, transform) => {
-        if (gesture.animationFrame) {
-          return;
-        }
-        gesture.animationFrame = window.requestAnimationFrame(() => {
-          if (gesture.swipingDirection === 'horizontal') {
-            this.refs.mainUi.style.transition = 'none';
-            this.refs.mainUi.style.transform = transform();
-            window.requestAnimationFrame(() => {
-              this.refs.mainUi.style.transition = null;
-            });
-          } else if (this.refs.mainUi.style.transform != null) {
-            this.refs.mainUi.style.transform = null;
-          }
-          gesture.animationFrame = null;
-        });
-      };
-      const onPanEnd = gesture => {
-        window.cancelAnimationFrame(gesture.animationFrame);
-        gesture.animationFrame = null;
-        this.refs.mainUi.style.transition = null;
-        this.refs.mainUi.style.transform = null;
-      };
-      if (this.refs.mainUi && !this.mainUiGesture) {
-        this.mainUiGesture = new TinyGesture(this.refs.mainUi, {mouseSupport: false});
-        this.mainUiGesture.on('swiperight', () => $convosOut = true);
-        this.mainUiGesture.on('panmove', onPanMove.bind(
-          this,
-          this.mainUiGesture,
-          () => 'translate3d(calc(-100% + '+Math.max(this.mainUiGesture.touchMoveX, 0)+'px), 0, 0)'
-        ));
-        this.mainUiGesture.on('panend', onPanEnd.bind(this, this.mainUiGesture));
-      } else if (!this.refs.mainUi && this.mainUiGesture) {
-        this.mainUiGesture.destroy();
-        delete this.mainUiGesture;
-      }
-      if (this.refs.convos && !this.convosGesture) {
-        this.convosGesture = new TinyGesture(this.refs.convos, {mouseSupport: false});
-        this.convosGesture.on('swipeleft', () => $convosOut = false);
-        this.convosGesture.on('panmove', onPanMove.bind(
-          this,
-          this.convosGesture,
-          () => 'translate3d('+this.convosGesture.touchMoveX+'px, 0, 0)'
-        ));
-        this.convosGesture.on('panend', onPanEnd.bind(this, this.convosGesture));
-      } else if (!this.refs.convos && this.convosGesture) {
-        this.convosGesture.destroy();
-        delete this.convosGesture;
-      }
-    },
-
-    computed: {
-      name: ({$view, $viewUser, $conversation, $conversations, $settings}) => {
-        if ($view === 'pushSubscriptions') {
-          return 'Push Subscriptions';
-        }
-        if ($view === 'user') {
-          return $viewUser.data.name;
-        }
-        if ($settings && $conversation.guid) {
-          return $conversation.getName($settings);
-        }
-        return '';
-      }
-    },
-
-    data () {
-      return {
-        _hideInstallPrompt: false,
-        _hideNotificationPrompt,
-        _hidePersistentStoragePrompt: true
-      };
-    },
-
-    methods: {
-      navigateConversation (conversation) {
-        if (router.lastRouteResolved().url !== '/c/'+conversation.guid) {
-          navigate('/c/'+conversation.guid);
-        } else {
-          $convosOut = false;
-        }
-      },
-
-      async notification (update) {
-        if (document.hidden && $webPushSubscription) {
-          // They will get a push notification.
-          return;
-        }
-
-        if (update.deleted || !update.data) {
-          return;
-        }
-
-        const conversation = new Conversation();
-        conversation.init(update.data);
-
-        if (conversation.data.lastMessage) {
-          if (conversation.is($conversation) && !document.hidden) {
-            // Don't notify if the user is on the conversation and not hidden.
-            return;
-          }
-          await conversation.data.lastMessage.ready();
-          if ($user.is(conversation.data.lastMessage.data.user)) {
-            // Don't notify if the user made the message.
-            return;
-          }
-          if (conversation.readline >= conversation.data.lastMessage.cdate) {
-            // Don't notify when a user deletes a message (will result in earlier message becoming lastMessage).
-            return;
-          }
-          await conversation.data.lastMessage.data.user.ready();
-        } else if (update.added) {
-          if ($user.is(conversation.data.user)) {
-            // Don't notify if the user made a new conversation.
-            return;
-          }
-          await conversation.readyAll(1).catch(ErrHandler);
-        } else {
-          return;
-        }
-
-        let notice;
-        let options = {};
-        if (document.hidden) {
-          // If the tab is hidden, display a desktop notice.
-          Object.assign(options, {
-            modules: {
-              Desktop: {
-                desktop: Notification.permission === 'granted',
-                icon: false
-              }
-            }
-          });
-        }
-        if (conversation.data.lastMessage) {
-          // Notify the user of a new message.
-          notice = PNotify.info(Object.assign({
-            title: getDisplayName(conversation.data.lastMessage.data.user, 'name')
-              + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? ' - ' + conversation.getName($settings)
-                : ''
-              ),
-            text:  conversation.data.lastMessage.decrypted.text.length > 40
-              ? conversation.data.lastMessage.decrypted.text.substr(0, 40) + '...'
-              : conversation.data.lastMessage.decrypted.text
-          }, options));
-        } else if (update.added) {
-          // Notify the user of a new conversation.
-          notice = PNotify.info(Object.assign({
-            title: 'New Conversation',
-            text: getDisplayName(conversation.data.user, 'name') + ' started '
-              + (conversation.data.acFull.length > 2 || conversation.data.name != null
-                ? conversation.getName($settings)
-                : 'a conversation'
-              )
-              + '.'
-          }, options));
-        }
-
-        notice.on('click', e => {
-          let target = e.target;
-          while (target.parentNode) {
-            if (target.classList && target.classList.contains('ui-pnotify-closer')) {
-              return;
-            }
-            target = target.parentNode;
-          }
-          if (document.hidden) {
-            window.focus();
-          }
-          if (!conversation.is($conversation)) {
-            window.requestAnimationFrame(() => {
-              this.navigateConversation(conversation);
-            });
-          }
-          notice.close();
-        });
-      }
+  $: name = (() => {
+    if ($view === 'pushSubscriptions') {
+      return 'Push Subscriptions';
     }
+    if ($view === 'user') {
+      return $viewUser.data.name;
+    }
+    if ($settings && $conversation.guid) {
+      return $conversation.getName($settings);
+    }
+    return '';
+  })();
+
+  let menuDropdown;
+  let menuDropdownComponent;
+  $: {
+    if (menuDropdown && !menuDropdownComponent) {
+      menuDropdownComponent = new Dropdown(menuDropdown);
+    } else if (!menuDropdown && menuDropdownComponent) {
+      menuDropdownComponent = null;
+    }
+  }
+
+  let mainUi;
+  let mainUiGesture;
+  let convos;
+  let convosGesture;
+  const onPanMove = (gesture, transform) => {
+    if (gesture.animationFrame) {
+      return;
+    }
+    gesture.animationFrame = window.requestAnimationFrame(() => {
+      if (gesture.swipingDirection === 'horizontal') {
+        mainUi.style.transition = 'none';
+        mainUi.style.transform = transform();
+        window.requestAnimationFrame(() => {
+          mainUi.style.transition = null;
+        });
+      } else if (mainUi.style.transform != null) {
+        mainUi.style.transform = null;
+      }
+      gesture.animationFrame = null;
+    });
   };
+  const onPanEnd = gesture => {
+    window.cancelAnimationFrame(gesture.animationFrame);
+    gesture.animationFrame = null;
+    mainUi.style.transition = null;
+    mainUi.style.transform = null;
+  };
+  $: {
+    // Initialize swipe gestures.
+    if (mainUi && !mainUiGesture) {
+      // Set the mainUi width to the proper value.
+      mainUi.style.width = '100%';
+      mainUiGesture = new TinyGesture(mainUi, {mouseSupport: false});
+      mainUiGesture.on('swiperight', () => $convosOut = true);
+      mainUiGesture.on('panmove', onPanMove.bind(
+        null,
+        mainUiGesture,
+        () => 'translate3d(calc(-100% + '+Math.max(mainUiGesture.touchMoveX, 0)+'px), 0, 0)'
+      ));
+      mainUiGesture.on('panend', onPanEnd.bind(null, mainUiGesture));
+    } else if (!mainUi && mainUiGesture) {
+      mainUiGesture.destroy();
+      mainUiGesture = null;
+    }
+    if (convos && !convosGesture) {
+      convosGesture = new TinyGesture(convos, {mouseSupport: false});
+      convosGesture.on('swipeleft', () => $convosOut = false);
+      convosGesture.on('panmove', onPanMove.bind(
+        null,
+        convosGesture,
+        () => 'translate3d('+convosGesture.touchMoveX+'px, 0, 0)'
+      ));
+      convosGesture.on('panend', onPanEnd.bind(null, convosGesture));
+    } else if (!convos && convosGesture) {
+      convosGesture.destroy();
+      convosGesture = null;
+    }
+  }
+
+  onMount(() => {
+    if (window.inCordova) {
+      window.plugins.OneSignal.userProvidedPrivacyConsent(consent => {
+        _hideNotificationPrompt = consent;
+      });
+    }
+
+    (async () => {
+      if (navigator.storage && navigator.storage.persist) {
+        _hidePersistentStoragePrompt = await navigator.storage.persisted();
+      }
+    })();
+  });
+
+  function navigateConversation (conversation) {
+    if (router.lastRouteResolved().url !== '/c/'+conversation.guid) {
+      navigate('/c/'+conversation.guid);
+    } else {
+      $convosOut = false;
+    }
+  }
+
+  async function notification (update) {
+    if (document.hidden && $webPushSubscription) {
+      // They will get a push notification.
+      return;
+    }
+
+    if (update.deleted || !update.data) {
+      return;
+    }
+
+    const conversation = new Conversation();
+    conversation.init(update.data);
+
+    if (conversation.data.lastMessage) {
+      if (conversation.is($conversation) && !document.hidden) {
+        // Don't notify if the user is on the conversation and not hidden.
+        return;
+      }
+      await conversation.data.lastMessage.ready();
+      if ($user.is(conversation.data.lastMessage.data.user)) {
+        // Don't notify if the user made the message.
+        return;
+      }
+      if (conversation.readline >= conversation.data.lastMessage.cdate) {
+        // Don't notify when a user deletes a message (will result in earlier message becoming lastMessage).
+        return;
+      }
+      await conversation.data.lastMessage.data.user.ready();
+    } else if (update.added) {
+      if ($user.is(conversation.data.user)) {
+        // Don't notify if the user made a new conversation.
+        return;
+      }
+      await conversation.readyAll(1).catch(ErrHandler);
+    } else {
+      return;
+    }
+
+    let notice;
+    let options = {};
+    if (document.hidden) {
+      // If the tab is hidden, display a desktop notice.
+      Object.assign(options, {
+        modules: {
+          Desktop: {
+            desktop: Notification.permission === 'granted',
+            icon: false
+          }
+        }
+      });
+    }
+    if (conversation.data.lastMessage) {
+      // Notify the user of a new message.
+      notice = PNotify.info(Object.assign({
+        title: getDisplayName(conversation.data.lastMessage.data.user, 'name')
+          + (conversation.data.acFull.length > 2 || conversation.data.name != null
+            ? ' - ' + conversation.getName($settings)
+            : ''
+          ),
+        text:  conversation.data.lastMessage.decrypted.text.length > 40
+          ? conversation.data.lastMessage.decrypted.text.substr(0, 40) + '...'
+          : conversation.data.lastMessage.decrypted.text
+      }, options));
+    } else if (update.added) {
+      // Notify the user of a new conversation.
+      notice = PNotify.info(Object.assign({
+        title: 'New Conversation',
+        text: getDisplayName(conversation.data.user, 'name') + ' started '
+          + (conversation.data.acFull.length > 2 || conversation.data.name != null
+            ? conversation.getName($settings)
+            : 'a conversation'
+          )
+          + '.'
+      }, options));
+    }
+
+    notice.on('click', e => {
+      let target = e.target;
+      while (target.parentNode) {
+        if (target.classList && target.classList.contains('ui-pnotify-closer')) {
+          return;
+        }
+        target = target.parentNode;
+      }
+      if (document.hidden) {
+        window.focus();
+      }
+      if (!conversation.is($conversation)) {
+        window.requestAnimationFrame(() => {
+          this.navigateConversation(conversation);
+        });
+      }
+      notice.close();
+    });
+  }
 </script>
 
 <style>
