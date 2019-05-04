@@ -1,4 +1,4 @@
-<div class="{className} position-relative" ref:container>
+<div class="{className} position-relative" bind:this={container}>
   <input
     type="search"
     class="form-control w-100"
@@ -55,6 +55,24 @@
   let _showUserSearchDropdown = false;
   let _userSearchTimer = null;
   let _userSearchPromiseServer = null;
+  let container;
+  let bodyClickHandler = event => {
+    let hide = false;
+    let target = event.target;
+    while (target.parentNode) {
+      if (target === container) {
+        break;
+      }
+      if (target === document.body) {
+        hide = true;
+        break;
+      }
+      target = target.parentNode;
+    }
+    if (hide) {
+      _showUserSearchDropdown = false;
+    }
+  };
 
   let previousUsername = username;
   $: {
@@ -149,29 +167,11 @@
   }
 
   onMount(() => {
-    this.bodyClickHandler = event => {
-      let hide = false;
-      let target = event.target;
-      while (target.parentNode) {
-        if (target === this.refs.container) {
-          break;
-        }
-        if (target === document.body) {
-          hide = true;
-          break;
-        }
-        target = target.parentNode;
-      }
-      if (hide) {
-        _showUserSearchDropdown = false;
-      }
-    };
-
-    document.body.addEventListener('click', this.bodyClickHandler);
+    document.body.addEventListener('click', bodyClickHandler);
   });
 
   onDestroy(() => {
-    document.body.removeEventListener('click', this.bodyClickHandler);
+    document.body.removeEventListener('click', bodyClickHandler);
   });
 
 

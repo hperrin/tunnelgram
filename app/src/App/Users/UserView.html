@@ -242,7 +242,7 @@
     conversation.data.acFull.push($viewUser);
 
     _startingConversation = true;
-    conversation.save().then(() => this.store.navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
+    conversation.save().then(() => navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
       _startingConversation = false;
     });
   }

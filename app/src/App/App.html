@@ -358,7 +358,7 @@
       }
       if (!conversation.is($conversation)) {
         window.requestAnimationFrame(() => {
-          this.navigateConversation(conversation);
+          navigateConversation(conversation);
         });
       }
       notice.close();
