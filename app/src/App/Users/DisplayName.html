@@ -7,16 +7,9 @@
 <script>
   import {settings} from '../../stores';
 
-  export default {
-    computed: {
-      nickname: ({user, $settings}) => ($settings != null && user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[user.guid] : null
-    },
+  export let user;
+  export let prop = 'name';
+  export let defaultValue = 'Loading...';
 
-    data () {
-      return {
-        prop: 'name',
-        defaultValue: 'Loading...'
-      }
-    }
-  };
+  $: nickname = ($settings != null && user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[user.guid] : null;
 </script>

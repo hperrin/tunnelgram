@@ -31,19 +31,20 @@
             {/if}
             <span>{subscription.agent.device.vendor || ''} {subscription.agent.device.model || ''}</span>
           </p>
-          <small title={simpleDateFormatter(subscription.cdate, 'wymdhms', 'short')}>Created: {simpleDateFormatter(subscription.cdate, 'ago', 'long')}</small>,
-          <small title={simpleDateFormatter(subscription.mdate, 'wymdhms', 'short')}>Last used: {simpleDateFormatter(subscription.mdate, 'ago', 'long')}</small>
+          <small title={new SimpleDateFormatter(subscription.cdate).format('wymdhms', 'short')}>Created: {new SimpleDateFormatter(subscription.cdate).format('ago', 'long')}</small>,
+          <small title={new SimpleDateFormatter(subscription.mdate).format('wymdhms', 'short')}>Last used: {new SimpleDateFormatter(subscription.mdate).format('ago', 'long')}</small>
         </div>
       {/each}
     </div>
   {/if}
 {:catch err}
   <div class="mt-3">
-    An error occurred: {stringify(err)}
+    An error occurred: {JSON.stringify(err)}
   </div>
 {/await}
 
 <script>
+  import {onMount} from 'svelte';
   import {Nymph} from 'nymph-client';
   import UAParser from 'ua-parser-js';
   import LoadingIndicator from '../LoadingIndicator';
@@ -51,44 +52,35 @@
   import ErrHandler from '../../ErrHandler';
   import {user} from '../../stores';
 
-  export default {
-    oncreate () {
-      this.set({
-        subscriptionsPromise: Nymph.getEntities({
-          'class': this.get().entity.class,
-          'sort': 'mdate',
-          'reverse': true
-        }, {
-          'type': '&',
-          'ref': ['user', $user.guid]
-        }).then(subs => this.set({subscriptions: subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs})).catch(ErrHandler)
-      });
-    },
+  export let entity;
+  export let showBrowser;
+  let subscriptionsPromise;
+  let subscriptions;
 
-    methods: {
-      remove (subscription) {
-        const {subscriptions} = this.get();
-        subscription.deleting = true;
-        this.set({subscriptions});
-        subscription.delete().then(() => {
-          const {subscriptions} = this.get();
-          const idx = subscription.arraySearch(subscriptions);
-          if (idx !== false) {
-            subscriptions.splice(idx, 1);
-            this.set({subscriptions});
-          }
-        }, err => {
-          const {subscriptions} = this.get();
-          subscription.deleting = false;
-          this.set({subscriptions});
-          ErrHandler(err);
-        });
+  onMount(() => {
+    subscriptionsPromise = Nymph.getEntities({
+      'class': entity.class,
+      'sort': 'mdate',
+      'reverse': true
+    }, {
+      'type': '&',
+      'ref': ['user', $user.guid]
+    }).then(subs => subscriptions = subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs).catch(ErrHandler);
+  });
+
+  function remove (subscription) {
+    subscription.deleting = true;
+    subscriptions = subscriptions;
+    subscription.delete().then(() => {
+      const idx = subscription.arraySearch(subscriptions);
+      if (idx !== false) {
+        subscriptions.splice(idx, 1);
+        subscriptions = subscriptions;
       }
-    },
-
-    helpers: {
-      stringify: JSON.stringify,
-      simpleDateFormatter: (date, style, length) => new SimpleDateFormatter(date).format(style, length)
-    }
-  };
+    }, err => {
+      subscription.deleting = false;
+      subscriptions = subscriptions;
+      ErrHandler(err);
+    });
+  }
 </script>

@@ -1,17 +1,17 @@
-<div class="{class} position-relative" ref:container>
+<div class="{className} position-relative" ref:container>
   <input
     type="search"
     class="form-control w-100"
     id="username"
-    ref:username
+    bind:this={usernameElem}
     placeholder="Username or name"
     on:keydown={event => handleUserSearchKeyDown(event)}
-    bind:value="username"
+    bind:value={username}
     disabled={disabled}
     autocomplete="off"
     on:focus={() => _showUserSearchDropdown = true} />
   {#if !disabled && (searchUsers.length || _userSearchPromiseServer)}
-    <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" ref:userSearchDropdown>
+    <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
       {#each searchUsers as user (user.guid)}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => fire('userSelected', {user})} on:keydown={event => handleUserSearchResultKeyDown(event)}>
           <span><span class="mr-2"><Avatar bind:user="user" /></span> <DisplayName bind:user="user" /> ({user.data.username})</span>
@@ -38,6 +38,7 @@
 </div>
 
 <script>
+  import {onMount, onDestroy} from 'svelte';
   import {Nymph} from 'nymph-client';
   import {User} from 'tilmeld-client';
   import Avatar from './Avatar';
@@ -45,193 +46,190 @@
   import LoadingIndicator from '../LoadingIndicator';
   import {conversations, settings, user} from '../../stores';
 
-  export default {
-    oncreate () {
-      this.bodyClickHandler = event => {
-        let hide = false;
-        let target = event.target;
-        while (target.parentNode) {
-          if (target === this.refs.container) {
-            break;
-          }
-          if (target === document.body) {
-            hide = true;
-            break;
-          }
-          target = target.parentNode;
-        }
-        if (hide) {
-          this.set({_showUserSearchDropdown: false});
-        }
-      };
+  export let className = '';
+  export let disabled = false;
+  export let searchUsers = [];
+  export let username = '';
+  let usernameElem;
+  let userSearchDropdown;
+  let _showUserSearchDropdown = false;
+  let _userSearchTimer = null;
 
-      document.body.addEventListener('click', this.bodyClickHandler);
-    },
-
-    ondestroy () {
-      document.body.removeEventListener('click', this.bodyClickHandler);
-    },
-
-    onupdate ({changed, current}) {
-      if (changed.username) {
-        const {username} = this.get();
-        const searchQuery = username.toLowerCase();
-        this.set({
-          searchUsers: [],
-          _userSearchPromiseServer: null,
-        });
-        if (searchQuery.length >= 2) {
-          let searchUsers = [];
-          // Search for users in the conversations in cache.
-          let startsWithUsers = [];
-          let containUsers = [];
-          $conversations.map(conversation => {
-            conversation.data.acFull.map(searchUser => {
-              if ($user.is(searchUser) || searchUser.isASleepingReference) {
-                return;
-              }
-              let name = searchUser.data.name.toLowerCase();
-              if (searchUser.guid in $settings.decrypted.nicknames) {
-                name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
-              }
-              if (name.startsWith(searchQuery) || searchUser.data.username.startsWith(searchQuery)) {
-                if (!searchUser.inArray(startsWithUsers)) {
-                  startsWithUsers.push(searchUser);
-                }
-              } else if (name.includes(searchQuery) || searchUser.data.username.includes(searchQuery)) {
-                if (!searchUser.inArray(containUsers)) {
-                  containUsers.push(searchUser);
-                }
-              }
-            });
-          });
-          searchUsers = [...startsWithUsers, ...containUsers];
-          this.set({
-            searchUsers,
-            _userSearchPromiseServer: new Promise(resolve => {
-              window.clearTimeout(this.get()._userSearchTimer);
-              this.set({
-                _userSearchTimer: window.setTimeout(async () => {
-                  const guids = [];
-                  for (let guid in $settings.decrypted.nicknames) {
-                    if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
-                      guids.push(guid);
-                    }
-                  }
-                  const nickPromise = guids.length ? Nymph.getEntities({
-                    'class': User.class
-                  }, {
-                    'type': '|',
-                    'guid': guids
-                  }) : Promise.resolve([]);
-
-                  const firstArgs = [{
-                    'class': User.class,
-                    'limit': 10
-                  }, {
-                    'type': '&',
-                    '!guid': [
-                      ...Object.keys($settings.decrypted.nicknames),
-                      $user.guid,
-                      ...searchUsers.map(user => user.guid)
-                    ]
-                  }];
-                  const unPromise = Nymph.getEntities(...firstArgs, {
-                    'type': '&',
-                    'ilike': ['username', searchQuery+'%']
-                  });
-                  const namePromise = Nymph.getEntities(...firstArgs, {
-                    'type': '&',
-                    'ilike': ['name', '%'+searchQuery+'%']
-                  });
-
-                  const nickUsers = await nickPromise;
-                  const unUsers = await unPromise;
-                  const nameUsers = await namePromise;
-
-                  for (let i in nickUsers) {
-                    if (nickUsers[i].inArray(searchUsers)) {
-                      nickUsers.splice(i, 1);
-                    }
-                  }
-                  for (let i in nameUsers) {
-                    if (nameUsers[i].inArray(unUsers)) {
-                      nameUsers.splice(i, 1);
-                    }
-                  }
-
-                  resolve([...nickUsers, ...unUsers, ...nameUsers]);
-                }, 150)
-              });
-            })
-          });
-        }
-      }
-    },
-
-    data () {
-      return {
-        _showUserSearchDropdown: false,
-        _userSearchTimer: null,
-        class: '',
-        disabled: false,
+  $: {
+    if (changed.username) {
+      const {username} = this.get();
+      const searchQuery = username.toLowerCase();
+      this.set({
         searchUsers: [],
-        username: ''
-      };
-    },
+        _userSearchPromiseServer: null,
+      });
+      if (searchQuery.length >= 2) {
+        let searchUsers = [];
+        // Search for users in the conversations in cache.
+        let startsWithUsers = [];
+        let containUsers = [];
+        $conversations.map(conversation => {
+          conversation.data.acFull.map(searchUser => {
+            if ($user.is(searchUser) || searchUser.isASleepingReference) {
+              return;
+            }
+            let name = searchUser.data.name.toLowerCase();
+            if (searchUser.guid in $settings.decrypted.nicknames) {
+              name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
+            }
+            if (name.startsWith(searchQuery) || searchUser.data.username.startsWith(searchQuery)) {
+              if (!searchUser.inArray(startsWithUsers)) {
+                startsWithUsers.push(searchUser);
+              }
+            } else if (name.includes(searchQuery) || searchUser.data.username.includes(searchQuery)) {
+              if (!searchUser.inArray(containUsers)) {
+                containUsers.push(searchUser);
+              }
+            }
+          });
+        });
+        searchUsers = [...startsWithUsers, ...containUsers];
+        this.set({
+          searchUsers,
+          _userSearchPromiseServer: new Promise(resolve => {
+            window.clearTimeout(this.get()._userSearchTimer);
+            this.set({
+              _userSearchTimer: window.setTimeout(async () => {
+                const guids = [];
+                for (let guid in $settings.decrypted.nicknames) {
+                  if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+                    guids.push(guid);
+                  }
+                }
+                const nickPromise = guids.length ? Nymph.getEntities({
+                  'class': User.class
+                }, {
+                  'type': '|',
+                  'guid': guids
+                }) : Promise.resolve([]);
 
-    methods: {
-      handleUserSearchKeyDown (event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-        } else if (event.keyCode === 40 && this.refs.userSearchDropdown) {
-          const firstResult = this.refs.userSearchDropdown.querySelector('.dropdown-item');
-          if (firstResult) {
-            firstResult.focus();
-            firstResult.scrollIntoView(false);
-            event.preventDefault();
-          }
-        }
-      },
+                const firstArgs = [{
+                  'class': User.class,
+                  'limit': 10
+                }, {
+                  'type': '&',
+                  '!guid': [
+                    ...Object.keys($settings.decrypted.nicknames),
+                    $user.guid,
+                    ...searchUsers.map(user => user.guid)
+                  ]
+                }];
+                const unPromise = Nymph.getEntities(...firstArgs, {
+                  'type': '&',
+                  'ilike': ['username', searchQuery+'%']
+                });
+                const namePromise = Nymph.getEntities(...firstArgs, {
+                  'type': '&',
+                  'ilike': ['name', '%'+searchQuery+'%']
+                });
 
-      handleUserSearchResultKeyDown (event) {
-        if (event.keyCode === 38) {
-          let previousEl = event.target.previousElementSibling;
-          while (previousEl && !previousEl.classList.contains('dropdown-item')) {
-            previousEl = event.target.previousElementSibling;
-          }
-          if (previousEl) {
-            previousEl.focus();
-            previousEl.scrollIntoView(false);
-          } else {
-            this.refs.username.focus();
-          }
-          event.preventDefault();
-        } else if (event.keyCode === 40) {
-          let nextEl = event.target.nextElementSibling;
-          while (nextEl && !nextEl.classList.contains('dropdown-item')) {
-            nextEl = event.target.nextElementSibling;
-          }
-          if (nextEl) {
-            nextEl.focus();
-            nextEl.scrollIntoView(false);
-            event.preventDefault();
-          }
-        }
-      },
+                const nickUsers = await nickPromise;
+                const unUsers = await unPromise;
+                const nameUsers = await namePromise;
 
-      setShowDropdown (showDropdown) {
-        this.set({_showUserSearchDropdown: showDropdown});
-      },
+                for (let i in nickUsers) {
+                  if (nickUsers[i].inArray(searchUsers)) {
+                    nickUsers.splice(i, 1);
+                  }
+                }
+                for (let i in nameUsers) {
+                  if (nameUsers[i].inArray(unUsers)) {
+                    nameUsers.splice(i, 1);
+                  }
+                }
 
-      clear () {
-        this.set({username: ''});
-      },
-
-      focus () {
-        this.refs.username.focus();
-        this.set({_showUserSearchDropdown: true});
+                resolve([...nickUsers, ...unUsers, ...nameUsers]);
+              }, 150)
+            });
+          })
+        });
       }
     }
-  };
+  }
+
+  onMount(() => {
+    this.bodyClickHandler = event => {
+      let hide = false;
+      let target = event.target;
+      while (target.parentNode) {
+        if (target === this.refs.container) {
+          break;
+        }
+        if (target === document.body) {
+          hide = true;
+          break;
+        }
+        target = target.parentNode;
+      }
+      if (hide) {
+        _showUserSearchDropdown = false;
+      }
+    };
+
+    document.body.addEventListener('click', this.bodyClickHandler);
+  });
+
+  onDestroy(() => {
+    document.body.removeEventListener('click', this.bodyClickHandler);
+  });
+
+
+  function handleUserSearchKeyDown (event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+    } else if (event.keyCode === 40 && userSearchDropdown) {
+      const firstResult = userSearchDropdown.querySelector('.dropdown-item');
+      if (firstResult) {
+        firstResult.focus();
+        firstResult.scrollIntoView(false);
+        event.preventDefault();
+      }
+    }
+  }
+
+  function handleUserSearchResultKeyDown (event) {
+    if (event.keyCode === 38) {
+      let previousEl = event.target.previousElementSibling;
+      while (previousEl && !previousEl.classList.contains('dropdown-item')) {
+        previousEl = event.target.previousElementSibling;
+      }
+      if (previousEl) {
+        previousEl.focus();
+        previousEl.scrollIntoView(false);
+      } else {
+        usernameElem.focus();
+      }
+      event.preventDefault();
+    } else if (event.keyCode === 40) {
+      let nextEl = event.target.nextElementSibling;
+      while (nextEl && !nextEl.classList.contains('dropdown-item')) {
+        nextEl = event.target.nextElementSibling;
+      }
+      if (nextEl) {
+        nextEl.focus();
+        nextEl.scrollIntoView(false);
+        event.preventDefault();
+      }
+    }
+  }
+
+  // TODO: is this used?
+  export function setShowDropdown (showDropdown) {
+    _showUserSearchDropdown = showDropdown;
+  }
+
+  // TODO: is this used?
+  export function clear () {
+    username = '';
+  }
+
+  function focus () {
+    usernameElem.focus();
+    _showUserSearchDropdown = true;
+  }
 </script>

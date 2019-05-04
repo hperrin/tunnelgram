@@ -10,7 +10,7 @@
         channel.
       {/if}
     </p>
-    <UserSearchSelector ref:userSearchSelector class="d-block" disabled={_addingUser} on:userSelected={event => addUser(event.detail.user)} />
+    <UserSearchSelector ref:userSearchSelector className="d-block" disabled={_addingUser} on:userSelected={event => addUser(event.detail.user)} />
     {#if _addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
         {_addUserError}
