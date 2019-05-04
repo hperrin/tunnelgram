@@ -46,6 +46,7 @@
   export let items = [];
   export let options = {};
   let photoswipe;
+  let pswp;
 
   onMount(() => {
     const defaultOptions = {
@@ -54,7 +55,7 @@
       ]
     };
 
-    this.pswp = new PhotoSwipe(
+    pswp = new PhotoSwipe(
       photoswipe,
       PhotoSwipeUI_Default,
       items,
@@ -63,18 +64,18 @@
   });
 
   export function listen (event, callback) {
-    this.pswp.listen(event, callback);
+    pswp.listen(event, callback);
   }
 
   export function invalidateCurrItems () {
-    this.pswp.invalidateCurrItems();
+    pswp.invalidateCurrItems();
   }
 
   export function updateSize (value) {
-    this.pswp.updateSize(value);
+    pswp.updateSize(value);
   }
 
   export function init () {
-    this.pswp.init();
+    pswp.init();
   }
 </script>

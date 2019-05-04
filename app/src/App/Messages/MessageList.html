@@ -1,5 +1,5 @@
 <svelte:window on:resize={handleWindowResize} />
-<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" ref:container on:scroll={handleScroll}>
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={handleScroll}>
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
       <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -15,7 +15,7 @@
         </div>
       </div>
     {/if}
-    <div class="d-flex flex-column-reverse" ref:messageContainer>
+    <div class="d-flex flex-column-reverse" bind:this={messageContainer}>
       {#each messages as message, i (message.guid)}
         <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
           <MessageView bind:message on:rendered={rescrollToBottom} on:deleted={() => removeMessage(message)} readLineCDate={_showReadline && _initialReadline} showAvatar={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid} showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}></MessageView>
@@ -31,6 +31,7 @@
 </div>
 
 <script>
+  import {onMount, onDestroy, beforeUpdate, afterUpdate} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Message from '../../Entities/Tunnelgram/Message';
   import ConversationHeader from '../Conversations/ConversationHeader';
@@ -39,346 +40,317 @@
   import ErrHandler from '../../ErrHandler';
   import {user} from '../../stores';
 
+  export let conversation;
+  export let messages = [];
+  let container;
+  let messageContainer;
+  let _loading;
+  let _disconnected = false;
+  let _isAtBottom = true;
+  let _showReadline = null;
+  let _initialReadline = null;
+  let _loadingEarlierMessages = false;
+  let _reachedEarliestMessage = false;
+  let _scrollToDistanceFromBottom = null;
+  let scrollWaitBottom;
+  let scrollWaitReadline;
+  let scrollToBottomListener;
+  let updateReadlineRaf;
+  let destroyed = false;
+  let subscription;
   const MESSAGE_PAGE_SIZE = 20;
-
-  export default {
-    oncreate () {
-      this.subscribe();
-      const {conversation} = this.get();
-      this.set({
-        _initialReadline: conversation.readline,
-        _latestReadline: conversation.readline
+  const onPubSubConnect = () => {
+    if (_disconnected) {
+      Nymph.getEntities({
+        'class': Message.class,
+        'sort': 'cdate',
+        'reverse': true
+      }, {
+        'type': '&',
+        'ref': ['conversation', conversation.guid],
+        'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
+      }).then(newMessages => {
+        messages = [...newMessages, ...messages];
       });
-      this.scrollWaitBottom = true;
-      this.scrollWaitReadline = false;
-
-      this.scrollToBottomListener = this.on('scrollToBottom', () => {
-        if (!this.scrollWaitReadline) {
-          this.scrollWaitBottom = true;
-          this.scrollToBottom();
-        }
-      });
-
-      this.onPubSubConnect = () => {
-        if (this.get()._disconnected) {
-          const {messages, conversation} = this.get();
-          Nymph.getEntities({
-            'class': Message.class,
-            'sort': 'cdate',
-            'reverse': true
-          }, {
-            'type': '&',
-            'ref': ['conversation', conversation.guid],
-            'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
-          }).then(newMessages => {
-            this.set({messages: [...newMessages, ...messages]})
-          });
-        }
-        this.set({_disconnected: false});
-      };
-
-      this.onPubSubDisconnect = () => {
-        this.set({_disconnected: true});
-      };
-
-      PubSub.on('connect', this.onPubSubConnect);
-      PubSub.on('disconnect', this.onPubSubDisconnect);
-    },
-
-    onstate ({changed, current}) {
-      const {_showReadline, _initialReadline, messages, conversation} = current;
-      if (_showReadline === null && _initialReadline !== 0 && messages.length) {
-        const visibleReadLine = _initialReadline > 0
-          && _initialReadline < messages[0].cdate;
-        this.set({
-          _showReadline: visibleReadLine
-        });
-        if (visibleReadLine) {
-          this.scrollWaitReadline = window.setTimeout(() => {
-            this.scrollWaitReadline = false;
-            this.scrollToReadLine();
-          }, 500);
-          this.scrollWaitBottom = false;
-        }
-      }
-
-      if (changed.conversation) {
-        this.set({_latestReadline: conversation.readline});
-      }
-    },
-
-    onupdate ({changed, current}) {
-      if ((
-          // Scroll to the bottom when the messages are first loaded.
-          (changed._loading && !current._loading && !this.scrollWaitReadline) ||
-          // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-          (changed.messages && current._isAtBottom && !document.hidden && !this.scrollWaitReadline)
-        )) {
-        this.scrollWaitBottom = true;
-        this.scrollToBottom();
-      }
-
-      if (changed._scrollToDistanceFromBottom && current._scrollToDistanceFromBottom != null) {
-        window.requestAnimationFrame(() => {
-          this.refs.container.scrollTop = this.refs.container.scrollHeight - current._scrollToDistanceFromBottom;
-          this.set({_scrollToDistanceFromBottom: null});
-        });
-      }
-
-      // Perform any scrolls that have been waiting.
-      if (this.scrollWaitReadline) {
-        window.clearTimeout(this.scrollWaitReadline);
-        this.scrollWaitReadline = false;
-        this.scrollToReadLine();
-      }
-    },
-
-    ondestroy () {
-      this.destroyed = true;
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-
-      if (this.scrollToBottomListener) {
-        this.scrollToBottomListener.cancel();
-      }
-
-      if (this.onPubSubConnect) {
-        PubSub.off('connect', this.onPubSubConnect);
-      }
-      if (this.onPubSubDisconnect) {
-        PubSub.off('disconnect', this.onPubSubDisconnect);
-      }
-    },
-
-    data () {
-      return {
-        _disconnected: false,
-        _isAtBottom: true,
-        _showReadline: null,
-        _initialReadline: null,
-        _latestReadline: null,
-        _loadingEarlierMessages: false,
-        _reachedEarliestMessage: false,
-        _scrollToDistanceFromBottom: null,
-        messages: []
-      };
-    },
-
-    methods: {
-      subscribe () {
-        if (this.subscription) {
-          this.subscription.unsubscribe();
-        }
-
-        this.set({_loading: true});
-
-        const {conversation} = this.get();
-        this.subscription = Nymph.getEntities({
-          'class': Message.class,
-          'sort': 'cdate',
-          'reverse': true,
-          'limit': MESSAGE_PAGE_SIZE
-        }, {
-          'type': '&',
-          'ref': ['conversation', conversation.guid]
-        }).subscribe(update => {
-          if (this.destroyed) {
-            return;
-          }
-          if (update) {
-            const {messages} = this.get();
-            if (Array.isArray(update)) {
-              if (update.length < MESSAGE_PAGE_SIZE) {
-                this.set({_reachedEarliestMessage: true});
-              }
-            }
-            PubSub.updateArray(messages, update);
-            // Setting _loading needs to go before handleScroll to scroll to the bottom on initial load.
-            this.set({messages, _loading: false});
-            this.createNewReadlineIfNeeded();
-            this.handleScroll();
-
-            if (update.added) {
-              // Remove the message from pending messages.
-              const {conversation} = this.get();
-              const ent = update.data;
-              for (let i = 0; i < conversation.pending.length; i++) {
-                const cur = conversation.pending[i];
-                if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
-                  conversation.pending.splice(i, 1);
-                  this.set({conversation});
-                  break;
-                }
-              }
-            }
-          } else {
-            this.set({_loading: false});
-          }
-        }, err => {
-          ErrHandler(err);
-          this.set({_loading: false});
-        });
-      },
-
-      handleScroll () {
-        if (this.refs.container.scrollTop < 250) {
-          this.loadEarlierMessages();
-        }
-
-        this.setIsAtBottom();
-        this.updateReadline();
-      },
-
-      handleWindowResize () {
-        // Scroll to the bottom if the user was at the bottom.
-        if (this.get()._isAtBottom) {
-          this.scrollToBottom();
-        }
-      },
-
-      setIsAtBottom () {
-        this.set({_isAtBottom: this.refs.container.scrollTop >= (this.refs.container.scrollHeight - this.refs.container.offsetHeight)});
-      },
-
-      async loadEarlierMessages () {
-        const {_loadingEarlierMessages, _reachedEarliestMessage, _scrollToDistanceFromBottom} = this.get();
-        if (_loadingEarlierMessages || _reachedEarliestMessage || _scrollToDistanceFromBottom || this.scrollWaitReadline || this.scrollWaitBottom) {
-          return;
-        }
-
-        const {conversation, messages} = this.get();
-
-        if (!messages.length) {
-          return;
-        }
-
-        this.set({_loadingEarlierMessages: true});
-
-        try {
-          const earlierMessages = await Nymph.getEntities({
-            'class': Message.class,
-            'sort': 'cdate',
-            'reverse': true,
-            'limit': MESSAGE_PAGE_SIZE
-          }, {
-            'type': '&',
-            'ref': ['conversation', conversation.guid],
-            'lt': ['cdate', messages[messages.length - 1].cdate]
-          });
-
-          if (earlierMessages && earlierMessages.length) {
-            const messages = [...this.get().messages, ...earlierMessages];
-            const distanceFromBottom = this.refs.container.scrollHeight - this.refs.container.scrollTop;
-            this.set({messages, _scrollToDistanceFromBottom: distanceFromBottom});
-          } else {
-            this.set({_reachedEarliestMessage: true});
-          }
-        } catch (e) {
-          ErrHandler(e);
-        }
-
-        this.set({_loadingEarlierMessages: false});
-      },
-
-      updateReadline () {
-        // Don't update the readline if the user doesn't have the page open.
-        if (document.hidden) {
-          return;
-        }
-        // Update readline on next animation frame (so that the DOM can be updated).
-        if (this.updateReadlineRaf) {
-          window.cancelAnimationFrame(this.updateReadlineRaf);
-        }
-        this.updateReadlineRaf = window.requestAnimationFrame(async () => {
-          delete this.updateReadlineRaf;
-          if (!this.refs.messageContainer) {
-            return;
-          }
-          const {_latestReadline} = this.get();
-          if (_latestReadline !== null) {
-            const messageBoxes = this.refs.messageContainer.querySelectorAll('.message-box[data-cdate]');
-            const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
-              const containerTop = this.refs.container.scrollTop;
-              const containerBottom = containerTop + this.refs.container.clientHeight;
-              const elBottom = el.offsetTop + el.offsetHeight;
-              return (elBottom + 10 >= containerTop) && (elBottom - 10 <= containerBottom); // 10 pixel buffer.
-            });
-            if (messageBoxesInViewport.length) {
-              const latestReadMessageBox = messageBoxesInViewport[0];
-              const updateReadline = JSON.parse(latestReadMessageBox.dataset.cdate);
-              if (updateReadline > _latestReadline) {
-                this.set({_latestReadline: updateReadline});
-                const {conversation} = this.get();
-                await conversation.saveReadline(updateReadline);
-                this.set({conversation});
-              }
-            }
-          }
-        });
-      },
-
-      async createNewReadlineIfNeeded () {
-        const {conversation, messages} = this.get();
-        if (conversation.readline == null && messages.length) {
-          const updateReadline = messages[0].cdate;
-          this.set({
-            _initialReadline: updateReadline,
-            _latestReadline: updateReadline
-          });
-          await conversation.saveReadline(updateReadline);
-          this.set({conversation});
-        }
-      },
-
-      scrollToReadLine () {
-        const readlineEl = this.refs.container.querySelector('.readline');
-        if (readlineEl) {
-          this.refs.container.scrollTop = Math.max(0, readlineEl.offsetTop - (this.refs.container.clientHeight * .5));
-          this.setIsAtBottom();
-          this.updateReadline();
-        }
-      },
-
-      scrollToBottom () {
-        this.refs.container.scrollTop = this.refs.container.scrollHeight;
-        this.scrollWaitBottom = false;
-        this.set({_isAtBottom: true});
-        this.updateReadline();
-      },
-
-      rescrollToBottom () {
-        if (this.get()._isAtBottom) {
-          this.scrollToBottom();
-        }
-      },
-
-      removeMessage (message) {
-        const {messages} = this.get();
-        const idx = message.arraySearch(messages);
-        if (idx !== false) {
-          messages.splice(idx, 1);
-          this.set({messages});
-        }
-      }
-    },
-
-    helpers: {
-      showTime (time1, time2) {
-        if (time2 === undefined) {
-          time2 = (+new Date()) / 1000;
-        }
-        const now = (+new Date()) / 1000;
-        if (now - time1 > 6 * 24 * 60 * 60) {
-          // More than 6 days ago.
-          return (time2 - time1 > 24 * 60 * 60); // 24 hours
-        } else if (now - time1 > 24 * 60 * 60) {
-          // More than 1 day ago.
-          return (time2 - time1 > 4 * 60 * 60); // 4 hours
-        } else {
-          return (time2 - time1 > 2 * 60 * 60); // 2 hours
-        }
-      }
+    }
+    _disconnected = false;
+  };
+  const onPubSubDisconnect = () => {
+    _disconnected = true;
+  };
+  const showTime = (time1, time2) => {
+    if (time2 === undefined) {
+      time2 = (+new Date()) / 1000;
+    }
+    const now = (+new Date()) / 1000;
+    if (now - time1 > 6 * 24 * 60 * 60) {
+      // More than 6 days ago.
+      return (time2 - time1 > 24 * 60 * 60); // 24 hours
+    } else if (now - time1 > 24 * 60 * 60) {
+      // More than 1 day ago.
+      return (time2 - time1 > 4 * 60 * 60); // 4 hours
+    } else {
+      return (time2 - time1 > 2 * 60 * 60); // 2 hours
     }
   };
+
+  onMount(() => {
+    subscribe();
+    _initialReadline = conversation.readline;
+    scrollWaitBottom = true;
+    scrollWaitReadline = false;
+
+    PubSub.on('connect', onPubSubConnect);
+    PubSub.on('disconnect', onPubSubDisconnect);
+  });
+
+  beforeUpdate(() => {
+    // TODO: can this be moved out of beforeUpdate?
+    if (_showReadline === null && _initialReadline !== 0 && messages.length) {
+      const visibleReadLine = _initialReadline > 0
+        && _initialReadline < messages[0].cdate;
+      _showReadline = visibleReadLine;
+      if (visibleReadLine) {
+        scrollWaitReadline = window.setTimeout(() => {
+          scrollWaitReadline = false;
+          scrollToReadLine();
+        }, 500);
+        scrollWaitBottom = false;
+      }
+    }
+  });
+
+  let previousLoading = _loading;
+  let previousMessagesLength = messages.length;
+  let previousScrollToDistanceFromBottom = _scrollToDistanceFromBottom;
+  afterUpdate(() => {
+    if ((
+        // Scroll to the bottom when the messages are first loaded.
+        (previousLoading !== _loading && !_loading && !scrollWaitReadline) ||
+        // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
+        (previousMessagesLength !== messages.length && _isAtBottom && !document.hidden && !scrollWaitReadline)
+      )) {
+      scrollToBottom();
+    }
+
+    if (previousScrollToDistanceFromBottom !== _scrollToDistanceFromBottom && _scrollToDistanceFromBottom != null) {
+      window.requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight - _scrollToDistanceFromBottom;
+        _scrollToDistanceFromBottom = null;
+      });
+    }
+
+    // Perform any scrolls that have been waiting.
+    if (scrollWaitReadline) {
+      window.clearTimeout(scrollWaitReadline);
+      scrollWaitReadline = false;
+      scrollToReadLine();
+    }
+
+    previousLoading = _loading;
+    previousMessagesLength = messages.length;
+    previousScrollToDistanceFromBottom = _scrollToDistanceFromBottom;
+  });
+
+  onDestroy(() => {
+    destroyed = true;
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    if (scrollToBottomListener) {
+      scrollToBottomListener.cancel();
+    }
+
+    PubSub.off('connect', onPubSubConnect);
+    PubSub.off('disconnect', onPubSubDisconnect);
+  });
+
+  function subscribe () {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    _loading = true;
+
+    subscription = Nymph.getEntities({
+      'class': Message.class,
+      'sort': 'cdate',
+      'reverse': true,
+      'limit': MESSAGE_PAGE_SIZE
+    }, {
+      'type': '&',
+      'ref': ['conversation', conversation.guid]
+    }).subscribe(update => {
+      if (destroyed) {
+        return;
+      }
+      if (update) {
+        if (Array.isArray(update)) {
+          if (update.length < MESSAGE_PAGE_SIZE) {
+            _reachedEarliestMessage = true;
+          }
+        }
+        PubSub.updateArray(messages, update);
+        // Setting _loading needs to go before handleScroll to scroll to the bottom on initial load.
+        messages = messages;
+        _loading = false;
+        createNewReadlineIfNeeded();
+        handleScroll();
+
+        if (update.added) {
+          // Remove the message from pending messages.
+          const ent = update.data;
+          for (let i = 0; i < conversation.pending.length; i++) {
+            const cur = conversation.pending[i];
+            if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
+              conversation.pending.splice(i, 1);
+              conversation = conversation;
+              break;
+            }
+          }
+        }
+      } else {
+        _loading = false;
+      }
+    }, err => {
+      ErrHandler(err);
+      _loading = false;
+    });
+  }
+
+  function handleScroll () {
+    if (container.scrollTop < 250) {
+      loadEarlierMessages();
+    }
+
+    setIsAtBottom();
+    updateReadline();
+  }
+
+  function handleWindowResize () {
+    // Scroll to the bottom if the user was at the bottom.
+    if (_isAtBottom) {
+      scrollToBottom();
+    }
+  }
+
+  function setIsAtBottom () {
+    _isAtBottom = container.scrollTop >= (container.scrollHeight - container.offsetHeight);
+  }
+
+  async function loadEarlierMessages () {
+    if (_loadingEarlierMessages || _reachedEarliestMessage || _scrollToDistanceFromBottom || scrollWaitReadline || scrollWaitBottom) {
+      return;
+    }
+
+    if (!messages.length) {
+      return;
+    }
+
+    _loadingEarlierMessages = true;
+
+    try {
+      const earlierMessages = await Nymph.getEntities({
+        'class': Message.class,
+        'sort': 'cdate',
+        'reverse': true,
+        'limit': MESSAGE_PAGE_SIZE
+      }, {
+        'type': '&',
+        'ref': ['conversation', conversation.guid],
+        'lt': ['cdate', messages[messages.length - 1].cdate]
+      });
+
+      if (earlierMessages && earlierMessages.length) {
+        messages = [...messages, ...earlierMessages];
+        _scrollToDistanceFromBottom = container.scrollHeight - container.scrollTop;
+      } else {
+        _reachedEarliestMessage = true;
+      }
+    } catch (e) {
+      ErrHandler(e);
+    }
+
+    _loadingEarlierMessages = false;
+  }
+
+  function updateReadline () {
+    // Don't update the readline if the user doesn't have the page open.
+    if (document.hidden) {
+      return;
+    }
+    // Update readline on next animation frame (so that the DOM can be updated).
+    if (updateReadlineRaf) {
+      window.cancelAnimationFrame(updateReadlineRaf);
+    }
+    updateReadlineRaf = window.requestAnimationFrame(async () => {
+      updateReadlineRaf = null;
+      if (!messageContainer) {
+        return;
+      }
+      if (conversation.readline !== null) {
+        const messageBoxes = messageContainer.querySelectorAll('.message-box[data-cdate]');
+        const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
+          const containerTop = container.scrollTop;
+          const containerBottom = containerTop + container.clientHeight;
+          const elBottom = el.offsetTop + el.offsetHeight;
+          return (elBottom + 10 >= containerTop) && (elBottom - 10 <= containerBottom); // 10 pixel buffer.
+        });
+        if (messageBoxesInViewport.length) {
+          const latestReadMessageBox = messageBoxesInViewport[0];
+          const updateReadline = JSON.parse(latestReadMessageBox.dataset.cdate);
+          if (updateReadline > conversation.readline) {
+            await conversation.saveReadline(updateReadline);
+            conversation = conversation;
+          }
+        }
+      }
+    });
+  }
+
+  async function createNewReadlineIfNeeded () {
+    if (conversation.readline == null && messages.length) {
+      const updateReadline = messages[0].cdate;
+      _initialReadline = updateReadline;
+      await conversation.saveReadline(updateReadline);
+      conversation = conversation;
+    }
+  }
+
+  function scrollToReadLine () {
+    const readlineEl = container.querySelector('.readline');
+    if (readlineEl) {
+      container.scrollTop = Math.max(0, readlineEl.offsetTop - (container.clientHeight * .5));
+      setIsAtBottom();
+      updateReadline();
+    }
+  }
+
+  export function requestScrollToBottom () {
+    if (!scrollWaitReadline) {
+      scrollToBottom();
+    }
+  }
+
+  function scrollToBottom () {
+    container.scrollTop = container.scrollHeight;
+    scrollWaitBottom = false;
+    _isAtBottom = true;
+    updateReadline();
+  }
+
+  function rescrollToBottom () {
+    if (_isAtBottom) {
+      scrollToBottom();
+    }
+  }
+
+  function removeMessage (message) {
+    const idx = message.arraySearch(messages);
+    if (idx !== false) {
+      messages.splice(idx, 1);
+      messages = messages;
+    }
+  }
 </script>

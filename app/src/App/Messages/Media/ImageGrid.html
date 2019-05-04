@@ -1,4 +1,4 @@
-<div ref:thumbnailContainer class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px; font-size: 1em;">
+<div bind:this={thumbnailContainer} class="d-flex flex-wrap justify-content-center bg-secondary text-white" style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px; font-size: 1em;">
   {#each resources as resource, index (resource.name)}
     <div class="d-flex justify-content-center align-items-center">
       {#await thumbnailPromises[index]}
@@ -21,6 +21,7 @@
   import {crypt} from '../../../Services/EncryptionService';
 
   export let resources;
+  let thumbnailContainer;
 
   $: thumbnailDimension = Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight)))),
   $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length),
@@ -64,7 +65,7 @@
       history: false,
       showHideOpacity: true,
       getThumbBoundsFn: index => {
-        const rect = this.refs.thumbnailContainer.children[index].getBoundingClientRect();
+        const rect = thumbnailContainer.children[index].getBoundingClientRect();
         return {x: rect.x, y: rect.y, w: rect.width};
       }
     };
