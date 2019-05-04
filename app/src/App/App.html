@@ -100,7 +100,7 @@
           </li>
         </ul>
         <span class="page-name navbar-text">
-          <span>{name}&nbsp;</span>
+          <span>{name}</span>
         </span>
         {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
           <NavBar />
@@ -175,6 +175,9 @@
     }
     if ($settings && $conversation.guid) {
       return $conversation.getName($settings);
+    }
+    if (!$conversation.guid) {
+      return 'New Conversation';
     }
     return '';
   })();

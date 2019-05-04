@@ -173,7 +173,7 @@
   }
 
   function handleScroll () {
-    if (container.scrollTop > (container.scrollHeight - container.clientHeight - 150)) {
+    if (container && container.scrollTop > (container.scrollHeight - container.clientHeight - 150)) {
       loadEarlierConversations();
     }
   }

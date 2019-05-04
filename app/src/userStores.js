@@ -7,7 +7,7 @@ let ready;
 export const user = writable(false);
 export const userAvatar = writable(null);
 export const userIsTilmeldAdmin = writable(false);
-export const userReady = new Promise(resolve => ready = resolve);
+export const userReadyPromise = new Promise(resolve => ready = resolve);
 
 // Get the current user.
 User.current().then(userValue => {

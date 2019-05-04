@@ -28,6 +28,8 @@ class EntityCacheService {
   }
 
   async getEntityData (guid) {
+    await this.ready;
+
     if (this.pendingCache.hasOwnProperty(guid)) {
       await this.pendingCache[guid];
     }
@@ -45,7 +47,9 @@ class EntityCacheService {
     return null;
   }
 
-  setEntityData (guid, data) {
+  async setEntityData (guid, data) {
+    await this.ready;
+
     // 10 days is the default expiry.
     let expiry = 1000*60*60*24*10;
     const entityClass = Nymph.getEntityClass(data.class);
@@ -66,7 +70,9 @@ class EntityCacheService {
     this.saveCache();
   }
 
-  deleteEntityData (guid) {
+  async deleteEntityData (guid) {
+    await this.ready;
+
     delete this.cache[guid];
     delete this.pendingCache[guid];
     this.saveCache();

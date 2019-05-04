@@ -82,7 +82,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
 // Everything is this function requires the logged in user status to be known.
 (async () => {
-  await get(store.userReady);
+  await store.userReadyPromise;
 
   store.conversation.subscribe(conversation => {
     if (conversation && conversation.guid) {
@@ -131,9 +131,11 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   store.user.subscribe(user => {
     if (user) {
       const route = router.lastRouteResolved();
-      const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
-      if (queryMatch) {
-        router.navigate(decodeURIComponent(queryMatch[1]));
+      if (route) {
+        const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+        if (queryMatch) {
+          router.navigate(decodeURIComponent(queryMatch[1]));
+        }
       }
 
       if (setupSubscription) {
@@ -404,7 +406,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     before: (done, params) => {
       if (!get(store.user)) {
         const route = router.lastRouteResolved();
-        if (route.url !== '/' && route.url !== '') {
+        if (route && route.url !== '/' && route.url !== '') {
           forwardCount++;
           if (forwardCount > 15) {
             debugger;

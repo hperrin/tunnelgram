@@ -1,5 +1,7 @@
 import {writable} from 'svelte/store';
 import PNotify from 'pnotify/dist/es/PNotify';
+import Conversation from './Entities/Tunnelgram/Conversation';
+import {crypt as cryptService} from './Services/EncryptionService';
 
 export * from './userStores';
 
@@ -13,7 +15,7 @@ export const view = writable('conversation');
 export const viewUser = writable(null);
 export const viewUserIsSelf = writable(null);
 export const convosOut = writable(true);
-export const crypt = writable(crypt);
+export const crypt = writable(cryptService);
 export const settings = writable(null);
 export const disconnected = writable(!navigator.onLine);
 export const requestNotificationPermission = writable(() => {
