@@ -1,24 +1,24 @@
 <div class="d-flex w-100 justify-content-center align-items-center">
   <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px; height: 60px;">
     {#each avatarUsersAndWidth.users as user (user.guid)}
-      <Avatar bind:user="user" size="{avatarUsersAndWidth.width}" />
+      <Avatar bind:user="user" size={avatarUsersAndWidth.width} />
     {/each}
   </div>
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0" style="word-break: break-word;">{name}</h5>
-      <small class="ml-1" title="{_longModifiedDate}" style="white-space: nowrap;">{_modifiedDate}</small>
+      <small class="ml-1" title={_longModifiedDate} style="white-space: nowrap;">{_modifiedDate}</small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
       {#if conversation.data.lastMessage}
         <small ref:lastmessage>
           {#if conversation.data.lastMessage.decrypted.text != null}
             {conversation.data.lastMessage.decrypted.text}
-          {:elseif conversation.data.lastMessage.decrypted.images.length === 1}
+          {:else if conversation.data.lastMessage.decrypted.images.length === 1}
             [A photo]
-          {:elseif conversation.data.lastMessage.decrypted.images.length > 1}
+          {:else if conversation.data.lastMessage.decrypted.images.length > 1}
             [Photos]
-          {:elseif conversation.data.lastMessage.decrypted.video !== null}
+          {:else if conversation.data.lastMessage.decrypted.video !== null}
             [A video]
           {/if}
         </small>

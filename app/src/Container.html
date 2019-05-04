@@ -59,7 +59,7 @@
             <h3>Setting up encryption...</h3>
           </div>
           <div class="text-center text-muted">
-            <small>Stuck? <a href="javascript:void(0)" on:click="logout()">Log Out</a></small>
+            <small>Stuck? <a href="javascript:void(0)" on:click={logout}>Log Out</a></small>
           </div>
         {:then data}
           <App />
@@ -68,7 +68,7 @@
             Error during encryption setup: {error}
           </div>
           <div>
-            <a href="javascript:void(0)" on:click="logout()">Log Out</a>
+            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
           </div>
         {/await}
       </div>

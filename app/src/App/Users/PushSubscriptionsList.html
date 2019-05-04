@@ -21,7 +21,7 @@
                 {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}
               {/if}
             </h5>
-            <button type="button" class="btn btn-sm btn-danger rounded-circle" on:click="remove(subscription)" disabled="{subscription.deleting}">
+            <button type="button" class="btn btn-sm btn-danger rounded-circle" on:click={() => remove(subscription)} disabled={subscription.deleting}>
               <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
             </button>
           </div>
@@ -31,8 +31,8 @@
             {/if}
             <span>{subscription.agent.device.vendor || ''} {subscription.agent.device.model || ''}</span>
           </p>
-          <small title="{simpleDateFormatter(subscription.cdate, 'wymdhms', 'short')}">Created: {simpleDateFormatter(subscription.cdate, 'ago', 'long')}</small>,
-          <small title="{simpleDateFormatter(subscription.mdate, 'wymdhms', 'short')}">Last used: {simpleDateFormatter(subscription.mdate, 'ago', 'long')}</small>
+          <small title={simpleDateFormatter(subscription.cdate, 'wymdhms', 'short')}>Created: {simpleDateFormatter(subscription.cdate, 'ago', 'long')}</small>,
+          <small title={simpleDateFormatter(subscription.mdate, 'wymdhms', 'short')}>Last used: {simpleDateFormatter(subscription.mdate, 'ago', 'long')}</small>
         </div>
       {/each}
     </div>

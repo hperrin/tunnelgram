@@ -1,5 +1,5 @@
-<svelte:window on:resize="handleWindowResize()" />
-<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" ref:container on:scroll="handleScroll()">
+<svelte:window on:resize={handleWindowResize} />
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" ref:container on:scroll={handleScroll}>
   {#if _loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
       <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -17,14 +17,14 @@
     {/if}
     <div class="d-flex flex-column-reverse" ref:messageContainer>
       {#each messages as message, i (message.guid)}
-        <div class="d-flex flex-column align-items-start message-box" data-cdate="{'' + message.cdate}">
-          <MessageView bind:message on:rendered="rescrollToBottom()" on:deleted="removeMessage(message)" readLineCDate="{_showReadline && _initialReadline}" showAvatar="{i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}" showTime="{i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}"></MessageView>
+        <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
+          <MessageView bind:message on:rendered={rescrollToBottom} on:deleted={() => removeMessage(message)} readLineCDate={_showReadline && _initialReadline} showAvatar={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid} showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}></MessageView>
         </div>
       {/each}
     </div>
     <div class="d-flex flex-column align-items-start">
       {#each conversation.pending as message}
-        <MessageView bind:message on:rendered="rescrollToBottom()" pending="true" showTime="{messages.length && showTime(messages[0].cdate)}"></MessageView>
+        <MessageView bind:message on:rendered={rescrollToBottom} pending="true" showTime={messages.length && showTime(messages[0].cdate)}></MessageView>
       {/each}
     </div>
   {/if}

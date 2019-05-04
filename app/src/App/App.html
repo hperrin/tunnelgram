@@ -12,32 +12,32 @@
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
       Wanna install {$brandWeb} to your app drawer for an app-like experience?
-      <a href="javascript:void(0)" on:click="set({_hideInstallPrompt: true, _nothing: $beforeInstallPromptEvent.prompt()})">Yeah</a>
+      <a href="javascript:void(0)" on:click={() => _hideInstallPrompt = true} on:click={() => $beforeInstallPromptEvent.prompt()}>Yeah</a>
     </div>
 
-    <a class="ml-2" href="javascript:void(0)" on:click="set({_hideInstallPrompt: true})" title="Close">
+    <a class="ml-2" href="javascript:void(0)" on:click={() => _hideInstallPrompt = true} title="Close">
       <i class="fas fa-times"></i>
     </a>
   </div>
-{:elseif !_hideNotificationPrompt}
+{:else if !_hideNotificationPrompt}
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
       Do you want to get notifications for new messages?
-      <a href="javascript:void(0)" on:click="set({_hideNotificationPrompt: true, _nothing: $requestNotificationPermission.call()})">Yeah</a>
+      <a href="javascript:void(0)" on:click={() => _hideNotificationPrompt = true} on:click={$requestNotificationPermission}>Yeah</a>
     </div>
 
-    <a class="ml-2" href="javascript:void(0)" on:click="set({_hideNotificationPrompt: true})" title="Close">
+    <a class="ml-2" href="javascript:void(0)" on:click={() => _hideNotificationPrompt = true} title="Close">
       <i class="fas fa-times"></i>
     </a>
   </div>
-{:elseif false && !_hidePersistentStoragePrompt}
+{:else if false && !_hidePersistentStoragePrompt}
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
       Do you want to stay logged in when your device runs low on space?
-      <a href="javascript:void(0)" on:click="set({_hidePersistentStoragePrompt: true, _nothing: $requestPersistentStorage.call()})">Yeah</a>
+      <a href="javascript:void(0)" on:click={() => _hidePersistentStoragePrompt = true} on:click={$requestPersistentStorage}>Yeah</a>
     </div>
 
-    <a class="ml-2" href="javascript:void(0)" on:click="set({_hidePersistentStoragePrompt: true})" title="Close">
+    <a class="ml-2" href="javascript:void(0)" on:click={() => _hidePersistentStoragePrompt = true} title="Close">
       <i class="fas fa-times"></i>
     </a>
   </div>
@@ -58,14 +58,14 @@
               <h6 class="dropdown-header">
                 {$user.data.name}
               </h6>
-              <a class="dropdown-item" href="javascript:void(0)" on:click="navigate('/u/' + $user.data.username)">
+              <a class="dropdown-item" href="javascript:void(0)" on:click={() => navigate('/u/' + $user.data.username)}>
                 Your Account
               </a>
-              <a class="dropdown-item" href="javascript:void(0)" on:click="navigate('/pushSubscriptions')">
+              <a class="dropdown-item" href="javascript:void(0)" on:click={() => navigate('/pushSubscriptions')}>
                 Push Subscriptions
               </a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="javascript:void(0)" on:click="$logout()">
+              <a class="dropdown-item" href="javascript:void(0)" on:click={logout}>
                 Log Out
               </a>
               {#if $userIsTilmeldAdmin}
@@ -94,7 +94,7 @@
       <div class="container-fluid">
         <ul class="navbar-nav d-md-none">
           <li class="nav-item">
-            <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click="$set({convosOut: true})" title="Back to list">
+            <a class="nav-link border-secondary rounded px-2" href="javascript:void(0)" on:click={() => $convosOut = true} title="Back to list">
               <i class="fas fa-arrow-left"></i>
             </a>
           </li>
@@ -113,9 +113,9 @@
           <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
           <LoadingIndicator width="200" height="200" />
         </div>
-      {:elseif $view === 'user'}
+      {:else if $view === 'user'}
         <UserView />
-      {:elseif $view === 'pushSubscriptions'}
+      {:else if $view === 'pushSubscriptions'}
         <PushSubscriptionsView />
       {:else}
         <ConversationView />
@@ -140,7 +140,22 @@
   import {getCookieValue} from '../Services/getCookieValue';
   import {Dropdown} from '../Services/Val/BSN';
   import ErrHandler from '../ErrHandler';
-  import {disconnected, beforeInstallPromptEvent, brandWeb, convosOut, brand, user, userIsTilmeldAdmin, view, conversation, loadingConversation, loadingUser} from '../stores';
+  import {
+    logout,
+    disconnected,
+    beforeInstallPromptEvent,
+    requestNotificationPermission,
+    requestPersistentStorage,
+    brandWeb,
+    convosOut,
+    brand,
+    user,
+    userIsTilmeldAdmin,
+    view,
+    conversation,
+    loadingConversation,
+    loadingUser
+  } from '../stores';
 
   const _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
 

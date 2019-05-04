@@ -6,27 +6,27 @@
 {#if message.data.informational}
   <small class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if message.data.text === 'left'}
-      <Avatar class="mx-2" user="{message.data.user}" size="18" /> <DisplayName bind:user="message.data.user" /> left the conversation.
-    {:elseif message.data.text === 'added'}
-      <Avatar class="mx-2" user="{message.data.relatedUser}" size="18" /> <DisplayName bind:user="message.data.relatedUser" /> was added to the conversation by <DisplayName bind:user="message.data.user" />.
+      <Avatar class="mx-2" user={message.data.user} size="18" /> <DisplayName bind:user="message.data.user" /> left the conversation.
+    {:else if message.data.text === 'added'}
+      <Avatar class="mx-2" user={message.data.relatedUser} size="18" /> <DisplayName bind:user="message.data.relatedUser" /> was added to the conversation by <DisplayName bind:user="message.data.user" />.
     {:else}
-      <Avatar class="mx-2" user="{message.data.user}" size="18" /> {message.data.text}
+      <Avatar class="mx-2" user={message.data.user} size="18" /> {message.data.text}
     {/if}
   </small>
 {:else}
   <div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};" ref:container>
     {#if _showActions && isOwner}
       <div class="h1 my-0" style="font-size: 0;">
-        <button type="button" class="btn btn-sm btn-danger mr-2" on:click="deleteMessage()" title="Delete message"><i class="fas fa-trash-alt"></i></button>
+        <button type="button" class="btn btn-sm btn-danger mr-2" on:click={deleteMessage} title="Delete message"><i class="fas fa-trash-alt"></i></button>
         {#if pending && _saveFailed}
-          <button type="button" class="btn btn-sm btn-success mr-2" on:click="retrySave()" title="Retry sending"><i class="fas fa-sync"></i></button>
+          <button type="button" class="btn btn-sm btn-success mr-2" on:click={retrySave} title="Retry sending"><i class="fas fa-sync"></i></button>
         {/if}
       </div>
     {/if}
     {#if !isOwner}
       {#if showAvatar && message.data.user !== null && message.data.user.data.username != null}
-        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click="navigate('/u/' + message.data.user.data.username)" title="{displayName}">
-          <Avatar user="{message.data.user}" size="18" />
+        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
+          <Avatar user={message.data.user} size="18" />
         </a>
       {:else}
         <div class="d-inline-block ml-2 my-0">
@@ -34,36 +34,40 @@
         </div>
       {/if}
     {/if}
-    <div class="{stageClass} {(_flipFirst || _flipSecond) ? 'raise-to-top perspective-stage' : ''}" style="{shouldEmbiggen ? '' : 'max-width: 80%;'}">
+    <div class="{stageClass} {(_flipFirst || _flipSecond) ? 'raise-to-top perspective-stage' : ''}" style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
       <div
         class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
-        style="{shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}"
+        style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
         tabindex="0"
         role="button"
-        on:animationend="set(_flipFirst ? {_flipFirst: false, _flipSecond: true, _flipped: !_flipped} : {_flipFirst: false, _flipSecond: false})"
-        on:dblclick="toggleActions()" title="{_createdDateLong}"
+        on:animationend={() => _flipFirst && _flipSecond = true}
+        on:animationend={() => _flipFirst && _flipped = !_flipped}
+        on:animationend={() => _flipFirst && _flipFirst = false}
+        on:animationend={() => _flipFirst || _flipSecond = false}
+        on:animationend={() => _flipFirst || _flipFirst = false}
+        on:dblclick={toggleActions} title={_createdDateLong}
         ref:messageContainer>
         {#if shouldEmbiggen}
-          <div class="d-inline-block" on:click="set({_flipFirst: !!flipper})" style="font-size: 1.1rem">
+          <div class="d-inline-block" on:click={() => _flipFirst = !!flipper} style="font-size: 1.1rem">
             {#if message.decrypted.text != null}
               <span class="h1">{_flipped ? message.decrypted.secretText : message.decrypted.text}</span>
-            {:elseif message.decrypted.images.length}
-              <div class="{shadowClass}"><ImageGrid resources="{message.decrypted.images}" /></div>
-            {:elseif message.decrypted.video != null}
-              <div class="{shadowClass}"><Video resource="{message.decrypted.video}" /></div>
+            {:else if message.decrypted.images.length}
+              <div class={shadowClass}><ImageGrid resources={message.decrypted.images} /></div>
+            {:else if message.decrypted.video != null}
+              <div class={shadowClass}><Video resource={message.decrypted.video} /></div>
             {/if}
           </div>
         {:else}
           {#if message.decrypted.images.length && (!flipper || _flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <ImageGrid resources="{message.decrypted.images}" />
+              <ImageGrid resources={message.decrypted.images} />
             </div>
-          {:elseif message.decrypted.video != null && (!flipper || _flipped)}
+          {:else if message.decrypted.video != null && (!flipper || _flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <Video resource="{message.decrypted.video}" />
+              <Video resource={message.decrypted.video} />
             </div>
           {/if}
-          <div class="card-body py-1 px-2 m-0" on:click="set({_flipFirst: !!flipper})">
+          <div class="card-body py-1 px-2 m-0" on:click={() => _flipFirst = !!flipper}>
             {#if _formattedText != null}
               <div class="card-text markdown-body" ref:message>{@html _flipped ? _formattedSecretText : _formattedText}</div>
             {/if}

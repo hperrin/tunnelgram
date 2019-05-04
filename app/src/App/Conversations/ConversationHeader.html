@@ -5,7 +5,7 @@
   </p>
   <p>
     {_Conversation.MODE_NAME[$conversation.data.mode]}
-    <button class="btn btn-sm btn-link" on:click="set({_showModeHelp: !_showModeHelp})">(?)</button>
+    <button class="btn btn-sm btn-link" on:click={() => _showModeHelp = !_showModeHelp}>(?)</button>
   </p>
   {#if _showModeHelp}
     <p class="alert alert-info m-3">
