@@ -43,7 +43,7 @@
   </div>
 {/if}
 <div class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
-  <div class="d-flex flex-column h-100 bg-dark text-light" ref:convos>
+  <div class="convos d-flex flex-column h-100 bg-dark text-light" ref:convos>
     <nav class="navbar navbar-expand navbar-dark bg-dark">
       <div class="container-fluid">
         <span class="navbar-brand align-items-center">
@@ -89,7 +89,7 @@
     </div>
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
-  <div class="flex-grow-1 d-flex flex-column h-100 bg-light text-dark" style="width: 0;" ref:mainUi>
+  <div class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark" style="width: 0;" ref:mainUi>
     <nav class="navbar navbar-expand navbar-dark bg-dark">
       <div class="container-fluid">
         <ul class="navbar-nav d-md-none">
@@ -99,7 +99,7 @@
             </a>
           </li>
         </ul>
-        <span class="navbar-text" ref:pageName>
+        <span class="page-name navbar-text">
           <span>{name}&nbsp;</span>
         </span>
         {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
@@ -367,10 +367,10 @@
 </script>
 
 <style>
-  ref:convos {
+  .convos {
     width: 100%;
   }
-  ref:mainUi {
+  .main-ui {
     position: absolute;
     left: 100%;
     top: 0;
@@ -379,20 +379,20 @@
     transition: transform ease .1s;
     transform: translate3d(-100%, 0, 0);
   }
-  .convos-out ref:mainUi {
+  .convos-out .main-ui {
     transform: translate3d(0, 0, 0);
   }
   @media (min-width: 767.98px) {
-    ref:convos {
+    .convos {
       max-width: 330px;
     }
-    ref:mainUi, .convos-out ref:mainUi {
+    .main-ui, .convos-out .main-ui {
       position: static;
       transform: none;
     }
   }
 
-  ref:pageName {
+  .page-name {
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;

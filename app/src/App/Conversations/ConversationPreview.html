@@ -11,7 +11,7 @@
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
       {#if conversation.data.lastMessage}
-        <small ref:lastmessage>
+        <small class="last-message">
           {#if conversation.data.lastMessage.decrypted.text != null}
             {conversation.data.lastMessage.decrypted.text}
           {:else if conversation.data.lastMessage.decrypted.images.length === 1}
@@ -132,7 +132,7 @@
 </script>
 
 <style>
-  ref:lastmessage {
+  .last-message {
     max-width: 100%;
     display: inline-block;
     overflow: hidden;

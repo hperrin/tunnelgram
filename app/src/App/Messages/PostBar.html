@@ -54,7 +54,7 @@
   <div class="d-flex align-items-stretch border-dark border-top">
     <input class="d-none" type="file" ref:fileInput on:change={event => handleFiles(event.target.files)} accept="image/*, video/*" multiple>
     {#if $inCordova}
-      <div class="btn-group dropup p-0" ref:addMediaDropdown>
+      <div class="add-media-dropdown btn-group dropup p-0" ref:addMediaDropdown>
         <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center dropdown-toggle" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" title="Add picture/video" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
         </button>
@@ -543,10 +543,10 @@
 </script>
 
 <style>
-  ref:addMediaDropdown .dropdown-toggle:after {
+  .add-media-dropdown .dropdown-toggle:after {
     display: none;
   }
-  ref:addMediaDropdown .dropdown-menu {
+  .add-media-dropdown .dropdown-menu {
     width: 100vw;
     max-width: 520px;
   }
