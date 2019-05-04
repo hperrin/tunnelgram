@@ -6,7 +6,7 @@
   </div>
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
-      <h5 class="mb-0" style="word-break: break-word;">{name}</h5>
+      <h5 class="mb-0" style="word-break: break-word;">{conversation.getName($settings)}</h5>
       <small class="ml-1" title={_longModifiedDate} style="white-space: nowrap;">{_modifiedDate}</small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
@@ -43,92 +43,72 @@
 </div>
 
 <script>
+  import {onMount, onDestroy} from 'svelte';
   import Avatar from '../Users/Avatar';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
   import {settings, user} from '../../stores';
 
-  export default {
-    oncreate () {
-      const {conversation} = this.get();
+  export let conversation = new Conversation();
+  let _unreadCount = null;
+  let _modifiedDate;
+  let _longModifiedDate;
+  let interval;
+  let destroyed = false;
 
-      this.interval = window.setInterval(() => this.updateTime(), 10000);
-      this.updateTime();
-      this.set({
-        _unreadCount: conversation.unreadCount()
-      });
-    },
-
-    onstate ({changed, current, previous}) {
-      if (changed.conversation && previous != null) {
-        this.updateTime();
-        this.set({
-          _unreadCount: current.conversation.unreadCount()
-        });
-      }
-
-      if (changed.conversation && current.conversation) {
-        // Ready the conversation's referenced entities.
-        const {conversation} = current;
-        if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
-          conversation._tgCalledReadyAll = true;
-          conversation.readyAll(1).then(() => {
-            conversation.containsSleepingReference = false;
-            conversation._tgCalledReadyAll = false;
-            if (!this.destroyed) {
-              this.set({conversation});
-            }
-          }, ErrHandler);
-        }
-      }
-    },
-
-    ondestroy() {
-      this.destroyed = true;
-      if (this.interval) {
-        clearInterval(this.interval);
-      }
-    },
-
-    computed: {
-      name: ({conversation, $settings}) => conversation.getName($settings),
-      isOwner: ({conversation, $user}) => $user.is(conversation.data.user),
-      avatarUsersAndWidth: ({conversation, $user}) => {
-        let users;
-        if (!conversation.data.acFull) {
-          users = [];
-        } else if (conversation.data.acFull.length === 1) {
-          users = conversation.data.acFull;
-        } else {
-          users = conversation.data.acFull.filter(u => !$user.is(u));
-        }
-        let i = 1;
-        while (i**2 < users.length) {
-          i++;
-        }
-        const width = Math.floor(60 / i);
-        return {users, width};
-      }
-    },
-
-    data () {
-      return {
-        _unreadCount: null,
-        conversation: new Conversation()
-      }
-    },
-
-    methods: {
-      updateTime () {
-        const {conversation} = this.get();
-        this.set({
-          _modifiedDate: new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short'),
-          _longModifiedDate: new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short')
-        });
-      }
+  $: isOwner = $user.is(conversation.data.user);
+  $: avatarUsersAndWidth = (() => {
+    let users;
+    if (!conversation.data.acFull) {
+      users = [];
+    } else if (conversation.data.acFull.length === 1) {
+      users = conversation.data.acFull;
+    } else {
+      users = conversation.data.acFull.filter(u => !$user.is(u));
     }
-  };
+    let i = 1;
+    while (i**2 < users.length) {
+      i++;
+    }
+    const width = Math.floor(60 / i);
+    return {users, width};
+  })();
+
+  $: if (conversation) {
+    updateTime();
+    _unreadCount = conversation.unreadCount();
+  }
+
+  $: if (conversation && conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+    // Ready the conversation's referenced entities.
+    if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+      conversation._tgCalledReadyAll = true;
+      conversation.readyAll(1).then(() => {
+        conversation.containsSleepingReference = false;
+        conversation._tgCalledReadyAll = false;
+        if (!destroyed) {
+          conversation = conversation;
+        }
+      }, ErrHandler);
+    }
+  }
+
+  onMount(() => {
+    interval = window.setInterval(() => updateTime(), 10000);
+  });
+
+  onDestroy(() => {
+    destroyed = true;
+    if (interval) {
+      clearInterval(interval);
+    }
+  });
+
+  function updateTime () {
+    _modifiedDate = new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short');
+    _longModifiedDate = new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short');
+  }
 </script>
 
 <style>

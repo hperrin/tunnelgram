@@ -40,6 +40,8 @@
   import ErrHandler from '../../ErrHandler';
   import {user} from '../../stores';
 
+  const MESSAGE_PAGE_SIZE = 20;
+
   export let conversation;
   export let messages = [];
   let container;
@@ -58,7 +60,6 @@
   let updateReadlineRaf;
   let destroyed = false;
   let subscription;
-  const MESSAGE_PAGE_SIZE = 20;
   const onPubSubConnect = () => {
     if (_disconnected) {
       Nymph.getEntities({

@@ -84,8 +84,8 @@
     </nav>
     <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
       <ConversationList
-        on:tunnelgram-notification={event => notification(event.update)}
-        on:tunnelgram-navigate={event => navigateConversation(event.conversation)} />
+        on:tunnelgram-notification={event => notification(event.detail)}
+        on:tunnelgram-navigate={event => navigateConversation(event.detail)} />
     </div>
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->

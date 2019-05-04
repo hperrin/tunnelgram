@@ -1,15 +1,15 @@
 <div class="d-flex flex-column justify-content-center align-items-center" style="min-height: 150px;">
-  <h1>{name}</h1>
+  <h1>{conversation.getName($settings)}</h1>
   <p>
-    Started {_startedDate}
+    Started {new SimpleDateFormatter(conversation.cdate).format('wymdhms', 'long')}
   </p>
   <p>
-    {_Conversation.MODE_NAME[$conversation.data.mode]}
+    {Conversation.MODE_NAME[conversation.data.mode]}
     <button class="btn btn-sm btn-link" on:click={() => _showModeHelp = !_showModeHelp}>(?)</button>
   </p>
   {#if _showModeHelp}
     <p class="alert alert-info m-3">
-      {_Conversation.MODE_DESCRIPTION[$conversation.data.mode]}
+      {Conversation.MODE_DESCRIPTION[conversation.data.mode]}
     </p>
   {/if}
 </div>
@@ -17,24 +17,8 @@
 <script>
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
-  import {conversation, settings} from '../../stores';
+  import {settings} from '../../stores';
 
-  export default {
-    oncreate () {
-      const {conversation} = this.get();
-      this.set({
-        _startedDate: (new SimpleDateFormatter(conversation.cdate)).format('wymdhms', 'long')
-      });
-    },
-
-    data () {
-      return {
-        _Conversation: Conversation
-      };
-    },
-
-    computed: {
-      name: ({conversation, $settings}) => conversation.getName($settings)
-    }
-  };
+  export let conversation;
+  let _showModeHelp = false;
 </script>

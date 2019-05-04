@@ -21,59 +21,52 @@
 </div>
 
 <script>
+  import {onDestroy} from 'svelte';
   import MessageList from '../Messages/MessageList';
   import PostBar from '../Messages/PostBar';
   import {conversation} from '../../stores';
 
+  let _showDropbox = false;
   let messageList;
   let postBar;
+  let timeout;
 
-  export default {
-    ondestroy () {
-      if (this.timeout) {
-        window.clearTimeout(this.timeout);
-      }
-    },
-
-    data () {
-      return {
-        _showDropbox: false
-      };
-    },
-
-    methods: {
-      clearTimeout () {
-        if (this.timeout) {
-          window.clearTimeout(this.timeout);
-          this.timeout = null;
-        }
-      },
-
-      showTimedDropbox () {
-        this.clearTimeout();
-
-        this.set({_showDropbox: true});
-
-        this.timeout = window.setTimeout(() => {
-          this.set({_showDropbox: false});
-          this.timeout = null;
-        }, 2000);
-      },
-
-      handleDrag (event, _showDropbox) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        this.set({_showDropbox});
-      },
-
-      handleDrop (event) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        this.set({_showDropbox: false});
-        this.refs.postBar.handleFiles(event.dataTransfer.files);
-      }
+  onDestroy(() => {
+    if (timeout) {
+      window.clearTimeout(timeout);
     }
-  };
+  });
+
+  function clearDropboxTimeout () {
+    if (timeout) {
+      window.clearTimeout(timeout);
+      timeout = null;
+    }
+  }
+
+  function showTimedDropbox () {
+    clearDropboxTimeout();
+
+    _showDropbox = true;
+
+    timeout = window.setTimeout(() => {
+      _showDropbox = false;
+      timeout = null;
+    }, 2000);
+  }
+
+  function handleDrag (event, _showDropboxValue) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    _showDropbox = _showDropboxValue;
+  }
+
+  function handleDrop (event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    _showDropbox = false;
+    postBar.handleFiles(event.dataTransfer.files);
+  }
 </script>

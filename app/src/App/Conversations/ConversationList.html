@@ -1,4 +1,4 @@
-<div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" ref:container on:scroll={handleScroll}>
+<div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" bind:this={container} on:scroll={handleScroll}>
   <div class="list-group">
     <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click={() => navigate('/c')}>
       <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
@@ -35,6 +35,7 @@
 </div>
 
 <script>
+  import {onMount, onDestroy, createEventDispatcher} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from '../LoadingIndicator';
@@ -45,186 +46,173 @@
 
   const CONVERSATION_PAGE_SIZE = 8;
 
-  let previousUser = $user;
-  $: {
-    if ($user && !$user.is(previousUser)) {
-      subscribe();
-      previousUser = $user;
+  const dispatch = createEventDispatcher();
+
+  let _disconnected = false;
+  let _loading = true;
+  let _loadingEarlierConversations = false;
+  let _reachedEarliestConversation = false;
+  let _search = '';
+  let destroyed = false;
+  let subscription;
+  let container;
+  const onPubSubConnect = () => {
+    if (_disconnected) {
+      Nymph.getEntities({
+        'class': Conversation.class,
+        'sort': 'mdate',
+        'reverse': true
+      }, {
+        'type': '&',
+        'ref': ['acFull', $user.guid],
+        'gt': ['mdate', $conversations.length ? Math.max(...$conversations.map(c => c.mdate)) : 0]
+      }).then(newConversations => {
+        $conversations = [...newConversations, ...$conversations.filter(c => !c.inArray(newConversations))];
+      });
     }
-  }
-
-  $: {
-    if ($conversations) {
-      handleScroll();
-    }
-  }
-
-  export default {
-    oncreate () {
-      this.subscribe();
-
-      this.onPubSubConnect = () => {
-        if (this.get()._disconnected) {
-          Nymph.getEntities({
-            'class': Conversation.class,
-            'sort': 'mdate',
-            'reverse': true
-          }, {
-            'type': '&',
-            'ref': ['acFull', $user.guid],
-            'gt': ['mdate', $conversations.length ? Math.max(...$conversations.map(c => c.mdate)) : 0]
-          }).then(newConversations => {
-            const newArray = [...newConversations, ...$conversations.filter(c => !c.inArray(newConversations))];
-            $conversations = newArray;
-          });
-        }
-        this.set({_disconnected: false});
-      };
-
-      this.onPubSubDisconnect = () => {
-        this.set({_disconnected: true});
-      };
-
-      PubSub.on('connect', this.onPubSubConnect);
-      PubSub.on('disconnect', this.onPubSubDisconnect);
-    },
-
-    onupdate ({changed}) {
-      if (changed._search) {
-        this.handleScroll();
-      }
-    },
-
-    ondestroy () {
-      this.destroyed = true;
-      if (this.subscription) {
-        this.subscription.unsubscribe();
-      }
-
-      if (this.onPubSubConnect) {
-        PubSub.off('connect', this.onPubSubConnect);
-      }
-      if (this.onPubSubDisconnect) {
-        PubSub.off('disconnect', this.onPubSubDisconnect);
-      }
-    },
-
-    data () {
-      return {
-        _disconnected: false,
-        _loading: true,
-        _loadingEarlierConversations: false,
-        _reachedEarliestConversation: false,
-        _search: ''
-      };
-    },
-
-    computed: {
-      filteredConversations: ({$user, $conversations, $settings, _search}) => {
-        if (_search === '' || !$settings) {
-          return $conversations;
-        }
-        _search = _search.toLowerCase();
-        const nicknameUserGUIDs = Object.entries($settings.decrypted.nicknames).filter(entry => {
-          const [guid, nickname] = entry;
-          return nickname.toLowerCase().indexOf(_search) !== -1;
-        }).map(entry => parseFloat(entry[0]));
-        return $conversations.filter(c => {
-          for (let user of c.data.acFull) {
-            if (user.isASleepingReference || ($user.is(user) && c.data.acFull.length > 1)) {
-              continue;
-            } else if (nicknameUserGUIDs.indexOf(user.guid) !== -1) {
-              return true;
-            } else if (!(user.guid in $settings.decrypted.nicknames) && user.data.name.toLowerCase().indexOf(_search) !== -1) {
-              return true;
-            }
-          }
-          return false;
-        });
-      }
-    },
-
-    methods: {
-      subscribe () {
-        if (this.subscription) {
-          this.subscription.unsubscribe();
-        }
-
-        this.set({_loading: true});
-
-        this.subscription = Nymph.getEntities({
-          'class': Conversation.class,
-          'sort': 'mdate',
-          'reverse': true,
-          'limit': CONVERSATION_PAGE_SIZE
-        }, {
-          'type': '&',
-          'ref': ['acFull', $user.guid]
-        }).subscribe(update => {
-          if (this.destroyed) {
-            return;
-          }
-          this.set({_loading: false});
-          if (update) {
-            if (Array.isArray(update)) {
-              if (update.length < CONVERSATION_PAGE_SIZE) {
-                this.set({_reachedEarliestConversation: true});
-              }
-            } else {
-              this.fire('tunnelgram-notification', {update});
-            }
-            PubSub.updateArray($conversations, update);
-            $conversations = $conversations;
-            this.handleScroll();
-          }
-        }, ErrHandler);
-      },
-
-      navigateConversation (conversation) {
-        this.fire('tunnelgram-navigate', {conversation});
-        this.set({_search: ''});
-      },
-
-      handleScroll () {
-        if (this.refs.container.scrollTop > (this.refs.container.scrollHeight - this.refs.container.clientHeight - 150)) {
-          this.loadEarlierConversations();
-        }
-      },
-
-      async loadEarlierConversations () {
-        if (this.get()._loadingEarlierConversations || this.get()._reachedEarliestConversation) {
-          return;
-        }
-
-        if (!$conversations.length) {
-          return;
-        }
-
-        this.set({_loadingEarlierConversations: true});
-
-        try {
-          const earlierConversations = await Nymph.getEntities({
-            'class': Conversation.class,
-            'sort': 'mdate',
-            'reverse': true,
-            'limit': CONVERSATION_PAGE_SIZE
-          }, {
-            'type': '&',
-            'ref': ['acFull', $user.guid],
-            'lt': ['mdate', Math.min(...$conversations.map(c => c.mdate))]
-          });
-
-          if (earlierConversations && earlierConversations.length) {
-            $conversations = [...$conversations, ...earlierConversations];
-          } else {
-            this.set({_reachedEarliestConversation: true});
-          }
-        } catch (e) {
-          ErrHandler(e);
-        }
-
-        this.set({_loadingEarlierConversations: false});
-      }
-    }
+    _disconnected = false;
   };
+  const onPubSubDisconnect = () => {
+    _disconnected = true;
+  };
+
+  $: filteredConversations = (() => {
+    if (_search === '' || !$settings) {
+      return $conversations;
+    }
+    const searchLC = _search.toLowerCase();
+    const nicknameUserGUIDs = Object.entries($settings.decrypted.nicknames).filter(entry => {
+      const [guid, nickname] = entry;
+      return nickname.toLowerCase().indexOf(searchLC) !== -1;
+    }).map(entry => parseFloat(entry[0]));
+    return $conversations.filter(c => {
+      for (let user of c.data.acFull) {
+        if (user.isASleepingReference || ($user.is(user) && c.data.acFull.length > 1)) {
+          continue;
+        } else if (nicknameUserGUIDs.indexOf(user.guid) !== -1) {
+          return true;
+        } else if (!(user.guid in $settings.decrypted.nicknames) && user.data.name.toLowerCase().indexOf(searchLC) !== -1) {
+          return true;
+        }
+      }
+      return false;
+    });
+  })();
+
+  let previousUser = $user;
+  $: if ($user && !$user.is(previousUser)) {
+    subscribe();
+    previousUser = $user;
+  }
+
+  let previousConversationsLength = $conversations.length;
+  $: if (previousConversationsLength !== $conversations.length) {
+    handleScroll();
+    previousConversationsLength = $conversations.length;
+  }
+
+  $: if (_search !== null) {
+    handleScroll();
+  }
+
+  onMount(() => {
+    subscribe();
+
+    PubSub.on('connect', onPubSubConnect);
+    PubSub.on('disconnect', onPubSubDisconnect);
+  });
+
+  onDestroy(() => {
+    destroyed = true;
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    PubSub.off('connect', onPubSubConnect);
+    PubSub.off('disconnect', onPubSubDisconnect);
+  });
+
+  function subscribe () {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+
+    _loading = true;
+
+    subscription = Nymph.getEntities({
+      'class': Conversation.class,
+      'sort': 'mdate',
+      'reverse': true,
+      'limit': CONVERSATION_PAGE_SIZE
+    }, {
+      'type': '&',
+      'ref': ['acFull', $user.guid]
+    }).subscribe(update => {
+      if (destroyed) {
+        return;
+      }
+      _loading = false;
+      if (update) {
+        if (Array.isArray(update)) {
+          if (update.length < CONVERSATION_PAGE_SIZE) {
+            _reachedEarliestConversation = true;
+          }
+        } else {
+          dispatch('tunnelgram-notification', update);
+        }
+        PubSub.updateArray($conversations, update);
+        $conversations = $conversations;
+        handleScroll();
+      }
+    }, ErrHandler);
+  }
+
+  function navigateConversation (conversation) {
+    dispatch('tunnelgram-navigate', conversation);
+    _search = '';
+  }
+
+  function handleScroll () {
+    if (container.scrollTop > (container.scrollHeight - container.clientHeight - 150)) {
+      loadEarlierConversations();
+    }
+  }
+
+  async function loadEarlierConversations () {
+    if (_loadingEarlierConversations || _reachedEarliestConversation) {
+      return;
+    }
+
+    if (!$conversations.length) {
+      return;
+    }
+
+    _loadingEarlierConversations = true;
+
+    try {
+      const earlierConversations = await Nymph.getEntities({
+        'class': Conversation.class,
+        'sort': 'mdate',
+        'reverse': true,
+        'limit': CONVERSATION_PAGE_SIZE
+      }, {
+        'type': '&',
+        'ref': ['acFull', $user.guid],
+        'lt': ['mdate', Math.min(...$conversations.map(c => c.mdate))]
+      });
+
+      if (earlierConversations && earlierConversations.length) {
+        $conversations = [...$conversations, ...earlierConversations];
+        if (earlierConversations.length < CONVERSATION_PAGE_SIZE) {
+          _reachedEarliestConversation = true;
+        }
+      } else {
+        _reachedEarliestConversation = true;
+      }
+    } catch (e) {
+      ErrHandler(e);
+    }
+
+    _loadingEarlierConversations = false;
+  }
 </script>

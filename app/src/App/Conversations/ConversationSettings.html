@@ -35,49 +35,43 @@
 </div>
 
 <script>
+  import {onMount} from 'svelte';
+  import {navigate} from '../../Services/router';
   import {conversation} from '../../stores';
 
-  export default {
-    oncreate () {
-      this.set({
-        name: $conversation.decrypted.name
-      });
-    },
+  let name = '';
+  let _clearingReadline = false;
+  let _confirmLeave = false;
+  let _leavingConversation = false;
 
-    data () {
-      return {
-        name: ''
-      };
-    },
+  onMount(() => {
+    name = $conversation.decrypted.name;
+  });
 
-    methods: {
-      save () {
-        const {name} = this.get();
-        if (name === '') {
-          $conversation.decrypted.name = null;
-        } else {
-          $conversation.decrypted.name = name;
-        }
-        $conversation.save();
-        $conversation = $conversation;
-      },
-
-      async clearReadline () {
-        this.set({_clearingReadline: true});
-        await $conversation.clearReadline();
-        $conversation = $conversation;
-        this.set({_clearingReadline: false});
-      },
-
-      confirmLeave () {
-        this.set({_confirmLeave: true});
-      },
-
-      leave () {
-        this.set({_leavingConversation: true});
-        this.store.navigate('/c');
-        $conversation.delete();
-      }
+  function save () {
+    if (name === '') {
+      $conversation.decrypted.name = null;
+    } else {
+      $conversation.decrypted.name = name;
     }
-  };
+    $conversation.save();
+    $conversation = $conversation;
+  }
+
+  async function clearReadline () {
+    _clearingReadline = true;
+    await $conversation.clearReadline();
+    $conversation = $conversation;
+    _clearingReadline = false;
+  }
+
+  function confirmLeave () {
+    _confirmLeave = true;
+  }
+
+  function leave () {
+    _leavingConversation = true;
+    navigate('/c');
+    $conversation.delete();
+  }
 </script>
