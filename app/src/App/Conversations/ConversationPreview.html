@@ -25,19 +25,17 @@
       {:else}
         <span>&nbsp;</span>
       {/if}
-      {#if _unreadCount}
-        {#await _unreadCount}
+      {#await _unreadCount}
+        <span>&nbsp;</span>
+      {:then count}
+        {#if count === 0}
           <span>&nbsp;</span>
-        {:then count}
-          {#if count === 0}
-            <span>&nbsp;</span>
-          {:else}
-            <span class="badge badge-primary">{count === true ? 'New' : count}</span>
-          {/if}
-        {:catch e}
-          <span>&nbsp;</span>
-        {/await}
-      {/if}
+        {:else}
+          <span class="badge badge-primary">{count === true ? 'New' : count}</span>
+        {/if}
+      {:catch e}
+        <span>&nbsp;</span>
+      {/await}
     </div>
   </div>
 </div>
@@ -51,7 +49,7 @@
   import {settings, user} from '../../stores';
 
   export let conversation = new Conversation();
-  let _unreadCount = null;
+  let _unreadCount = Promise.resolve(0);
   let _modifiedDate;
   let _longModifiedDate;
   let interval;
@@ -75,9 +73,11 @@
     return {users, width};
   })();
 
-  $: if (conversation) {
+  let previousConversationReadline = conversation.readline;
+  $: if (conversation.readline !== previousConversationReadline) {
     updateTime();
     _unreadCount = conversation.unreadCount();
+    previousConversationReadline = conversation.readline;
   }
 
   $: if (conversation && conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {

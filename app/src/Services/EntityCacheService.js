@@ -48,6 +48,10 @@ class EntityCacheService {
   }
 
   async setEntityData (guid, data) {
+    // Save the data before awaiting so it doesn't get converted to real
+    // entities.
+    const saveData = JSON.stringify(data);
+
     await this.ready;
 
     // 10 days is the default expiry.
@@ -60,7 +64,7 @@ class EntityCacheService {
 
     this.cache[guid] = {
       retrieved: new Date(),
-      data: JSON.stringify(data),
+      data: saveData,
       expiry
     };
     if (this.pendingCache.hasOwnProperty(guid)) {
