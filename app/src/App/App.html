@@ -11,7 +11,7 @@
 {#if $beforeInstallPromptEvent && !_hideInstallPrompt}
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
-      Wanna install {$brandWeb} to your app drawer for an app-like experience?
+      Wanna install {$brandWeb} to your device for a native app experience?
       <a href="javascript:void(0)" on:click={() => (_hideInstallPrompt = true) && $beforeInstallPromptEvent.prompt()}>Yeah</a>
     </div>
 
@@ -22,7 +22,7 @@
 {:else if !_hideNotificationPrompt}
   <div class="alert alert-info d-flex justify-content-between align-items-center m-0">
     <div>
-      Do you want to get notifications for new messages?
+      Do you want notifications for new messages?
       <a href="javascript:void(0)" on:click={() => (_hideNotificationPrompt = true) && $requestNotificationPermission()}>Yeah</a>
     </div>
 
@@ -184,12 +184,10 @@
 
   let menuDropdown;
   let menuDropdownComponent;
-  $: {
-    if (menuDropdown && !menuDropdownComponent) {
-      menuDropdownComponent = new Dropdown(menuDropdown);
-    } else if (!menuDropdown && menuDropdownComponent) {
-      menuDropdownComponent = null;
-    }
+  $: if (menuDropdown && !menuDropdownComponent) {
+    menuDropdownComponent = new Dropdown(menuDropdown);
+  } else if (!menuDropdown && menuDropdownComponent) {
+    menuDropdownComponent = null;
   }
 
   let mainUi;
