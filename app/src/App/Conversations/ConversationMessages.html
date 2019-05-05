@@ -17,19 +17,49 @@
   <div class="flex-grow-1 position-relative">
     <MessageList bind:conversation={$conversation} bind:this={messageList} />
   </div>
-  <PostBar bind:conversation={$conversation} bind:this={postBar} on:scrollToBottom={() => messageList.requestScrollToBottom()} />
+  {#if postBarStorage && $conversation.guid in postBarStorage}
+    <PostBar
+      bind:this={postBar}
+      bind:conversation={$conversation}
+      bind:text={postBarStorage[$conversation.guid].text}
+      bind:images={postBarStorage[$conversation.guid].images}
+      bind:video={postBarStorage[$conversation.guid].video}
+      on:scrollToBottom={() => messageList.requestScrollToBottom()}
+    />
+  {/if}
 </div>
 
 <script>
   import {onDestroy} from 'svelte';
   import MessageList from '../Messages/MessageList';
   import PostBar from '../Messages/PostBar';
+  import {storage} from '../../Services/StorageService';
   import {conversation} from '../../stores';
 
   let _showDropbox = false;
   let messageList;
   let postBar;
   let timeout;
+  let postBarStorage = null;
+
+  (async () => {
+    postBarStorage = await storage.getItem('tgPostBarStorage');
+    if (!postBarStorage) {
+      postBarStorage = {};
+    }
+  })();
+
+  $: if ($conversation && postBarStorage && !($conversation.guid in postBarStorage)) {
+    postBarStorage[$conversation.guid] = {
+      text: '',
+      images: [],
+      video: null
+    };
+  }
+
+  $: if (postBarStorage) {
+    storage.setItem('tgPostBarStorage', postBarStorage);
+  }
 
   onDestroy(() => {
     if (timeout) {
