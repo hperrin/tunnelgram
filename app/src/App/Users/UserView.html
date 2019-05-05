@@ -195,9 +195,9 @@
   });
 
   function saveUser () {
-    $viewUser.save().then(user => {
-      $user = user;
-      $viewUser = user;
+    $viewUser.save().then(userValue => {
+      $user = userValue;
+      $viewUser = userValue;
     }, ErrHandler);
   }
 
@@ -208,12 +208,12 @@
       } else {
         $settings.decrypted.nicknames[$viewUser.guid] = nickname;
       }
-      $settings.save().then(settings => {
-        $settings = settings;
-        $viewUser = $viewUser;
-        $conversation = $conversation;
-        $conversations = $conversations
-        $user = $user;
+      $settings.save().then(settingsValue => {
+        settings.set(settingsValue);
+        viewUser.set($viewUser);
+        conversation.set($conversation);
+        conversations.set($conversations)
+        user.set($user);
       }, ErrHandler);
     }
   }
@@ -280,7 +280,7 @@
 
     avatar = avatarImg.data;
 
-    $viewUser = $viewUser;
+    viewUser.set($viewUser);
     _avatarLoading = false;
   }
 </script>

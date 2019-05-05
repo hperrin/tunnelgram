@@ -150,12 +150,12 @@
             const unUsers = await unPromise;
             const nameUsers = await namePromise;
 
-            for (let i = nickUsers.length; i >= 0; i--) {
+            for (let i = nickUsers.length - 1; i >= 0; i--) {
               if (nickUsers[i].inArray(searchUsers)) {
                 nickUsers.splice(i, 1);
               }
             }
-            for (let i = nameUsers.length; i >= 0; i--) {
+            for (let i = nameUsers.length - 1; i >= 0; i--) {
               if (nameUsers[i].inArray(unUsers)) {
                 nameUsers.splice(i, 1);
               }
@@ -226,7 +226,7 @@
     username = '';
   }
 
-  function focus () {
+  export function focus () {
     usernameElem.focus();
     _showUserSearchDropdown = true;
   }

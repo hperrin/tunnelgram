@@ -49,7 +49,7 @@
     $conversation.readyAll(1).then(() => {
       $conversation.containsSleepingReference = false;
       $conversation._tgCalledReadyAll = false;
-      $conversation = $conversation;
+      conversation.set($conversation);
     }, ErrHandler);
   }
 
@@ -70,7 +70,7 @@
     }
 
     $conversation.data.acFull.push(user);
-    $conversation = $conversation;
+    conversation.set($conversation);
     _addingUser = true;
     $conversation.save().then(() => {
       userSearchSelector.clear();

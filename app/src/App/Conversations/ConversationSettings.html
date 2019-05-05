@@ -55,13 +55,13 @@
       $conversation.decrypted.name = name;
     }
     $conversation.save();
-    $conversation = $conversation;
+    conversation.set($conversation);
   }
 
   async function clearReadline () {
     _clearingReadline = true;
     await $conversation.clearReadline();
-    $conversation = $conversation;
+    conversation.set($conversation);
     _clearingReadline = false;
   }
 

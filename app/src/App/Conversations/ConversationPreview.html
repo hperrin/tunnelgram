@@ -96,6 +96,7 @@
 
   onMount(() => {
     interval = window.setInterval(() => updateTime(), 10000);
+    updateTime();
   });
 
   onDestroy(() => {

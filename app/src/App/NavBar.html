@@ -72,8 +72,8 @@
 
   async function setNotifications (key) {
     const notif = $conversation.saveNotificationSetting(key);
-    $conversation = $conversation;
+    conversation.set($conversation);
     await notif;
-    $conversation = $conversation;
+    conversation.set($conversation);
   }
 </script>

@@ -61,7 +61,7 @@
   let _addUserError = null;
   let userSearchSelector;
 
-  $: usersOtherThanCurrent = $conversation.data.acFull && $conversation.data.acFull.filter(user => !$user.is(user));
+  $: usersOtherThanCurrent = ($conversation.data.acFull || []).filter(u => !$user.is(u));
   $: existingConversations = (() => {
     if ($conversation.guid) {
       return null;
@@ -72,6 +72,14 @@
       return conversations;
     })
   })();
+
+  $: {
+    console.log(usersOtherThanCurrent);
+  }
+
+  $: {
+    console.log($conversation);
+  }
 
   function addUser (user) {
     _addUserError = null;
@@ -89,14 +97,14 @@
     }
 
     $conversation.data.acFull.push(user);
-    $conversation = $conversation;
+    conversation.set($conversation);
     userSearchSelector.clear();
     userSearchSelector.focus();
   }
 
   function removeUser (userToRemove) {
     $conversation.set({acFull: $conversation.data.acFull.filter(user => !userToRemove.is(user))});
-    $conversation = $conversation;
+    conversation.set($conversation);
   }
 
   function save () {
