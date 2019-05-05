@@ -44,7 +44,6 @@
 {/await}
 
 <script>
-  import {onMount} from 'svelte';
   import {Nymph} from 'nymph-client';
   import UAParser from 'ua-parser-js';
   import LoadingIndicator from '../LoadingIndicator';
@@ -55,19 +54,15 @@
   export let name;
   export let entity;
   export let showBrowser;
-  let subscriptionsPromise;
   let subscriptions;
-
-  onMount(() => {
-    subscriptionsPromise = Nymph.getEntities({
-      'class': entity.class,
-      'sort': 'mdate',
-      'reverse': true
-    }, {
-      'type': '&',
-      'ref': ['user', $user.guid]
-    }).then(subs => subscriptions = subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs).catch(ErrHandler);
-  });
+  let subscriptionsPromise = Nymph.getEntities({
+    'class': entity.class,
+    'sort': 'mdate',
+    'reverse': true
+  }, {
+    'type': '&',
+    'ref': ['user', $user.guid]
+  }).then(subs => subscriptions = subs.forEach(s => s.agent = UAParser(s.data.uaString)) || subs).catch(ErrHandler);
 
   function remove (subscription) {
     subscription.deleting = true;

@@ -62,12 +62,10 @@
 
   let notificationsDropdown;
   let notificationsDropdownComponent;
-  $: {
-    if (notificationsDropdown && !notificationsDropdownComponent) {
-      notificationsDropdownComponent = new Dropdown(notificationsDropdown);
-    } else if (!notificationsDropdown && notificationsDropdownComponent) {
-      notificationsDropdownComponent = null;
-    }
+  $: if (notificationsDropdown && !notificationsDropdownComponent) {
+    notificationsDropdownComponent = new Dropdown(notificationsDropdown);
+  } else if (!notificationsDropdown && notificationsDropdownComponent) {
+    notificationsDropdownComponent = null;
   }
 
   async function setNotifications (key) {

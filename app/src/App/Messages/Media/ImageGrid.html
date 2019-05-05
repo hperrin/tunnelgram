@@ -15,7 +15,6 @@
 </div>
 
 <script>
-  import {onMount} from 'svelte';
   import PhotoSwipe from './PhotoSwipe';
   import LoadingIndicator from '../../LoadingIndicator';
   import {crypt} from '../../../Services/EncryptionService';
@@ -27,27 +26,23 @@
   $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length);
   $: thumbnailPromises = resources.map(resource => resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail);
 
-  onMount(() => {
-    let setResource = false;
-    for (let resource of resources) {
-      if (resource.thumbnail instanceof Uint8Array) {
-        const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
-        const _source = URL.createObjectURL(blob);
-        resource.thumbnailSrc = _source;
-        setResource = true;
-      } else {
-        resource.thumbnail.then(data => {
-          const blob = new Blob([data], {type: resource.thumbnailType});
+  $: {
+    for (let i = 0; i < resources.length; i++) {
+      if (!resources[i].thumbnailSrc && !resources[i].thumbnailSrcPromise) {
+        if (resources[i].thumbnail instanceof Uint8Array) {
+          const blob = new Blob([resources[i].thumbnail], {type: resources[i].thumbnailType});
           const _source = URL.createObjectURL(blob);
-          resource.thumbnailSrc = _source;
-          resources = resources;
-        });
+          resources[i].thumbnailSrc = _source;
+        } else {
+          resources[i].thumbnailSrcPromise = resources[i].thumbnail.then(data => {
+            const blob = new Blob([data], {type: resources[i].thumbnailType});
+            const _source = URL.createObjectURL(blob);
+            resources[i].thumbnailSrc = _source;
+          });
+        }
       }
     }
-    if (setResource) {
-      resources = resources;
-    }
-  });
+  }
 
   function showBigImage (index) {
     let items = resources.map(resource => {

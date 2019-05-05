@@ -156,17 +156,15 @@
 
   let messageContainer;
   let messageContainerGesture;
-  $: {
-    // Initialize swipe gestures.
-    if (messageContainer && !messageContainerGesture) {
-      messageContainerGesture = new TinyGesture(messageContainer);
-      messageContainerGesture.on('longpress', () => {
-        toggleActions();
-      });
-    } else if (!messageContainer && messageContainerGesture) {
-      messageContainerGesture.destroy();
-      messageContainerGesture = null;
-    }
+  // Initialize swipe gestures.
+  $: if (messageContainer && !messageContainerGesture) {
+    messageContainerGesture = new TinyGesture(messageContainer);
+    messageContainerGesture.on('longpress', () => {
+      toggleActions();
+    });
+  } else if (!messageContainer && messageContainerGesture) {
+    messageContainerGesture.destroy();
+    messageContainerGesture = null;
   }
 
   onMount(() => {

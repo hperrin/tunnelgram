@@ -35,7 +35,6 @@
 </div>
 
 <script>
-  import {onMount} from 'svelte';
   import {navigate} from '../../Services/router';
   import {conversation} from '../../stores';
 
@@ -44,9 +43,11 @@
   let _confirmLeave = false;
   let _leavingConversation = false;
 
-  onMount(() => {
+  let previousConversation = null;
+  $: if (previousConversation !== $conversation) {
     name = $conversation.decrypted.name;
-  });
+    previousConversation = $conversation;
+  };
 
   function save () {
     if (name === '') {

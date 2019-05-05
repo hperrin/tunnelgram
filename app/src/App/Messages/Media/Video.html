@@ -24,7 +24,6 @@
 </div>
 
 <script>
-  import {onMount} from 'svelte';
   import LoadingIndicator from '../../LoadingIndicator';
   import {crypt} from '../../../Services/EncryptionService';
 
@@ -34,19 +33,19 @@
 
   $: thumbnailPromise = resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail;
 
-  onMount(() => {
+  $: if (!resource.thumbnailSrc && !resource.thumbnailSrcPromise) {
     if (resource.thumbnail instanceof Uint8Array) {
       const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
       const _source = URL.createObjectURL(blob);
       resource.thumbnailSrc = _source;
     } else {
-      resource.thumbnail.then(data => {
+      resource.thumbnailSrcPromise = resource.thumbnail.then(data => {
         const blob = new Blob([data], {type: resource.thumbnailType});
         const _source = URL.createObjectURL(blob);
         resource.thumbnailSrc = _source;
       });
     }
-  });
+  }
 
   function loadVideo () {
     _loading = true;

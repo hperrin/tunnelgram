@@ -11,7 +11,7 @@
     <ul class="list-group mt-3 text-body">
       {#each usersOtherThanCurrent as user (user.guid)}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /></span>
+          <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /></span>
           <button class="btn btn-danger btn-sm" on:click={() => removeUser(user)}>
             <i class="fas fa-minus"></i>
           </button>
@@ -29,7 +29,7 @@
           <div class="list-group mt-3 text-body">
             {#each conversations as conversation (conversation.guid)}
               <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
-                <ConversationPreview bind:conversation={conversation} />
+                <ConversationPreview bind:conversation />
               </a>
             {/each}
           </div>
@@ -72,14 +72,6 @@
       return conversations;
     })
   })();
-
-  $: {
-    console.log(usersOtherThanCurrent);
-  }
-
-  $: {
-    console.log($conversation);
-  }
 
   function addUser (user) {
     _addUserError = null;

@@ -14,7 +14,7 @@
     <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
       {#each searchUsers as user (user.guid)}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-          <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
+          <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
         </a>
       {/each}
       {#await _userSearchPromiseServer}
@@ -29,7 +29,7 @@
         {/if}
         {#each serverUsers as user (user.guid)}
           <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-            <span><span class="mr-2"><Avatar bind:user={user} /></span> <DisplayName bind:user={user} /> ({user.data.username})</span>
+            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
           </a>
         {/each}
       {/await}
@@ -77,94 +77,92 @@
   };
 
   let previousUsername = username;
-  $: {
-    if (username !== previousUsername) {
-      previousUsername = username;
-      const searchQuery = username.toLowerCase();
-      searchUsers = [];
-      _userSearchPromiseServer = null;
-      if (searchQuery.length >= 2) {
-        // Search for users in the conversations in cache.
-        let startsWithUsers = [];
-        let containUsers = [];
-        $conversations.map(conversation => {
-          conversation.data.acFull.map(searchUser => {
-            if ($user.is(searchUser) || searchUser.isASleepingReference) {
-              return;
-            }
-            let name = searchUser.data.name.toLowerCase();
-            if (searchUser.guid in $settings.decrypted.nicknames) {
-              name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
-            }
-            if (name.startsWith(searchQuery) || searchUser.data.username.toLowerCase().startsWith(searchQuery)) {
-              if (!searchUser.inArray(startsWithUsers)) {
-                startsWithUsers.push(searchUser);
-              }
-            } else if (name.includes(searchQuery) || searchUser.data.username.toLowerCase().includes(searchQuery)) {
-              if (!searchUser.inArray(containUsers)) {
-                containUsers.push(searchUser);
-              }
-            }
-          });
-        });
-        searchUsers = [...startsWithUsers, ...containUsers];
-        _userSearchPromiseServer = new Promise(resolve => {
-          if (_userSearchTimer) {
-            window.clearTimeout(_userSearchTimer);
+  $: if (previousUsername !== username) {
+    previousUsername = username;
+    const searchQuery = username.toLowerCase();
+    searchUsers = [];
+    _userSearchPromiseServer = null;
+    if (searchQuery.length >= 2) {
+      // Search for users in the conversations in cache.
+      let startsWithUsers = [];
+      let containUsers = [];
+      $conversations.map(conversation => {
+        conversation.data.acFull.map(searchUser => {
+          if ($user.is(searchUser) || searchUser.isASleepingReference) {
+            return;
           }
-          _userSearchTimer = window.setTimeout(async () => {
-            const guids = [];
-            for (let guid in $settings.decrypted.nicknames) {
-              if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
-                guids.push(guid);
-              }
+          let name = searchUser.data.name.toLowerCase();
+          if (searchUser.guid in $settings.decrypted.nicknames) {
+            name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
+          }
+          if (name.startsWith(searchQuery) || searchUser.data.username.toLowerCase().startsWith(searchQuery)) {
+            if (!searchUser.inArray(startsWithUsers)) {
+              startsWithUsers.push(searchUser);
             }
-            const nickPromise = guids.length ? Nymph.getEntities({
-              'class': User.class
-            }, {
-              'type': '|',
-              'guid': guids
-            }) : Promise.resolve([]);
-
-            const firstArgs = [{
-              'class': User.class,
-              'limit': 10
-            }, {
-              'type': '&',
-              '!guid': [
-                ...Object.keys($settings.decrypted.nicknames),
-                $user.guid,
-                ...searchUsers.map(user => user.guid)
-              ]
-            }];
-            const unPromise = Nymph.getEntities(...firstArgs, {
-              'type': '&',
-              'ilike': ['username', searchQuery+'%']
-            });
-            const namePromise = Nymph.getEntities(...firstArgs, {
-              'type': '&',
-              'ilike': ['name', '%'+searchQuery+'%']
-            });
-
-            const nickUsers = await nickPromise;
-            const unUsers = await unPromise;
-            const nameUsers = await namePromise;
-
-            for (let i = nickUsers.length - 1; i >= 0; i--) {
-              if (nickUsers[i].inArray(searchUsers)) {
-                nickUsers.splice(i, 1);
-              }
+          } else if (name.includes(searchQuery) || searchUser.data.username.toLowerCase().includes(searchQuery)) {
+            if (!searchUser.inArray(containUsers)) {
+              containUsers.push(searchUser);
             }
-            for (let i = nameUsers.length - 1; i >= 0; i--) {
-              if (nameUsers[i].inArray(unUsers)) {
-                nameUsers.splice(i, 1);
-              }
-            }
-
-            resolve([...nickUsers, ...unUsers, ...nameUsers]);
-          }, 150);
+          }
         });
-      }
+      });
+      searchUsers = [...startsWithUsers, ...containUsers];
+      _userSearchPromiseServer = new Promise(resolve => {
+        if (_userSearchTimer) {
+          window.clearTimeout(_userSearchTimer);
+        }
+        _userSearchTimer = window.setTimeout(async () => {
+          const guids = [];
+          for (let guid in $settings.decrypted.nicknames) {
+            if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+              guids.push(guid);
+            }
+          }
+          const nickPromise = guids.length ? Nymph.getEntities({
+            'class': User.class
+          }, {
+            'type': '|',
+            'guid': guids
+          }) : Promise.resolve([]);
+
+          const firstArgs = [{
+            'class': User.class,
+            'limit': 10
+          }, {
+            'type': '&',
+            '!guid': [
+              ...Object.keys($settings.decrypted.nicknames),
+              $user.guid,
+              ...searchUsers.map(user => user.guid)
+            ]
+          }];
+          const unPromise = Nymph.getEntities(...firstArgs, {
+            'type': '&',
+            'ilike': ['username', searchQuery+'%']
+          });
+          const namePromise = Nymph.getEntities(...firstArgs, {
+            'type': '&',
+            'ilike': ['name', '%'+searchQuery+'%']
+          });
+
+          const nickUsers = await nickPromise;
+          const unUsers = await unPromise;
+          const nameUsers = await namePromise;
+
+          for (let i = nickUsers.length - 1; i >= 0; i--) {
+            if (nickUsers[i].inArray(searchUsers)) {
+              nickUsers.splice(i, 1);
+            }
+          }
+          for (let i = nameUsers.length - 1; i >= 0; i--) {
+            if (nameUsers[i].inArray(unUsers)) {
+              nameUsers.splice(i, 1);
+            }
+          }
+
+          resolve([...nickUsers, ...unUsers, ...nameUsers]);
+        }, 150);
+      });
     }
   }
 

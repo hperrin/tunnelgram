@@ -7,7 +7,7 @@
     </div>
   {:else}
     {#if _reachedEarliestMessage}
-      <ConversationHeader bind:conversation={conversation} />
+      <ConversationHeader bind:conversation />
     {:else}
       <div class="d-flex align-items-center justify-content-center {_loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
         <div class="col-auto">
@@ -43,7 +43,7 @@
   const MESSAGE_PAGE_SIZE = 20;
 
   export let conversation;
-  export let messages = [];
+  let messages = [];
   let container;
   let messageContainer;
   let _loading;
@@ -56,7 +56,6 @@
   let _scrollToDistanceFromBottom = null;
   let scrollWaitBottom;
   let scrollWaitReadline;
-  let scrollToBottomListener;
   let updateReadlineRaf;
   let destroyed = false;
   let subscription;
@@ -95,12 +94,21 @@
     }
   };
 
-  onMount(() => {
-    subscribe();
+  let previousConversation = null;
+  $: if (previousConversation !== conversation) {
+    previousConversation = conversation;
+    messages = [];
     _initialReadline = conversation.readline;
+    _showReadline = null;
+    _loadingEarlierMessages = false;
+    _reachedEarliestMessage = false;
+    _scrollToDistanceFromBottom = null;
     scrollWaitBottom = true;
     scrollWaitReadline = false;
+    subscribe();
+  }
 
+  onMount(() => {
     PubSub.on('connect', onPubSubConnect);
     PubSub.on('disconnect', onPubSubDisconnect);
   });
@@ -159,10 +167,6 @@
       subscription.unsubscribe();
     }
 
-    if (scrollToBottomListener) {
-      scrollToBottomListener.cancel();
-    }
-
     PubSub.off('connect', onPubSubConnect);
     PubSub.off('disconnect', onPubSubDisconnect);
   });
@@ -173,6 +177,7 @@
     }
 
     _loading = true;
+    const queryConversationGuid = conversation.guid;
 
     subscription = Nymph.getEntities({
       'class': Message.class,
@@ -183,7 +188,7 @@
       'type': '&',
       'ref': ['conversation', conversation.guid]
     }).subscribe(update => {
-      if (destroyed) {
+      if (destroyed || queryConversationGuid !== conversation.guid) {
         return;
       }
       if (update) {
@@ -262,6 +267,10 @@
         'ref': ['conversation', conversation.guid],
         'lt': ['cdate', messages[messages.length - 1].cdate]
       });
+
+      if (!_loadingEarlierMessages) {
+        return;
+      }
 
       if (earlierMessages && earlierMessages.length) {
         messages = [...messages, ...earlierMessages];
