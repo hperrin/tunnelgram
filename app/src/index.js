@@ -70,6 +70,19 @@ export function refreshAll () {
   store.conversations.set(conversations);
 };
 
+let forwardCount = 0;
+function navigateToContinueUrl () {
+  const route = router.lastRouteResolved();
+  if (route && route.url !== '/' && route.url !== '') {
+    forwardCount++;
+    if (forwardCount > 15) {
+      debugger;
+    }
+    const url = route.url + (route.query !== '' ? '?'+route.query : '');
+    router.navigate('/?continue='+encodeURIComponent(url));
+  }
+}
+
 window.addEventListener('beforeinstallprompt', e => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
@@ -123,37 +136,38 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
   let previousUser = get(store.user);
   store.user.subscribe(user => {
-    if (user) {
-      const route = router.lastRouteResolved();
-      if (route) {
-        const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
-        if (queryMatch) {
-          router.navigate(decodeURIComponent(queryMatch[1]));
+    if (previousUser !== user) {
+      if (user) {
+        const route = router.lastRouteResolved();
+        if (route) {
+          const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+          if (queryMatch) {
+            router.navigate(decodeURIComponent(queryMatch[1]));
+          }
         }
-      }
 
-      if (setupSubscription) {
-        setupSubscription();
-      }
+        if (setupSubscription) {
+          setupSubscription();
+        }
 
-      // If the user logs in, get their settings.
-      if (get(store.settings) == null || !user.is(previousUser)) {
-        crypt.ready.then(() => {
-          Settings.current().then(settings => {
-            store.settings.set(settings);
+        // If the user logs in, get their settings.
+        if (get(store.settings) == null) {
+          crypt.ready.then(() => {
+            Settings.current().then(settings => {
+              store.settings.set(settings);
+            });
           });
-        });
+        }
+      } else if (user === null) {
+        // If the user logs out, clear everything.
+        storage.clear();
+        store.conversations.set([]);
+        store.conversation.set(new Conversation());
+        store.settings.set(null);
+        refreshAll();
+        // And navigate to a continue URL, since the user doesn't have access.
+        navigateToContinueUrl();
       }
-    } else if (user === null) {
-      // If the user logs out, clear everything.
-      storage.clear();
-      store.user.set(null);
-      store.conversations.set([]);
-      store.conversation.set(new Conversation());
-      store.settings.set(null);
-      refreshAll();
-      // And navigate to the home screen.
-      router.navigate('/');
     }
 
     previousUser = user;
@@ -205,10 +219,9 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
       if (pushSupport && notificationSupport) {
         setupSubscription = async () => {
-          const getSubscription = () => {
-            return navigator.serviceWorker.ready.then(registration => {
-              return registration.pushManager.getSubscription();
-            });
+          const getSubscription = async () => {
+            const registration = await swRegPromise;
+            return registration.pushManager.getSubscription();
           };
 
           const subscribeFromWorker = subscriptionOptions => {
@@ -241,7 +254,6 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
               navigator.serviceWorker.addEventListener('message', messageListenerFunction);
             });
           };
-
 
           // See if there is a subscription already.
           let subscription = await getSubscription();
@@ -395,19 +407,10 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     }
   };
 
-  let forwardCount = 0;
   router.hooks({
     before: (done, params) => {
       if (!get(store.user)) {
-        const route = router.lastRouteResolved();
-        if (route && route.url !== '/' && route.url !== '') {
-          forwardCount++;
-          if (forwardCount > 15) {
-            debugger;
-          }
-          const url = route.url + (route.query !== '' ? '?'+route.query : '');
-          router.navigate('/?continue='+encodeURIComponent(url));
-        }
+        navigateToContinueUrl();
         done(false);
       } else {
         done();
@@ -434,7 +437,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       store.loadingUser.set(false);
     },
     'pwa-home': () => {
-      store.convosOut.set(true);
+      router.navigate('/');
     }
   }).notFound(() => {
     router.navigate('/');
