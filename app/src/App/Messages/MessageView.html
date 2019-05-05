@@ -64,11 +64,11 @@
               <Video resource={message.decrypted.video} />
             </div>
           {/if}
-          <div class="card-body py-1 px-2 m-0" on:click={() => _flipFirst = !!flipper}>
-            {#if _formattedText != null}
+          {#if _flipped ? (_formattedSecretText != null) : (_formattedText != null)}
+            <div class="card-body py-1 px-2 m-0" on:click={() => _flipFirst = !!flipper}>
               <div class="message card-text markdown-body">{@html _flipped ? _formattedSecretText : _formattedText}</div>
-            {/if}
-          </div>
+            </div>
+          {/if}
         {/if}
       </div>
     </div>
