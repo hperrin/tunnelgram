@@ -169,8 +169,8 @@
       }
     };
 
-    message.retrySave = () => message.save(true).then(saveSuccess, ErrHandler);
-    message.cancelSave = () => removePending();
+    message.retrySave = () => message.save(true).then(removePending, ErrHandler);
+    message.cancelSave = removePending;
     message.save().then(removePending, ErrHandler);
 
     conversation = conversation;
