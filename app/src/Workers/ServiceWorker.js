@@ -8,17 +8,24 @@ self.addEventListener('install', event => {
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_STATIC).then(cache => {
-        return cache.addAll([
-          '/',
-          '/#/pwa-home',
-          '/dist/main.js',
-          '/dist/main.css',
-          '/dist/showdown.js'
+        return Promise.all([
+          cache.add('/').catch(() => {
+            // Ignore errors.
+          }),
+          cache.add('/dist/main.js').catch(() => {
+            // Ignore errors.
+          }),
+          cache.add('/dist/main.css').catch(() => {
+            // Ignore errors.
+          }),
+          cache.add('/dist/showdown.js').catch(() => {
+            // Ignore errors.
+          })
         ]);
       }),
       caches.open(CACHE_CONTENT)
     ])
-    .then(() => self.skipWaiting())
+    .then(() => self.skipWaiting(), () => self.skipWaiting())
   );
 });
 
@@ -46,6 +53,8 @@ self.addEventListener('fetch', event => {
       console.log('['+cacheType+' Cache] add item to offline: '+response.url);
       cache.put(request, response.clone());
       return response;
+    }, () => {
+      // Ignore errors.
     });
   }
 
