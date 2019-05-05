@@ -266,7 +266,8 @@
   });
 
   function navigateConversation (conversation) {
-    if (router.lastRouteResolved().url !== '/c/'+conversation.guid) {
+    const route = router.lastRouteResolved();
+    if (!route || route.url !== '/c/'+conversation.guid) {
       navigate('/c/'+conversation.guid);
     } else {
       $convosOut = false;
