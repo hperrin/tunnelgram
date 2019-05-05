@@ -177,17 +177,8 @@ class Message extends \Nymph\Entity {
             )
         )
         ->when(
-            v::attribute('text'),
-            v::allOf(
-              v::not(v::attribute('images')),
-              v::not(v::attribute('video'))
-            ),
-            v::alwaysValid()
-        )
-        ->when(
             v::attribute('images'),
             v::allOf(
-              v::not(v::attribute('text')),
               v::not(v::attribute('video'))
             ),
             v::alwaysValid()
@@ -195,8 +186,7 @@ class Message extends \Nymph\Entity {
         ->when(
             v::attribute('video'),
             v::allOf(
-              v::not(v::attribute('images')),
-              v::not(v::attribute('text'))
+              v::not(v::attribute('images'))
             ),
             v::alwaysValid()
         )
