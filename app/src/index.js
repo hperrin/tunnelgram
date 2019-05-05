@@ -121,12 +121,6 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   store.conversation.subscribe(conversation => syncConversations(conversation, get(store.conversations)));
   store.conversations.subscribe(conversations => syncConversations(get(store.conversation), conversations));
 
-  store.conversations.subscribe(conversations => {
-    if (conversations.length === 0) {
-      router.navigate('/c');
-    }
-  });
-
   let previousUser = get(store.user);
   store.user.subscribe(user => {
     if (user) {
