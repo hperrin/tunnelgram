@@ -116,13 +116,22 @@ Using this strategy, Tunnelgram can send a video from any client device that can
 If you'd like to work on Tunnelgram, follow these steps to get it up and running on your system:
 
 1. Install [Docker](https://store.docker.com/search?type=edition&offering=community). You also need Docker Compose, which is included in the Community Edition.
-2. Now run these commands:
+2. Run these commands to checkout the repo and start the containers:
   ```sh
   git clone https://github.com/hperrin/tunnelgram.git
   cd tunnelgram
   ./run.sh
   ```
-3. Go to http://localhost:8080/
+3. Run these commands to create the buckets in the blob store:
+  ```sh
+  docker ps
+  # Look for the FPM container's name (probably tunnelgram_fpm_1) and use it in the next command.
+  docker exec -it tunnelgram_fpm_1 /bin/bash
+  cd /maintenance/
+  php create-buckets.php
+  exit
+  ```
+4. You're ready! Go to http://localhost:8080/
 
 To rebuild on file changes, in the `app` directory:
 
