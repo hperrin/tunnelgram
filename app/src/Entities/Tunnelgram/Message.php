@@ -45,7 +45,7 @@ class Message extends \Nymph\Entity {
       $this->conversation->save();
     }
     // Delete images from blob store.
-    if (count($this->images)) {
+    if (isset($this->images) && count($this->images)) {
       include_once(__DIR__.'/../../Blob/BlobClient.php');
       $client = new BlobClient();
       foreach ($this->images as $curImg) {
