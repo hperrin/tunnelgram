@@ -71,24 +71,27 @@ trait SendPushNotificationsTrait {
 
         // Send the notification to each subscription.
         foreach ($pushSubscriptions as $appPushSubscription) {
-          $result = $api->notifications->add([
-            'headings' => [
-              'en' => $title
-            ],
-            'contents' => [
-              'en' => $message
-            ],
-            'data' => ['conversationGuid' => $options['conversationGuid']],
-            'include_player_ids' => [$appPushSubscription->playerId],
-            'android_visibility' => 0,
-            'ios_badgeType' => 'Increase',
-            'ios_badgeCount' => 1,
-            // Not supported by OneSignal PHP client yet.
-            // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
-            'priority' => 10,
-            'android_group' => "tunnelgram_{$options['conversationGuid']}",
-            'adm_group' => "tunnelgram_{$options['conversationGuid']}"
-          ]);
+          \register_shutdown_function(
+              [&$api->notifications, 'add'],
+              [
+                'headings' => [
+                  'en' => $title
+                ],
+                'contents' => [
+                  'en' => $message
+                ],
+                'data' => ['conversationGuid' => $options['conversationGuid']],
+                'include_player_ids' => [$appPushSubscription->playerId],
+                'android_visibility' => 0,
+                'ios_badgeType' => 'Increase',
+                'ios_badgeCount' => 1,
+                // Not supported by OneSignal PHP client yet.
+                // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
+                'priority' => 10,
+                'android_group' => "tunnelgram_{$options['conversationGuid']}",
+                'adm_group' => "tunnelgram_{$options['conversationGuid']}"
+              ]
+          );
         }
       }
     }
@@ -126,10 +129,13 @@ trait SendPushNotificationsTrait {
           'contentEncoding' => 'aesgcm'
         ]);
 
-        $webPush->sendNotification($subscription);
+        \register_shutdown_function(
+            [&$webPush, 'sendNotification'],
+            $subscription
+        );
       }
     }
-    $webPush->flush();
+    \register_shutdown_function([&$webPush, 'flush']);
   }
 
   private function checkNotificationsSettingForPush($userGuid, $conversationGuid) {

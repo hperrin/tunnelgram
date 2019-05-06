@@ -374,8 +374,7 @@ class Message extends \Nymph\Entity {
           $names[$curUser->guid] = $curUser->$showNameProp;
         }
         // Send push notifications to the recipients after script execution.
-        register_shutdown_function(
-            [$this, 'sendPushNotifications'],
+        $this->sendPushNotifications(
             array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
             [
               'conversationGuid' => $this->conversation->guid,
@@ -387,7 +386,7 @@ class Message extends \Nymph\Entity {
                 ? 'Photo'
                 : ($this->video ? 'Video' : 'Message')
             ]
-        );
+          );
       }
     }
 
