@@ -51,8 +51,8 @@
         </span>
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown" bind:this={menuDropdown}>
-            <a class="nav-link dropdown-toggle p-0" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <Avatar bind:user={$user} />
+            <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <Avatar bind:user={$user} size={32} />
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
               <h6 class="dropdown-header">
