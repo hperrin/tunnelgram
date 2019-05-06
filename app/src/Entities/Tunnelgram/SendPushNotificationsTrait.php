@@ -23,6 +23,13 @@ trait SendPushNotificationsTrait {
       return;
     } else {
       // We are the child.
+
+      // First, reconnect to the DB, since the connection doesn't survive the
+      // process fork.
+      Nymph::disconnect();
+      Nymph::connect();
+
+      // Send the push notifications.
       $this->sendAppPushNotifications($recipientGuids, $options);
       $this->sendWebPushNotifications($recipientGuids, $options);
       exit;
