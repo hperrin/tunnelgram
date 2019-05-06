@@ -100,7 +100,17 @@
           </li>
         </ul>
         <span class="page-name navbar-text">
-          <span>{name}</span>
+          <span>
+            {#if $view === 'pushSubscriptions'}
+              Push Subscriptions
+            {:else if $view === 'user'}
+              {$viewUser.data.name}
+            {:else if $settings && $conversation.guid}
+              {$conversation.getName($settings)}
+            {:else}
+              <span>&nbsp;</span>
+            {/if}
+          </span>
         </span>
         {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
           <NavBar />
@@ -165,22 +175,6 @@
   let _hideInstallPrompt = false;
   let _hideNotificationPrompt = !('Notification' in window) || Notification.permission !== 'default';
   let _hidePersistentStoragePrompt = true;
-
-  $: name = (() => {
-    if ($view === 'pushSubscriptions') {
-      return 'Push Subscriptions';
-    }
-    if ($view === 'user') {
-      return $viewUser.data.name;
-    }
-    if ($settings && $conversation.guid) {
-      return $conversation.getName($settings);
-    }
-    if (!$conversation.guid) {
-      return 'New Conversation';
-    }
-    return '';
-  })();
 
   let menuDropdown;
   let menuDropdownComponent;
