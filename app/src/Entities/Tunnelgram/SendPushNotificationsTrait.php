@@ -13,8 +13,20 @@ use Minishlink\WebPush\Subscription;
 
 trait SendPushNotificationsTrait {
   public function sendPushNotifications($recipientGuids, $options) {
-    $this->sendAppPushNotifications($recipientGuids, $options);
-    $this->sendWebPushNotifications($recipientGuids, $options);
+    $pid = \pcntl_fork();
+    if ($pid == -1) {
+      php_error('Couldn\'t fork process for push notifications.');
+      $this->sendAppPushNotifications($recipientGuids, $options);
+      $this->sendWebPushNotifications($recipientGuids, $options);
+    } else if ($pid) {
+      // We are the parent.
+      return;
+    } else {
+      // We are the child.
+      $this->sendAppPushNotifications($recipientGuids, $options);
+      $this->sendWebPushNotifications($recipientGuids, $options);
+      exit;
+    }
   }
 
   public function sendAppPushNotifications($recipientGuids, $options) {
@@ -71,27 +83,24 @@ trait SendPushNotificationsTrait {
 
         // Send the notification to each subscription.
         foreach ($pushSubscriptions as $appPushSubscription) {
-          \register_shutdown_function(
-              [&$api->notifications, 'add'],
-              [
-                'headings' => [
-                  'en' => $title
-                ],
-                'contents' => [
-                  'en' => $message
-                ],
-                'data' => ['conversationGuid' => $options['conversationGuid']],
-                'include_player_ids' => [$appPushSubscription->playerId],
-                'android_visibility' => 0,
-                'ios_badgeType' => 'Increase',
-                'ios_badgeCount' => 1,
-                // Not supported by OneSignal PHP client yet.
-                // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
-                'priority' => 10,
-                'android_group' => "tunnelgram_{$options['conversationGuid']}",
-                'adm_group' => "tunnelgram_{$options['conversationGuid']}"
-              ]
-          );
+          $api->notifications->add([
+            'headings' => [
+              'en' => $title
+            ],
+            'contents' => [
+              'en' => $message
+            ],
+            'data' => ['conversationGuid' => $options['conversationGuid']],
+            'include_player_ids' => [$appPushSubscription->playerId],
+            'android_visibility' => 0,
+            'ios_badgeType' => 'Increase',
+            'ios_badgeCount' => 1,
+            // Not supported by OneSignal PHP client yet.
+            // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
+            'priority' => 10,
+            'android_group' => "tunnelgram_{$options['conversationGuid']}",
+            'adm_group' => "tunnelgram_{$options['conversationGuid']}"
+          ]);
         }
       }
     }
@@ -129,13 +138,10 @@ trait SendPushNotificationsTrait {
           'contentEncoding' => 'aesgcm'
         ]);
 
-        \register_shutdown_function(
-            [&$webPush, 'sendNotification'],
-            $subscription
-        );
+        $webPush->sendNotification($subscription);
       }
     }
-    \register_shutdown_function([&$webPush, 'flush']);
+    $webPush->flush();
   }
 
   private function checkNotificationsSettingForPush($userGuid, $conversationGuid) {

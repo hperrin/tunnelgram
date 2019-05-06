@@ -9,6 +9,7 @@ RUN ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/
 RUN docker-php-ext-install mysqli
 RUN docker-php-ext-configure gmp
 RUN docker-php-ext-install gmp
+RUN docker-php-ext-install pcntl
 
 RUN curl https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh -o wait-for-it.sh
 RUN chmod 755 wait-for-it.sh

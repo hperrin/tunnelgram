@@ -45,4 +45,4 @@ if [ ! -f "onesignal_rest_api_key.txt" ]; then
   touch ./onesignal_rest_api_key.txt
 fi
 
-docker-compose up
+docker-compose up $*
