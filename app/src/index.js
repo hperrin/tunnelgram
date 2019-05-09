@@ -238,6 +238,10 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   store.user.subscribe(user => {
     if (previousUser !== user) {
       if (user != null) {
+        // This is needed because the current user is added to acFull.
+        store.conversation.set(new Conversation());
+
+        // Check for a continue route and navigate to it.
         const route = router.lastRouteResolved();
         if (route) {
           const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
