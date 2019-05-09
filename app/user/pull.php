@@ -69,7 +69,7 @@ try {
         $readlineConversationGuids[] = $readline->conversation->guid;
 
         return $readline->readline
-          < $readline->conversation->mdate;
+          < $readline->conversation->lastMessage->cdate;
       }
   ));
 
