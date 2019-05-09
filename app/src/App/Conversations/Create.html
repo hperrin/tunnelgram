@@ -56,7 +56,7 @@
             <div class="list-group mt-3 text-body">
               {#each existingConversations as conversation (conversation.guid)}
                 <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
-                  <ConversationPreview bind:conversation />
+                  <Preview bind:conversation />
                 </a>
               {/each}
             </div>
@@ -85,7 +85,7 @@
   import {Nymph} from 'nymph-client';
   import {User} from 'tilmeld-client';
   import UserSearchSelector from '../Users/UserSearchSelector';
-  import ConversationPreview from './ConversationPreview';
+  import Preview from './Preview';
   import Avatar from '../Users/Avatar';
   import DisplayName from '../Users/DisplayName';
   import {navigate} from '../../Services/router';

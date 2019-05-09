@@ -80,7 +80,7 @@
               <div class="list-group mt-3 text-body">
                 {#each existingConversations as conversation (conversation.guid)}
                   <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
-                    <ConversationPreview bind:conversation />
+                    <Preview bind:conversation />
                   </a>
                 {/each}
               </div>
@@ -111,7 +111,7 @@
   import PNotify from 'pnotify/dist/es/PNotify';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import Avatar from './Avatar';
-  import ConversationPreview from '../Conversations/ConversationPreview';
+  import Preview from '../Conversations/Preview';
   import LoadingIndicator from '../LoadingIndicator';
   import {navigate} from '../../Services/router';
   import {Dropdown} from '../../Services/Val/BSN';

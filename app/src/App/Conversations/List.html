@@ -10,7 +10,7 @@
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
       <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {curConversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(curConversation)}>
-        <ConversationPreview bind:conversation={curConversation} />
+        <Preview bind:conversation={curConversation} />
       </div>
     {/each}
     {#if !_loading && !$conversations.length}
@@ -37,7 +37,7 @@
   import {Nymph, PubSub} from 'nymph-client';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from '../LoadingIndicator';
-  import ConversationPreview from './ConversationPreview';
+  import Preview from './Preview';
   import {navigate} from '../../Services/router';
   import ErrHandler from '../../ErrHandler';
   import {conversation, conversations, user, settings} from '../../stores';
