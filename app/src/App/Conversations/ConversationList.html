@@ -8,21 +8,19 @@
         <input type="text" class="form-control bg-secondary border-0 text-light" bind:value={_search} name="search" placeholder="Search people" autocomplete="off" />
       </div>
     {/if}
-    {#if !_loading}
-      {#each $conversations as curConversation (curConversation.guid)}
-        <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {curConversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(curConversation)}>
-          <ConversationPreview bind:conversation={curConversation} />
-        </div>
-      {/each}
-      {#if !$conversations.length}
-        <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
-          {#if $conversations.length}
-            No matching conversations.
-          {:else}
-            You have no conversations yet.
-          {/if}
-        </div>
-      {/if}
+    {#each $conversations as curConversation (curConversation.guid)}
+      <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {curConversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(curConversation)}>
+        <ConversationPreview bind:conversation={curConversation} />
+      </div>
+    {/each}
+    {#if !_loading && !$conversations.length}
+      <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
+        {#if $conversations.length}
+          No matching conversations.
+        {:else}
+          You have no conversations yet.
+        {/if}
+      </div>
     {/if}
     {#if _loading || !_reachedEarliestConversation}
       <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0 {_loadingEarlierConversations ? '' : 'visibility-hidden'}">
@@ -63,8 +61,13 @@
         'sort': 'mdate',
         'reverse': true
       }, {
+        'type': '|',
+        'ref': [
+          ['acFull', $user.guid],
+          ...$user.data.groups.map(group => ['group', group.guid])
+        ]
+      }, {
         'type': '&',
-        'ref': ['acFull', $user.guid],
         'gt': ['mdate', $conversations.length ? Math.max(...$conversations.map(c => c.mdate)) : 0]
       }).then(newConversations => {
         $conversations = [...newConversations, ...$conversations.filter(c => !c.inArray(newConversations))];
@@ -99,10 +102,12 @@
     });
   })();
 
-  let previousUser = $user;
-  $: if ($user && !$user.is(previousUser)) {
+  let previousUser = null;
+  let previousUserGroupsLength = 0;
+  $: if ($user && (!$user.is(previousUser) || $user.data.groups.length !== previousUserGroupsLength)) {
     subscribe();
     previousUser = $user;
+    previousUserGroupsLength = $user.data.groups.length;
   }
 
   let previousConversationsLength = $conversations.length;
@@ -116,8 +121,6 @@
   }
 
   onMount(() => {
-    subscribe();
-
     PubSub.on('connect', onPubSubConnect);
     PubSub.on('disconnect', onPubSubDisconnect);
   });
@@ -145,8 +148,11 @@
       'reverse': true,
       'limit': CONVERSATION_PAGE_SIZE
     }, {
-      'type': '&',
-      'ref': ['acFull', $user.guid]
+      'type': '|',
+      'ref': [
+        ['acFull', $user.guid],
+        ...$user.data.groups.map(group => ['group', group.guid])
+      ]
     }).subscribe(update => {
       if (destroyed) {
         return;
@@ -196,8 +202,13 @@
         'reverse': true,
         'limit': CONVERSATION_PAGE_SIZE
       }, {
+        'type': '|',
+        'ref': [
+          ['acFull', $user.guid],
+          ...$user.data.groups.map(group => ['group', group.guid])
+        ]
+      }, {
         'type': '&',
-        'ref': ['acFull', $user.guid],
         'lt': ['mdate', Math.min(...$conversations.map(c => c.mdate))]
       });
 

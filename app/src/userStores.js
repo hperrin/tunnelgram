@@ -9,18 +9,42 @@ export const userAvatar = writable(null);
 export const userIsTilmeldAdmin = writable(false);
 export const userReadyPromise = new Promise(resolve => ready = resolve);
 
+let subscription;
+
 // Get the current user.
 User.current().then(userValue => {
   user.set(userValue);
+  if (subscription) {
+    subscription.unsubscribe();
+  }
+  // PubSub subscription.
+  if (userValue) {
+    subscription = userValue.subscribe(userValue => {
+      user.set(userValue);
+    })
+  }
   ready();
 }, ErrHandler);
 
 // Handle logins and logouts.
 User.on('login', userValue => {
   user.set(userValue);
+  if (subscription) {
+    subscription.unsubscribe();
+  }
+  // PubSub subscription.
+  subscription = userValue.subscribe(userValue => {
+    user.set(userValue);
+  })
 });
 User.on('logout', () => {
+  // Svelte freaks out if $user isn't available while it's destroying everything.
+  user.set(new User());
+  // Now set user to it's appropriate value.
   user.set(null);
+  if (subscription) {
+    subscription.unsubscribe();
+  }
 });
 
 let previousUserValue = false;

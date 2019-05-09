@@ -51,9 +51,18 @@
         </div>
       </div>
     {/if}
-    {#if $user}
+    {#if $user && $user.guid}
       <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="height: 0;">
-        {#await $crypt.ready}
+        {#if cryptReady}
+          <App />
+        {:else if cryptError}
+            <div>
+              Error during encryption setup: {cryptError}
+            </div>
+            <div>
+              <a href="javascript:void(0)" on:click={logout}>Log Out</a>
+            </div>
+        {:else}
           <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
             <LoadingIndicator width="100" height="100" />
             <h3>Setting up encryption...</h3>
@@ -61,16 +70,7 @@
           <div class="text-center text-muted">
             <small>Stuck? <a href="javascript:void(0)" on:click={logout}>Log Out</a></small>
           </div>
-        {:then data}
-          <App />
-        {:catch error}
-          <div>
-            Error during encryption setup: {error}
-          </div>
-          <div>
-            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
-          </div>
-        {/await}
+        {/if}
       </div>
     {/if}
   </div>
@@ -86,6 +86,17 @@
 
   const cryptoAvailable = (() => {
     return !!((window.crypto || window.msCrypto).getRandomValues);
+  })();
+  let cryptReady = false;
+  let cryptError = null;
+
+  (async () => {
+    try {
+      await $crypt.ready;
+      cryptReady = true;
+    } catch (e) {
+      cryptError = e;
+    }
   })();
 </script>
 

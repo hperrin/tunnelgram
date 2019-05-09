@@ -74,15 +74,11 @@
         </div>
       {:else}
         <div>
-          {#await existingConversations}
-            <div>
-              One second...
-            </div>
-          {:then conversations}
-            {#if conversations.length}
+          {#if existingConversations}
+            {#if existingConversations.length}
               <h3 class="mt-3">Your Conversations</h3>
               <div class="list-group mt-3 text-body">
-                {#each conversations as conversation (conversation.guid)}
+                {#each existingConversations as conversation (conversation.guid)}
                   <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
                     <ConversationPreview bind:conversation />
                   </a>
@@ -90,13 +86,17 @@
               </div>
               <h3 class="mt-3">Or Start a New One</h3>
             {/if}
-            <button type="button" class="btn {conversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Conversation with {$viewUser.data.nameFirst}</button>
-          {:catch e}
+            <button type="button" class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Conversation with {$viewUser.data.nameFirst}</button>
+          {:else if existingConversationsError}
             <div class="alert alert-danger my-3" role="alert">
               Oops... something went wrong.
             </div>
             <button type="button" class="btn btn-light mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Conversation with {$viewUser.data.nameFirst}</button>
-          {/await}
+          {:else}
+            <div>
+              One second...
+            </div>
+          {/if}
         </div>
       {/if}
     </div>
@@ -104,6 +104,7 @@
 </div>
 
 <script>
+  import {onDestroy} from 'svelte';
   import {Nymph} from 'nymph-client';
   import ChangePassword from 'tilmeld-components/src/ChangePassword';
   import QRCode from 'qrcode';
@@ -134,30 +135,44 @@
   let _mouseOverAvatar = false;
   let _avatarLoading = false;
   let avatarInput;
+  let existingConversations = null;
+  let existingConversationsError = false;
+  let destroyed = false;
   // let EXPERIMENT_WEB_PUSH = getCookieValue('EXPERIMENT_WEB_PUSH') === 'true';
 
   $: shortLink = 'http://tngm.me/'+encodeURIComponent($viewUser.data.username);
   $: shortLinkPreview = 'tngm.me/'+encodeURIComponent($viewUser.data.username);
-  $: existingConversations = (() => {
-    if ($viewUserIsSelf) {
-      return null;
-    }
-
-    return Nymph.getEntities({
-      'class': Conversation.class,
-      'sort': 'mdate',
-      'reverse': true
-    }, {
-      'type': '&',
-      'ref': [
-        ['acFull', $viewUser.guid],
-        ['acFull', $user.guid]
-      ]
-    }).then(async conversations => {
-      await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
-      return conversations;
-    });
-  })();
+  $: if ($viewUserIsSelf) {
+    existingConversations = null;
+    existingConversationsError = false;
+  } else {
+    (async () => {
+      try {
+        existingConversationsError = false;
+        const conversations = await Nymph.getEntities({
+          'class': Conversation.class,
+          'sort': 'mdate',
+          'reverse': true
+        }, {
+          'type': '&',
+          'ref': [
+            ['acFull', [$viewUser.guid, $user.guid]]
+          ]
+        });
+        await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
+        if (destroyed) {
+          return;
+        }
+        existingConversations = conversations;
+      } catch (e) {
+        if (destroyed) {
+          return;
+        }
+        existingConversations = null;
+        existingConversationsError = true;
+      }
+    })();
+  };
   $: if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
     nickname = $settings.decrypted.nicknames[$viewUser.guid];
   }
@@ -188,6 +203,10 @@
       }
     );
   }
+
+  onDestroy(() => {
+    destroyed = true;
+  });
 
   function saveUser () {
     $viewUser.save().then(userValue => {

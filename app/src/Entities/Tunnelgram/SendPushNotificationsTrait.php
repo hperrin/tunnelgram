@@ -20,12 +20,16 @@ trait SendPushNotificationsTrait {
       $this->sendWebPushNotifications($recipientGuids, $options);
     } else if ($pid) {
       // We are the parent.
+
+      // Reconnect to the DB, since the connection doesn't survive the fork.
+      Nymph::disconnect();
+      Nymph::connect();
+
       return;
     } else {
       // We are the child.
 
-      // First, reconnect to the DB, since the connection doesn't survive the
-      // process fork.
+      // Reconnect to the DB, since the connection doesn't survive the fork.
       Nymph::disconnect();
       Nymph::connect();
 

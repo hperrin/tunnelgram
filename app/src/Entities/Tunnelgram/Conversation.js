@@ -25,8 +25,11 @@ export class Conversation extends Entity {
       name: null
     };
     this.data.name = null;
-    this.mode = Conversation.MODE_CONVERSATION;
+    this.data.mode = Conversation.MODE_CONVERSATION;
     this.data.acFull = [];
+    if (currentUser) {
+      this.data.acFull.push(currentUser);
+    }
   }
 
   // === Instance Methods ===
@@ -56,7 +59,7 @@ export class Conversation extends Entity {
     // Decrypt the conversation name.
     if (this.data.name != null) {
       let decrypt = input => input;
-      if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
+      if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && currentUser.guid in this.data.keys) {
         const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
         decrypt = input => crypt.decrypt(input, key);
       }
@@ -77,6 +80,10 @@ export class Conversation extends Entity {
   }
 
   async save () {
+    if (!this.guid && !currentUser.inArray(this.data.acFull)) {
+      this.data.acFull.push(currentUser);
+    }
+
     if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
       this.data.name = this.decrypted.name;
       delete this.data.keys;
@@ -84,19 +91,40 @@ export class Conversation extends Entity {
       let key;
 
       if (this.decrypted.name != null || this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
-        key = crypt.generateKey();
-        const encryptPromises = [];
-        for (let user of this.data.acFull) {
-          const pad = crypt.generatePad();
-          encryptPromises.push({user, promise: crypt.encryptRSAForUser(key + pad, user)});
+        if (this.data.keys && currentUser.guid in this.data.keys) {
+          key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+        } else {
+          this.data.keys = {};
+          key = crypt.generateKey();
         }
-        this.data.keys = {};
+        const encryptPromises = [];
+        // Encrypt the key for conversation users and channel admins.
+        for (let user of this.data.acFull) {
+          if (!(user.guid in this.data.keys)) {
+            const pad = crypt.generatePad();
+            encryptPromises.push({guid: user.guid, promise: crypt.encryptRSAForUser(key + pad, user)});
+          }
+        }
+        // This isn't needed because addChannelUser handles channel user keys.
+        // if (this.data.mode === Conversation.MODE_CHANNEL_PRIVATE && this.data.group) {
+        //   // Encrypt the key for channel users.
+        //   if (this.data.group.isASleepingReference) {
+        //     await this.data.group.ready();
+        //   }
+        //   const userGuids = await this.getGroupUserGuids();
+        //   for (let guid of userGuids) {
+        //     if (!(guid in this.data.keys)) {
+        //       const pad = crypt.generatePad();
+        //       encryptPromises.push({guid, promise: crypt.encryptRSAForUser(key + pad, guid)});
+        //     }
+        //   }
+        // }
         for (let entry of encryptPromises) {
-          this.data.keys[entry.user.guid] = await entry.promise;
+          this.data.keys[entry.guid] = await entry.promise;
         }
       }
 
-      // Encrypt the conversation name for all recipients (which should include the current user).
+      // Encrypt the conversation name.
       if (this.decrypted.name != null) {
         this.data.name = crypt.encrypt(this.decrypted.name, key);
       } else {
@@ -109,25 +137,31 @@ export class Conversation extends Entity {
 
   getName (settings) {
     if (this.guid == null) {
-      return 'New Conversation';
+      return this.data.mode === Conversation.MODE_CONVERSATION ? 'New Conversation' : 'New Channel';
     } else if (this.decrypted.name != null) {
       return this.decrypted.name;
     } else if (this.data.acFull.length === 1) {
-      return 'Just You';
-    } else {
-      const names = [];
-      for (let i = 0; i < this.data.acFull.length; i++) {
-        const participant = this.data.acFull[i];
-        if (!currentUser.is(participant)) {
-          let name = participant.data.name ? participant.data.name : 'Loading...';
-          if (settings && participant.guid in settings.decrypted.nicknames) {
-            name = settings.decrypted.nicknames[participant.guid];
-          }
-          names.push(name);
-        }
+      if (this.data.mode === Conversation.MODE_CONVERSATION) {
+        return 'Just You';
+      } else if (currentUser.is(this.data.acFull[0])) {
+        return 'Your Channel';
       }
-      return names.join(', ');
     }
+
+    const names = [];
+    for (let i = 0; i < this.data.acFull.length; i++) {
+      const participant = this.data.acFull[i];
+      if (!currentUser.is(participant)) {
+        let name = participant.data.name ? participant.data.name : 'Loading...';
+        if (settings && participant.guid in settings.decrypted.nicknames) {
+          name = settings.decrypted.nicknames[participant.guid];
+        }
+        names.push(name);
+      } else if (this.data.mode !== Conversation.MODE_CONVERSATION) {
+        names.push('You');
+      }
+    }
+    return (this.data.mode === Conversation.MODE_CONVERSATION ? '' : 'Channel with ')+names.join(', ');
   }
 
   async unreadCount () {
@@ -176,6 +210,30 @@ export class Conversation extends Entity {
 
   findMatchingConversations(...args) {
     return this.serverCall('findMatchingConversations', args, true);
+  }
+
+  getGroupUsers(...args) {
+    return this.serverCall('getGroupUsers', args, true);
+  }
+
+  async addChannelUser(user) {
+    let userKey = null;
+
+    if (this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
+      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+      const pad = crypt.generatePad();
+      userKey = await crypt.encryptRSAForUser(key + pad, user);
+    }
+
+    return await this.serverCall('addChannelUser', [user, userKey], true);
+  }
+
+  removeChannelUser(...args) {
+    return this.serverCall('removeChannelUser', args, true);
+  }
+
+  leave(...args) {
+    return this.serverCall('leave', args);
   }
 }
 

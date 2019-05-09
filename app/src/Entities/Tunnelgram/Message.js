@@ -20,6 +20,7 @@ export class Message extends Entity {
     this.savePromise = null;
     this.textElevation = 1;
     this.secretTextElevation = 1;
+    this.mode = null;
     this.encryption = false;
     this.decrypted = {
       text: '[Encrypted text]',
@@ -42,11 +43,19 @@ export class Message extends Entity {
     if (entityData.encryption != null) {
       this.encryption = entityData.encryption;
     }
+    if (entityData.mode != null) {
+      this.mode = entityData.mode;
+    }
 
     let decrypt = input => input;
     let decryptBytesAsync = async input => input;
     if (entityData.encryption && currentUser && this.data.keys && this.data.keys.hasOwnProperty(currentUser.guid)) {
-      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+      let key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+      if (this.mode === Conversation.MODE_CHANNEL_PRIVATE) {
+        // key is the conversation key (See Message.php/jsonSerialize). XOR it
+        // with the plaintext key to get the encryption key.
+        key = crypt.xorKey(key, this.data.key);
+      }
       decrypt = input => crypt.decrypt(input, key);
       decryptBytesAsync = input => crypt.decryptBytesAsync(input, key);
     }
@@ -175,6 +184,7 @@ export class Message extends Entity {
   toJSON() {
     const obj = super.toJSON();
 
+    obj.mode = this.mode;
     obj.encryption = this.encryption;
 
     return obj;
@@ -193,7 +203,12 @@ export class Message extends Entity {
         if (this.data.conversation.data.mode === Conversation.MODE_CONVERSATION) {
           key = crypt.generateKey();
         } else if (this.data.conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
-          key = crypt.decryptRSA(this.data.conversation.data.keys[currentUser.guid]).slice(0, 96);
+          // Store a plaintext key.
+          this.data.key = crypt.generateKey();
+          // Get the channel key.
+          const channelKey = crypt.decryptRSA(this.data.conversation.data.keys[currentUser.guid]).slice(0, 96);
+          // The encryption key is the result of XORing the two.
+          key = crypt.xorKey(channelKey, this.data.key);
         } else {
           encrypt = (input, key) => input;
           encryptBytesToBase64Async = async (input, key) => {
@@ -202,7 +217,7 @@ export class Message extends Entity {
           };
         }
 
-        // Encrypt the message text for all recipients (which should include the current user).
+        // Encrypt the message text.
         if (this.decrypted.text != null) {
           this.data.text = encrypt(this.decrypted.text, key);
           if (this.decrypted.text.match(/^1> (?:.|\n)*\n2> ./)) {
@@ -243,6 +258,7 @@ export class Message extends Entity {
         }
 
         if (this.data.conversation.data.mode === Conversation.MODE_CONVERSATION) {
+          // Encrypt the key for all the conversation users.
           const encryptPromises = [];
           for (let user of this.data.conversation.data.acFull) {
             const pad = crypt.generatePad();

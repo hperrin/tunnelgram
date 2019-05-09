@@ -236,21 +236,21 @@ class EncryptionService extends AESEncryptionService {
     return encryptor.encrypt(text);
   }
 
-  async encryptRSAForUser(text, user) {
+  async encryptRSAForUser(text, userOrGuid) {
     let publicKey;
-    if (this.userPublicKeys.hasOwnProperty(user.guid)) {
-      publicKey = this.userPublicKeys[user.guid];
+    let guid = typeof userOrGuid === 'number' ? userOrGuid : userOrGuid.guid;
+    if (guid in this.userPublicKeys) {
+      publicKey = this.userPublicKeys[guid];
     } else {
       try {
-        const publicKeyEntity = await Nymph.getEntity(
-          {'class': PublicKey.class},
-          {
-            'type': '&',
-            'ref': ['user', user.guid]
-          }
-        );
+        const publicKeyEntity = await Nymph.getEntity({
+          'class': PublicKey.class
+        }, {
+          'type': '&',
+          'ref': ['user', guid]
+        });
         publicKey = publicKeyEntity.get('text');
-        this.userPublicKeys[user.guid] = publicKey;
+        this.userPublicKeys[guid] = publicKey;
       } catch (e) {
         return null;
       }

@@ -17,22 +17,24 @@
           <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
         </a>
       {/each}
-      {#await _userSearchPromiseServer}
-        <span class="dropdown-item-text d-flex justify-content-center">
-          <LoadingIndicator width="18" height="18" />
-        </span>
-      {:then serverUsers}
-        {#if serverUsers.length}
-          <span class="dropdown-item-text d-flex justify-content-center my-2">
-            Others
+      <div>
+        {#await _userSearchPromiseServer}
+          <span class="dropdown-item-text d-flex justify-content-center">
+            <LoadingIndicator width="18" height="18" />
           </span>
-        {/if}
-        {#each serverUsers as user (user.guid)}
-          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
-          </a>
-        {/each}
-      {/await}
+        {:then serverUsers}
+          {#if serverUsers.length}
+            <span class="dropdown-item-text d-flex justify-content-center my-2">
+              Others
+            </span>
+          {/if}
+          {#each serverUsers as user (user.guid)}
+            <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+              <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+            </a>
+          {/each}
+        {/await}
+      </div>
     </div>
   {/if}
 </div>

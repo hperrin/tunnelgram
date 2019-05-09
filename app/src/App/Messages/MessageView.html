@@ -5,12 +5,19 @@
 {/if}
 {#if message.data.informational}
   <small class="d-flex align-items-center w-100 mb-2 text-muted">
+    <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
+      <Avatar user={message.data.user} size="18" />
+    </a>
     {#if message.data.text === 'left'}
-      <Avatar className="mx-2" user={message.data.user} size="18" /> <DisplayName bind:user={message.data.user} /> left the conversation.
+      <DisplayName bind:user={message.data.user} /> left.
     {:else if message.data.text === 'added'}
-      <Avatar className="mx-2" user={message.data.relatedUser} size="18" /> <DisplayName bind:user={message.data.relatedUser} /> was added to the conversation by <DisplayName bind:user={message.data.user} />.
+      <DisplayName bind:user={message.data.user} /> added <DisplayName bind:user={message.data.relatedUser} />.
+    {:else if message.data.text === 'removed'}
+      <DisplayName bind:user={message.data.user} /> removed <DisplayName bind:user={message.data.relatedUser} />.
+    {:else if message.data.text === 'promoted'}
+      <DisplayName bind:user={message.data.user} /> promoted <DisplayName bind:user={message.data.relatedUser} />.
     {:else}
-      <Avatar className="mx-2" user={message.data.user} size="18" /> {message.data.text}
+      {message.data.text}
     {/if}
   </small>
 {:else}

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.93.3",
+            "version": "3.93.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "874c1040edab52df3873157aa54ea51833d48c0e"
+                "reference": "75d6b1ec57f3438ac960d74e08366be43d52eca7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/874c1040edab52df3873157aa54ea51833d48c0e",
-                "reference": "874c1040edab52df3873157aa54ea51833d48c0e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/75d6b1ec57f3438ac960d74e08366be43d52eca7",
+                "reference": "75d6b1ec57f3438ac960d74e08366be43d52eca7",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-05-03T18:07:06+00:00"
+            "time": "2019-05-08T18:16:33+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -2161,16 +2161,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.22",
+            "version": "3.0.0-beta.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "3c18dbf45c2750d07c798e14534dba87387beeba"
+                "reference": "7291113688a56a85b9d5dee0bc2cfe01f8c6d745"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/3c18dbf45c2750d07c798e14534dba87387beeba",
-                "reference": "3c18dbf45c2750d07c798e14534dba87387beeba",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/7291113688a56a85b9d5dee0bc2cfe01f8c6d745",
+                "reference": "7291113688a56a85b9d5dee0bc2cfe01f8c6d745",
                 "shasum": ""
             },
             "require-dev": {
@@ -2211,20 +2211,20 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2019-05-01T00:00:00+00:00"
+            "time": "2019-05-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.29",
+            "version": "1.0.0-beta.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "815a38cdd2012cab2407016b6335327b54198ee0"
+                "reference": "8de77dc5225a8be2dbc324c9239a055ca0c165b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/815a38cdd2012cab2407016b6335327b54198ee0",
-                "reference": "815a38cdd2012cab2407016b6335327b54198ee0",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/8de77dc5225a8be2dbc324c9239a055ca0c165b4",
+                "reference": "8de77dc5225a8be2dbc324c9239a055ca0c165b4",
                 "shasum": ""
             },
             "require": {
@@ -2270,7 +2270,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2019-05-01T00:00:00+00:00"
+            "time": "2019-05-08T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",

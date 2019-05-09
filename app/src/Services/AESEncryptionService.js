@@ -64,4 +64,13 @@ export class AESEncryptionService {
     (root.crypto || root.msCrypto).getRandomValues(keyArray);
     return aesjs.utils.hex.fromBytes(keyArray);
   }
+
+  xorKey (keyA, keyB) {
+    let keyArrayA = this.decodeBase64(keyA);
+    let keyArrayB = this.decodeBase64(keyB);
+
+    const xoredKey = keyArrayA.map((byte, i) => byte ^ keyArrayB[i]);
+
+    return aesjs.utils.hex.fromBytes(xoredKey);
+  }
 }

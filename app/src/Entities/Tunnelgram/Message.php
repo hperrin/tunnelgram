@@ -13,6 +13,7 @@ class Message extends \Nymph\Entity {
     'text',
     'images',
     'video',
+    'key',
     'keys',
     'conversation'
   ];
@@ -34,7 +35,7 @@ class Message extends \Nymph\Entity {
   }
 
   public function handleDelete() {
-    if ($this->is($this->conversation->lastMessage)) {
+    if (isset($this->conversation->lastMessage) && $this->is($this->conversation->lastMessage)) {
       $this->conversation->lastMessage = Nymph::getEntity([
         'class' => 'Tunnelgram\Message',
         'reverse' => true,
@@ -54,7 +55,7 @@ class Message extends \Nymph\Entity {
       }
     }
     // Delete video from blob store.
-    if ($this->video) {
+    if (isset($this->video)) {
       include_once(__DIR__.'/../../Blob/BlobClient.php');
       $client = new BlobClient();
       $client->delete('tunnelgram-thumbnails', $this->video['id']);
@@ -67,7 +68,7 @@ class Message extends \Nymph\Entity {
     $object = parent::jsonSerialize($clientClassName);
 
     if (
-      $this->informational ||
+      ($this->informational ?? false) ||
       $this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC
     ) {
       $object->encryption = false;
@@ -85,6 +86,7 @@ class Message extends \Nymph\Entity {
         $object->data['keys'] = $newKeys;
       }
 
+      $object->mode = $this->conversation->mode;
       $object->encryption = true;
     }
 
@@ -101,7 +103,7 @@ class Message extends \Nymph\Entity {
       return false;
     }
 
-    if (!Tilmeld::checkPermissions($this->conversation, Tilmeld::FULL_ACCESS)) {
+    if (!Tilmeld::checkPermissions($this->conversation, Tilmeld::WRITE_ACCESS)) {
       return false;
     }
 
@@ -124,7 +126,7 @@ class Message extends \Nymph\Entity {
         unset($this->keys);
       }
 
-      if ($this->informational) {
+      if ($this->informational ?? false) {
         $this->acUser = Tilmeld::READ_ACCESS;
       }
 
@@ -133,7 +135,7 @@ class Message extends \Nymph\Entity {
       }
       unset($curImg);
 
-      if ($this->video) {
+      if (isset($this->video)) {
         $this->video['id'] = Uuid::uuid4()->toString();
       }
     }
@@ -166,13 +168,21 @@ class Message extends \Nymph\Entity {
         ->attribute('informational', v::boolType(), false)
         ->attribute('relatedUser', v::instance('\Tilmeld\Entities\User'), false)
         ->attribute(
+            'key',
+            v::stringType()->notEmpty()->prnt()->length(1, 2048),
+            (
+              !($this->informational ?? false) &&
+              $this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE
+            )
+        )
+        ->attribute(
             'keys',
             v::arrayVal()->each(
                 v::stringType()->notEmpty()->prnt()->length(1, 2048),
                 v::intVal()->in($recipientGuids)
             ),
             (
-              !$this->informational &&
+              !($this->informational ?? false) &&
               $this->conversation->mode === Conversation::MODE_CONVERSATION
             )
         )
@@ -361,7 +371,7 @@ class Message extends \Nymph\Entity {
       // Update the user's readline.
       $this->conversation->saveReadline($this->mdate);
 
-      if (!$this->informational) {
+      if (!($this->informational ?? false)) {
         $this->conversation->refresh();
         $this->conversation->lastMessage = $this;
         $this->conversation->save();
@@ -381,10 +391,10 @@ class Message extends \Nymph\Entity {
               'conversationNamed' => isset($this->conversation->name),
               'senderName' => Tilmeld::$currentUser->name,
               'names' => $names,
-              'type' => $this->informational ? 'info' : 'message',
-              'messageType' => $this->images
+              'type' => ($this->informational ?? false) ? 'info' : 'message',
+              'messageType' => isset($this->images)
                 ? 'Photo'
-                : ($this->video ? 'Video' : 'Message')
+                : (isset($this->video) ? 'Video' : 'Message')
             ]
           );
       }

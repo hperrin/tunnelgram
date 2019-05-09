@@ -97,252 +97,6 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 (async () => {
   await store.userReadyPromise;
 
-  store.conversation.subscribe(conversation => {
-    if (conversation && conversation.guid) {
-      const conversations = get(store.conversations);
-      // Refresh conversations' readlines when current conversation changes.
-      for (let curConv of conversations) {
-        if (curConv != null && conversation != null && conversation === curConv) {
-          // They are the same instance, so mark conversations as changed.
-          store.conversations.set(conversations);
-          break;
-          // If they are the same entity, but different instances, the next code
-          // block will update conversations.
-        }
-      }
-    }
-  });
-
-  function syncConversations(conversation, conversations) {
-    // 'conversation' and the corresponding entity in 'conversations' should be
-    // the same instance, so check to make sure they are.
-    if (conversation && conversation.guid) {
-      const idx = conversation.arraySearch(conversations);
-
-      if (idx !== false && conversation !== conversations[idx]) {
-        // Check both of their modified dates. Whichever is most recent wins.
-        if (conversations[idx].mdate > conversation.mdate) {
-          conversation = conversations[idx];
-          store.conversation.set(conversation);
-        } else {
-          conversations[idx] = conversation;
-          store.conversations.set(conversations);
-        }
-      }
-    }
-  }
-  store.conversation.subscribe(conversation => syncConversations(conversation, get(store.conversations)));
-  store.conversations.subscribe(conversations => syncConversations(get(store.conversation), conversations));
-
-  let previousUser = get(store.user);
-  store.user.subscribe(user => {
-    if (previousUser !== user) {
-      if (user) {
-        const route = router.lastRouteResolved();
-        if (route) {
-          const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
-          if (queryMatch) {
-            router.navigate(decodeURIComponent(queryMatch[1]));
-          }
-        }
-
-        if (setupSubscription) {
-          setupSubscription();
-        }
-
-        // If the user logs in, get their settings.
-        if (get(store.settings) == null) {
-          crypt.ready.then(() => {
-            Settings.current().then(settings => {
-              store.settings.set(settings);
-            });
-          });
-        }
-      } else if (user === null) {
-        // If the user logs out, clear everything.
-        storage.clear();
-        store.conversations.set([]);
-        store.conversation.set(new Conversation());
-        store.settings.set(null);
-        refreshAll();
-        // And navigate to a continue URL, since the user doesn't have access.
-        navigateToContinueUrl();
-      }
-    }
-
-    previousUser = user;
-  });
-
-  if (get(store.user) != null) {
-    // Get the current settings.
-    crypt.ready.then(() => {
-      Settings.current().then(settings => {
-        store.settings.set(settings);
-      });
-    });
-  }
-
-  (async () => {
-    if (window.inCordova) {
-      // Cordova OneSignal Push Subscriptions
-
-      // When user consents to notifications, tell OneSignal.
-      store.requestNotificationPermission.set(() => window.plugins.OneSignal.provideUserConsent(true));
-
-      // This won't resolve until the user allows notifications and OneSignal
-      // registers the device and returns a player ID. This should only happen
-      // after the user has logged in, so we can safely save it to the server.
-      let playerId = await window.appPushPlayerIdPromise;
-      if (playerId == null) {
-        return;
-      }
-
-      // Push the playerId up to the server. (It will be updated if it already
-      // exists.)
-      const appPushSubscription = new AppPushSubscription();
-      appPushSubscription.set({
-        playerId
-      });
-      appPushSubscription.save().catch(ErrHandler);
-    } else {
-      // Web Push Subscriptions
-      if ((await swRegPromise) == null) {
-        return;
-      }
-
-      // Support for push, notifications, and push payloads.
-      const pushSupport = 'PushManager' in window;
-      const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
-      // Maybe I'll use these if I can figure out how to get payloads to work.
-      // const payloadSupport = 'getKey' in PushSubscription.prototype;
-      // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
-
-      if (pushSupport && notificationSupport) {
-        setupSubscription = async () => {
-          const getSubscription = async () => {
-            const registration = await swRegPromise;
-            return registration.pushManager.getSubscription();
-          };
-
-          const subscribeFromWorker = subscriptionOptions => {
-            return new Promise((resolve, reject) => {
-              if (!navigator.serviceWorker.controller) {
-                reject(new Error('There is no service worker.'));
-                return;
-              }
-
-              navigator.serviceWorker.controller.postMessage({
-                command: 'subscribe',
-                subscriptionOptions: subscriptionOptions
-              });
-
-              const messageListenerFunction = event => {
-                navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
-                switch (event.data.command) {
-                  case 'subscribe-success':
-                    resolve(getSubscription());
-                    break;
-                  case 'subscribe-failure':
-                    reject(new Error('Subscription failed: ' + event.data.message));
-                    break;
-                  default:
-                    reject(new Error('Invalid command: ' + event.data.command));
-                    break;
-                }
-              };
-
-              navigator.serviceWorker.addEventListener('message', messageListenerFunction);
-            });
-          };
-
-          // See if there is a subscription already.
-          let subscription = await getSubscription();
-
-          if (subscription) {
-            store.webPushSubscription.set(subscription);
-
-            try {
-              const webPushSubscriptionServerCheck = await Nymph.getEntity({
-                class: WebPushSubscription.class
-              }, {
-                'type': '&',
-                'strict': ['endpoint', subscription.endpoint]
-              });
-
-              if (webPushSubscriptionServerCheck != null) {
-                return;
-              }
-            } catch (e) {
-              if (e.status !== 404) {
-                throw e;
-              }
-            }
-          } else {
-            // The vapid key from the server.
-            const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
-            if (!vapidPublicKey) {
-              return;
-            }
-            const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
-
-            // Make the subscription.
-            subscription = await subscribeFromWorker({
-              userVisibleOnly: true,
-              applicationServerKey: convertedVapidKey
-            });
-
-            store.webPushSubscription.set(subscription);
-          }
-
-          // And push it up to the server.
-          const webPushSubscription = new WebPushSubscription();
-          const subscriptionData = JSON.parse(JSON.stringify(subscription));
-          webPushSubscription.set({
-            endpoint: subscriptionData.endpoint,
-            keys: {
-              p256dh: subscriptionData.keys.p256dh,
-              auth: subscriptionData.keys.auth
-            }
-          });
-          webPushSubscription.save().catch(ErrHandler);
-        };
-
-        // Set notification permission asker.
-        store.requestNotificationPermission.set(async () => {
-          const permissionResult = await new Promise(async resolve => {
-            const promise = Notification.requestPermission(value => resolve(value));
-            if (promise) {
-              resolve(await promise);
-            }
-          });
-
-          if (permissionResult === 'denied' || permissionResult === 'default') {
-            return;
-          }
-
-          setupSubscription();
-        });
-
-        if (Notification.permission === 'granted') {
-          if (get(store.user)) {
-            setupSubscription();
-          }
-        }
-      }
-    }
-  })();
-
-  const loader = document.getElementById('initialLoader');
-  if (loader) {
-    loader.parentNode.removeChild(loader);
-  }
-
-  const app = new Container({
-    target: document.querySelector('main'),
-    props: {},
-    store
-  });
-
   const conversationHandler = params => {
     const guid = parseFloat(params.id);
     const conversations = get(store.conversations);
@@ -442,6 +196,254 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   }).notFound(() => {
     router.navigate('/');
   }).resolve();
+
+  store.conversation.subscribe(conversation => {
+    if (conversation && conversation.guid) {
+      const conversations = get(store.conversations);
+      // Refresh conversations' readlines when current conversation changes.
+      for (let curConv of conversations) {
+        if (curConv != null && conversation != null && conversation === curConv) {
+          // They are the same instance, so mark conversations as changed.
+          store.conversations.set(conversations);
+          break;
+          // If they are the same entity, but different instances, the next code
+          // block will update conversations.
+        }
+      }
+    }
+  });
+
+  function syncConversations(conversation, conversations) {
+    // 'conversation' and the corresponding entity in 'conversations' should be
+    // the same instance, so check to make sure they are.
+    if (conversation && conversation.guid) {
+      const idx = conversation.arraySearch(conversations);
+
+      if (idx !== false && conversation !== conversations[idx]) {
+        // Check both of their modified dates. Whichever is most recent wins.
+        if (conversations[idx].mdate > conversation.mdate) {
+          conversation = conversations[idx];
+          store.conversation.set(conversation);
+        } else {
+          conversations[idx] = conversation;
+          store.conversations.set(conversations);
+        }
+      }
+    }
+  }
+  store.conversation.subscribe(conversation => syncConversations(conversation, get(store.conversations)));
+  store.conversations.subscribe(conversations => syncConversations(get(store.conversation), conversations));
+
+  let previousUser = null;
+  store.user.subscribe(user => {
+    if (previousUser !== user) {
+      if (user != null) {
+        const route = router.lastRouteResolved();
+        if (route) {
+          const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+          if (queryMatch) {
+            router.navigate(decodeURIComponent(queryMatch[1]));
+          }
+        }
+
+        if (setupSubscription) {
+          setupSubscription();
+        }
+
+        // Get their settings.
+        crypt.ready.then(() => {
+          Settings.current().then(settings => {
+            store.settings.set(settings);
+          });
+        });
+      } else if (previousUser != null && user == null) {
+        // If the user logs out, clear everything.
+        storage.clear();
+        store.conversations.set([]);
+        store.conversation.set(new Conversation());
+        store.settings.set(null);
+        refreshAll();
+        // And navigate to a continue URL, since the user doesn't have access.
+        navigateToContinueUrl();
+      }
+
+      previousUser = user;
+    }
+  });
+
+  (async () => {
+    if (window.inCordova) {
+      // Cordova OneSignal Push Subscriptions
+
+      // When user consents to notifications, tell OneSignal.
+      store.requestNotificationPermission.set(() => window.plugins.OneSignal.provideUserConsent(true));
+
+      // This won't resolve until the user allows notifications and OneSignal
+      // registers the device and returns a player ID. This should only happen
+      // after the user has logged in, so we can safely save it to the server.
+      let playerId = await window.appPushPlayerIdPromise;
+      if (playerId == null) {
+        return;
+      }
+
+      // Push the playerId up to the server. (It will be updated if it already
+      // exists.)
+      const appPushSubscription = new AppPushSubscription();
+      appPushSubscription.set({
+        playerId
+      });
+      appPushSubscription.save().catch(ErrHandler);
+    } else {
+      // Web Push Subscriptions
+      if ((await swRegPromise) == null) {
+        return;
+      }
+
+      // Support for push, notifications, and push payloads.
+      const pushSupport = 'PushManager' in window;
+      const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
+      // Maybe I'll use these if I can figure out how to get payloads to work.
+      // const payloadSupport = 'getKey' in PushSubscription.prototype;
+      // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
+
+      if (pushSupport && notificationSupport) {
+        setupSubscription = async () => {
+          const registration = await swRegPromise;
+
+          const getSubscription = async () => {
+            return registration.pushManager.getSubscription();
+          };
+
+          const subscribeFromWorkerOrSelf = subscriptionOptions => {
+            return new Promise((resolve, reject) => {
+              if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                  command: 'subscribe',
+                  subscriptionOptions: subscriptionOptions
+                });
+
+                const messageListenerFunction = event => {
+                  navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
+                  switch (event.data.command) {
+                    case 'subscribe-success':
+                      resolve(getSubscription());
+                      break;
+                    case 'subscribe-failure':
+                      reject('Subscription from worker failed: ' + event.data.message);
+                      break;
+                    default:
+                      reject('Invalid command: ' + event.data.command);
+                      break;
+                  }
+                };
+
+                navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+              } else {
+                if (subscriptionOptions.hasOwnProperty('applicationServerKey')) {
+                  subscriptionOptions.applicationServerKey = new Uint8Array(subscriptionOptions.applicationServerKey);
+                }
+
+                registration.pushManager.subscribe(subscriptionOptions).then(subscription => {
+                  resolve(subscription);
+                }).catch(error => {
+                  reject('Subscription from self failed: ' + error.message);
+                });
+              }
+            });
+          };
+
+          // See if there is a subscription already.
+          let subscription = await getSubscription();
+
+          if (subscription) {
+            store.webPushSubscription.set(subscription);
+
+            try {
+              const webPushSubscriptionServerCheck = await Nymph.getEntity({
+                class: WebPushSubscription.class
+              }, {
+                'type': '&',
+                'strict': ['endpoint', subscription.endpoint]
+              });
+
+              if (webPushSubscriptionServerCheck != null) {
+                return;
+              }
+            } catch (e) {
+              if (e.status !== 404) {
+                throw e;
+              }
+            }
+          } else {
+            // The vapid key from the server.
+            const vapidPublicKey = await WebPushSubscription.getVapidPublicKey();
+            if (!vapidPublicKey) {
+              return;
+            }
+            const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
+
+            // Make the subscription.
+            try {
+              subscription = await subscribeFromWorkerOrSelf({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidKey
+              });
+            } catch (e) {
+              console.log('Push subscription failed: '+e);
+              return;
+            }
+
+            store.webPushSubscription.set(subscription);
+          }
+
+          // And push it up to the server.
+          const webPushSubscription = new WebPushSubscription();
+          const subscriptionData = JSON.parse(JSON.stringify(subscription));
+          webPushSubscription.set({
+            endpoint: subscriptionData.endpoint,
+            keys: {
+              p256dh: subscriptionData.keys.p256dh,
+              auth: subscriptionData.keys.auth
+            }
+          });
+          webPushSubscription.save().catch(ErrHandler);
+        };
+
+        // Set notification permission asker.
+        store.requestNotificationPermission.set(async () => {
+          const permissionResult = await new Promise(async resolve => {
+            const promise = Notification.requestPermission(value => resolve(value));
+            if (promise) {
+              resolve(await promise);
+            }
+          });
+
+          if (permissionResult === 'denied' || permissionResult === 'default') {
+            return;
+          }
+
+          setupSubscription();
+        });
+
+        if (Notification.permission === 'granted') {
+          if (get(store.user)) {
+            setupSubscription();
+          }
+        }
+      }
+    }
+  })();
+
+  const loader = document.getElementById('initialLoader');
+  if (loader) {
+    loader.parentNode.removeChild(loader);
+  }
+
+  const app = new Container({
+    target: document.querySelector('main'),
+    props: {},
+    store
+  });
 })();
 
 // Required for Cordova.
