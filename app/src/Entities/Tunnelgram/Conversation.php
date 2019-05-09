@@ -10,7 +10,7 @@ use Ramsey\Uuid\Uuid;
 class Conversation extends \Nymph\Entity {
   use SendPushNotificationsTrait;
   const ETYPE = 'conversation';
-  const MODE_CONVERSATION = 0;
+  const MODE_CHAT = 0;
   const MODE_CHANNEL_PRIVATE = 1;
   const MODE_CHANNEL_PUBLIC = 2;
   protected $clientEnabledMethods = [
@@ -49,7 +49,7 @@ class Conversation extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->name = null;
-    $this->mode = self::MODE_CONVERSATION;
+    $this->mode = self::MODE_CHAT;
     $this->acFull = [];
     $this->acGroup = Tilmeld::WRITE_ACCESS;
     parent::__construct($id);
@@ -91,7 +91,7 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function getGroupUsers($limit, $offset) {
-    if (isset($this->guid) && $this->mode !== self::MODE_CONVERSATION) {
+    if (isset($this->guid) && $this->mode !== self::MODE_CHAT) {
       return $this->group->getUsers(false, $limit, $offset);
     }
     return null;
@@ -104,8 +104,8 @@ class Conversation extends \Nymph\Entity {
     if (!Tilmeld::$currentUser->inArray($this->acFull)) {
       throw new \Exception('You\'re not an admin of this channel.');
     }
-    if ($this->mode === self::MODE_CONVERSATION) {
-      throw new \Exception('Conversations don\'t support channel members.');
+    if ($this->mode === self::MODE_CHAT) {
+      throw new \Exception('Chats don\'t support channel members.');
     }
     if ($user->inArray($this->acFull)) {
       throw new \Exception('That user is a channel admin.');
@@ -142,8 +142,8 @@ class Conversation extends \Nymph\Entity {
     if (!Tilmeld::$currentUser->inArray($this->acFull)) {
       throw new \Exception('You\'re not an admin of this channel.');
     }
-    if ($this->mode === self::MODE_CONVERSATION) {
-      throw new \Exception('Conversations don\'t support channel members.');
+    if ($this->mode === self::MODE_CHAT) {
+      throw new \Exception('Chats don\'t support channel members.');
     }
     if ($user->inArray($this->acFull)) {
       throw new \Exception('That user is a channel admin.');
@@ -173,7 +173,7 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function leave() {
-    if ($this->mode !== self::MODE_CONVERSATION && !Tilmeld::$currentUser->inArray($this->acFull)) {
+    if ($this->mode !== self::MODE_CHAT && !Tilmeld::$currentUser->inArray($this->acFull)) {
       $this->handleDelete();
     } else {
       $this->delete();
@@ -185,10 +185,10 @@ class Conversation extends \Nymph\Entity {
 
     $acFullIndex = Tilmeld::$currentUser->arraySearch($this->acFull);
 
-    if ($this->mode === self::MODE_CONVERSATION) {
+    if ($this->mode === self::MODE_CHAT) {
       // Is the user in the conversation?
       if ($acFullIndex === false) {
-        throw new \Exception('You can only remove yourself from conversations you are in.');
+        throw new \Exception('You can only remove yourself from chats you are in.');
       }
 
       // Delete all the user's messages.
@@ -262,7 +262,7 @@ class Conversation extends \Nymph\Entity {
         }
       } while (count($readlines));
 
-      if ($this->mode !== self::MODE_CONVERSATION) {
+      if ($this->mode !== self::MODE_CHAT) {
         // Remove all the users from the group.
         do {
           $users = Nymph::getEntities([
@@ -323,7 +323,7 @@ class Conversation extends \Nymph\Entity {
 
       $this->saveSkipAC();
     }
-    if ($this->mode !== self::MODE_CONVERSATION) {
+    if ($this->mode !== self::MODE_CHAT) {
       $user = User::factory(Tilmeld::$currentUser->guid);
 
       $user->delGroup($this->group);
@@ -335,7 +335,7 @@ class Conversation extends \Nymph\Entity {
 
   public function jsonSerialize($clientClassName = true) {
     if (!isset($this->mode)) {
-      $this->mode = self::MODE_CONVERSATION;
+      $this->mode = self::MODE_CHAT;
     }
 
     $object = parent::jsonSerialize($clientClassName);
@@ -380,8 +380,8 @@ class Conversation extends \Nymph\Entity {
         'guid' => $this->lastMessage->guid
       ]) === null
     ) {
-      // If a user is added to a regular conversation, they may not be able to
-      // see the last message.
+      // If a user is added to a chat, they may not be able to see the last
+      // message.
       unset($object->data['lastMessage']);
     }
 
@@ -409,7 +409,7 @@ class Conversation extends \Nymph\Entity {
   public function putData($data, $sdata = []) {
     parent::putData($data, $sdata);
     if (!isset($this->mode)) {
-      $this->mode = self::MODE_CONVERSATION;
+      $this->mode = self::MODE_CHAT;
     }
   }
 
@@ -503,7 +503,7 @@ class Conversation extends \Nymph\Entity {
     }
 
     if (!isset($this->mode)) {
-      $this->mode = self::MODE_CONVERSATION;
+      $this->mode = self::MODE_CHAT;
     }
 
     $newConversation = false;
@@ -534,7 +534,7 @@ class Conversation extends \Nymph\Entity {
           !Tilmeld::$currentUser->is($removedUsers[0])
         )
       ) {
-        throw new \Exception('You can only remove yourself from a conversation or channel admins.');
+        throw new \Exception('You can\'t remove others from a chat or channel admins.');
       }
 
       foreach ($removedUsers as $curUser) {
@@ -610,7 +610,7 @@ class Conversation extends \Nymph\Entity {
       throw new \Exception($exception->getFullMessage());
     }
 
-    if ($newConversation && $this->mode !== self::MODE_CONVERSATION) {
+    if ($newConversation && $this->mode !== self::MODE_CHAT) {
       // Create a group for this channel's users.
       $userGroup = Group::factory();
       $userGroup->groupname = 'channel-users-'.Uuid::uuid4()->toString();
@@ -653,7 +653,8 @@ class Conversation extends \Nymph\Entity {
             'conversationNamed' => isset($this->name),
             'senderName' => Tilmeld::$currentUser->name,
             'names' => $names,
-            'type' => 'newConversation'
+            'type' => 'newConversation',
+            'mode' => $this->mode
           ]
       );
     }

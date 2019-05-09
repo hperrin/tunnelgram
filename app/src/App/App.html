@@ -332,11 +332,11 @@
     } else if (update.added) {
       // Notify the user of a new conversation.
       notice = PNotify.info(Object.assign({
-        title: 'New Conversation',
+        title: 'New '+Conversation.MODE_SHORT_NAME[conversation.data.mode],
         text: getDisplayName(conversation.data.user, 'name') + ' started '
           + (conversation.data.acFull.length > 2 || conversation.data.name != null
             ? conversation.getName($settings)
-            : 'a conversation'
+            : 'a '+Conversation.MODE_SHORT_NAME[conversation.data.mode]
           )
           + '.'
       }, options));

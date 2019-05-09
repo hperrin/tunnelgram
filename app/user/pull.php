@@ -55,11 +55,6 @@ try {
     '!strict' => ['notifications', Tunnelgram\Readline::NOTIFICATIONS_NONE]
   ]);
 
-  // foreach ($readlines as $readline) {
-  //   $readline->delete();
-  // }
-  // die('remove all readlines success');
-
   // Get all the readlines for conversations with unread messages.
   $readlineConversationGuids = [];
   $unreadReadlines = array_values(array_filter(
@@ -74,7 +69,7 @@ try {
         $readlineConversationGuids[] = $readline->conversation->guid;
 
         return $readline->readline
-          < $readline->conversation->lastMessage->cdate;
+          < $readline->conversation->mdate;
       }
   ));
 

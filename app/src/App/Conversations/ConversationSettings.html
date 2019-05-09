@@ -1,7 +1,7 @@
 <div class="d-flex flex-column align-items-center p-3">
   <form class="d-flex flex-column justify-content-start w-std-page" on:submit|preventDefault={save}>
-    <h3 class="mt-3">{$conversation.data.mode === Conversation.MODE_CONVERSATION ? 'Conversation' : 'Channel'} Settings</h3>
-    {#if $conversation.data.mode === Conversation.MODE_CONVERSATION || currentUserIsChannelAdmin}
+    <h3 class="mt-3">{Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings</h3>
+    {#if $conversation.data.mode === Conversation.MODE_CHAT || currentUserIsChannelAdmin}
       <div class="form-group">
         <label for="name">Name</label>
         <input type="text" class="form-control" bind:value={name} id="name" aria-describedby="nameHelp" placeholder="Name">
@@ -22,10 +22,10 @@
   <hr />
   <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
     {#if !_confirmLeave}
-      {#if $conversation.data.mode === Conversation.MODE_CONVERSATION}
+      {#if $conversation.data.mode === Conversation.MODE_CHAT}
         <div class="alert alert-danger">
-          If you leave a conversation, all of your messages in it will be deleted.
-          It may take a while, so the conversation will still be in your list for a bit.
+          If you leave a chat, all of your messages in it will be deleted. It
+          may take a while, so the chat will still be in your list for a bit.
         </div>
       {:else if currentUserIsChannelAdmin && $conversation.data.acFull.length === 1}
         <div class="alert alert-danger">
@@ -33,12 +33,12 @@
           permanently deleted.
         </div>
       {/if}
-      <button type="button" class="btn btn-danger" on:click={confirmLeave} disabled={_leavingConversation}>Leave {$conversation.data.mode === Conversation.MODE_CONVERSATION ? 'Conversation' : 'Channel'}</button>
+      <button type="button" class="btn btn-danger" on:click={confirmLeave} disabled={_leavingConversation}>Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
     {:else}
       <div class="alert alert-danger">
         Are you sure you want to leave? This can't be undone.
       </div>
-      <button type="button" class="btn btn-danger" on:click={leave} disabled={_leavingConversation}>Yes, Leave {$conversation.data.mode === Conversation.MODE_CONVERSATION ? 'Conversation' : 'Channel'}</button>
+      <button type="button" class="btn btn-danger" on:click={leave} disabled={_leavingConversation}>Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
     {/if}
   </div>
 </div>
@@ -53,7 +53,7 @@
   let _confirmLeave = false;
   let _leavingConversation = false;
 
-  $: currentUserIsChannelAdmin = $conversation.data.mode !== Conversation.MODE_CONVERSATION && $user.inArray($conversation.data.acFull);
+  $: currentUserIsChannelAdmin = $conversation.data.mode !== Conversation.MODE_CHAT && $user.inArray($conversation.data.acFull);
 
   let previousConversation = null;
   $: if (previousConversation !== $conversation) {

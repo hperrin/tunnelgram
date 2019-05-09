@@ -25,7 +25,7 @@ export class Conversation extends Entity {
       name: null
     };
     this.data.name = null;
-    this.data.mode = Conversation.MODE_CONVERSATION;
+    this.data.mode = Conversation.MODE_CHAT;
     this.data.acFull = [];
     if (currentUser) {
       this.data.acFull.push(currentUser);
@@ -137,11 +137,11 @@ export class Conversation extends Entity {
 
   getName (settings) {
     if (this.guid == null) {
-      return this.data.mode === Conversation.MODE_CONVERSATION ? 'New Conversation' : 'New Channel';
+      return 'New '+Conversation.MODE_NAME[this.data.mode];
     } else if (this.decrypted.name != null) {
       return this.decrypted.name;
     } else if (this.data.acFull.length === 1) {
-      if (this.data.mode === Conversation.MODE_CONVERSATION) {
+      if (this.data.mode === Conversation.MODE_CHAT) {
         return 'Just You';
       } else if (currentUser.is(this.data.acFull[0])) {
         return 'Your Channel';
@@ -157,11 +157,11 @@ export class Conversation extends Entity {
           name = settings.decrypted.nicknames[participant.guid];
         }
         names.push(name);
-      } else if (this.data.mode !== Conversation.MODE_CONVERSATION) {
+      } else if (this.data.mode !== Conversation.MODE_CHAT) {
         names.push('You');
       }
     }
-    return (this.data.mode === Conversation.MODE_CONVERSATION ? '' : 'Channel with ')+names.join(', ');
+    return (this.data.mode === Conversation.MODE_CHAT ? '' : 'Channel with ')+names.join(', ');
   }
 
   async unreadCount () {
@@ -244,18 +244,23 @@ Conversation.class = 'Tunnelgram\\Conversation';
 // Cache expiry time. 3 hours.
 Conversation.CACHE_EXPIRY = 1000*60*60*3;
 // Conversation modes.
-Conversation.MODE_CONVERSATION = 0;
+Conversation.MODE_CHAT = 0;
 Conversation.MODE_CHANNEL_PRIVATE = 1;
 Conversation.MODE_CHANNEL_PUBLIC = 2;
 Conversation.MODE_NAME = {
-  [Conversation.MODE_CONVERSATION]: `Conversation`,
+  [Conversation.MODE_CHAT]: `Chat`,
   [Conversation.MODE_CHANNEL_PRIVATE]: `Private Channel`,
   [Conversation.MODE_CHANNEL_PUBLIC]: `Public Channel`
 };
+Conversation.MODE_SHORT_NAME = {
+  [Conversation.MODE_CHAT]: `Chat`,
+  [Conversation.MODE_CHANNEL_PRIVATE]: `Channel`,
+  [Conversation.MODE_CHANNEL_PUBLIC]: `Channel`
+};
 Conversation.MODE_DESCRIPTION = {
-  [Conversation.MODE_CONVERSATION]: `A conversation is end to end encrypted on a per-user level. When a message is sent, the decryption key is copied and encrypted for each person in the conversation. This means that if someone is added to a conversation later, they won't be able to read any previous messages.`,
-  [Conversation.MODE_CHANNEL_PRIVATE]: `A private channel is end to end encrypted on a channel level. When a message is sent, the decryption key is derived from the channel's encryption key, which is encrypted for each person. This means that if someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
-  [Conversation.MODE_CHANNEL_PUBLIC]: `A public channel is not encrypted. Anyone can search for a public channel and read its messages before joining it.`
+  [Conversation.MODE_CHAT]: `Chat messages are end to end encrypted per-user. Message decryption keys are copied and encrypted for each person in the chat. If someone is added to a chat later, they won't be able to read any previous messages.`,
+  [Conversation.MODE_CHANNEL_PRIVATE]: `Private channel messages are end to end encrypted per-channel. Message decryption keys are derived from the channel's encryption key, which is encrypted for each person. If someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
+  [Conversation.MODE_CHANNEL_PUBLIC]: `Public channel messages are not encrypted. Anyone can search for a public channel and read its messages before joining or requesting to join.`
 };
 // Notification settings.
 Conversation.NOTIFICATIONS_ALL = 0;
@@ -264,8 +269,8 @@ Conversation.NOTIFICATIONS_DIRECT = 2;
 Conversation.NOTIFICATIONS_NONE = 4;
 Conversation.NOTIFICATIONS_NAME = {
   [Conversation.NOTIFICATIONS_ALL]: `Every Message`,
-  // [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Channel Callouts (@here)`,
-  // [Conversation.NOTIFICATIONS_DIRECT]: `Direct Mentions`,
+  // [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Broadcasts (@here)`,
+  // [Conversation.NOTIFICATIONS_DIRECT]: `Only Mentions`,
   [Conversation.NOTIFICATIONS_NONE]: `No Notifications`
 };
 

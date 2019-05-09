@@ -76,7 +76,7 @@
         <div>
           {#if existingConversations}
             {#if existingConversations.length}
-              <h3 class="mt-3">Your Conversations</h3>
+              <h3 class="mt-3">Your Chats and Channels Together</h3>
               <div class="list-group mt-3 text-body">
                 {#each existingConversations as conversation (conversation.guid)}
                   <a class="list-group-item list-group-item-action" href="javascript:void(0)" on:click={() => navigate('/c/'+conversation.guid)}>
@@ -84,14 +84,14 @@
                   </a>
                 {/each}
               </div>
-              <h3 class="mt-3">Or Start a New One</h3>
+              <h3 class="mt-3">Or Start a New Chat</h3>
             {/if}
-            <button type="button" class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Conversation with {$viewUser.data.nameFirst}</button>
+            <button type="button" class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
           {:else if existingConversationsError}
             <div class="alert alert-danger my-3" role="alert">
               Oops... something went wrong.
             </div>
-            <button type="button" class="btn btn-light mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Conversation with {$viewUser.data.nameFirst}</button>
+            <button type="button" class="btn btn-light mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
           {:else}
             <div>
               One second...

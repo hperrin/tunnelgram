@@ -1,3 +1,5 @@
+import Conversation from '../Entities/Tunnelgram/Conversation';
+
 // Offline Cache
 
 const CACHE_STATIC = 'tunnelgram-static-v2';
@@ -162,10 +164,10 @@ self.addEventListener('push', event => {
           ? 'Just You'
           : (
               entry.new
-                ? 'New conversation with '
+                ? 'New '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' with '
                 : (entry.conversation.data.name == null
                     ? ''
-                    : 'Conversation with '
+                    : Conversation.MODE_SHORT_NAME[entry.conversation.data.mode]+' with '
                   )
             ) + (
               entry.conversation.data.acFull
@@ -185,7 +187,11 @@ self.addEventListener('push', event => {
         // Build a message for the notification.
         let message;
         if (entry.messages.length === 0) {
-          message = payload.users[entry.conversation.data.user[1]].data.name + ' started a conversation.';
+          if (entry.new) {
+            message = payload.users[entry.conversation.data.user[1]].data.name + ' started a '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+'.';
+          } else {
+            message = 'The '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' was updated.';
+          }
         } else {
           if (entry.messages.length === 1) {
             if (entry.messages[0].data.informational) {

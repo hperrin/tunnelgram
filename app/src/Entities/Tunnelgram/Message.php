@@ -113,7 +113,7 @@ class Message extends \Nymph\Entity {
     }
 
     if (!isset($this->guid)) {
-      if ($this->conversation->mode === Conversation::MODE_CONVERSATION) {
+      if ($this->conversation->mode === Conversation::MODE_CHAT) {
         $this->acRead = $this->conversation->acFull;
         $this->acOther = Tilmeld::NO_ACCESS;
       } else if ($this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE) {
@@ -141,7 +141,7 @@ class Message extends \Nymph\Entity {
     }
 
     $recipientGuids = [];
-    if ($this->conversation->mode === Conversation::MODE_CONVERSATION) {
+    if ($this->conversation->mode === Conversation::MODE_CHAT) {
       foreach ($this->acRead as $user) {
         $recipientGuids[] = $user->guid;
       }
@@ -183,7 +183,7 @@ class Message extends \Nymph\Entity {
             ),
             (
               !($this->informational ?? false) &&
-              $this->conversation->mode === Conversation::MODE_CONVERSATION
+              $this->conversation->mode === Conversation::MODE_CHAT
             )
         )
         ->when(

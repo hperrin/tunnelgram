@@ -35,7 +35,7 @@
     <a class="nav-link" href="javascript:void(0)" on:click={() => navigate('/c/'+$conversation.guid+'/people')} title="People ({$conversation.data.acFull.length})">
       <span class="fa-layers fa-fw">
         <i class="fas fa-users"></i>
-        {#if $conversation.data.mode === Conversation.MODE_CONVERSATION}
+        {#if $conversation.data.mode === Conversation.MODE_CHAT}
           <span class="fa-layers-counter fa-layers-bottom-right bg-info" style="transform: scale(0.6); bottom: -.4em; right: -.4em;">{$conversation.data.acFull.length}</span>
         {/if}
       </span>

@@ -73,8 +73,8 @@ trait SendPushNotificationsTrait {
         // Construct the notification title for this user.
         $title = $options['conversationNamed'] ? (
             $options['type'] === 'newConversation'
-              ? 'New conversation with '
-              : 'Conversation with '
+              ? 'New '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').' with '
+              : ($options['mode'] === Conversation::MODE_CHAT ? 'Chat' : 'Channel').' with '
           ) : '';
         $title .= implode(
             ', ',
@@ -85,9 +85,9 @@ trait SendPushNotificationsTrait {
 
         // Construct the notification message.
         if ($options['type'] === 'newConversation') {
-          $message = $options['senderName'].' started a conversation.';
+          $message = $options['senderName'].' started a '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').'.';
         } elseif ($options['type'] === 'info') {
-          $message = $options['senderName'].' updated the conversation.';
+          $message = $options['senderName'].' updated the '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').'.';
         } else {
           $message = $options['messageType'].' from '.$options['senderName'].'.';
         }

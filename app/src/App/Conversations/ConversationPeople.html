@@ -2,7 +2,7 @@
   <div class="d-flex flex-column justify-content-start w-std-page">
     <h3 class="mt-3">Add Someone</h3>
     <p>
-      {#if $conversation.data.mode === Conversation.MODE_CONVERSATION}
+      {#if $conversation.data.mode === Conversation.MODE_CHAT}
         New people can only see messages sent after you add them.
       {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE}
         New members can see all past messages in this channel.
@@ -15,7 +15,7 @@
       </div>
     {/if}
     <h3 class="mt-3">
-      {#if $conversation.data.mode === Conversation.MODE_CONVERSATION}
+      {#if $conversation.data.mode === Conversation.MODE_CHAT}
         People in this Conversation
       {:else}
         Channel Admins
@@ -36,7 +36,7 @@
         </a>
       {/each}
     </div>
-    {#if $conversation.data.mode !== Conversation.MODE_CONVERSATION}
+    {#if $conversation.data.mode !== Conversation.MODE_CHAT}
       <h3 class="mt-3">Channel Members</h3>
       <div class="list-group mt-3 text-body">
         {#each nonAdminChannelUsers as curUser (curUser.guid)}
@@ -94,7 +94,7 @@
   let channelUsersLoading = false;
   let channelUsersReachedEnd = false;
 
-  $: currentUserIsChannelAdmin = $conversation.data.mode !== Conversation.MODE_CONVERSATION && $user.inArray($conversation.data.acFull);
+  $: currentUserIsChannelAdmin = $conversation.data.mode !== Conversation.MODE_CHAT && $user.inArray($conversation.data.acFull);
   $: nonAdminChannelUsers = channelUsers.filter(user => !user.inArray($conversation.data.acFull));
 
   $: if ($conversation && $conversation.containsSleepingReference && !$conversation._tgCalledReadyAll) {
@@ -117,7 +117,7 @@
   }
 
   async function addUser (user) {
-    if ($conversation.data.mode === Conversation.MODE_CONVERSATION) {
+    if ($conversation.data.mode === Conversation.MODE_CHAT) {
       addAcFullUser(user);
     } else {
       try {
@@ -171,7 +171,7 @@
   }
 
   async function loadMoreChannelUsers () {
-    if ($conversation.data.mode === Conversation.MODE_CONVERSATION || channelUsersReachedEnd) {
+    if ($conversation.data.mode === Conversation.MODE_CHAT || channelUsersReachedEnd) {
       return;
     }
 
