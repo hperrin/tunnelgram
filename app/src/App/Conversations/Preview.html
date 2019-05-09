@@ -7,7 +7,7 @@
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0" style="word-break: break-word;">{conversation.getName($settings)}</h5>
-      <small class="ml-1" title={_longModifiedDate} style="white-space: nowrap;">{_modifiedDate}</small>
+      <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">{modifiedDate}</small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
       {#if conversation.data.lastMessage}
@@ -25,10 +25,10 @@
       {:else}
         <span>&nbsp;</span>
       {/if}
-      {#if _unreadCount === 0}
+      {#if unreadCount === 0}
         <span>&nbsp;</span>
       {:else}
-        <span class="badge badge-primary">{_unreadCount === true ? 'New' : _unreadCount}</span>
+        <span class="badge badge-primary">{unreadCount === true ? 'New' : unreadCount}</span>
       {/if}
     </div>
   </div>
@@ -43,9 +43,9 @@
   import {settings, user} from '../../stores';
 
   export let conversation = new Conversation();
-  let _unreadCount = 0;
-  let _modifiedDate;
-  let _longModifiedDate;
+  let unreadCount = 0;
+  let modifiedDate;
+  let longModifiedDate;
   let interval;
   let destroyed = false;
 
@@ -70,7 +70,7 @@
   $: if (conversation) {
     updateTime();
     (async () => {
-      _unreadCount = await conversation.unreadCount();
+      unreadCount = await conversation.unreadCount();
     })();
   }
 
@@ -101,8 +101,8 @@
   });
 
   function updateTime () {
-    _modifiedDate = new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short');
-    _longModifiedDate = new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short');
+    modifiedDate = new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short');
+    longModifiedDate = new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short');
   }
 </script>
 

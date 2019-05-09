@@ -1,14 +1,14 @@
 <div class="h-100 w-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center p-3">
     <div class="d-flex justify-content-center flex-wrap w-100">
-      <div class="d-inline-block position-relative m-3" on:mouseenter={() => _mouseOverAvatar = true} on:mouseleave={() => _mouseOverAvatar = false}>
+      <div class="d-inline-block position-relative m-3" on:mouseenter={() => mouseOverAvatar = true} on:mouseleave={() => mouseOverAvatar = false}>
         {#if $viewUserIsSelf}
           <input class="d-none" type="file" bind:this={avatarInput} on:change={event => handleAvatar(event.target.files)} />
           <button class="position-absolute btn btn-primary btn-sm rounded" on:click={() => avatarInput.click()} style="right: 0; bottom: 0;">
             <i class="fas fa-upload fa-2x"></i>
           </button>
         {/if}
-        {#if _avatarLoading}
+        {#if avatarLoading}
           <div class="d-flex position-absolute h-100 w-100 justify-content-center align-items-center">
             <LoadingIndicator width="160" height="160" />
           </div>
@@ -86,12 +86,12 @@
               </div>
               <h3 class="mt-3">Or Start a New Chat</h3>
             {/if}
-            <button type="button" class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
+            <button type="button" class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'} mt-3 w-100" on:click={newConversation} disabled={startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
           {:else if existingConversationsError}
             <div class="alert alert-danger my-3" role="alert">
               Oops... something went wrong.
             </div>
-            <button type="button" class="btn btn-light mt-3 w-100" on:click={newConversation} disabled={_startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
+            <button type="button" class="btn btn-light mt-3 w-100" on:click={newConversation} disabled={startingConversation}>Start a Chat with {$viewUser.data.nameFirst}</button>
           {:else}
             <div>
               One second...
@@ -131,9 +131,9 @@
 
   let nickname = '';
   let code;
-  let _startingConversation = false;
-  let _mouseOverAvatar = false;
-  let _avatarLoading = false;
+  let startingConversation = false;
+  let mouseOverAvatar = false;
+  let avatarLoading = false;
   let avatarInput;
   let existingConversations = null;
   let existingConversationsError = false;
@@ -256,9 +256,9 @@
     const conversation = new Conversation();
     conversation.data.acFull.push($viewUser);
 
-    _startingConversation = true;
+    startingConversation = true;
     conversation.save().then(() => navigate('/c/'+conversation.guid), ErrHandler).finally(() => {
-      _startingConversation = false;
+      startingConversation = false;
     });
   }
 
@@ -277,7 +277,7 @@
       return;
     }
 
-    _avatarLoading = true;
+    avatarLoading = true;
 
     // Read the image into an Image to resize it and generate a thumbnail.
     const image = new Image();
@@ -295,6 +295,6 @@
     avatar = avatarImg.data;
 
     viewUser.set($viewUser);
-    _avatarLoading = false;
+    avatarLoading = false;
   }
 </script>

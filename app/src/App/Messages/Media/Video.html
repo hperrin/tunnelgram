@@ -4,11 +4,11 @@
       <LoadingIndicator width={resource.thumbnailWidth} height={resource.thumbnailHeight} text="Decrypting..." />
     {:then thumbnail}
       <div>
-        {#if _loading}
+        {#if loading}
           <LoadingIndicator width={resource.thumbnailWidth} height={resource.thumbnailHeight} text="Decrypting..." />
-        {:else if _source}
+        {:else if source}
           <video poster={resource.thumbnailSrc} width={resource.thumbnailWidth} height={resource.thumbnailHeight} title={resource.name} controls autoplay playsinline>
-            <source src={_source} type={resource.dataType} />
+            <source src={source} type={resource.dataType} />
           </video>
         {:else}
           <div class="d-flex justify-content-center align-items-center position-relative" tabindex="0" on:click={loadVideo} style="cursor: pointer;">
@@ -28,32 +28,32 @@
   import {crypt} from '../../../Services/EncryptionService';
 
   export let resource;
-  let _loading = false;
-  let _source = null;
+  let loading = false;
+  let source = null;
 
   $: thumbnailPromise = resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail;
 
   $: if (!resource.thumbnailSrc && !resource.thumbnailSrcPromise) {
     if (resource.thumbnail instanceof Uint8Array) {
       const blob = new Blob([resource.thumbnail], {type: resource.thumbnailType});
-      const _source = URL.createObjectURL(blob);
-      resource.thumbnailSrc = _source;
+      const source = URL.createObjectURL(blob);
+      resource.thumbnailSrc = source;
     } else {
       resource.thumbnailSrcPromise = resource.thumbnail.then(data => {
         const blob = new Blob([data], {type: resource.thumbnailType});
-        const _source = URL.createObjectURL(blob);
-        resource.thumbnailSrc = _source;
+        const source = URL.createObjectURL(blob);
+        resource.thumbnailSrc = source;
       });
     }
   }
 
   function loadVideo () {
-    _loading = true;
+    loading = true;
     const resourcePromise = ('promise' in resource.data) ? resource.data.promise() : Promise.resolve(resource.data);
     resourcePromise.then(data => {
       const blob = new Blob([data], {type: resource.dataType});
-      _source = URL.createObjectURL(blob);
-      _loading = false;
+      source = URL.createObjectURL(blob);
+      loading = false;
     });
   }
 </script>

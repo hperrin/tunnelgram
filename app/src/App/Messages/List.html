@@ -1,15 +1,15 @@
 <svelte:window on:resize={handleWindowResize} />
 <div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={handleScroll}>
-  {#if _loading}
+  {#if loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
       <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
       <LoadingIndicator width="200" height="200" />
     </div>
   {:else}
-    {#if _reachedEarliestMessage}
+    {#if reachedEarliestMessage}
       <ConversationHeader bind:conversation />
     {:else}
-      <div class="d-flex align-items-center justify-content-center {_loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
+      <div class="d-flex align-items-center justify-content-center {loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>
@@ -18,7 +18,7 @@
     <div class="d-flex flex-column-reverse" bind:this={messageContainer}>
       {#each messages as message, i (message.guid)}
         <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
-          <MessageItem bind:message on:rendered={rescrollToBottom} on:deleted={() => removeMessage(message)} readLineCDate={_showReadline && _initialReadline} showAvatar={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid} showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}></MessageItem>
+          <MessageItem bind:message on:rendered={rescrollToBottom} on:deleted={() => removeMessage(message)} readLineCDate={showReadline && initialReadline} showAvatar={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid} showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}></MessageItem>
         </div>
       {/each}
     </div>
@@ -46,21 +46,21 @@
   let messages = [];
   let container;
   let messageContainer;
-  let _loading;
-  let _disconnected = false;
-  let _isAtBottom = true;
-  let _showReadline = null;
-  let _initialReadline = null;
-  let _loadingEarlierMessages = false;
-  let _reachedEarliestMessage = false;
-  let _scrollToDistanceFromBottom = null;
+  let loading;
+  let disconnected = false;
+  let isAtBottom = true;
+  let showReadline = null;
+  let initialReadline = null;
+  let loadingEarlierMessages = false;
+  let reachedEarliestMessage = false;
+  let scrollToDistanceFromBottom = null;
   let scrollWaitBottom;
   let scrollWaitReadline;
   let updateReadlineRaf;
   let destroyed = false;
   let subscription;
   const onPubSubConnect = () => {
-    if (_disconnected) {
+    if (disconnected) {
       Nymph.getEntities({
         'class': Message.class,
         'sort': 'cdate',
@@ -73,10 +73,10 @@
         messages = [...newMessages, ...messages];
       });
     }
-    _disconnected = false;
+    disconnected = false;
   };
   const onPubSubDisconnect = () => {
-    _disconnected = true;
+    disconnected = true;
   };
   const showTime = (time1, time2) => {
     if (time2 === undefined) {
@@ -98,11 +98,11 @@
   $: if (previousConversation !== conversation) {
     previousConversation = conversation;
     messages = [];
-    _initialReadline = conversation.readline;
-    _showReadline = null;
-    _loadingEarlierMessages = false;
-    _reachedEarliestMessage = false;
-    _scrollToDistanceFromBottom = null;
+    initialReadline = conversation.readline;
+    showReadline = null;
+    loadingEarlierMessages = false;
+    reachedEarliestMessage = false;
+    scrollToDistanceFromBottom = null;
     scrollWaitBottom = true;
     scrollWaitReadline = false;
     subscribe();
@@ -115,10 +115,10 @@
 
   beforeUpdate(() => {
     // TODO: can this be moved out of beforeUpdate?
-    if (_showReadline === null && _initialReadline !== 0 && messages.length) {
-      const visibleReadLine = _initialReadline > 0
-        && _initialReadline < messages[0].cdate;
-      _showReadline = visibleReadLine;
+    if (showReadline === null && initialReadline !== 0 && messages.length) {
+      const visibleReadLine = initialReadline > 0
+        && initialReadline < messages[0].cdate;
+      showReadline = visibleReadLine;
       if (visibleReadLine) {
         scrollWaitReadline = window.setTimeout(() => {
           scrollWaitReadline = false;
@@ -129,23 +129,23 @@
     }
   });
 
-  let previousLoading = _loading;
+  let previousLoading = loading;
   let previousMessagesLength = messages.length;
-  let previousScrollToDistanceFromBottom = _scrollToDistanceFromBottom;
+  let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
     if ((
         // Scroll to the bottom when the messages are first loaded.
-        (previousLoading !== _loading && !_loading && !scrollWaitReadline) ||
+        (previousLoading !== loading && !loading && !scrollWaitReadline) ||
         // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-        (previousMessagesLength !== messages.length && _isAtBottom && !document.hidden && !scrollWaitReadline)
+        (previousMessagesLength !== messages.length && isAtBottom && !document.hidden && !scrollWaitReadline)
       )) {
       scrollToBottom();
     }
 
-    if (previousScrollToDistanceFromBottom !== _scrollToDistanceFromBottom && _scrollToDistanceFromBottom != null) {
+    if (previousScrollToDistanceFromBottom !== scrollToDistanceFromBottom && scrollToDistanceFromBottom != null) {
       window.requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight - _scrollToDistanceFromBottom;
-        _scrollToDistanceFromBottom = null;
+        container.scrollTop = container.scrollHeight - scrollToDistanceFromBottom;
+        scrollToDistanceFromBottom = null;
       });
     }
 
@@ -156,9 +156,9 @@
       scrollToReadLine();
     }
 
-    previousLoading = _loading;
+    previousLoading = loading;
     previousMessagesLength = messages.length;
-    previousScrollToDistanceFromBottom = _scrollToDistanceFromBottom;
+    previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   });
 
   onDestroy(() => {
@@ -176,7 +176,7 @@
       subscription.unsubscribe();
     }
 
-    _loading = true;
+    loading = true;
     const queryConversationGuid = conversation.guid;
 
     subscription = Nymph.getEntities({
@@ -194,13 +194,13 @@
       if (update) {
         if (Array.isArray(update)) {
           if (update.length < MESSAGE_PAGE_SIZE) {
-            _reachedEarliestMessage = true;
+            reachedEarliestMessage = true;
           }
         }
         PubSub.updateArray(messages, update);
-        // Setting _loading needs to go before handleScroll to scroll to the bottom on initial load.
+        // Setting loading needs to go before handleScroll to scroll to the bottom on initial load.
         messages = messages;
-        _loading = false;
+        loading = false;
         createNewReadlineIfNeeded();
         handleScroll();
 
@@ -217,11 +217,11 @@
           }
         }
       } else {
-        _loading = false;
+        loading = false;
       }
     }, err => {
       ErrHandler(err);
-      _loading = false;
+      loading = false;
     });
   }
 
@@ -236,17 +236,17 @@
 
   function handleWindowResize () {
     // Scroll to the bottom if the user was at the bottom.
-    if (_isAtBottom) {
+    if (isAtBottom) {
       scrollToBottom();
     }
   }
 
   function setIsAtBottom () {
-    _isAtBottom = container.scrollTop >= (container.scrollHeight - container.offsetHeight);
+    isAtBottom = container.scrollTop >= (container.scrollHeight - container.offsetHeight);
   }
 
   async function loadEarlierMessages () {
-    if (_loadingEarlierMessages || _reachedEarliestMessage || _scrollToDistanceFromBottom || scrollWaitReadline || scrollWaitBottom) {
+    if (loadingEarlierMessages || reachedEarliestMessage || scrollToDistanceFromBottom || scrollWaitReadline || scrollWaitBottom) {
       return;
     }
 
@@ -254,7 +254,7 @@
       return;
     }
 
-    _loadingEarlierMessages = true;
+    loadingEarlierMessages = true;
 
     try {
       const earlierMessages = await Nymph.getEntities({
@@ -268,21 +268,21 @@
         'lt': ['cdate', messages[messages.length - 1].cdate]
       });
 
-      if (!_loadingEarlierMessages) {
+      if (!loadingEarlierMessages) {
         return;
       }
 
       if (earlierMessages && earlierMessages.length) {
         messages = [...messages, ...earlierMessages];
-        _scrollToDistanceFromBottom = container.scrollHeight - container.scrollTop;
+        scrollToDistanceFromBottom = container.scrollHeight - container.scrollTop;
       } else {
-        _reachedEarliestMessage = true;
+        reachedEarliestMessage = true;
       }
     } catch (e) {
       ErrHandler(e);
     }
 
-    _loadingEarlierMessages = false;
+    loadingEarlierMessages = false;
   }
 
   function updateReadline () {
@@ -322,7 +322,7 @@
   async function createNewReadlineIfNeeded () {
     if (conversation.readline == null && messages.length) {
       const updateReadline = messages[0].cdate;
-      _initialReadline = updateReadline;
+      initialReadline = updateReadline;
       await conversation.saveReadline(updateReadline);
       conversation = conversation;
     }
@@ -346,12 +346,12 @@
   function scrollToBottom () {
     container.scrollTop = container.scrollHeight;
     scrollWaitBottom = false;
-    _isAtBottom = true;
+    isAtBottom = true;
     updateReadline();
   }
 
   function rescrollToBottom () {
-    if (_isAtBottom) {
+    if (isAtBottom) {
       scrollToBottom();
     }
   }

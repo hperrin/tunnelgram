@@ -1,5 +1,5 @@
 <form on:submit|preventDefault={newMessage}>
-  {#if images.length || video != null || _mediaLoading}
+  {#if images.length || video != null || mediaLoading}
     <div class="d-flex flex-wrap justify-content-start align-items-start position-relative bg-secondary pt-2 pl-2">
       {#each images as image, i}
         <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
@@ -34,16 +34,16 @@
           </span>
         </div>
       {/if}
-      {#if _mediaLoading === 'image'}
+      {#if mediaLoading === 'image'}
         <div class="d-flex justify-content-center align-items-center mr-2 mb-2 text-white" style="width: 152px; height: 152px;">
           <LoadingIndicator width="80" height="80" text="Resampling..." />
         </div>
       {/if}
-      {#if _mediaLoading === 'video'}
+      {#if mediaLoading === 'video'}
         <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 text-white" style="width: 152px; height: 152px;">
-          <LoadingIndicator width="150" height="150" text={_transcoder == null ? 'Loading...' : (_transcodeProgress == null ? 'Preparing...' : 'Transcoding...'+'\n'+Math.floor(_transcodeProgress * 100)+'%')} progress={_transcodeProgress} />
+          <LoadingIndicator width="150" height="150" text={transcoder == null ? 'Loading...' : (transcodeProgress == null ? 'Preparing...' : 'Transcoding...'+'\n'+Math.floor(transcodeProgress * 100)+'%')} progress={transcodeProgress} />
         </div>
-        {#if _transcoder != null}
+        {#if transcoder != null}
           <button type="button" class="btn btn-sm btn-danger position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click={cancelVideoTranscode}>
             Cancel
           </button>
@@ -71,7 +71,7 @@
       </button>
     {/if}
     <textarea class="text-editor form-control border-0 text-dark" bind:value={text} placeholder="New message" on:keydown={event => handleKeyDown(event)} on:keyup={handleKeyUp} bind:this={textEditor}></textarea>
-    <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled={messageIsEmpty || _mediaLoading} title="Send message">
+    <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled={messageIsEmpty || mediaLoading} title="Send message">
       <i class="fas fa-comment"></i>
     </button>
   </div>
@@ -107,9 +107,9 @@
   export let text = '';
   export let images = [];
   export let video = null;
-  let _mediaLoading = false;
-  let _transcoder = null;
-  let _transcodeProgress = null;
+  let mediaLoading = false;
+  let transcoder = null;
+  let transcodeProgress = null;
   let destroyed = false;
   let textEditor;
   let fileInput;
@@ -126,7 +126,7 @@
 
   onDestroy(() => {
     destroyed = true;
-    if (_transcoder != null) {
+    if (transcoder != null) {
       cancelVideoTranscode();
     }
   });
@@ -327,9 +327,9 @@
           continue;
         }
 
-        _mediaLoading = 'video';
-        _transcoder = null;
-        _transcodeProgress = null;
+        mediaLoading = 'video';
+        transcoder = null;
+        transcodeProgress = null;
 
         // Read the video into a temporary video element to check it and
         // generate a thumbnail.
@@ -355,7 +355,7 @@
             title: 'Unreadable',
             text: 'Your browser can\'t read the video stream from this file.'
           });
-          _mediaLoading = false;
+          mediaLoading = false;
           break;
         }
 
@@ -385,16 +385,16 @@
               : 'Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it\'s too big.'
           });
           try {
-            _transcoder = new VideoService();
-            data = await _transcoder.transcode(new Uint8Array(result), videoElem.duration, progress => _transcodeProgress = progress);
+            transcoder = new VideoService();
+            data = await transcoder.transcode(new Uint8Array(result), videoElem.duration, progress => transcodeProgress = progress);
           } catch (err) {
             PNotify.error({
               title: 'Transcoding Failed',
               text: err
             });
-            _mediaLoading = false;
-            _transcoder = null;
-            _transcodeProgress = null;
+            mediaLoading = false;
+            transcoder = null;
+            transcodeProgress = null;
             return;
           }
         }
@@ -434,9 +434,9 @@
           objectURL
         };
         images = [];
-        _mediaLoading = false;
-        _transcoder = null;
-        _transcodeProgress = null;
+        mediaLoading = false;
+        transcoder = null;
+        transcodeProgress = null;
 
         break;
       } else if (!file.type.startsWith('image/')) {
@@ -451,7 +451,7 @@
         });
         break;
       } else {
-        _mediaLoading = 'image';
+        mediaLoading = 'image';
         imageCount++;
 
         // Read the image into an Image to resize it and generate a
@@ -501,19 +501,19 @@
 
         imageCount--;
         if (imageCount === 0) {
-          _mediaLoading = false;
+          mediaLoading = false;
         }
       }
     }
   }
 
   function cancelVideoTranscode () {
-    if (_transcoder) {
-      _transcoder.cancel();
+    if (transcoder) {
+      transcoder.cancel();
     }
-    _mediaLoading = false;
-    _transcoder = null;
-    _transcodeProgress = null;
+    mediaLoading = false;
+    transcoder = null;
+    transcodeProgress = null;
   }
 </script>
 

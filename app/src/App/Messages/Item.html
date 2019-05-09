@@ -22,10 +22,10 @@
   </small>
 {:else}
   <div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};">
-    {#if _showActions && isOwner}
+    {#if showActions && isOwner}
       <div class="h1 my-0" style="font-size: 0;">
         <button type="button" class="btn btn-sm btn-danger mr-2" on:click={deleteMessage} title="Delete message"><i class="fas fa-trash-alt"></i></button>
-        {#if pending && _saveFailed}
+        {#if pending && saveFailed}
           <button type="button" class="btn btn-sm btn-success mr-2" on:click={retrySave} title="Retry sending"><i class="fas fa-sync"></i></button>
         {/if}
       </div>
@@ -41,20 +41,20 @@
         </div>
       {/if}
     {/if}
-    <div class="{stageClass} {(_flipFirst || _flipSecond) ? 'raise-to-top perspective-stage' : ''}" style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
+    <div class="{stageClass} {(flipFirst || flipSecond) ? 'raise-to-top perspective-stage' : ''}" style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
       <div
-        class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {_flipFirst ? 'flip-first' : ''} {_flipSecond ? 'flip-second' : ''}"
+        class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {flipFirst ? 'flip-first' : ''} {flipSecond ? 'flip-second' : ''}"
         style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
         tabindex="0"
         role="button"
         on:animationend={handleFlipAnimationEnd}
         on:dblclick={toggleActions}
-        title={_createdDateLong}
+        title={createdDateLong}
         bind:this={messageContainer}>
         {#if shouldEmbiggen}
-          <div class="d-inline-block" on:click={() => _flipFirst = !!flipper} style="font-size: 1.1rem">
+          <div class="d-inline-block" on:click={() => flipFirst = !!flipper} style="font-size: 1.1rem">
             {#if message.decrypted.text != null}
-              <span class="h1">{_flipped ? message.decrypted.secretText : message.decrypted.text}</span>
+              <span class="h1">{flipped ? message.decrypted.secretText : message.decrypted.text}</span>
             {:else if message.decrypted.images.length}
               <div class={shadowClass}><ImageGrid resources={message.decrypted.images} /></div>
             {:else if message.decrypted.video != null}
@@ -62,31 +62,31 @@
             {/if}
           </div>
         {:else}
-          {#if message.decrypted.images.length && (!flipper || _flipped)}
+          {#if message.decrypted.images.length && (!flipper || flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
               <ImageGrid resources={message.decrypted.images} />
             </div>
-          {:else if message.decrypted.video != null && (!flipper || _flipped)}
+          {:else if message.decrypted.video != null && (!flipper || flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
               <Video resource={message.decrypted.video} />
             </div>
           {/if}
-          {#if _flipped ? (_formattedSecretText != null) : (_formattedText != null)}
-            <div class="card-body py-1 px-2 m-0" on:click={() => _flipFirst = !!flipper}>
-              <div class="message card-text markdown-body">{@html _flipped ? _formattedSecretText : _formattedText}</div>
+          {#if flipped ? (formattedSecretText != null) : (formattedText != null)}
+            <div class="card-body py-1 px-2 m-0" on:click={() => flipFirst = !!flipper}>
+              <div class="message card-text markdown-body">{@html flipped ? formattedSecretText : formattedText}</div>
             </div>
           {/if}
         {/if}
       </div>
     </div>
-    {#if _showActions && !pending}
+    {#if showActions && !pending}
       <div class="mr-2 my-0">
-        <small class="text-muted">{_createdDateShort}</small>
+        <small class="text-muted">{createdDateShort}</small>
       </div>
     {/if}
     {#if pending}
       <small class="text-muted">
-        {#if _saveFailed}
+        {#if saveFailed}
           <span title="Failed to send message"><i class="fas fa-exclamation-circle"></i></span>
         {:else}
           <span title="Sending message..."><i class="fas fa-sync fa-spin"></i></span>
@@ -123,18 +123,18 @@
   export let showAvatar = true;
   export let showTime = false;
   export let pending = false;
-  let _showActions = false;
-  let _formattedText = null;
-  let _formattedSecretText = null;
-  let _saveFailed = null;
-  let _flipped = false;
-  let _flipSecond;
-  let _flipFirst;
+  let showActions = false;
+  let formattedText = null;
+  let formattedSecretText = null;
+  let saveFailed = null;
+  let flipped = false;
+  let flipSecond;
+  let flipFirst;
   let createdDateRelative;
   let destroyed;
   let interval;
-  let _createdDateLong;
-  let _createdDateShort;
+  let createdDateLong;
+  let createdDateShort;
 
   $: isOwner = pending || $user.is(message.data.user);
   $: shouldEmbiggen = (() => {
@@ -149,8 +149,8 @@
   })();
   $: flipper = message.decrypted.secretText != null;
   $: displayName = message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name);
-  $: shadowClass = ['shadow-none elevate-0 perspective-stage', 'shadow-sm', 'shadow elevate-2 perspective-stage', 'shadow-lg elevate-3 perspective-stage'][_flipped ? message.secretTextElevation : message.textElevation];
-  $: stageClass = ['', '', 'p-1', 'p-2'][_flipped ? message.secretTextElevation : message.textElevation];
+  $: shadowClass = ['shadow-none elevate-0 perspective-stage', 'shadow-sm', 'shadow elevate-2 perspective-stage', 'shadow-lg elevate-3 perspective-stage'][flipped ? message.secretTextElevation : message.textElevation];
+  $: stageClass = ['', '', 'p-1', 'p-2'][flipped ? message.secretTextElevation : message.textElevation];
 
   $: if (message && !pending && message.containsSleepingReference && !message._tgCalledReadyAll) {
     // Ready the message's referenced entities.
@@ -182,8 +182,8 @@
       // Use showdown to convert the markdown to HTML.
       const html = window.tgShowdownConverter.makeHtml(message.decrypted.text);
       const secretHtml = message.decrypted.secretText != null ? window.tgShowdownConverter.makeHtml(message.decrypted.secretText) : null;
-      _formattedText = html == null ? null : html.replace(/\n$/, '');
-      _formattedSecretText = secretHtml == null ? null : secretHtml.replace(/\n$/, '');
+      formattedText = html == null ? null : html.replace(/\n$/, '');
+      formattedSecretText = secretHtml == null ? null : secretHtml.replace(/\n$/, '');
       await tick();
       dispatch('rendered');
     };
@@ -198,8 +198,8 @@
     };
     waitForShowdown();
 
-    _createdDateLong = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'long');
-    _createdDateShort = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'short');
+    createdDateLong = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'long');
+    createdDateShort = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'short');
 
     if (pending) {
       handlePending();
@@ -228,16 +228,16 @@
   function handlePending () {
     if (message.savePromise) {
       message.savePromise.catch((err) => {
-        _saveFailed = true;
-        _showActions = true;
+        saveFailed = true;
+        showActions = true;
       });
     }
   }
 
   function retrySave () {
     message.retrySave();
-    _saveFailed = null;
-    _showActions = false;
+    saveFailed = null;
+    showActions = false;
     handlePending();
   }
 
@@ -267,18 +267,18 @@
   }
 
   function handleFlipAnimationEnd() {
-    if (_flipFirst) {
-      _flipSecond = true;
-      _flipped = !_flipped;
-      _flipFirst = false;
+    if (flipFirst) {
+      flipSecond = true;
+      flipped = !flipped;
+      flipFirst = false;
     } else {
-      _flipSecond = false;
-      _flipFirst = false;
+      flipSecond = false;
+      flipFirst = false;
     }
   }
 
   function toggleActions () {
-    _showActions = !_showActions;
+    showActions = !showActions;
   }
 </script>
 

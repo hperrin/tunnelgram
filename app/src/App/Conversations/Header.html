@@ -5,9 +5,9 @@
   </p>
   <p>
     {Conversation.MODE_NAME[conversation.data.mode]}
-    <button class="btn btn-sm btn-link" on:click={() => _showModeHelp = !_showModeHelp}>(?)</button>
+    <button class="btn btn-sm btn-link" on:click={() => showModeHelp = !showModeHelp}>(?)</button>
   </p>
-  {#if _showModeHelp}
+  {#if showModeHelp}
     <p class="alert alert-info m-3">
       {Conversation.MODE_DESCRIPTION[conversation.data.mode]}
     </p>
@@ -20,5 +20,5 @@
   import {settings} from '../../stores';
 
   export let conversation;
-  let _showModeHelp = false;
+  let showModeHelp = false;
 </script>

@@ -17,11 +17,11 @@
       settings. Try this if you keep getting notified of new messages here, even
       though you've seen them all.
     </div>
-    <button type="button" class="btn btn-info" on:click={clearReadline} disabled={_clearingReadline}>Clear my Readline/Notification Settings</button>
+    <button type="button" class="btn btn-info" on:click={clearReadline} disabled={clearingReadline}>Clear my Readline/Notification Settings</button>
   </div>
   <hr />
   <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
-    {#if !_confirmLeave}
+    {#if !confirmLeave}
       {#if $conversation.data.mode === Conversation.MODE_CHAT}
         <div class="alert alert-danger">
           If you leave a chat, all of your messages in it will be deleted. It
@@ -33,12 +33,12 @@
           permanently deleted.
         </div>
       {/if}
-      <button type="button" class="btn btn-danger" on:click={confirmLeave} disabled={_leavingConversation}>Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
+      <button type="button" class="btn btn-danger" on:click={showConfirmLeave} disabled={leavingConversation}>Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
     {:else}
       <div class="alert alert-danger">
         Are you sure you want to leave? This can't be undone.
       </div>
-      <button type="button" class="btn btn-danger" on:click={leave} disabled={_leavingConversation}>Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
+      <button type="button" class="btn btn-danger" on:click={leave} disabled={leavingConversation}>Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
     {/if}
   </div>
 </div>
@@ -49,9 +49,9 @@
   import {conversation, user} from '../../stores';
 
   let name = '';
-  let _clearingReadline = false;
-  let _confirmLeave = false;
-  let _leavingConversation = false;
+  let clearingReadline = false;
+  let confirmLeave = false;
+  let leavingConversation = false;
 
   $: currentUserIsChannelAdmin = $conversation.data.mode !== Conversation.MODE_CHAT && $user.inArray($conversation.data.acFull);
 
@@ -72,18 +72,18 @@
   }
 
   async function clearReadline () {
-    _clearingReadline = true;
+    clearingReadline = true;
     await $conversation.clearReadline();
     conversation.set($conversation);
-    _clearingReadline = false;
+    clearingReadline = false;
   }
 
-  function confirmLeave () {
-    _confirmLeave = true;
+  function showConfirmLeave () {
+    confirmLeave = true;
   }
 
   function leave () {
-    _leavingConversation = true;
+    leavingConversation = true;
     navigate('/c');
     $conversation.leave();
   }

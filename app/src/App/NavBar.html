@@ -16,7 +16,7 @@
       <h6 class="dropdown-header">
         Notification Setting
       </h6>
-      {#each _keys as key}
+      {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
         <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click={() => setNotifications(key)}>
           {Conversation.NOTIFICATIONS_NAME[key]}
         </a>
@@ -59,8 +59,6 @@
   import Conversation from '../Entities/Tunnelgram/Conversation';
   import {Dropdown} from '../Services/Val/BSN';
   import {conversation, view} from '../stores';
-
-  const _keys = Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat);
 
   let notificationsDropdown;
   let notificationsDropdownComponent;

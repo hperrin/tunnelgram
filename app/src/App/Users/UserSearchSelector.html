@@ -9,32 +9,28 @@
     bind:value={username}
     disabled={disabled}
     autocomplete="off"
-    on:focus={() => _showUserSearchDropdown = true} />
-  {#if !disabled && (searchUsers.length || _userSearchPromiseServer)}
-    <div class="dropdown-menu mt-0 {_showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
-      {#each searchUsers as user (user.guid)}
+    on:focus={() => showUserSearchDropdown = true} />
+  {#if !disabled && (localUsers.length || serverUsersLoading)}
+    <div class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
+      {#each localUsers as user (user.guid)}
         <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
           <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
         </a>
       {/each}
-      <div>
-        {#await _userSearchPromiseServer}
-          <span class="dropdown-item-text d-flex justify-content-center">
-            <LoadingIndicator width="18" height="18" />
-          </span>
-        {:then serverUsers}
-          {#if serverUsers.length}
-            <span class="dropdown-item-text d-flex justify-content-center my-2">
-              Others
-            </span>
-          {/if}
-          {#each serverUsers as user (user.guid)}
-            <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-              <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
-            </a>
-          {/each}
-        {/await}
-      </div>
+      {#if serverUsersLoading}
+        <span class="dropdown-item-text d-flex justify-content-center">
+          <LoadingIndicator width="18" height="18" />
+        </span>
+      {:else if serverUsers.length}
+        <span class="dropdown-item-text d-flex justify-content-center my-2">
+          Others
+        </span>
+        {#each serverUsers as user (user.guid)}
+          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+          </a>
+        {/each}
+      {/if}
     </div>
   {/if}
 </div>
@@ -52,14 +48,16 @@
 
   export let className = '';
   export let disabled = false;
-  export let searchUsers = [];
-  export let username = '';
+  let localUsers = [];
+  let serverUsers = [];
+  let serverUsersLoading = false;
+  let username = '';
   let usernameElem;
   let userSearchDropdown;
-  let _showUserSearchDropdown = false;
-  let _userSearchTimer = null;
-  let _userSearchPromiseServer = null;
+  let showUserSearchDropdown = false;
+  let userSearchTimer = null;
   let container;
+  let destroyed = false;
   let bodyClickHandler = event => {
     let hide = false;
     let target = event.target;
@@ -74,7 +72,7 @@
       target = target.parentNode;
     }
     if (hide) {
-      _showUserSearchDropdown = false;
+      showUserSearchDropdown = false;
     }
   };
 
@@ -82,8 +80,9 @@
   $: if (previousUsername !== username) {
     previousUsername = username;
     const searchQuery = username.toLowerCase();
-    searchUsers = [];
-    _userSearchPromiseServer = null;
+    localUsers = [];
+    serverUsers = [];
+    serverUsersLoading = false;
     if (searchQuery.length >= 2) {
       // Search for users in the conversations in cache.
       let startsWithUsers = [];
@@ -108,63 +107,67 @@
           }
         });
       });
-      searchUsers = [...startsWithUsers, ...containUsers];
-      _userSearchPromiseServer = new Promise(resolve => {
-        if (_userSearchTimer) {
-          window.clearTimeout(_userSearchTimer);
+      localUsers = [...startsWithUsers, ...containUsers];
+      serverUsersLoading = true;
+      if (userSearchTimer) {
+        window.clearTimeout(userSearchTimer);
+      }
+      userSearchTimer = window.setTimeout(async () => {
+        const guids = [];
+        for (let guid in $settings.decrypted.nicknames) {
+          if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+            guids.push(guid);
+          }
         }
-        _userSearchTimer = window.setTimeout(async () => {
-          const guids = [];
-          for (let guid in $settings.decrypted.nicknames) {
-            if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
-              guids.push(guid);
-            }
+        const nickPromise = guids.length ? Nymph.getEntities({
+          'class': User.class
+        }, {
+          'type': '|',
+          'guid': guids
+        }) : Promise.resolve([]);
+
+        const firstArgs = [{
+          'class': User.class,
+          'limit': 10
+        }, {
+          'type': '&',
+          '!guid': [
+            ...Object.keys($settings.decrypted.nicknames),
+            $user.guid,
+            ...localUsers.map(user => user.guid)
+          ]
+        }];
+        const unPromise = Nymph.getEntities(...firstArgs, {
+          'type': '&',
+          'ilike': ['username', searchQuery+'%']
+        });
+        const namePromise = Nymph.getEntities(...firstArgs, {
+          'type': '&',
+          'ilike': ['name', '%'+searchQuery+'%']
+        });
+
+        const nickUsers = await nickPromise;
+        const unUsers = await unPromise;
+        const nameUsers = await namePromise;
+
+        if (destroyed) {
+          return;
+        }
+
+        for (let i = nickUsers.length - 1; i >= 0; i--) {
+          if (nickUsers[i].inArray(localUsers)) {
+            nickUsers.splice(i, 1);
           }
-          const nickPromise = guids.length ? Nymph.getEntities({
-            'class': User.class
-          }, {
-            'type': '|',
-            'guid': guids
-          }) : Promise.resolve([]);
-
-          const firstArgs = [{
-            'class': User.class,
-            'limit': 10
-          }, {
-            'type': '&',
-            '!guid': [
-              ...Object.keys($settings.decrypted.nicknames),
-              $user.guid,
-              ...searchUsers.map(user => user.guid)
-            ]
-          }];
-          const unPromise = Nymph.getEntities(...firstArgs, {
-            'type': '&',
-            'ilike': ['username', searchQuery+'%']
-          });
-          const namePromise = Nymph.getEntities(...firstArgs, {
-            'type': '&',
-            'ilike': ['name', '%'+searchQuery+'%']
-          });
-
-          const nickUsers = await nickPromise;
-          const unUsers = await unPromise;
-          const nameUsers = await namePromise;
-
-          for (let i = nickUsers.length - 1; i >= 0; i--) {
-            if (nickUsers[i].inArray(searchUsers)) {
-              nickUsers.splice(i, 1);
-            }
+        }
+        for (let i = nameUsers.length - 1; i >= 0; i--) {
+          if (nameUsers[i].inArray(unUsers)) {
+            nameUsers.splice(i, 1);
           }
-          for (let i = nameUsers.length - 1; i >= 0; i--) {
-            if (nameUsers[i].inArray(unUsers)) {
-              nameUsers.splice(i, 1);
-            }
-          }
+        }
 
-          resolve([...nickUsers, ...unUsers, ...nameUsers]);
-        }, 150);
-      });
+        serverUsersLoading = false;
+        serverUsers = [...nickUsers, ...unUsers, ...nameUsers];
+      }, 150);
     }
   }
 
@@ -173,6 +176,7 @@
   });
 
   onDestroy(() => {
+    destroyed = true;
     document.body.removeEventListener('click', bodyClickHandler);
   });
 
@@ -216,18 +220,12 @@
     }
   }
 
-  // TODO: is this used?
-  export function setShowDropdown (showDropdown) {
-    _showUserSearchDropdown = showDropdown;
-  }
-
-  // TODO: is this used?
   export function clear () {
     username = '';
   }
 
   export function focus () {
     usernameElem.focus();
-    _showUserSearchDropdown = true;
+    showUserSearchDropdown = true;
   }
 </script>

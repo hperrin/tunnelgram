@@ -5,7 +5,7 @@
     </div>
     {#if $conversations.length > 1}
       <div class="list-group-item d-flex p-0 border-0">
-        <input type="text" class="form-control bg-secondary border-0 text-light" bind:value={_search} name="search" placeholder="Search people" autocomplete="off" />
+        <input type="text" class="form-control bg-secondary border-0 text-light" bind:value={search} name="search" placeholder="Search people" autocomplete="off" />
       </div>
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
@@ -13,7 +13,7 @@
         <Preview bind:conversation={curConversation} />
       </div>
     {/each}
-    {#if !_loading && !$conversations.length}
+    {#if !loading && !$conversations.length}
       <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
         {#if $conversations.length}
           No matching conversations.
@@ -22,8 +22,8 @@
         {/if}
       </div>
     {/if}
-    {#if _loading || !_reachedEarliestConversation}
-      <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0 {_loadingEarlierConversations ? '' : 'visibility-hidden'}">
+    {#if loading || !reachedEarliestConversation}
+      <div class="list-group-item p-2 rounded-0 d-flex align-items-center justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}">
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>
@@ -46,16 +46,16 @@
 
   const dispatch = createEventDispatcher();
 
-  let _disconnected = false;
-  let _loading = true;
-  let _loadingEarlierConversations = false;
-  let _reachedEarliestConversation = false;
-  let _search = '';
+  let disconnected = false;
+  let loading = true;
+  let loadingEarlierConversations = false;
+  let reachedEarliestConversation = false;
+  let search = '';
   let destroyed = false;
   let subscription;
   let container;
   const onPubSubConnect = () => {
-    if (_disconnected) {
+    if (disconnected) {
       Nymph.getEntities({
         'class': Conversation.class,
         'sort': 'mdate',
@@ -73,17 +73,17 @@
         $conversations = [...newConversations, ...$conversations.filter(c => !c.inArray(newConversations))];
       });
     }
-    _disconnected = false;
+    disconnected = false;
   };
   const onPubSubDisconnect = () => {
-    _disconnected = true;
+    disconnected = true;
   };
 
   $: filteredConversations = (() => {
-    if (_search === '' || !$settings) {
+    if (search === '' || !$settings) {
       return $conversations;
     }
-    const searchLC = _search.toLowerCase();
+    const searchLC = search.toLowerCase();
     const nicknameUserGUIDs = Object.entries($settings.decrypted.nicknames).filter(entry => {
       const [guid, nickname] = entry;
       return nickname.toLowerCase().indexOf(searchLC) !== -1;
@@ -116,7 +116,7 @@
     previousConversationsLength = $conversations.length;
   }
 
-  $: if (_search !== null) {
+  $: if (search !== null) {
     handleScroll();
   }
 
@@ -140,7 +140,7 @@
       subscription.unsubscribe();
     }
 
-    _loading = true;
+    loading = true;
 
     subscription = Nymph.getEntities({
       'class': Conversation.class,
@@ -157,11 +157,11 @@
       if (destroyed) {
         return;
       }
-      _loading = false;
+      loading = false;
       if (update) {
         if (Array.isArray(update)) {
           if (update.length < CONVERSATION_PAGE_SIZE) {
-            _reachedEarliestConversation = true;
+            reachedEarliestConversation = true;
           }
         } else {
           dispatch('tunnelgram-notification', update);
@@ -175,7 +175,7 @@
 
   function navigateConversation (conversation) {
     dispatch('tunnelgram-navigate', conversation);
-    _search = '';
+    search = '';
   }
 
   function handleScroll () {
@@ -185,7 +185,7 @@
   }
 
   async function loadEarlierConversations () {
-    if (_loadingEarlierConversations || _reachedEarliestConversation) {
+    if (loadingEarlierConversations || reachedEarliestConversation) {
       return;
     }
 
@@ -193,7 +193,7 @@
       return;
     }
 
-    _loadingEarlierConversations = true;
+    loadingEarlierConversations = true;
 
     try {
       const earlierConversations = await Nymph.getEntities({
@@ -215,15 +215,15 @@
       if (earlierConversations && earlierConversations.length) {
         $conversations = [...$conversations, ...earlierConversations];
         if (earlierConversations.length < CONVERSATION_PAGE_SIZE) {
-          _reachedEarliestConversation = true;
+          reachedEarliestConversation = true;
         }
       } else {
-        _reachedEarliestConversation = true;
+        reachedEarliestConversation = true;
       }
     } catch (e) {
       ErrHandler(e);
     }
 
-    _loadingEarlierConversations = false;
+    loadingEarlierConversations = false;
   }
 </script>
