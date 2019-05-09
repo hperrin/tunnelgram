@@ -107,13 +107,18 @@
   let destroyed = false;
 
   $: usersOtherThanCurrent = ($conversation.data.acFull || []).filter(u => !$user.is(u));
+
+  let previousConversationAcFullLength = 0;
   $: if ($conversation.guid || $conversation.data.mode !== Conversation.MODE_CONVERSATION) {
     existingConversations = null;
     existingConversationsError = false;
-  } else {
+    previousConversationAcFullLength = 0;
+  } else if (previousConversationAcFullLength !== $conversation.data.acFull.length) {
+    previousConversationAcFullLength = $conversation.data.acFull.length;
+    existingConversations = null;
+    existingConversationsError = false;
     (async () => {
       try {
-        existingConversationsError = false;
         const conversations = await $conversation.findMatchingConversations();
         await Promise.all(conversations.map(conversation => conversation.readyAll(1).catch(ErrHandler)));
         if (destroyed) {
