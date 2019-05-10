@@ -57,6 +57,10 @@ export class Settings extends Entity {
   // === Static Methods ===
 
   static async current () {
+    if (!currentUser) {
+      return new Settings();
+    }
+
     let existing;
     try {
       existing = await Nymph.getEntity({

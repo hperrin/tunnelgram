@@ -100,6 +100,11 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   const conversationHandler = params => {
     const guid = parseFloat(params.id);
     const conversations = get(store.conversations);
+
+    if (!get(store.user)) {
+      return;
+    }
+
     let conversation = null;
     for (let cur of conversations) {
       if (cur.guid === guid) {
@@ -137,6 +142,11 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   const userHandler = params => {
     const {username} = params;
     const user = get(store.user);
+
+    if (!user) {
+      return;
+    }
+
     store.loadingUser.set(true);
     if (user.data.username === username) {
       store.viewUser.set(user);
@@ -164,8 +174,8 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   router.hooks({
     before: (done, params) => {
       if (!get(store.user)) {
+        done();
         navigateToContinueUrl();
-        done(false);
       } else {
         done();
       }
@@ -178,6 +188,10 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     'c/:id': {uses: conversationHandler},
     'c/:id/:view': {uses: conversationHandler},
     'c': () => {
+      if (!get(store.user)) {
+        return;
+      }
+
       const conversation = new Conversation();
       store.conversation.set(conversation);
       store.view.set('conversation');
@@ -185,6 +199,10 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     },
     'u/:username': {uses: userHandler},
     'pushSubscriptions': () => {
+      if (!get(store.user)) {
+        return;
+      }
+
       store.view.set('pushSubscriptions');
       store.convosOut.set(false);
       store.loadingConversation.set(false);

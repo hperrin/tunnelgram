@@ -142,13 +142,17 @@
 
   $: shortLink = 'http://tngm.me/'+encodeURIComponent($viewUser.data.username);
   $: shortLinkPreview = 'tngm.me/'+encodeURIComponent($viewUser.data.username);
+
+  let previousViewUserGuid = null;
   $: if ($viewUserIsSelf) {
     existingConversations = null;
     existingConversationsError = false;
-  } else {
+  } else if (previousViewUserGuid !== $viewUser.guid) {
+    previousViewUserGuid = $viewUser.guid;
+    existingConversations = null;
+    existingConversationsError = false;
     (async () => {
       try {
-        existingConversationsError = false;
         const conversations = await Nymph.getEntities({
           'class': Conversation.class,
           'sort': 'mdate',
@@ -173,6 +177,7 @@
       }
     })();
   };
+
   $: if ($settings && $viewUser && $viewUser.guid in $settings.decrypted.nicknames) {
     nickname = $settings.decrypted.nicknames[$viewUser.guid];
   }
