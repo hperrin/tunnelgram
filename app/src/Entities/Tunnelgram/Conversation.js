@@ -3,6 +3,7 @@ import {User} from 'tilmeld-client';
 import {Message} from './Message';
 import {saveEntities, restoreEntities} from '../../Services/entityRefresh';
 import {crypt} from '../../Services/EncryptionService';
+import * as ConversationConstants from './ConversationConstants';
 
 let currentUser = null;
 
@@ -243,36 +244,8 @@ export class Conversation extends Entity {
 Conversation.class = 'Tunnelgram\\Conversation';
 // Cache expiry time. 3 hours.
 Conversation.CACHE_EXPIRY = 1000*60*60*3;
-// Conversation modes.
-Conversation.MODE_CHAT = 0;
-Conversation.MODE_CHANNEL_PRIVATE = 1;
-Conversation.MODE_CHANNEL_PUBLIC = 2;
-Conversation.MODE_NAME = {
-  [Conversation.MODE_CHAT]: `Chat`,
-  [Conversation.MODE_CHANNEL_PRIVATE]: `Private Channel`,
-  [Conversation.MODE_CHANNEL_PUBLIC]: `Public Channel`
-};
-Conversation.MODE_SHORT_NAME = {
-  [Conversation.MODE_CHAT]: `Chat`,
-  [Conversation.MODE_CHANNEL_PRIVATE]: `Channel`,
-  [Conversation.MODE_CHANNEL_PUBLIC]: `Channel`
-};
-Conversation.MODE_DESCRIPTION = {
-  [Conversation.MODE_CHAT]: `Chat messages are end to end encrypted per-user. Message decryption keys are copied and encrypted for each person in the chat. If someone is added to a chat later, they won't be able to read any previous messages.`,
-  [Conversation.MODE_CHANNEL_PRIVATE]: `Private channel messages are end to end encrypted per-channel. Message decryption keys are derived from the channel's encryption key, which is encrypted for each person. If someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
-  [Conversation.MODE_CHANNEL_PUBLIC]: `Public channel messages are not encrypted. Anyone can search for a public channel and read its messages before joining or requesting to join.`
-};
-// Notification settings.
-Conversation.NOTIFICATIONS_ALL = 0;
-Conversation.NOTIFICATIONS_MENTIONS = 1;
-Conversation.NOTIFICATIONS_DIRECT = 2;
-Conversation.NOTIFICATIONS_NONE = 4;
-Conversation.NOTIFICATIONS_NAME = {
-  [Conversation.NOTIFICATIONS_ALL]: `Every Message`,
-  // [Conversation.NOTIFICATIONS_MENTIONS]: `Mentions and Broadcasts (@here)`,
-  // [Conversation.NOTIFICATIONS_DIRECT]: `Only Mentions`,
-  [Conversation.NOTIFICATIONS_NONE]: `No Notifications`
-};
+
+Object.assign(Conversation, ConversationConstants);
 
 Nymph.setEntityClass(Conversation.class, Conversation);
 

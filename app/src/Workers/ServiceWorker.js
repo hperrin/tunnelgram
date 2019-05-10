@@ -1,4 +1,4 @@
-import Conversation from '../Entities/Tunnelgram/Conversation';
+import {MODE_SHORT_NAME} from '../Entities/Tunnelgram/ConversationConstants';
 
 // Offline Cache
 
@@ -164,10 +164,10 @@ self.addEventListener('push', event => {
           ? 'Just You'
           : (
               entry.new
-                ? 'New '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' with '
+                ? 'New '+MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' with '
                 : (entry.conversation.data.name == null
                     ? ''
-                    : Conversation.MODE_SHORT_NAME[entry.conversation.data.mode]+' with '
+                    : MODE_SHORT_NAME[entry.conversation.data.mode]+' with '
                   )
             ) + (
               entry.conversation.data.acFull
@@ -188,9 +188,9 @@ self.addEventListener('push', event => {
         let message;
         if (entry.messages.length === 0) {
           if (entry.new) {
-            message = payload.users[entry.conversation.data.user[1]].data.name + ' started a '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+'.';
+            message = payload.users[entry.conversation.data.user[1]].data.name + ' started a '+MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+'.';
           } else {
-            message = 'The '+Conversation.MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' was updated.';
+            message = 'The '+MODE_SHORT_NAME[entry.conversation.data.mode].toLowerCase()+' was updated.';
           }
         } else {
           if (entry.messages.length === 1) {
