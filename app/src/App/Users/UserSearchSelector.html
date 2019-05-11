@@ -9,7 +9,8 @@
     bind:value={username}
     disabled={disabled}
     autocomplete="off"
-    on:focus={() => showUserSearchDropdown = true} />
+    on:focus={() => showUserSearchDropdown = true}
+  >
   {#if !disabled && (localUsers.length || serverUsersLoading)}
     <div class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
       {#each localUsers as user (user.guid)}

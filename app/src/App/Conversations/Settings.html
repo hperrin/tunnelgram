@@ -10,7 +10,7 @@
       <button type="submit" class="btn btn-primary">Save</button>
     {/if}
   </form>
-  <hr />
+  <hr>
   <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
     <div class="alert alert-info">
       If you want to start fresh, you can clear your readline and notification
@@ -19,7 +19,7 @@
     </div>
     <button type="button" class="btn btn-info" on:click={clearReadline} disabled={clearingReadline}>Clear my Readline/Notification Settings</button>
   </div>
-  <hr />
+  <hr>
   <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
     {#if !confirmLeave}
       {#if $conversation.data.mode === Conversation.MODE_CHAT}

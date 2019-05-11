@@ -3,7 +3,7 @@
     <div class="d-flex flex-wrap justify-content-start align-items-start position-relative bg-secondary pt-2 pl-2">
       {#each images as image, i}
         <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
-          <img src={image.thumbnailImg} alt={image.name} title={image.name} />
+          <img src={image.thumbnailImg} alt={image.name} title={image.name}>
           <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click={() => rotateImage(i)} title="Rotate">
             <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
           </button>
