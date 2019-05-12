@@ -3,7 +3,7 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 
-error_reporting(E_ALL);
+error_reporting(0);
 
 /*
  * When a client gets a push from the server, it can call pull.php with its
