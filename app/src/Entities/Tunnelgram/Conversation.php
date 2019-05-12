@@ -117,7 +117,7 @@ class Conversation extends \Nymph\Entity {
     }
 
     $user->addGroup($this->group);
-    if (!$user->save()) {
+    if (!$user->saveSkipAC()) {
       throw new \Exception('Couldn\'t add user to channel group.');
     }
 
@@ -152,7 +152,7 @@ class Conversation extends \Nymph\Entity {
     }
 
     $user->delGroup($this->group);
-    if (!$user->save()) {
+    if (!$user->saveSkipAC()) {
       throw new \Exception('Couldn\'t remove user from channel group.');
     }
 
@@ -295,7 +295,7 @@ class Conversation extends \Nymph\Entity {
           foreach ($users as $user) {
             // Make sure we have permission to delete.
             $user->delGroup($this->group);
-            $user->save();
+            $user->saveSkipAC();
           }
         } while (count($users));
 
