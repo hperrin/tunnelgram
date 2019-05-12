@@ -3,7 +3,8 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 
-error_reporting(0);
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
 
 /*
  * When a client gets a push from the server, it can call pull.php with its
@@ -117,9 +118,20 @@ try {
   foreach ($conversations as $conversation) {
     foreach ($conversation->acFull as $user) {
       if (!isset($users[$user->guid])) {
-        $users[$user->guid] = $user;
         // Access its username in order to wake it if it's a sleeping reference.
         $user->username;
+        // Save it to the user array.
+        $users[$user->guid] = $user;
+      }
+    }
+  }
+  foreach ($data as $curData) {
+    foreach ($curData['messages'] as $message) {
+      if (!isset($users[$message->user->guid])) {
+        // Access its username in order to wake it if it's a sleeping reference.
+        $message->user->username;
+        // Save it to the user array.
+        $users[$message->user->guid] = $message->user;
       }
     }
   }
