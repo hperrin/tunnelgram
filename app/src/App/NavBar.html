@@ -1,28 +1,30 @@
 <ul class="navbar-nav ml-auto">
-  <li class="nav-item dropdown" bind:this={notificationsDropdown}>
-    <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="notificationsDropdown" title="Notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      {#if $conversation.notifications === Conversation.NOTIFICATIONS_ALL}
-        <span><i class="fas fa-bell"></i></span>
-      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_MENTIONS}
-        <span><i class="far fa-bell"></i></span>
-      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_DIRECT}
-        <span><i class="far fa-bell"></i></span>
-      {:else if $conversation.notifications === Conversation.NOTIFICATIONS_NONE}
-        <span><i class="fas fa-bell-slash"></i></span>
-      {/if}
-      <span class="sr-only">({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
-    </a>
-    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
-      <h6 class="dropdown-header">
-        Notification Setting
-      </h6>
-      {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
-        <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click={() => setNotifications(key)}>
-          {Conversation.NOTIFICATIONS_NAME[key]}
-        </a>
-      {/each}
-    </div>
-  </li>
+  {#if $conversation.isUserJoined()}
+    <li class="nav-item dropdown" bind:this={notificationsDropdown}>
+      <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="notificationsDropdown" title="Notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {#if $conversation.notifications === Conversation.NOTIFICATIONS_ALL}
+          <span><i class="fas fa-bell"></i></span>
+        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_MENTIONS}
+          <span><i class="far fa-bell"></i></span>
+        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_DIRECT}
+          <span><i class="far fa-bell"></i></span>
+        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_NONE}
+          <span><i class="fas fa-bell-slash"></i></span>
+        {/if}
+        <span class="sr-only">({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
+        <h6 class="dropdown-header">
+          Notification Setting
+        </h6>
+        {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
+          <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click={() => setNotifications(key)}>
+            {Conversation.NOTIFICATIONS_NAME[key]}
+          </a>
+        {/each}
+      </div>
+    </li>
+  {/if}
   <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
     <a class="nav-link" href="javascript:void(0)" on:click={() => navigate('/c/'+$conversation.guid)} title="Conversation">
       <i class="fas fa-comments"></i>
@@ -44,14 +46,16 @@
       {/if}
     </a>
   </li>
-  <li class="nav-item {$view === 'settings' ? 'active' : ''}">
-    <a class="nav-link" href="javascript:void(0)" on:click={() => navigate('/c/'+$conversation.guid+'/settings')} title="Settings">
-      <i class="fas fa-cog"></i>
-      {#if $view === 'settings'}
-        <span class="sr-only">(current)</span>
-      {/if}
-    </a>
-  </li>
+  {#if $conversation.isUserJoined()}
+    <li class="nav-item {$view === 'settings' ? 'active' : ''}">
+      <a class="nav-link" href="javascript:void(0)" on:click={() => navigate('/c/'+$conversation.guid+'/settings')} title="Settings">
+        <i class="fas fa-cog"></i>
+        {#if $view === 'settings'}
+          <span class="sr-only">(current)</span>
+        {/if}
+      </a>
+    </li>
+  {/if}
 </ul>
 
 <script>

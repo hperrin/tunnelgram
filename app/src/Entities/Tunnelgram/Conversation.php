@@ -21,13 +21,15 @@ class Conversation extends \Nymph\Entity {
     'removeChannelUser',
     'clearReadline',
     'saveNotificationSetting',
+    'join',
     'leave'
   ];
   protected $whitelistData = [
     'name',
     'keys',
     'acFull',
-    'mode'
+    'mode',
+    'openJoining'
   ];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -170,6 +172,22 @@ class Conversation extends \Nymph\Entity {
     $addedMessage->text = 'removed';
     $addedMessage->relatedUser = $user;
     $addedMessage->saveSkipAC();
+  }
+
+  public function join() {
+    if ($this->mode === self::MODE_CHANNEL_PUBLIC && $this->openJoining) {
+      $user = User::factory(Tilmeld::$currentUser->guid);
+
+      $user->addGroup($this->group);
+      if ($user->save()) {
+        // Send an informational message that the user has joined.
+        $leftMessage = new Message();
+        $leftMessage->conversation = $this;
+        $leftMessage->informational = true;
+        $leftMessage->text = 'joined';
+        $leftMessage->saveSkipAC();
+      }
+    }
   }
 
   public function leave() {
@@ -467,6 +485,10 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function saveReadline($newReadline) {
+    if (!Tilmeld::checkPermissions($this, Tilmeld::WRITE_ACCESS)) {
+      return false;
+    }
+
     $readline = $this->getReadline();
 
     if (!isset($readline->readline) || $readline->readline < $newReadline) {
@@ -478,12 +500,16 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function saveNotificationSetting($setting) {
+    if (!Tilmeld::checkPermissions($this, Tilmeld::WRITE_ACCESS)) {
+      return false;
+    }
+
     $readline = $this->getReadline();
 
     $readline->notifications = (int) $setting;
     $readline->save();
 
-    return $readline->notifications ?? null;
+    return $readline->notifications;
   }
 
   public function updateDataProtection() {
@@ -565,7 +591,7 @@ class Conversation extends \Nymph\Entity {
     }
 
     $recipientGuids = [];
-    if (!$newConversation && $this->mode === self::MODE_CHANNEL_PRIVATE) {
+    if (!$newConversation && $this->mode !== self::MODE_CHAT) {
       $users = $this->group->getUsers();
       foreach ($users as $user) {
         $recipientGuids[] = $user->guid;
@@ -579,6 +605,15 @@ class Conversation extends \Nymph\Entity {
     // This is for old conversations that have a null lastMessage.
     if (!isset($this->lastMessage)) {
       unset($this->lastMessage);
+    }
+
+    if ($this->mode !== self::MODE_CHANNEL_PUBLIC) {
+      unset($this->openJoining);
+    }
+
+    if ($this->mode === self::MODE_CHANNEL_PUBLIC) {
+      unset($this->keys);
+      $this->acOther = Tilmeld::READ_ACCESS;
     }
 
     try {
@@ -604,6 +639,11 @@ class Conversation extends \Nymph\Entity {
             )
         ))
         ->attribute('lastMessage', v::instance('Tunnelgram\Message'), false)
+        ->attribute(
+            'openJoining',
+            v::boolType(),
+            $this->mode === self::MODE_CHANNEL_PUBLIC
+        )
         ->setName('conversation')
         ->assert($this->getValidatable());
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {

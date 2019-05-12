@@ -3,7 +3,6 @@ import {User} from 'tilmeld-client';
 import {Conversation} from './Conversation';
 import {saveEntities, restoreEntities} from '../../Services/entityRefresh';
 import {crypt} from '../../Services/EncryptionService';
-import base64js from 'base64-js';
 
 let currentUser = null;
 
@@ -211,10 +210,7 @@ export class Message extends Entity {
           key = crypt.xorKey(channelKey, this.data.key);
         } else {
           encrypt = (input, key) => input;
-          encryptBytesToBase64Async = async (input, key) => {
-            // TODO(hperrin): Base64 async.
-            return input;
-          };
+          encryptBytesToBase64Async = async (input, key) => crypt.encodeBase64(input);
         }
 
         // Encrypt the message text.

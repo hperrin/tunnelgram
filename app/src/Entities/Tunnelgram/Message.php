@@ -67,10 +67,10 @@ class Message extends \Nymph\Entity {
   public function jsonSerialize($clientClassName = true) {
     $object = parent::jsonSerialize($clientClassName);
 
-    if (
-      ($this->informational ?? false) ||
-      $this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC
-    ) {
+    if ($this->informational ?? false) {
+      $object->encryption = false;
+    } elseif ($this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC) {
+      $object->mode = $this->conversation->mode;
       $object->encryption = false;
     } else {
       if ($this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE) {
@@ -145,6 +145,11 @@ class Message extends \Nymph\Entity {
       foreach ($this->acRead as $user) {
         $recipientGuids[] = $user->guid;
       }
+    }
+
+    if ($this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC) {
+      unset($this->keys);
+      unset($this->key);
     }
 
     if (!$this->images) {

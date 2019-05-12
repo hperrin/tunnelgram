@@ -17,7 +17,7 @@
   <div class="flex-grow-1 position-relative">
     <MessageList bind:conversation={$conversation} bind:this={messageList} />
   </div>
-  {#if postBarStorage && $conversation.guid in postBarStorage}
+  {#if showPostBar}
     <PostBar
       bind:this={postBar}
       bind:conversation={$conversation}
@@ -26,6 +26,10 @@
       bind:video={postBarStorage[$conversation.guid].video}
       on:scrollToBottom={() => messageList.requestScrollToBottom()}
     />
+  {:else if showJoinBar}
+    <JoinBar
+      bind:conversation={$conversation}
+    />
   {/if}
 </div>
 
@@ -33,6 +37,7 @@
   import {onDestroy} from 'svelte';
   import MessageList from '../Messages/List';
   import PostBar from '../Messages/PostBar';
+  import JoinBar from '../Messages/JoinBar';
   import {storage} from '../../Services/StorageService';
   import {conversation} from '../../stores';
 
@@ -42,14 +47,10 @@
   let timeout;
   let postBarStorage = null;
 
-  (async () => {
-    postBarStorage = await storage.getItem('tgPostBarStorage');
-    if (!postBarStorage) {
-      postBarStorage = {};
-    }
-  })();
+  $: showPostBar = $conversation && $conversation.isUserJoined() && postBarStorage && $conversation.guid in postBarStorage;
+  $: showJoinBar = $conversation && $conversation.canUserJoin();
 
-  $: if ($conversation && postBarStorage && !($conversation.guid in postBarStorage)) {
+  $: if ($conversation && $conversation.isUserJoined() && postBarStorage && !($conversation.guid in postBarStorage)) {
     postBarStorage[$conversation.guid] = {
       text: '',
       images: [],
@@ -60,6 +61,13 @@
   $: if (postBarStorage) {
     storage.setItem('tgPostBarStorage', postBarStorage);
   }
+
+  (async () => {
+    postBarStorage = await storage.getItem('tgPostBarStorage');
+    if (!postBarStorage) {
+      postBarStorage = {};
+    }
+  })();
 
   onDestroy(() => {
     if (timeout) {
@@ -79,17 +87,21 @@
 
     showDropbox = true;
 
-    timeout = window.setTimeout(() => {
-      showDropbox = false;
-      timeout = null;
-    }, 2000);
+    if (postBar) {
+      timeout = window.setTimeout(() => {
+        showDropbox = false;
+        timeout = null;
+      }, 2000);
+    }
   }
 
   function handleDrag (event, showDropboxValue) {
     event.stopPropagation();
     event.preventDefault();
 
-    showDropbox = showDropboxValue;
+    if (postBar) {
+      showDropbox = showDropboxValue;
+    }
   }
 
   function handleDrop (event) {
@@ -97,6 +109,8 @@
     event.preventDefault();
 
     showDropbox = false;
-    postBar.handleFiles(event.dataTransfer.files);
+    if (postBar) {
+      postBar.handleFiles(event.dataTransfer.files);
+    }
   }
 </script>

@@ -1,13 +1,13 @@
 <div class="d-flex flex-column align-items-center p-3">
   <h2 class="btn-group d-flex w-std-page">
-    {#each [Conversation.MODE_CHAT, Conversation.MODE_CHANNEL_PRIVATE] as mode}
+    {#each [Conversation.MODE_CHAT, Conversation.MODE_CHANNEL_PRIVATE, Conversation.MODE_CHANNEL_PUBLIC] as mode}
       <button
         class="btn btn-secondary flex-grow-1 {$conversation.data.mode === mode ? 'active' : ''}"
         type="button"
         on:click={() => $conversation.data.mode = mode}
         aria-pressed={$conversation.data.mode === mode}
       >
-        Start a {Conversation.MODE_NAME[mode]}
+        {Conversation.MODE_NAME[mode]}
       </button>
     {/each}
   </h2>
@@ -18,12 +18,29 @@
       still end to end encrypted, so only channel members can read what is sent
       in them.
     </p>
+  {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
+    <p class="alert alert-info m-3 w-std-page">
+      Public channels have admins who can add new members and promote other
+      members to admin. Everyone can search for and view public channels, and
+      they are not encrypted.
+    </p>
   {/if}
   <form class="d-flex flex-column justify-content-start w-std-page" on:submit|preventDefault={save}>
     {#if $conversation.data.mode !== Conversation.MODE_CHAT}
       <div class="form-group">
         <label for="name">Name</label>
         <input type="text" class="form-control" bind:value={$conversation.decrypted.name} id="name" placeholder="Name">
+      </div>
+    {/if}
+    {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
+      <div class="form-group">
+        <label for="openJoining">Open Joining</label>
+        <div>
+          <label>
+            <input type="checkbox" bind:checked={$conversation.data.openJoining} id="openJoining">
+            Allow anyone to join and send messages.
+          </label>
+        </div>
       </div>
     {/if}
     <h3 class="mt-3">Add {$conversation.data.mode === Conversation.MODE_CHAT ? 'People' : 'Channel Admins'}</h3>

@@ -15,7 +15,7 @@ export const MODE_SHORT_NAME = {
 export const MODE_DESCRIPTION = {
   [MODE_CHAT]: `Chat messages are end to end encrypted per-user. Message decryption keys are copied and encrypted for each person in the chat. If someone is added to a chat later, they won't be able to read any previous messages.`,
   [MODE_CHANNEL_PRIVATE]: `Private channel messages are end to end encrypted per-channel. Message decryption keys are derived from the channel's encryption key, which is encrypted for each person. If someone is added to a private channel later, they will be able to read all of the previous messages in the channel.`,
-  [MODE_CHANNEL_PUBLIC]: `Public channel messages are not encrypted. Anyone can search for a public channel and read its messages before joining or requesting to join.`
+  [MODE_CHANNEL_PUBLIC]: `Public channel messages are not encrypted. Anyone can search for a public channel and read its messages.`
 };
 // Notification settings.
 export const NOTIFICATIONS_ALL = 0;

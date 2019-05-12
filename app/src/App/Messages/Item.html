@@ -8,7 +8,9 @@
     <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
       <Avatar user={message.data.user} size="18" />
     </a>
-    {#if message.data.text === 'left'}
+    {#if message.data.text === 'joined'}
+      <DisplayName bind:user={message.data.user} /> joined.
+    {:else if message.data.text === 'left'}
       <DisplayName bind:user={message.data.user} /> left.
     {:else if message.data.text === 'added'}
       <DisplayName bind:user={message.data.user} /> added <DisplayName bind:user={message.data.relatedUser} />.

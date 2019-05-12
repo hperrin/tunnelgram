@@ -87,6 +87,7 @@ export class Conversation extends Entity {
 
     if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
       this.data.name = this.decrypted.name;
+      this.data.openJoining = !!this.data.openJoining;
       delete this.data.keys;
     } else {
       let key;
@@ -106,20 +107,6 @@ export class Conversation extends Entity {
             encryptPromises.push({guid: user.guid, promise: crypt.encryptRSAForUser(key + pad, user)});
           }
         }
-        // This isn't needed because addChannelUser handles channel user keys.
-        // if (this.data.mode === Conversation.MODE_CHANNEL_PRIVATE && this.data.group) {
-        //   // Encrypt the key for channel users.
-        //   if (this.data.group.isASleepingReference) {
-        //     await this.data.group.ready();
-        //   }
-        //   const userGuids = await this.getGroupUserGuids();
-        //   for (let guid of userGuids) {
-        //     if (!(guid in this.data.keys)) {
-        //       const pad = crypt.generatePad();
-        //       encryptPromises.push({guid, promise: crypt.encryptRSAForUser(key + pad, guid)});
-        //     }
-        //   }
-        // }
         for (let entry of encryptPromises) {
           this.data.keys[entry.guid] = await entry.promise;
         }
@@ -193,6 +180,9 @@ export class Conversation extends Entity {
   }
 
   saveReadline (...args) {
+    if (!this.isUserJoined()) {
+      return;
+    }
     this.readline = args[0];
     this.unreadCountPromise = null;
     return this.serverCall('saveReadline', args, true);
@@ -235,6 +225,27 @@ export class Conversation extends Entity {
 
   leave(...args) {
     return this.serverCall('leave', args);
+  }
+
+  join(...args) {
+    return this.serverCall('join', args);
+  }
+
+  isUserJoined() {
+    if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      if (currentUser.inArray(this.data.acFull)) {
+        return true;
+      }
+      return !!currentUser.data.groups.filter(group => group.guid === this.data.group.guid).length;
+    }
+    return true;
+  }
+
+  canUserJoin() {
+    if (this.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      return this.data.openJoining;
+    }
+    return false;
   }
 }
 
