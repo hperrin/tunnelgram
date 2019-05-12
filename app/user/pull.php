@@ -118,9 +118,8 @@ try {
     foreach ($conversation->acFull as $user) {
       if (!isset($users[$user->guid])) {
         $users[$user->guid] = $user;
-        if ($user->isASleepingReference) {
-          $user->referenceWake();
-        }
+        // Access its username in order to wake it if it's a sleeping reference.
+        $user->username;
       }
     }
   }

@@ -155,7 +155,7 @@ self.addEventListener('push', event => {
         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
       method: 'POST'
-    })).then(response => response.json()).then(payload => {
+    })).then(response => response.text()).then(text => JSON.parse(filterPhpMessages(text))).then(payload => {
       let promises = payload.data.map(entry => {
         const showNameProp = entry.conversation.data.acFull.length > 2
           ? 'nameFirst'
@@ -267,7 +267,7 @@ function sendNotification (title, body, guid, timestamp) {
     timestamp,
     vibrate: [120, 240, 120, 240, 360]
   });
-};
+}
 
 function openConversation (conversationId) {
   const urlToOpen = new URL('/#/c/'+conversationId, self.location.origin).href;
@@ -292,4 +292,16 @@ function openConversation (conversationId) {
       return clients.openWindow(urlToOpen);
     }
   });
-};
+}
+
+function filterPhpMessages(text) {
+  const phpMessages = /<br \/>\n(<b>[\w ]+<\/b>:.*?)<br \/>\n/gm;
+  if (text.match(phpMessages)) {
+    let match;
+    while ((match = phpMessages.exec(text)) !== null) {
+      console.log('PHP Message:', match[1].replace(/<\/?b>/g, ''));
+    }
+    text = text.replace(phpMessages, '');
+  }
+  return text;
+}
