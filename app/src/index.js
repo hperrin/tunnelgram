@@ -16,7 +16,7 @@ import AppPushSubscription from './Entities/Tunnelgram/AppPushSubscription';
 import WebPushSubscription from './Entities/Tunnelgram/WebPushSubscription';
 import Readline from './Entities/Tunnelgram/Readline';
 import Settings from './Entities/Tunnelgram/Settings';
-import Container from './Container.html';
+import Container from './Container';
 import ErrHandler from './ErrHandler';
 
 import {get} from 'svelte/store';
