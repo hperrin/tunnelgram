@@ -31,7 +31,7 @@
 </div>
 
 <script>
-  import {onMount, onDestroy, beforeUpdate, afterUpdate} from 'svelte';
+  import {onMount, onDestroy, beforeUpdate, afterUpdate, tick} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Message from '../../Entities/Tunnelgram/Message';
   import ConversationHeader from '../Conversations/Header';
@@ -94,9 +94,9 @@
     }
   };
 
-  let previousConversation = null;
-  $: if (previousConversation !== conversation) {
-    previousConversation = conversation;
+  let previousConversationGuid = null;
+  $: if (previousConversationGuid !== conversation.guid) {
+    previousConversationGuid = conversation.guid;
     messages = [];
     initialReadline = conversation.readline;
     showReadline = null;
@@ -225,12 +225,15 @@
     });
   }
 
-  function handleScroll () {
+  async function handleScroll () {
+    setIsAtBottom();
+
+    await tick();
+
     if (container.scrollTop < 250) {
       loadEarlierMessages();
     }
 
-    setIsAtBottom();
     updateReadline();
   }
 

@@ -33,7 +33,7 @@
 </div>
 
 <script>
-  import {onMount, onDestroy, createEventDispatcher} from 'svelte';
+  import {onMount, onDestroy, tick, createEventDispatcher} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from '../LoadingIndicator';
@@ -160,6 +160,7 @@
       loading = false;
       if (update) {
         if (Array.isArray(update)) {
+          $conversations = [];
           if (update.length < CONVERSATION_PAGE_SIZE) {
             reachedEarliestConversation = true;
           }
@@ -178,7 +179,8 @@
     search = '';
   }
 
-  function handleScroll () {
+  async function handleScroll () {
+    await tick();
     if (container && container.scrollTop > (container.scrollHeight - container.clientHeight - 150)) {
       loadEarlierConversations();
     }
