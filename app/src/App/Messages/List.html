@@ -230,11 +230,13 @@
 
     await tick();
 
-    if (container.scrollTop < 250) {
-      loadEarlierMessages();
-    }
+    if (container) {
+      if (container.scrollTop < 250) {
+        loadEarlierMessages();
+      }
 
-    updateReadline();
+      updateReadline();
+    }
   }
 
   function handleWindowResize () {
