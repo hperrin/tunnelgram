@@ -150,7 +150,7 @@ try {
   echo json_encode([
     'currentUserGuid' => Tilmeld::$currentUser->guid,
     'users' => $users,
-    'data' => $output
+    'data' => $data
   ]);
 } catch (\Nymph\Exceptions\QueryFailedException $e) {
   echo $e->getMessage()."\n\n".$e->getQuery();
