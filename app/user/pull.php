@@ -136,11 +136,21 @@ try {
     }
   }
 
+  // Add an images array to all the messages, because the old service worker
+  // expected it.
+  foreach ($data as $curData) {
+    foreach ($curData['messages'] as $message) {
+      if (!isset($message->images)) {
+        $message->images = [];
+      }
+    }
+  }
+
   header('Content-Type: application/json');
   echo json_encode([
     'currentUserGuid' => Tilmeld::$currentUser->guid,
     'users' => $users,
-    'data' => $data
+    'data' => $output
   ]);
 } catch (\Nymph\Exceptions\QueryFailedException $e) {
   echo $e->getMessage()."\n\n".$e->getQuery();

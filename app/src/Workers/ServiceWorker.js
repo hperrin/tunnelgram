@@ -196,9 +196,9 @@ self.addEventListener('push', event => {
           if (entry.messages.length === 1) {
             if (entry.messages[0].data.informational) {
               message = 'Update from ';
-            } else if (entry.messages[0].data.images.length) {
+            } else if (entry.messages[0].data.images != null && entry.messages[0].data.images.length) {
               message = 'Photo from ';
-            } else if (entry.messages[0].data.video !== null) {
+            } else if (entry.messages[0].data.video != null) {
               message = 'Video from ';
             } else {
               message = 'Message from ';
