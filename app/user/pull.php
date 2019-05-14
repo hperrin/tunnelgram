@@ -136,12 +136,15 @@ try {
     }
   }
 
-  // Add an images array to all the messages, because the old service worker
-  // expected it.
+  // Add an images array and video entry to all the messages, because the old
+  // service worker expected them.
   foreach ($data as $curData) {
     foreach ($curData['messages'] as $message) {
       if (!isset($message->images)) {
         $message->images = [];
+      }
+      if (!isset($message->video)) {
+        $message->video = null;
       }
     }
   }
