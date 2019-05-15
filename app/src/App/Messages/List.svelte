@@ -18,7 +18,21 @@
     <div class="d-flex flex-column-reverse" bind:this={messageContainer}>
       {#each messages as message, i (message.guid)}
         <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
-          <MessageItem bind:message on:rendered={rescrollToBottom} on:deleted={() => removeMessage(message)} readLineCDate={showReadline && initialReadline} showAvatar={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid} showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}></MessageItem>
+          <MessageItem
+            bind:message
+            on:rendered={rescrollToBottom}
+            on:deleted={() => removeMessage(message)}
+            nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
+            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
+            showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}
+          ></MessageItem>
+          {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
+            <div class="d-flex align-items-center w-100 mb-2 readline">
+              <hr class="mx-2 flex-grow-1">
+              <small class="text-muted">new messages</small>
+              <hr class="mx-2 flex-grow-1">
+            </div>
+          {/if}
         </div>
       {/each}
     </div>
@@ -77,21 +91,6 @@
   };
   const onPubSubDisconnect = () => {
     disconnected = true;
-  };
-  const showTime = (time1, time2) => {
-    if (time2 === undefined) {
-      time2 = (+new Date()) / 1000;
-    }
-    const now = (+new Date()) / 1000;
-    if (now - time1 > 6 * 24 * 60 * 60) {
-      // More than 6 days ago.
-      return (time2 - time1 > 24 * 60 * 60); // 24 hours
-    } else if (now - time1 > 24 * 60 * 60) {
-      // More than 1 day ago.
-      return (time2 - time1 > 4 * 60 * 60); // 4 hours
-    } else {
-      return (time2 - time1 > 2 * 60 * 60); // 2 hours
-    }
   };
 
   let previousConversationGuid = null;
@@ -248,6 +247,22 @@
 
   function setIsAtBottom () {
     isAtBottom = container.scrollTop >= (container.scrollHeight - container.offsetHeight);
+  }
+
+  function showTime (time1, time2) {
+    if (time2 === undefined) {
+      time2 = (+new Date()) / 1000;
+    }
+    const now = (+new Date()) / 1000;
+    if (now - time1 > 6 * 24 * 60 * 60) {
+      // More than 6 days ago.
+      return (time2 - time1 > 24 * 60 * 60); // 24 hours
+    } else if (now - time1 > 24 * 60 * 60) {
+      // More than 1 day ago.
+      return (time2 - time1 > 4 * 60 * 60); // 4 hours
+    } else {
+      return (time2 - time1 > 40 * 60); // 40 minutes
+    }
   }
 
   async function loadEarlierMessages () {

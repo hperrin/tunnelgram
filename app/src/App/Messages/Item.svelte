@@ -4,36 +4,50 @@
   </small>
 {/if}
 {#if message.data.informational}
-  <small class="d-flex align-items-center w-100 mb-2 text-muted">
-    <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
-      <Avatar user={message.data.user} size="18" />
-    </a>
-    {#if message.data.text === 'joined'}
-      <DisplayName bind:user={message.data.user} /> joined.
-    {:else if message.data.text === 'left'}
-      <DisplayName bind:user={message.data.user} /> left.
-    {:else if message.data.text === 'added'}
-      <DisplayName bind:user={message.data.user} /> added <DisplayName bind:user={message.data.relatedUser} />.
-    {:else if message.data.text === 'removed'}
-      <DisplayName bind:user={message.data.user} /> removed <DisplayName bind:user={message.data.relatedUser} />.
-    {:else if message.data.text === 'promoted'}
-      <DisplayName bind:user={message.data.user} /> promoted <DisplayName bind:user={message.data.relatedUser} />.
-    {:else}
-      {message.data.text}
+  <div class="d-flex align-items-center w-100 mb-2 text-muted">
+    {#if isMessageUserReady}
+      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
+        <Avatar user={message.data.user} size="18" />
+      </a>
+      <small>
+        {#if message.data.text === 'joined'}
+          <DisplayName bind:user={message.data.user} /> joined.
+        {:else if message.data.text === 'left'}
+          <DisplayName bind:user={message.data.user} /> left.
+        {:else if message.data.text === 'added'}
+          <DisplayName bind:user={message.data.user} /> added <DisplayName bind:user={message.data.relatedUser} />.
+        {:else if message.data.text === 'removed'}
+          <DisplayName bind:user={message.data.user} /> removed <DisplayName bind:user={message.data.relatedUser} />.
+        {:else if message.data.text === 'promoted'}
+          <DisplayName bind:user={message.data.user} /> promoted <DisplayName bind:user={message.data.relatedUser} />.
+        {:else}
+          {message.data.text}
+        {/if}
+      </small>
     {/if}
-  </small>
+  </div>
 {:else}
-  <div class="d-flex align-items-center w-100 mb-2 {isOwner ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};">
+  {#if isChannel && prevMessageUserIsDifferent && isMessageUserReady}
+    <div class="d-flex align-items-center w-100 mb-2 text-muted">
+      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
+        <Avatar user={message.data.user} size="18" />
+      </a>
+      <small>
+        <DisplayName bind:user={message.data.user} />
+      </small>
+    </div>
+  {/if}
+  <div class="d-flex align-items-center w-100 mb-2 {(isOwner && !isChannel) ? 'flex-row-reverse' : ''}" style="opacity: {pending ? '.6' : '1'};">
     {#if showActions && isOwner}
       <div class="h1 my-0" style="font-size: 0;">
-        <button type="button" class="btn btn-sm btn-danger mr-2" on:click={deleteMessage} title="Delete message"><i class="fas fa-trash-alt"></i></button>
+        <button type="button" class="btn btn-sm btn-danger mx-2" on:click={deleteMessage} title="Delete message"><i class="fas fa-trash-alt"></i></button>
         {#if pending && saveFailed}
-          <button type="button" class="btn btn-sm btn-success mr-2" on:click={retrySave} title="Retry sending"><i class="fas fa-sync"></i></button>
+          <button type="button" class="btn btn-sm btn-success mx-2" on:click={retrySave} title="Retry sending"><i class="fas fa-sync"></i></button>
         {/if}
       </div>
     {/if}
-    {#if !isOwner}
-      {#if showAvatar && message.data.user !== null && message.data.user.data.username != null}
+    {#if !isOwner && !isChannel}
+      {#if nextMessageUserIsDifferent && isMessageUserReady}
         <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
           <Avatar user={message.data.user} size="18" />
         </a>
@@ -43,16 +57,20 @@
         </div>
       {/if}
     {/if}
+    {#if isChannel}
+      <div class="d-inline-block my-0" style="width: 9px;">&nbsp;</div>
+    {/if}
     <div class="{stageClass} {(flipFirst || flipSecond) ? 'raise-to-top perspective-stage' : ''}" style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
       <div
-        class="{shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass} mx-2 my-0 {flipper ? 'flipper' : ''} {flipFirst ? 'flip-first' : ''} {flipSecond ? 'flip-second' : ''}"
+        class="{isChannel ? (isOwner ? 'border-primary border-left' : 'border-info border-left') : (shouldEmbiggen ? '' : 'card rounded '+(isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light')+' '+shadowClass)} mx-2 my-0 {flipper ? 'flipper' : ''} {flipFirst ? 'flip-first' : ''} {flipSecond ? 'flip-second' : ''}"
         style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
         tabindex="0"
         role="button"
         on:animationend={handleFlipAnimationEnd}
         on:dblclick={toggleActions}
         title={createdDateLong}
-        bind:this={messageContainer}>
+        bind:this={messageContainer}
+      >
         {#if shouldEmbiggen}
           <div class="d-inline-block" on:click={() => flipFirst = !!flipper} style="font-size: 1.1rem">
             {#if message.decrypted.text != null}
@@ -97,17 +115,11 @@
     {/if}
   </div>
 {/if}
-{#if readLineCDate === message.cdate}
-  <div class="d-flex align-items-center w-100 mb-2 readline">
-    <hr class="mx-2 flex-grow-1">
-    <small class="text-muted">new messages</small>
-    <hr class="mx-2 flex-grow-1">
-  </div>
-{/if}
 
 <script>
   import {onMount, onDestroy, tick, createEventDispatcher} from 'svelte';
   import TinyGesture from 'tinygesture';
+  import Conversation from '../../Entities/Tunnelgram/Conversation';
   import ImageGrid from './Media/ImageGrid';
   import Video from './Media/Video';
   import Avatar from '../Users/Avatar';
@@ -121,8 +133,8 @@
   const bareEmojiRegex = /^(?:\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74)\uDB40\uDC7F|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC68(?:\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|[\u2695\u2696\u2708]\uFE0F|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]\uFE0F|(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]))|\uD83D\uDC69\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2695\u2696\u2708]|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83D\uDC69\u200D[\u2695\u2696\u2708])\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D\uDC68(?:\u200D(?:(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|\uD83D[\uDC66\uDC67])|\uD83C[\uDFFB-\uDFFF])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92])|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF6\uD83C\uDDE6|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDD1-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC69\uDC6E\uDC70-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD18-\uDD1C\uDD1E\uDD1F\uDD26\uDD30-\uDD39\uDD3D\uDD3E\uDDD1-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])?|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDEEB\uDEEC\uDEF4-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u2660\u2663\u2665\u2666\u2668\u267B\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEF8]|\uD83E[\uDD10-\uDD3A\uDD3C-\uDD3E\uDD40-\uDD45\uDD47-\uDD4C\uDD50-\uDD6B\uDD80-\uDD97\uDDC0\uDDD0-\uDDE6])\uFE0F)$/;
 
   export let message = null;
-  export let readLineCDate = false;
-  export let showAvatar = true;
+  export let nextMessageUserIsDifferent = true;
+  export let prevMessageUserIsDifferent = true;
   export let showTime = false;
   export let pending = false;
   let showActions = false;
@@ -139,6 +151,8 @@
   let createdDateShort;
 
   $: isOwner = pending || $user.is(message.data.user);
+  $: isChannel = message.mode !== Conversation.MODE_CHAT;
+  $: isMessageUserReady = message.data.user != null && message.data.user.data.username != null;
   $: shouldEmbiggen = (() => {
     // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
     if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.video == null && message.decrypted.text.match(bareEmojiRegex)) {
@@ -160,6 +174,9 @@
       message.readyAll(1).then(() => {
         message.containsSleepingReference = false;
         message._tgCalledReadyAll = false;
+        if (!destroyed) {
+          message = message;
+        }
       }, ErrHandler);
   }
 
@@ -177,7 +194,7 @@
   }
 
   onMount(() => {
-    interval = window.setInterval(() => updateTime(), 10000);
+    interval = window.setInterval(updateTime, 10000);
     updateTime();
 
     const setFormattedText = async () => {
@@ -250,7 +267,7 @@
     }
     let {cdate} = message;
     if (cdate == null) {
-      cdate = +new Date();
+      cdate = (+new Date()) / 1000;
     }
     const now = (+new Date()) / 1000;
     const cdateFormatter = new SimpleDateFormatter(Math.min(cdate, (+new Date()) / 1000));
