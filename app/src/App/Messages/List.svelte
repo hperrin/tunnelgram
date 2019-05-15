@@ -1,5 +1,5 @@
-<svelte:window on:resize={handleWindowResize} />
-<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={handleScroll}>
+<svelte:window on:resize={rescrollToBottom} />
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={setIsAtBottom} on:scroll={handleScroll}>
   {#if loading}
     <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
       <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
@@ -27,7 +27,7 @@
             showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}
           ></MessageItem>
           {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
-            <div class="d-flex align-items-center w-100 mb-2 readline">
+            <div class="d-flex align-items-center w-100 mb-2 readline" bind:this={readlineEl}>
               <hr class="mx-2 flex-grow-1">
               <small class="text-muted">new messages</small>
               <hr class="mx-2 flex-grow-1">
@@ -38,14 +38,21 @@
     </div>
     <div class="d-flex flex-column align-items-start">
       {#each conversation.pending as message}
-        <MessageItem bind:message on:rendered={rescrollToBottom} pending="true" showTime={messages.length && showTime(messages[0].cdate)}></MessageItem>
+        <MessageItem
+          bind:message
+          on:rendered={rescrollToBottom}
+          pending="true"
+          nextMessageUserIsDifferent={false}
+          prevMessageUserIsDifferent={false}
+          showTime={messages.length && showTime(messages[0].cdate)}
+        ></MessageItem>
       {/each}
     </div>
   {/if}
 </div>
 
 <script>
-  import {onMount, onDestroy, beforeUpdate, afterUpdate, tick} from 'svelte';
+  import {onMount, onDestroy, afterUpdate, tick} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Message from '../../Entities/Tunnelgram/Message';
   import ConversationHeader from '../Conversations/Header';
@@ -60,6 +67,7 @@
   let messages = [];
   let container;
   let messageContainer;
+  let readlineEl;
   let loading;
   let disconnected = false;
   let isAtBottom = true;
@@ -97,6 +105,7 @@
   $: if (previousConversationGuid !== conversation.guid) {
     previousConversationGuid = conversation.guid;
     messages = [];
+    isAtBottom = true;
     initialReadline = conversation.readline;
     showReadline = null;
     loadingEarlierMessages = false;
@@ -107,38 +116,29 @@
     subscribe();
   }
 
+  $: if (showReadline === null && initialReadline !== 0 && messages.length) {
+    showReadline = initialReadline > 0 && initialReadline < messages[0].cdate;
+    scrollWaitReadline = showReadline;
+  }
+
+  $: if (readlineEl && scrollWaitReadline) {
+    scrollWaitReadline = false;
+    scrollWaitBottom = false;
+    container.scrollTop = Math.max(0, readlineEl.offsetTop - (container.clientHeight * .6));
+    setIsAtBottom();
+    updateReadline();
+  }
+
   onMount(() => {
     PubSub.on('connect', onPubSubConnect);
     PubSub.on('disconnect', onPubSubDisconnect);
   });
 
-  beforeUpdate(() => {
-    // TODO: can this be moved out of beforeUpdate?
-    if (showReadline === null && initialReadline !== 0 && messages.length) {
-      const visibleReadLine = initialReadline > 0
-        && initialReadline < messages[0].cdate;
-      showReadline = visibleReadLine;
-      if (visibleReadLine) {
-        scrollWaitReadline = window.setTimeout(() => {
-          scrollWaitReadline = false;
-          scrollToReadLine();
-        }, 500);
-        scrollWaitBottom = false;
-      }
-    }
-  });
-
-  let previousLoading = loading;
-  let previousMessagesLength = messages.length;
   let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
-    if ((
-        // Scroll to the bottom when the messages are first loaded.
-        (previousLoading !== loading && !loading && !scrollWaitReadline) ||
-        // Scroll to the bottom when new messages come in, if the user is at the bottom and the window is focused.
-        (previousMessagesLength !== messages.length && isAtBottom && !document.hidden && !scrollWaitReadline)
-      )) {
-      scrollToBottom();
+    // Rescroll to bottom when things change if the page is visible.
+    if (!document.hidden && container.scrollTop < (container.scrollHeight - container.offsetHeight)) {
+      rescrollToBottom();
     }
 
     if (previousScrollToDistanceFromBottom !== scrollToDistanceFromBottom && scrollToDistanceFromBottom != null) {
@@ -148,15 +148,6 @@
       });
     }
 
-    // Perform any scrolls that have been waiting.
-    if (scrollWaitReadline) {
-      window.clearTimeout(scrollWaitReadline);
-      scrollWaitReadline = false;
-      scrollToReadLine();
-    }
-
-    previousLoading = loading;
-    previousMessagesLength = messages.length;
     previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   });
 
@@ -197,24 +188,25 @@
           }
         }
         PubSub.updateArray(messages, update);
-        // Setting loading needs to go before handleScroll to scroll to the bottom on initial load.
         messages = messages;
         loading = false;
         createNewReadlineIfNeeded();
-        handleScroll();
 
         if (update.added) {
           // Remove the message from pending messages.
           const ent = update.data;
           for (let i = 0; i < conversation.pending.length; i++) {
             const cur = conversation.pending[i];
-            if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
+            if (ent.guid === cur.guid) {
               conversation.pending.splice(i, 1);
               conversation = conversation;
               break;
             }
           }
         }
+
+        rescrollToBottom();
+        handleScroll();
       } else {
         loading = false;
       }
@@ -225,8 +217,6 @@
   }
 
   async function handleScroll () {
-    setIsAtBottom();
-
     await tick();
 
     if (container) {
@@ -235,13 +225,6 @@
       }
 
       updateReadline();
-    }
-  }
-
-  function handleWindowResize () {
-    // Scroll to the bottom if the user was at the bottom.
-    if (isAtBottom) {
-      scrollToBottom();
     }
   }
 
@@ -348,29 +331,21 @@
     }
   }
 
-  function scrollToReadLine () {
-    const readlineEl = container.querySelector('.readline');
-    if (readlineEl) {
-      container.scrollTop = Math.max(0, readlineEl.offsetTop - (container.clientHeight * .5));
-      setIsAtBottom();
+  export async function scrollToBottom () {
+    scrollWaitBottom = true;
+
+    await tick();
+
+    if (scrollWaitBottom && !scrollWaitReadline) {
+      container.scrollTop = container.scrollHeight;
+      isAtBottom = true;
       updateReadline();
     }
-  }
-
-  export function requestScrollToBottom () {
-    if (!scrollWaitReadline) {
-      scrollToBottom();
-    }
-  }
-
-  function scrollToBottom () {
-    container.scrollTop = container.scrollHeight;
     scrollWaitBottom = false;
-    isAtBottom = true;
-    updateReadline();
   }
 
   function rescrollToBottom () {
+    // Scroll to the bottom if the user was at the bottom.
     if (isAtBottom) {
       scrollToBottom();
     }

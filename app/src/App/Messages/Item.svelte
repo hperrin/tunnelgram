@@ -6,20 +6,20 @@
 {#if message.data.informational}
   <div class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if isMessageUserReady}
-      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
-        <Avatar user={message.data.user} size="18" />
+      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+        <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
         {#if message.data.text === 'joined'}
-          <DisplayName bind:user={message.data.user} /> joined.
+          <DisplayName bind:user={messageUser} /> joined.
         {:else if message.data.text === 'left'}
-          <DisplayName bind:user={message.data.user} /> left.
+          <DisplayName bind:user={messageUser} /> left.
         {:else if message.data.text === 'added'}
-          <DisplayName bind:user={message.data.user} /> added <DisplayName bind:user={message.data.relatedUser} />.
+          <DisplayName bind:user={messageUser} /> added <DisplayName bind:user={message.data.relatedUser} />.
         {:else if message.data.text === 'removed'}
-          <DisplayName bind:user={message.data.user} /> removed <DisplayName bind:user={message.data.relatedUser} />.
+          <DisplayName bind:user={messageUser} /> removed <DisplayName bind:user={message.data.relatedUser} />.
         {:else if message.data.text === 'promoted'}
-          <DisplayName bind:user={message.data.user} /> promoted <DisplayName bind:user={message.data.relatedUser} />.
+          <DisplayName bind:user={messageUser} /> promoted <DisplayName bind:user={message.data.relatedUser} />.
         {:else}
           {message.data.text}
         {/if}
@@ -28,12 +28,12 @@
   </div>
 {:else}
   {#if isChannel && prevMessageUserIsDifferent && isMessageUserReady}
-    <div class="d-flex align-items-center w-100 mb-2 text-muted">
-      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
-        <Avatar user={message.data.user} size="18" />
+    <div class="d-flex align-items-center w-100 my-2 text-muted">
+      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+        <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
-        <DisplayName bind:user={message.data.user} />
+        <DisplayName bind:user={messageUser} />
       </small>
     </div>
   {/if}
@@ -48,17 +48,17 @@
     {/if}
     {#if !isOwner && !isChannel}
       {#if nextMessageUserIsDifferent && isMessageUserReady}
-        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click={() => navigate('/u/' + message.data.user.data.username)} title={displayName}>
-          <Avatar user={message.data.user} size="18" />
+        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+          <Avatar user={messageUser} size={avatarSize} />
         </a>
       {:else}
         <div class="d-inline-block ml-2 my-0">
-          <div style="height: 18px; width: 18px;">&nbsp;</div>
+          <div style="height: {avatarSize}px; width: {avatarSize}px;">&nbsp;</div>
         </div>
       {/if}
     {/if}
     {#if isChannel}
-      <div class="d-inline-block my-0" style="width: 9px;">&nbsp;</div>
+      <div class="d-inline-block my-0" style="width: {avatarSize / 2}px;">&nbsp;</div>
     {/if}
     <div class="{stageClass} {(flipFirst || flipSecond) ? 'raise-to-top perspective-stage' : ''}" style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
       <div
@@ -117,7 +117,7 @@
 {/if}
 
 <script>
-  import {onMount, onDestroy, tick, createEventDispatcher} from 'svelte';
+  import {onDestroy, tick, createEventDispatcher} from 'svelte';
   import TinyGesture from 'tinygesture';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import ImageGrid from './Media/ImageGrid';
@@ -151,8 +151,10 @@
   let createdDateShort;
 
   $: isOwner = pending || $user.is(message.data.user);
+  $: messageUser = pending ? $user : message.data.user;
   $: isChannel = message.mode !== Conversation.MODE_CHAT;
-  $: isMessageUserReady = message.data.user != null && message.data.user.data.username != null;
+  $: avatarSize = isChannel ? 24 : 18;
+  $: isMessageUserReady = pending || (message.data.user != null && message.data.user.data.username != null);
   $: shouldEmbiggen = (() => {
     // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
     if (message.decrypted.text != null && !message.decrypted.images.length && message.decrypted.video == null && message.decrypted.text.match(bareEmojiRegex)) {
@@ -164,20 +166,20 @@
     return false;
   })();
   $: flipper = message.decrypted.secretText != null;
-  $: displayName = message.data.user == null ? '' : (($settings != null && message.data.user.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[message.data.user.guid] : message.data.user.data.name);
+  $: displayName = messageUser == null ? '' : (($settings != null && messageUser.guid in $settings.decrypted.nicknames) ? $settings.decrypted.nicknames[messageUser.guid] : messageUser.data.name);
   $: shadowClass = ['shadow-none elevate-0 perspective-stage', 'shadow-sm', 'shadow elevate-2 perspective-stage', 'shadow-lg elevate-3 perspective-stage'][flipped ? message.secretTextElevation : message.textElevation];
   $: stageClass = ['', '', 'p-1', 'p-2'][flipped ? message.secretTextElevation : message.textElevation];
 
   $: if (message && !pending && message.containsSleepingReference && !message._tgCalledReadyAll) {
     // Ready the message's referenced entities.
-      message._tgCalledReadyAll = true;
-      message.readyAll(1).then(() => {
-        message.containsSleepingReference = false;
-        message._tgCalledReadyAll = false;
-        if (!destroyed) {
-          message = message;
-        }
-      }, ErrHandler);
+    message._tgCalledReadyAll = true;
+    message.readyAll(1).then(() => {
+      message.containsSleepingReference = false;
+      message._tgCalledReadyAll = false;
+      if (!destroyed) {
+        message = message;
+      }
+    }, ErrHandler);
   }
 
   let messageContainer;
@@ -193,29 +195,16 @@
     messageContainerGesture = null;
   }
 
-  onMount(() => {
+  let previousMessage = null;
+  $: if (previousMessage !== message) {
+    previousMessage = message;
+    waitForShowdown();
+
+    if (interval) {
+      window.clearInterval(interval);
+    }
     interval = window.setInterval(updateTime, 10000);
     updateTime();
-
-    const setFormattedText = async () => {
-      // Use showdown to convert the markdown to HTML.
-      const html = window.tgShowdownConverter.makeHtml(message.decrypted.text);
-      const secretHtml = message.decrypted.secretText != null ? window.tgShowdownConverter.makeHtml(message.decrypted.secretText) : null;
-      formattedText = html == null ? null : html.replace(/\n$/, '');
-      formattedSecretText = secretHtml == null ? null : secretHtml.replace(/\n$/, '');
-      await tick();
-      dispatch('rendered');
-    };
-
-    // If showdown isn't available, wait until it is.
-    const waitForShowdown = () => {
-      if (window.tgShowdownConverter) {
-        setFormattedText();
-      } else {
-        setTimeout(waitForShowdown, 500);
-      }
-    };
-    waitForShowdown();
 
     createdDateLong = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'long');
     createdDateShort = message.cdate == null ? 'Pending' : new SimpleDateFormatter(message.cdate).format('wymdhms', 'short');
@@ -223,16 +212,33 @@
     if (pending) {
       handlePending();
     }
-
-    dispatch('rendered');
-  });
+  }
 
   onDestroy(() => {
     destroyed = true;
     if (interval) {
-      clearInterval(interval);
+      window.clearInterval(interval);
     }
   });
+
+  // If showdown isn't available, wait until it is.
+  function waitForShowdown () {
+    if (window.tgShowdownConverter) {
+      setFormattedText();
+    } else {
+      window.setTimeout(waitForShowdown, 500);
+    }
+  }
+
+  async function setFormattedText () {
+    // Use showdown to convert the markdown to HTML.
+    const html = window.tgShowdownConverter.makeHtml(message.decrypted.text);
+    const secretHtml = message.decrypted.secretText != null ? window.tgShowdownConverter.makeHtml(message.decrypted.secretText) : null;
+    formattedText = html == null ? null : html.replace(/\n$/, '');
+    formattedSecretText = secretHtml == null ? null : secretHtml.replace(/\n$/, '');
+    await tick();
+    dispatch('rendered');
+  }
 
   async function deleteMessage () {
     if (pending) {
@@ -246,7 +252,11 @@
 
   function handlePending () {
     if (message.savePromise) {
-      message.savePromise.catch((err) => {
+      const myMessage = message;
+      message.savePromise.catch(() => {
+        if (message !== myMessage) {
+          return;
+        }
         saveFailed = true;
         showActions = true;
       });

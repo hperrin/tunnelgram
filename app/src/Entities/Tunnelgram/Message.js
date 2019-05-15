@@ -191,17 +191,19 @@ export class Message extends Entity {
 
   save (skipEncryption) {
     this.savePromise = (async () => {
-      if (!skipEncryption) {
-        if (this.data.conversation.isSleepingReference) {
-          await this.data.conversation.ready();
-        }
+      if (this.data.conversation.isSleepingReference) {
+        await this.data.conversation.ready();
+      }
 
+      this.mode = this.data.conversation.data.mode;
+
+      if (!skipEncryption) {
         let key = null;
         let encrypt = (input, key) => crypt.encrypt(input, key);
         let encryptBytesToBase64Async = (input, key) => crypt.encryptBytesToBase64Async(input, key);
-        if (this.data.conversation.data.mode === Conversation.MODE_CHAT) {
+        if (this.mode === Conversation.MODE_CHAT) {
           key = crypt.generateKey();
-        } else if (this.data.conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
+        } else if (this.mode === Conversation.MODE_CHANNEL_PRIVATE) {
           // Store a plaintext key.
           this.data.key = crypt.generateKey();
           // Get the channel key.
@@ -253,7 +255,7 @@ export class Message extends Entity {
           };
         }
 
-        if (this.data.conversation.data.mode === Conversation.MODE_CHAT) {
+        if (this.mode === Conversation.MODE_CHAT) {
           // Encrypt the key for all the conversation users.
           const encryptPromises = [];
           for (let user of this.data.conversation.data.acFull) {

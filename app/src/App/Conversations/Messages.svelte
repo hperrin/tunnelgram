@@ -24,9 +24,9 @@
       bind:text={postBarStorage[$conversation.guid].text}
       bind:images={postBarStorage[$conversation.guid].images}
       bind:video={postBarStorage[$conversation.guid].video}
-      on:scrollToBottom={() => messageList.requestScrollToBottom()}
+      on:scrollToBottom={() => messageList.scrollToBottom()}
     />
-  {:else if showJoinBar}
+  {:else}
     <JoinBar
       bind:conversation={$conversation}
     />
@@ -48,7 +48,6 @@
   let postBarStorage = null;
 
   $: showPostBar = $conversation && $conversation.isUserJoined() && postBarStorage && $conversation.guid in postBarStorage;
-  $: showJoinBar = $conversation && $conversation.canUserJoin();
 
   $: if ($conversation && $conversation.isUserJoined() && postBarStorage && !($conversation.guid in postBarStorage)) {
     postBarStorage[$conversation.guid] = {
