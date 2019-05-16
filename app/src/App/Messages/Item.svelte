@@ -6,7 +6,7 @@
 {#if message.data.informational}
   <div class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if isMessageUserReady}
-      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+      <a class="mx-2" style="line-height: 1;" href="/#/u/{messageUser.data.username}" title={displayName}>
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
@@ -29,7 +29,7 @@
 {:else}
   {#if isChannel && prevMessageUserIsDifferent && isMessageUserReady}
     <div class="d-flex align-items-center w-100 my-2 text-muted">
-      <a class="mx-2" style="line-height: 1;" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+      <a class="mx-2" style="line-height: 1;" href="/#/u/{messageUser.data.username}" title={displayName}>
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
@@ -48,7 +48,7 @@
     {/if}
     {#if !isOwner && !isChannel}
       {#if nextMessageUserIsDifferent && isMessageUserReady}
-        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="javascript:void(0)" on:click={() => navigate('/u/' + messageUser.data.username)} title={displayName}>
+        <a class="d-inline-flex ml-2 my-0 align-items-center align-self-end" href="/#/u/{messageUser.data.username}" title={displayName}>
           <Avatar user={messageUser} size={avatarSize} />
         </a>
       {:else}

@@ -98,35 +98,40 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   await store.userReadyPromise;
 
   const conversationHandler = params => {
-    const guid = parseFloat(params.id);
-    const conversations = get(store.conversations);
-
     if (!get(store.user)) {
       return;
     }
 
-    let conversation = null;
-    for (let cur of conversations) {
-      if (cur.guid === guid) {
-        conversation = cur;
-        break;
+    const guid = parseFloat(params.id);
+    const conversation = get(store.conversation);
+    const conversations = get(store.conversations);
+    let conv = null;
+
+    if (conversation.guid === guid) {
+      conv = conversation;
+    } else {
+      for (let cur of conversations) {
+        if (cur.guid === guid) {
+          conv = cur;
+          break;
+        }
       }
     }
-    store.loadingConversation.set(true);
-    if (conversation) {
-      store.conversation.set(conversation);
+
+    if (conv) {
+      store.conversation.set(conv);
       store.view.set(params.view || 'conversation');
       store.convosOut.set(false);
-      store.loadingConversation.set(false);
     } else {
+      store.loadingConversation.set(true);
       crypt.ready.then(() => {
         Nymph.getEntity({
           'class': Conversation.class
         }, {
           'type': '&',
           'guid': guid
-        }).then(conversation => {
-          store.conversation.set(conversation);
+        }).then(conv => {
+          store.conversation.set(conv);
           store.view.set(params.view || 'conversation');
           store.convosOut.set(false);
           store.loadingConversation.set(false);
