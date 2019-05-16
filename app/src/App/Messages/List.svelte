@@ -137,7 +137,7 @@
   let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
     // Rescroll to bottom when things change if the page is visible.
-    if (!document.hidden && container.scrollTop && container.scrollTop < (container.scrollHeight - container.offsetHeight)) {
+    if (!document.hidden && Math.ceil(container.scrollTop) < (container.scrollHeight - container.offsetHeight)) {
       rescrollToBottom();
     }
 
@@ -229,7 +229,7 @@
   }
 
   function setIsAtBottom () {
-    isAtBottom = container.scrollTop >= (container.scrollHeight - container.offsetHeight);
+    isAtBottom = Math.ceil(container.scrollTop) >= (container.scrollHeight - container.offsetHeight);
   }
 
   function showTime (time1, time2) {
@@ -340,16 +340,14 @@
 
     await tick();
 
-    window.requestAnimationFrame(() => {
-      if (scrollWaitBottom) {
-        if (!scrollWaitReadline && container) {
-          container.scrollTop = container.scrollHeight;
-          isAtBottom = true;
-          updateReadline();
-        }
-        scrollWaitBottom = false;
+    if (scrollWaitBottom) {
+      if (!scrollWaitReadline) {
+        container.scrollTop = container.scrollHeight;
+        isAtBottom = true;
+        updateReadline();
       }
-    });
+      scrollWaitBottom = false;
+    }
   }
 
   function rescrollToBottom () {
