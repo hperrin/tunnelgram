@@ -137,7 +137,7 @@
   let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
     // Rescroll to bottom when things change if the page is visible.
-    if (!document.hidden && container.scrollTop < (container.scrollHeight - container.offsetHeight)) {
+    if (!document.hidden && !scrollWaitBottom && container.scrollTop < (container.scrollHeight - container.offsetHeight)) {
       rescrollToBottom();
     }
 
