@@ -76,8 +76,8 @@
   let loadingEarlierMessages = false;
   let reachedEarliestMessage = false;
   let scrollToDistanceFromBottom = null;
-  let scrollWaitBottom;
-  let scrollWaitReadline;
+  let scrollWaitBottom = false;
+  let scrollWaitReadline = false;
   let updateReadlineRaf;
   let destroyed = false;
   let subscription;
@@ -111,7 +111,8 @@
     loadingEarlierMessages = false;
     reachedEarliestMessage = false;
     scrollToDistanceFromBottom = null;
-    scrollWaitBottom = true;
+    previousScrollToDistanceFromBottom = null;
+    scrollWaitBottom = false;
     scrollWaitReadline = false;
     subscribe();
   }
@@ -332,7 +333,7 @@
   }
 
   export async function scrollToBottom () {
-    if (scrollWaitReadline || scrollWaitBottom) {
+    if (scrollWaitBottom) {
       return;
     }
 
