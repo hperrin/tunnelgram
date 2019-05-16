@@ -332,16 +332,22 @@
   }
 
   export async function scrollToBottom () {
+    if (scrollWaitReadline) {
+      return;
+    }
+
     scrollWaitBottom = true;
 
     await tick();
 
-    if (scrollWaitBottom && !scrollWaitReadline) {
-      container.scrollTop = container.scrollHeight;
-      isAtBottom = true;
-      updateReadline();
+    if (scrollWaitBottom) {
+      if (!scrollWaitReadline) {
+        container.scrollTop = container.scrollHeight;
+        isAtBottom = true;
+        updateReadline();
+      }
+      scrollWaitBottom = false;
     }
-    scrollWaitBottom = false;
   }
 
   function rescrollToBottom () {
