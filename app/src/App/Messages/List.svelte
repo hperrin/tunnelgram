@@ -340,14 +340,16 @@
 
     await tick();
 
-    if (scrollWaitBottom) {
-      if (!scrollWaitReadline) {
-        container.scrollTop = container.scrollHeight;
-        isAtBottom = true;
-        updateReadline();
+    window.requestAnimationFrame(() => {
+      if (scrollWaitBottom) {
+        if (!scrollWaitReadline && container) {
+          container.scrollTop = container.scrollHeight;
+          isAtBottom = true;
+          updateReadline();
+        }
+        scrollWaitBottom = false;
       }
-      scrollWaitBottom = false;
-    }
+    });
   }
 
   function rescrollToBottom () {
