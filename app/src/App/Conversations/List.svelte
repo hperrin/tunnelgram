@@ -1,17 +1,17 @@
 <div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" bind:this={container} on:scroll={handleScroll}>
   <div class="list-group">
-    <div class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}" style="cursor: pointer;" tabindex="0" on:click={() => navigate('/c')}>
+    <a href="/#/c" on:click={() => search = ''} class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
       <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
-    </div>
+    </a>
     {#if $conversations.length > 1}
       <div class="list-group-item d-flex p-0 border-0">
         <input type="text" class="form-control bg-secondary border-0 text-light" bind:value={search} name="search" placeholder="Search people" autocomplete="off" />
       </div>
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
-      <div class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {curConversation.inArray(filteredConversations) ? '' : 'd-none'}" style="cursor: pointer;" tabindex="0" on:click={() => navigateConversation(curConversation)}>
+      <a href="/#/c/{curConversation.guid}" on:click={() => search = ''} class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {filteredConversations[curConversation.guid] ? '' : 'd-none'}" style="cursor: pointer;">
         <Preview bind:conversation={curConversation} />
-      </div>
+      </a>
     {/each}
     {#if !loading && !$conversations.length}
       <div class="list-group-item p-2 rounded-0 flex-column align-items-start bg-transparent border-0">
@@ -79,7 +79,7 @@
     disconnected = true;
   };
 
-  $: filteredConversations = (() => {
+  $: filteredConversations = Object.fromEntries((() => {
     if (search === '' || !$settings) {
       return $conversations;
     }
@@ -100,7 +100,7 @@
       }
       return false;
     });
-  })();
+  })().map(conv => [conv.guid, true]));
 
   let previousUser = null;
   let previousUserGroupsLength = 0;
@@ -172,11 +172,6 @@
         handleScroll();
       }
     }, ErrHandler);
-  }
-
-  function navigateConversation (conversation) {
-    dispatch('tunnelgram-navigate', conversation);
-    search = '';
   }
 
   async function handleScroll () {

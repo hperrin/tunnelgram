@@ -27,9 +27,7 @@
       on:scrollToBottom={() => messageList.scrollToBottom()}
     />
   {:else}
-    <JoinBar
-      bind:conversation={$conversation}
-    />
+    <JoinBar bind:conversation={$conversation} />
   {/if}
 </div>
 
@@ -47,9 +45,9 @@
   let timeout;
   let postBarStorage = null;
 
-  $: showPostBar = $conversation && $conversation.isUserJoined() && postBarStorage && $conversation.guid in postBarStorage;
+  $: showPostBar = $conversation.guid && $conversation.isUserJoined() && postBarStorage && $conversation.guid in postBarStorage;
 
-  $: if ($conversation && $conversation.isUserJoined() && postBarStorage && !($conversation.guid in postBarStorage)) {
+  $: if ($conversation.guid && $conversation.isUserJoined() && postBarStorage && !($conversation.guid in postBarStorage)) {
     postBarStorage[$conversation.guid] = {
       text: '',
       images: [],

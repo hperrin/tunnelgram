@@ -267,7 +267,7 @@
         settings.set(settingsValue);
         viewUser.set($viewUser);
         conversation.set($conversation);
-        conversations.set($conversations)
+        conversations.set($conversations);
         user.set($user);
       }, ErrHandler);
     }

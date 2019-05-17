@@ -76,7 +76,9 @@ function navigateToContinueUrl () {
   if (route && route.url !== '/' && route.url !== '') {
     forwardCount++;
     if (forwardCount > 15) {
+      console.log(route);
       debugger;
+      return;
     }
     const url = route.url + (route.query !== '' ? '?'+route.query : '');
     router.navigate('/?continue='+encodeURIComponent(url));
@@ -102,12 +104,15 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       return;
     }
 
-    const guid = parseFloat(params.id);
+    const guid = (params && params.id) ? parseFloat(params.id) : null;
+    const view = (params && params.view) || 'conversation';
     const conversation = get(store.conversation);
     const conversations = get(store.conversations);
     let conv = null;
 
-    if (conversation.guid === guid) {
+    if (guid === null) {
+      conv = new Conversation();
+    } else if (conversation.guid === guid) {
       conv = conversation;
     } else {
       for (let cur of conversations) {
@@ -120,7 +125,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
     if (conv) {
       store.conversation.set(conv);
-      store.view.set(params.view || 'conversation');
+      store.view.set(view);
       store.convosOut.set(false);
     } else {
       store.loadingConversation.set(true);
@@ -132,7 +137,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
           'guid': guid
         }).then(conv => {
           store.conversation.set(conv);
-          store.view.set(params.view || 'conversation');
+          store.view.set(view);
           store.convosOut.set(false);
           store.loadingConversation.set(false);
         }, err => {
@@ -178,7 +183,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
   router.hooks({
     before: (done, params) => {
-      if (!get(store.user)) {
+      if (get(store.user) === null) {
         done();
         navigateToContinueUrl();
       } else {
@@ -190,18 +195,9 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   router.on(() => {
     store.convosOut.set(true);
   }).on({
+    'c': {uses: conversationHandler},
     'c/:id': {uses: conversationHandler},
     'c/:id/:view': {uses: conversationHandler},
-    'c': () => {
-      if (!get(store.user)) {
-        return;
-      }
-
-      const conversation = new Conversation();
-      store.conversation.set(conversation);
-      store.view.set('conversation');
-      store.convosOut.set(false);
-    },
     'u/:username': {uses: userHandler},
     'pushSubscriptions': () => {
       if (!get(store.user)) {
@@ -224,38 +220,15 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     if (conversation && conversation.guid) {
       const conversations = get(store.conversations);
       // Refresh conversations' readlines when current conversation changes.
-      for (let curConv of conversations) {
-        if (curConv != null && conversation != null && conversation === curConv) {
-          // They are the same instance, so mark conversations as changed.
+      for (let i in conversations) {
+        if (conversation === conversations[i] || conversation.is(conversations[i])) {
+          conversations[i] = conversation;
           store.conversations.set(conversations);
           break;
-          // If they are the same entity, but different instances, the next code
-          // block will update conversations.
         }
       }
     }
   });
-
-  function syncConversations(conversation, conversations) {
-    // 'conversation' and the corresponding entity in 'conversations' should be
-    // the same instance, so check to make sure they are.
-    if (conversation && conversation.guid) {
-      const idx = conversation.arraySearch(conversations);
-
-      if (idx !== false && conversation !== conversations[idx]) {
-        // Check both of their modified dates. Whichever is most recent wins.
-        if (conversations[idx].mdate > conversation.mdate) {
-          conversation = conversations[idx];
-          store.conversation.set(conversation);
-        } else {
-          conversations[idx] = conversation;
-          store.conversations.set(conversations);
-        }
-      }
-    }
-  }
-  store.conversation.subscribe(conversation => syncConversations(conversation, get(store.conversations)));
-  store.conversations.subscribe(conversations => syncConversations(get(store.conversation), conversations));
 
   let previousUser = null;
   store.user.subscribe(user => {

@@ -114,20 +114,16 @@
     previousScrollToDistanceFromBottom = null;
     scrollWaitBottom = false;
     scrollWaitReadline = false;
-    subscribe();
+    if (conversation.guid) {
+      subscribe();
+    } else if (subscription) {
+      subscription.unsubscribe();
+    }
   }
 
   $: if (showReadline === null && initialReadline !== 0 && messages.length) {
     showReadline = initialReadline > 0 && initialReadline < messages[0].cdate;
     scrollWaitReadline = showReadline;
-  }
-
-  $: if (readlineEl && scrollWaitReadline) {
-    scrollWaitReadline = false;
-    scrollWaitBottom = false;
-    container.scrollTop = Math.max(0, readlineEl.offsetTop - (container.clientHeight * .6));
-    setIsAtBottom();
-    updateReadline();
   }
 
   onMount(() => {
@@ -140,6 +136,14 @@
     // Rescroll to bottom when things change if the page is visible.
     if (!document.hidden && Math.ceil(container.scrollTop) < (container.scrollHeight - container.offsetHeight)) {
       rescrollToBottom();
+    }
+
+    if (readlineEl && scrollWaitReadline) {
+      scrollWaitReadline = false;
+      scrollWaitBottom = false;
+      container.scrollTop = Math.max(0, readlineEl.offsetTop - (container.clientHeight * .6));
+      setIsAtBottom();
+      updateReadline();
     }
 
     if (previousScrollToDistanceFromBottom !== scrollToDistanceFromBottom && scrollToDistanceFromBottom != null) {

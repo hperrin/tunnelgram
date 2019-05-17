@@ -83,9 +83,7 @@
       </div>
     </nav>
     <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
-      <ConversationList
-        on:tunnelgram-notification={event => notification(event.detail)}
-        on:tunnelgram-navigate={event => navigateConversation(event.detail)} />
+      <ConversationList on:tunnelgram-notification={event => notification(event.detail)} />
     </div>
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
@@ -257,15 +255,6 @@
     })();
   });
 
-  function navigateConversation (conversation) {
-    const route = router.lastRouteResolved();
-    if (!route || route.url !== '/c/'+conversation.guid) {
-      navigate('/c/'+conversation.guid);
-    } else {
-      $convosOut = false;
-    }
-  }
-
   async function notification (update) {
     if (document.hidden && $webPushSubscription) {
       // They will get a push notification.
@@ -276,30 +265,30 @@
       return;
     }
 
-    const conversation = new Conversation();
-    conversation.init(update.data);
+    const conv = new Conversation();
+    conv.init(update.data);
 
-    if (conversation.data.lastMessage) {
-      if (conversation.is($conversation) && !document.hidden) {
+    if (conv.data.lastMessage) {
+      if (conv.is($conversation) && !document.hidden) {
         // Don't notify if the user is on the conversation and not hidden.
         return;
       }
-      await conversation.data.lastMessage.ready();
-      if ($user.is(conversation.data.lastMessage.data.user)) {
+      await conv.data.lastMessage.ready();
+      if ($user.is(conv.data.lastMessage.data.user)) {
         // Don't notify if the user made the message.
         return;
       }
-      if (conversation.readline >= conversation.data.lastMessage.cdate) {
+      if (conv.readline >= conv.data.lastMessage.cdate) {
         // Don't notify when a user deletes a message (will result in earlier message becoming lastMessage).
         return;
       }
-      await conversation.data.lastMessage.data.user.ready();
+      await conv.data.lastMessage.data.user.ready();
     } else if (update.added) {
-      if ($user.is(conversation.data.user)) {
+      if ($user.is(conv.data.user)) {
         // Don't notify if the user made a new conversation.
         return;
       }
-      await conversation.readyAll(1).catch(ErrHandler);
+      await conv.readyAll(1).catch(ErrHandler);
     } else {
       return;
     }
@@ -317,26 +306,26 @@
         }
       });
     }
-    if (conversation.data.lastMessage) {
+    if (conv.data.lastMessage) {
       // Notify the user of a new message.
       notice = PNotify.info(Object.assign({
-        title: getDisplayName(conversation.data.lastMessage.data.user, 'name')
-          + (conversation.data.acFull.length > 2 || conversation.data.name != null
-            ? ' - ' + conversation.getName($settings)
+        title: getDisplayName(conv.data.lastMessage.data.user, 'name')
+          + (conv.data.acFull.length > 2 || conv.data.name != null
+            ? ' - ' + conv.getName($settings)
             : ''
           ),
-        text:  conversation.data.lastMessage.decrypted.text.length > 40
-          ? conversation.data.lastMessage.decrypted.text.substr(0, 40) + '...'
-          : conversation.data.lastMessage.decrypted.text
+        text:  conv.data.lastMessage.decrypted.text.length > 40
+          ? conv.data.lastMessage.decrypted.text.substr(0, 40) + '...'
+          : conv.data.lastMessage.decrypted.text
       }, options));
     } else if (update.added) {
       // Notify the user of a new conversation.
       notice = PNotify.info(Object.assign({
-        title: 'New '+Conversation.MODE_SHORT_NAME[conversation.data.mode],
-        text: getDisplayName(conversation.data.user, 'name') + ' started '
-          + (conversation.data.acFull.length > 2 || conversation.data.name != null
-            ? conversation.getName($settings)
-            : 'a '+Conversation.MODE_SHORT_NAME[conversation.data.mode]
+        title: 'New '+Conversation.MODE_SHORT_NAME[conv.data.mode],
+        text: getDisplayName(conv.data.user, 'name') + ' started '
+          + (conv.data.acFull.length > 2 || conv.data.name != null
+            ? conv.getName($settings)
+            : 'a '+Conversation.MODE_SHORT_NAME[conv.data.mode]
           )
           + '.'
       }, options));
@@ -353,11 +342,9 @@
       if (document.hidden) {
         window.focus();
       }
-      if (!conversation.is($conversation)) {
-        window.requestAnimationFrame(() => {
-          navigateConversation(conversation);
-        });
-      }
+      window.requestAnimationFrame(() => {
+        navigate('/c/'+conv.guid);
+      });
       notice.close();
     });
   }
