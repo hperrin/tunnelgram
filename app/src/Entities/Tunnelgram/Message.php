@@ -230,9 +230,12 @@ class Message extends \Nymph\Entity {
                     ),
                     v::key(
                         'thumbnail',
-                        v::stringType()->notEmpty()->prnt()->length(
-                            1,
-                            ceil(102400 * 1.4) // Base64 of 100KiB
+                        v::oneOf(
+                            v::stringType()->notEmpty()->prnt()->length(
+                                1,
+                                ceil(102400 * 1.4) // Base64 of 100KiB
+                            ),
+                            v::nullType()
                         )
                     ),
                     v::key(
@@ -338,11 +341,13 @@ class Message extends \Nymph\Entity {
         include(__DIR__.'/../../Blob/BlobClient.php');
         $client = new BlobClient();
         foreach ($this->images as &$curImg) {
-          $curImg['thumbnail'] = $client->upload(
-              'tunnelgram-thumbnails',
-              $curImg['id'],
-              base64_decode($curImg['thumbnail'])
-          );
+          if ($curImg['thumbnail'] !== null) {
+            $curImg['thumbnail'] = $client->upload(
+                'tunnelgram-thumbnails',
+                $curImg['id'],
+                base64_decode($curImg['thumbnail'])
+            );
+          }
           $curImg['data'] = $client->upload(
               'tunnelgram-images',
               $curImg['id'],

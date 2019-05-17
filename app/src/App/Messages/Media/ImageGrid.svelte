@@ -5,7 +5,7 @@
         <LoadingIndicator width={thumbnailDimension} height={thumbnailDimension} text="Decrypting..." />
       {:then thumbnail}
         <a href="javascript:void(0)" on:click={() => showBigImage(index)} style="font-size: 0;">
-          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); width: {thumbnailDimension}px; height: {thumbnailDimension}px;" title={resource.name}>&nbsp;</div>
+          <div class="imageThumbnail" style="background-image: url({resource.thumbnailSrc || ''}); background-size: {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).width}px {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).height}px; width: {thumbnailDimension}px; height: {thumbnailDimension}px;" title={resource.name}>&nbsp;</div>
         </a>
       {:catch e}
         <span class="badge badge-warning">error</span>
@@ -23,7 +23,7 @@
   let thumbnailContainer;
 
   $: thumbnailDimension = Math.min(...resources.map(resource => Math.min(parseFloat(resource.thumbnailWidth), parseFloat(resource.thumbnailHeight))));
-  $: thumbnailContainerMaxWidthMultiplier = Math.min(3, resources.length);
+  $: thumbnailContainerMaxWidthMultiplier = resources.length === 4 ? 2 : 3;
   $: thumbnailPromises = resources.map(resource => resource.thumbnail instanceof Uint8Array ? Promise.resolve(resource.thumbnail) : resource.thumbnail);
 
   $: {
@@ -42,6 +42,14 @@
         }
       }
     }
+  }
+
+  function getThumbnailDimensions (width, height) {
+    const multiplier = thumbnailDimension / Math.min(width, height);
+    return {
+      width: multiplier * width,
+      height: multiplier * height
+    };
   }
 
   function showBigImage (index) {

@@ -82,6 +82,8 @@ export class Message extends Entity {
     } else if (this.data.images || this.data.video) {
       this.decrypted.text = null;
     }
+
+    const blobReplace = [/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'];
     if (this.data.images && this.data.images.length) {
       this.decrypted.images = this.data.images.map(image => {
         // Don't fetch the full image until the user requests it.
@@ -89,8 +91,8 @@ export class Message extends Entity {
         const data = {
           promise: () => {
             if (!fullSizePromise) {
-              fullSizePromise = new Promise((resolve, reject) => {
-                window.fetch(image.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+              fullSizePromise = new Promise(resolve => {
+                window.fetch(image.data.replace(...blobReplace), {
                   mode: 'cors'
                 }).then(response => {
                   return response.arrayBuffer();
@@ -104,9 +106,10 @@ export class Message extends Entity {
             }
             return fullSizePromise;
           }
-        }
-        const thumbnail = new Promise((resolve, reject) => {
-          window.fetch(image.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+        };
+        const thumbnailType = decrypt(image.thumbnailType);
+        const thumbnail = image.thumbnail === null ? data.promise() : new Promise(resolve => {
+          window.fetch(image.thumbnail.replace(...blobReplace), {
             mode: 'cors'
           }).then(response => {
             return response.arrayBuffer();
@@ -123,7 +126,7 @@ export class Message extends Entity {
           dataWidth: decrypt(image.dataWidth),
           dataHeight: decrypt(image.dataHeight),
           data,
-          thumbnailType: decrypt(image.thumbnailType),
+          thumbnailType,
           thumbnailWidth: decrypt(image.thumbnailWidth),
           thumbnailHeight: decrypt(image.thumbnailHeight),
           thumbnail
@@ -135,8 +138,8 @@ export class Message extends Entity {
       const data = {
         promise: () => {
           if (!fullSizePromise) {
-            fullSizePromise = new Promise((resolve, reject) => {
-              window.fetch(this.data.video.data.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+            fullSizePromise = new Promise(resolve => {
+              window.fetch(this.data.video.data.replace(...blobReplace), {
                 mode: 'cors'
               }).then(response => {
                 return response.arrayBuffer();
@@ -150,9 +153,9 @@ export class Message extends Entity {
           }
           return fullSizePromise;
         }
-      }
-      const thumbnail = new Promise((resolve, reject) => {
-        window.fetch(this.data.video.thumbnail.replace(/^http:\/\/blob:9000\//, 'http://'+window.location.host.replace(/:\d+$/, '')+':8082/'), {
+      };
+      const thumbnail = new Promise(resolve => {
+        window.fetch(this.data.video.thumbnail.replace(...blobReplace), {
           mode: 'cors'
         }).then(response => {
           return response.arrayBuffer();
@@ -236,7 +239,7 @@ export class Message extends Entity {
             thumbnailWidth: encrypt(image.thumbnailWidth, key),
             thumbnailHeight: encrypt(image.thumbnailHeight, key),
             // Image/video data is a Uint8Array, not a string.
-            thumbnail: await encryptBytesToBase64Async(image.thumbnail, key)
+            thumbnail: image.thumbnailType === 'image/gif' ? null : await encryptBytesToBase64Async(image.thumbnail, key)
           })));
         } else if (this.decrypted.video != null) {
           this.data.video = {

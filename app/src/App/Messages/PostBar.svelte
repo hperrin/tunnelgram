@@ -3,10 +3,12 @@
     <div class="d-flex flex-wrap justify-content-start align-items-start position-relative bg-secondary pt-2 pl-2">
       {#each images as image, i}
         <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
-          <img src={image.thumbnailImg} alt={image.name} title={image.name}>
-          <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click={() => rotateImage(i)} title="Rotate">
-            <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
-          </button>
+          <img src={image.thumbnailImg} alt={image.name} title={image.name} width={image.thumbnailWidth} height={image.thumbnailHeight}>
+          {#if image.dataType !== 'image/gif'}
+            <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click={() => rotateImage(i)} title="Rotate">
+              <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+            </button>
+          {/if}
           <button type="button" class="btn btn-sm btn-danger rounded-circle thumbnailOverlay thumbnailButton" style="right: 4px; top: 4px;" on:click={() => images = removeIndex(images, i)} title="Remove">
             <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
           </button>
@@ -450,6 +452,11 @@
           text: 'You can put up to 9 images into a message.'
         });
         break;
+      } else if (file.type === 'image/gif' && file.size > 2097152) {
+        PNotify.notice({
+          title: 'GIF is Too Big',
+          text: 'Sorry, but GIFs can only be up to 2 MB.'
+        });
       } else {
         mediaLoading = 'image';
         imageCount++;
@@ -459,30 +466,59 @@
         const imageElem = new Image();
         const tempObjectURL = file.localURL || URL.createObjectURL(file);
         let resolve;
-        const p = new Promise(r => resolve = r);
+        let p = new Promise(r => resolve = r);
         imageElem.onload = () => resolve();
         imageElem.src = tempObjectURL;
         await p;
 
-        let size = 3000;
         let dataImg;
-        let dataMatch;
         let dataType;
         let data;
         let resizeImage = new EditImageService(imageElem, file.type);
-        do {
-          // Resize the image repeatedly down until the size is under 2MiB.
-          dataImg = await resizeImage.resizeContain(size, size);
-          dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-          dataType = dataMatch[1];
-          data = crypt.decodeBase64(dataMatch[2]);
-          size -= 200;
-        } while (data.length >= 2097152);
-        const thumbnailImg = await resizeImage.resizeContain();
+        let thumbnailImg = await resizeImage.resizeContain();
+        let thumbnailType;
+        let thumbnail;
+        if (file.type === 'image/gif') {
+          // Read the gif into memory.
+          const reader = new FileReader();
+          p = new Promise(r => resolve = r);
+          if (window.inCordova) {
+            reader.onloadend = () => resolve(reader.result);
+          } else {
+            reader.onload = e => resolve(e.target.result);
+          }
+          reader.readAsArrayBuffer(file);
+
+          const result = await p;
+
+          data = new Uint8Array(result.slice(0));
+          dataType = file.type;
+          dataImg = {
+            data: 'data:'+file.type+';base64,'+crypt.encodeBase64(data),
+            width: imageElem.naturalWidth,
+            height: imageElem.naturalHeight
+          };
+          // The thumbnail should be the same as the image, just with a scaled
+          // down width and height.
+          thumbnail = new Uint8Array(result.slice(0));
+          thumbnailType = file.type;
+          thumbnailImg.data = dataImg.data;
+        } else {
+          let size = 3000;
+          let dataMatch;
+          do {
+            // Resize the image repeatedly down until the size is under 2MiB.
+            dataImg = await resizeImage.resizeContain(size, size);
+            dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+            dataType = dataMatch[1];
+            data = crypt.decodeBase64(dataMatch[2]);
+            size -= 200;
+          } while (data.length >= 2097152);
+          const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
+          thumbnailType = thumbnailMatch[1];
+          thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
+        }
         resizeImage.destroy();
-        const thumbnailMatch = thumbnailImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
-        const thumbnailType = thumbnailMatch[1];
-        const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
 
         images = [...images, {
           name: file.name,
