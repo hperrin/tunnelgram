@@ -450,6 +450,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 window.router = router;
 // Useful for debugging.
 window.store = store;
+window.storeGet = get;
 window.Nymph = Nymph;
 window.User = User;
 window.Group = Group;

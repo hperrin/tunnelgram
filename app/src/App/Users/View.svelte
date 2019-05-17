@@ -264,11 +264,11 @@
         $settings.decrypted.nicknames[$viewUser.guid] = nickname;
       }
       $settings.save().then(settingsValue => {
-        settings.set(settingsValue);
-        viewUser.set($viewUser);
-        conversation.set($conversation);
-        conversations.set($conversations);
-        user.set($user);
+        $settings = settingsValue;
+        $viewUser = $viewUser;
+        $conversation = $conversation;
+        $conversations = $conversations;
+        $user = $user;
       }, ErrHandler);
     }
   }
@@ -333,9 +333,11 @@
     const avatarImg = await resizeImage.resizeCrop(500, 500);
     resizeImage.destroy();
 
-    avatar = avatarImg.data;
+    $viewUser.data.avatar = avatarImg.data;
 
-    viewUser.set($viewUser);
+    await $viewUser.save();
+
+    $viewUser = $viewUser;
     avatarLoading = false;
   }
 </script>

@@ -86,13 +86,13 @@
       $conversation.data.openJoining = openJoining;
     }
     $conversation.save();
-    conversation.set($conversation);
+    $conversation = $conversation;
   }
 
   async function clearReadline () {
     clearingReadline = true;
     await $conversation.clearReadline();
-    conversation.set($conversation);
+    $conversation = $conversation;
     clearingReadline = false;
   }
 

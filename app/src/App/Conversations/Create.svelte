@@ -166,14 +166,14 @@
     }
 
     $conversation.data.acFull.push(user);
-    conversation.set($conversation);
+    $conversation = $conversation;
     userSearchSelector.clear();
     userSearchSelector.focus();
   }
 
   function removeUser (userToRemove) {
     $conversation.set({acFull: $conversation.data.acFull.filter(user => !userToRemove.is(user))});
-    conversation.set($conversation);
+    $conversation = $conversation;
   }
 
   function save () {

@@ -168,7 +168,7 @@
           dispatch('tunnelgram-notification', update);
         }
         PubSub.updateArray($conversations, update);
-        conversations.set($conversations);
+        $conversations = $conversations;
         handleScroll();
       }
     }, ErrHandler);
