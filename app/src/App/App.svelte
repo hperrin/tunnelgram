@@ -58,10 +58,10 @@
               <h6 class="dropdown-header">
                 {$user.data.name}
               </h6>
-              <a class="dropdown-item" href="/#/u/{$user.data.username}">
+              <a class="dropdown-item" href="#/u/{$user.data.username}">
                 Your Account
               </a>
-              <a class="dropdown-item" href="/#/pushSubscriptions">
+              <a class="dropdown-item" href="#/pushSubscriptions">
                 Push Subscriptions
               </a>
               <div class="dropdown-divider"></div>
@@ -92,7 +92,7 @@
       <div class="container-fluid">
         <ul class="navbar-nav d-md-none">
           <li class="nav-item">
-            <a class="nav-link border-secondary rounded px-2" href="/#/" title="Back to list">
+            <a class="nav-link border-secondary rounded px-2" href="#/" title="Back to list">
               <i class="fas fa-arrow-left"></i>
             </a>
           </li>

@@ -119,8 +119,7 @@ class CordovaApp {
 // Nymph Config
 NymphOptions = {
   restURL: 'https://tunnelgram.com/rest.php',
-  pubsubURL: 'wss://pubsub.tunnelgram.com',
-  rateLimit: 100
+  pubsubURL: 'wss://pubsub.tunnelgram.com'
 };
 
 inCordova = true;

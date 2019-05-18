@@ -25,7 +25,7 @@
     </h3>
     <div class="list-group mt-3 text-body">
       {#each $conversation.data.acFull as curUser (curUser.guid)}
-        <a class="list-group-item d-flex justify-content-between align-items-center" href="/#/u/{curUser.data.username}">
+        <a class="list-group-item d-flex justify-content-between align-items-center" href="#/u/{curUser.data.username}">
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
               <Avatar bind:user={curUser} />
@@ -43,7 +43,7 @@
       <div class="list-group mt-3 text-body">
         {#each nonAdminChannelUsers as curUser (curUser.guid)}
           <span class="list-group-item d-flex justify-content-between align-items-center">
-            <a class="d-flex align-items-center" href="/#/u/{curUser.data.username}">
+            <a class="d-flex align-items-center" href="#/u/{curUser.data.username}">
               <span class="mr-2" style="line-height: 0;">
                 <Avatar bind:user={curUser} />
               </span>

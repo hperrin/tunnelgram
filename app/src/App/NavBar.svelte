@@ -26,7 +26,7 @@
     </li>
   {/if}
   <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
-    <a class="nav-link" href="/#/c/{$conversation.guid}" title="Conversation">
+    <a class="nav-link" href="#/c/{$conversation.guid}" title="Conversation">
       <i class="fas fa-comments"></i>
       {#if $view === 'conversation'}
         <span class="sr-only">(current)</span>
@@ -34,7 +34,7 @@
     </a>
   </li>
   <li class="nav-item {$view === 'people' ? 'active' : ''}">
-    <a class="nav-link" href="/#/c/{$conversation.guid}/people" title="People ({$conversation.data.acFull.length})">
+    <a class="nav-link" href="#/c/{$conversation.guid}/people" title="People ({$conversation.data.acFull.length})">
       <span class="fa-layers fa-fw">
         <i class="fas fa-users"></i>
         {#if $conversation.data.mode === Conversation.MODE_CHAT}
@@ -48,7 +48,7 @@
   </li>
   {#if $conversation.isUserJoined()}
     <li class="nav-item {$view === 'settings' ? 'active' : ''}">
-      <a class="nav-link" href="/#/c/{$conversation.guid}/settings" title="Settings">
+      <a class="nav-link" href="#/c/{$conversation.guid}/settings" title="Settings">
         <i class="fas fa-cog"></i>
         {#if $view === 'settings'}
           <span class="sr-only">(current)</span>

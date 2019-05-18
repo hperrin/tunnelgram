@@ -1,6 +1,6 @@
 <div class="h-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" bind:this={container} on:scroll={handleScroll}>
   <div class="list-group">
-    <a href="/#/c" on:click={() => search = ''} class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
+    <a href="#/c" on:click={() => search = ''} class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
       <h5 class="mb-0 d-flex w-100 align-items-center"><i class="fas fa-plus-circle mr-1"></i> New Conversation</h5>
     </a>
     {#if $conversations.length > 1}
@@ -9,7 +9,7 @@
       </div>
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
-      <a href="/#/c/{curConversation.guid}" on:click={() => search = ''} class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {filteredConversations[curConversation.guid] ? '' : 'd-none'}" style="cursor: pointer;">
+      <a href="#/c/{curConversation.guid}" on:click={() => search = ''} class="list-group-item p-2 list-group-item-action rounded-0 flex-column align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''} {filteredConversations[curConversation.guid] ? '' : 'd-none'}" style="cursor: pointer;">
         <Preview bind:conversation={curConversation} />
       </a>
     {/each}
