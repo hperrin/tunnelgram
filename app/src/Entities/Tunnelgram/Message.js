@@ -53,7 +53,12 @@ export class Message extends Entity {
       if (this.mode === Conversation.MODE_CHANNEL_PRIVATE) {
         // key is the conversation key (See Message.php/jsonSerialize). XOR it
         // with the plaintext key to get the encryption key.
-        key = crypt.xorKey(key, this.data.key);
+        if (this.cdate < 1558141377) {
+          // Keys before this time were decoded as base64.
+          key = crypt.xorBase64ToHex(key, this.data.key);
+        } else {
+          key = crypt.xorHex(key, this.data.key);
+        }
       }
       decrypt = input => crypt.decrypt(input, key);
       decryptBytesAsync = input => crypt.decryptBytesAsync(input, key);

@@ -65,12 +65,27 @@ export class AESEncryptionService {
     return aesjs.utils.hex.fromBytes(keyArray);
   }
 
-  xorKey (keyA, keyB) {
-    let keyArrayA = this.decodeBase64(keyA);
-    let keyArrayB = this.decodeBase64(keyB);
+  xorHex (keyA, keyB) {
+    let bytesA = aesjs.utils.hex.toBytes(keyA);
+    let bytesB = aesjs.utils.hex.toBytes(keyB);
 
-    const xoredKey = keyArrayA.map((byte, i) => byte ^ keyArrayB[i]);
+    const xoredBytes = this.xorBytes(bytesA, bytesB);
 
-    return aesjs.utils.hex.fromBytes(xoredKey);
+    return aesjs.utils.hex.fromBytes(xoredBytes);
+  }
+
+  xorBase64ToHex (keyA, keyB) {
+    // This isn't used anymore. It was improperly implemented, and is here for
+    // decrypted messages from before May 17, 2019.
+    let bytesA = this.decodeBase64(keyA);
+    let bytesB = this.decodeBase64(keyB);
+
+    const xoredBytes = this.xorBytes(bytesA, bytesB);
+
+    return aesjs.utils.hex.fromBytes(xoredBytes);
+  }
+
+  xorBytes (bytesA, bytesB) {
+    return bytesA.map((byte, i) => byte ^ bytesB[i]);
   }
 }
