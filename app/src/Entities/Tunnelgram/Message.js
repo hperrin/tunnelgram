@@ -217,7 +217,7 @@ export class Message extends Entity {
           // Get the channel key.
           const channelKey = crypt.decryptRSA(this.data.conversation.data.keys[currentUser.guid]).slice(0, 96);
           // The encryption key is the result of XORing the two.
-          key = crypt.xorKey(channelKey, this.data.key);
+          key = crypt.xorHex(channelKey, this.data.key);
         } else {
           encrypt = (input, key) => input;
           encryptBytesToBase64Async = async (input, key) => crypt.encodeBase64(input);
