@@ -88,6 +88,10 @@
     }
   }
 
+  $: if (conversation && conversation.data.lastMessage && !conversation.data.lastMessage.cryptReady) {
+    conversation.data.lastMessage.cryptReadyPromise.then(() => conversation = conversation);
+  }
+
   onMount(() => {
     interval = window.setInterval(() => updateTime(), 10000);
     updateTime();

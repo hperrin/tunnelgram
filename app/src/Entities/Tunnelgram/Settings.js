@@ -17,6 +17,9 @@ export class Settings extends Entity {
       nicknames: {}
     };
     this.data.nicknames = {};
+
+    this.cryptReady = true;
+    this.cryptReadyPromise = Promise.resolve(true);
   }
 
   // === Instance Methods ===
@@ -28,13 +31,19 @@ export class Settings extends Entity {
       return this;
     }
 
-    // Decrypt the nicknames.
-    if (currentUser && this.data.key) {
-      const key = crypt.decryptRSA(this.data.key);
-      for (let id in this.data.nicknames) {
-        this.decrypted.nicknames[id] = crypt.decrypt(this.data.nicknames[id], key);
+    this.cryptReady = false;
+    this.cryptReadyPromise = (async () => {
+        // Decrypt the nicknames.
+      if (currentUser && this.data.key) {
+        const key = crypt.decryptRSA(this.data.key);
+        for (let id in this.data.nicknames) {
+          this.decrypted.nicknames[id] = await crypt.decrypt(this.data.nicknames[id], key);
+        }
       }
-    }
+
+      this.cryptReady = true;
+      return true;
+    })();
 
     return this;
   }
@@ -44,7 +53,7 @@ export class Settings extends Entity {
     const key = crypt.generateKey();
     this.data.nicknames = {};
     for (let id in this.decrypted.nicknames) {
-      this.data.nicknames[id] = crypt.encrypt(this.decrypted.nicknames[id], key);
+      this.data.nicknames[id] = await crypt.encrypt(this.decrypted.nicknames[id], key);
     }
 
     const encryptPromise = crypt.encryptRSAForUser(key, currentUser);

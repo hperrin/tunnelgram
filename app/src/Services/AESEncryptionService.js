@@ -1,48 +1,58 @@
 import aesjs from 'aes-js';
 import base64js from 'base64-js';
-import utf8 from 'utf8';
 
 const root = (self || window);
 
 export class AESEncryptionService {
-  decrypt (text, key) {
+  async decrypt (text, key) {
     // Decrypt the text.
     const encryptedBytes = this.decodeBase64(text);
-    const bytes = this.decryptBytes(encryptedBytes, key);
-    return utf8.decode(aesjs.utils.utf8.fromBytes(bytes));
+    const bytes = await this.decryptBytes(encryptedBytes, key);
+    return this.encodeUtf8(bytes);
   }
 
-  decryptBytes (bytes, key) {
-    const cryptKey = key.substr(0, 64);
-    const cryptIV = key.substr(64, 32);
-    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
-    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
-    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
-
-    // Decrypt the bytes.
-    return aesCtr.decrypt(bytes);
+  async decryptBytes (bytes, key) {
+    return await this.encryptBytes(bytes, key);
   }
 
-  encrypt (text, key) {
+  async encrypt (text, key) {
     // Encrypt the text.
-    const bytes = aesjs.utils.utf8.toBytes(utf8.encode(text));
-    const encryptedBytes = this.encryptBytes(bytes, key);
+    const bytes = this.decodeUtf8(text);
+    const encryptedBytes = await this.encryptBytes(bytes, key);
     return this.encodeBase64(encryptedBytes);
   }
 
-  encryptBytes (bytes, key) {
+  async encryptBytes (bytes, key) {
     const cryptKey = key.substr(0, 64);
     const cryptIV = key.substr(64, 32);
-    const keyBytes = aesjs.utils.hex.toBytes(cryptKey);
-    const ivBytes = aesjs.utils.hex.toBytes(cryptIV);
-    const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
+    const keyBytes = Uint8Array.from(aesjs.utils.hex.toBytes(cryptKey));
+    const ivBytes = Uint8Array.from(aesjs.utils.hex.toBytes(cryptIV));
 
-    // Encrypt the bytes.
-    return aesCtr.encrypt(bytes);
+    const cryptoKey = await root.crypto.subtle.importKey(
+      'raw',
+      keyBytes,
+      'AES-CBC',
+      false,
+      ['encrypt']
+    );
+
+    const length = bytes.length % 16 ? bytes.length + 16 - (bytes.length % 16) : bytes.length;
+    const zeroBytes = Uint8Array.from((new Array(length)).map(() => 0));
+
+    const cypherBytes = new Uint8Array(await root.crypto.subtle.encrypt(
+      {
+        name: 'AES-CBC',
+        iv: ivBytes
+      },
+      cryptoKey,
+      zeroBytes
+    ));
+
+    return this.xorBytes(bytes, cypherBytes);
   }
 
-  encryptBytesToBase64 (bytes, key) {
-    return this.encodeBase64(this.encryptBytes(bytes, key));
+  async encryptBytesToBase64 (bytes, key) {
+    return this.encodeBase64(await this.encryptBytes(bytes, key));
   }
 
   encodeBase64 (bytes) {
@@ -51,6 +61,18 @@ export class AESEncryptionService {
 
   decodeBase64 (text) {
     return base64js.toByteArray(text);
+  }
+
+  encodeUtf8 (bytes) {
+    const enc = new TextDecoder('utf-8');
+    const text = enc.decode(bytes);
+    return text;
+  }
+
+  decodeUtf8 (text) {
+    const enc = new TextEncoder();
+    const bytes = enc.encode(text);
+    return bytes;
   }
 
   generateKey () {

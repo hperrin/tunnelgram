@@ -91,7 +91,8 @@
         'type': '&',
         'ref': ['conversation', conversation.guid],
         'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
-      }).then(newMessages => {
+      }).then(async newMessages => {
+        await Promise.all(newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise));
         messages = [...newMessages, ...messages];
       });
     }
@@ -134,7 +135,7 @@
   let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
     // Rescroll to bottom when things change if the page is visible.
-    if (!document.hidden && Math.ceil(container.scrollTop) < (container.scrollHeight - container.offsetHeight)) {
+    if (!document.hidden && container && Math.ceil(container.scrollTop) < (container.scrollHeight - container.offsetHeight)) {
       rescrollToBottom();
     }
 
@@ -148,8 +149,10 @@
 
     if (previousScrollToDistanceFromBottom !== scrollToDistanceFromBottom && scrollToDistanceFromBottom != null) {
       window.requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight - scrollToDistanceFromBottom;
-        scrollToDistanceFromBottom = null;
+        if (container) {
+          container.scrollTop = container.scrollHeight - scrollToDistanceFromBottom;
+          scrollToDistanceFromBottom = null;
+        }
       });
     }
 
@@ -182,7 +185,7 @@
     }, {
       'type': '&',
       'ref': ['conversation', conversation.guid]
-    }).subscribe(update => {
+    }).subscribe(async update => {
       if (destroyed || queryConversationGuid !== conversation.guid) {
         return;
       }
@@ -193,6 +196,7 @@
           }
         }
         PubSub.updateArray(messages, update);
+        await Promise.all(messages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise));
         messages = messages;
         loading = false;
         createNewReadlineIfNeeded();
@@ -234,7 +238,9 @@
   }
 
   function setIsAtBottom () {
-    isAtBottom = Math.ceil(container.scrollTop) >= (container.scrollHeight - container.offsetHeight);
+    if (container) {
+      isAtBottom = Math.ceil(container.scrollTop) >= (container.scrollHeight - container.offsetHeight);
+    }
   }
 
   function showTime (time1, time2) {
@@ -281,8 +287,11 @@
       }
 
       if (earlierMessages && earlierMessages.length) {
+        await Promise.all(earlierMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise));
         messages = [...messages, ...earlierMessages];
-        scrollToDistanceFromBottom = container.scrollHeight - container.scrollTop;
+        if (container) {
+          scrollToDistanceFromBottom = container.scrollHeight - container.scrollTop;
+        }
       } else {
         reachedEarliestMessage = true;
       }
@@ -307,7 +316,7 @@
       if (!messageContainer) {
         return;
       }
-      if (conversation.readline !== null) {
+      if (conversation.readline !== null && container) {
         const messageBoxes = messageContainer.querySelectorAll('.message-box[data-cdate]');
         const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
           const containerTop = container.scrollTop;
@@ -346,7 +355,7 @@
     await tick();
 
     if (scrollWaitBottom) {
-      if (!scrollWaitReadline) {
+      if (!scrollWaitReadline && container) {
         container.scrollTop = container.scrollHeight;
         isAtBottom = true;
         updateReadline();

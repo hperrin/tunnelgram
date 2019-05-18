@@ -258,28 +258,6 @@ class EncryptionService extends AESEncryptionService {
     return this.encryptRSA(text, publicKey);
   }
 
-  async decryptAsync (text, key) {
-    return await this.callAESEncryptionWorker('decrypt', [text, key]);
-  }
-
-  async encryptAsync (text, key) {
-    return await this.callAESEncryptionWorker('encrypt', [text, key]);
-  }
-
-  async decryptBytesAsync (bytes, key) {
-    const returnBytes = await this.callAESEncryptionWorker('decryptBytes', [bytes, key], [bytes.buffer]);
-
-    return returnBytes;
-  }
-
-  async encryptBytesAsync (bytes, key) {
-    return await this.callAESEncryptionWorker('encryptBytes', [bytes, key], [bytes.buffer]);
-  }
-
-  async encryptBytesToBase64Async (bytes, key) {
-    return await this.callAESEncryptionWorker('encryptBytesToBase64', [bytes, key], [bytes.buffer]);
-  }
-
   callAESEncryptionWorker (action, args, transferrables) {
     this.aesEncryptionWorkerCounter++;
     const counter = this.aesEncryptionWorkerCounter;

@@ -31,6 +31,9 @@ export class Conversation extends Entity {
     if (currentUser) {
       this.data.acFull.push(currentUser);
     }
+
+    this.cryptReady = true;
+    this.cryptReadyPromise = Promise.resolve(true);
   }
 
   // === Instance Methods ===
@@ -57,16 +60,22 @@ export class Conversation extends Entity {
       this.notifications = entityData.notifications;
     }
 
-    // Decrypt the conversation name.
-    if (this.data.name != null) {
-      let decrypt = input => input;
-      if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && currentUser.guid in this.data.keys) {
-        const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
-        decrypt = input => crypt.decrypt(input, key);
+    this.cryptReady = false;
+    this.cryptReadyPromise = (async () => {
+      // Decrypt the conversation name.
+      if (this.data.name != null) {
+        let decrypt = async input => input;
+        if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && currentUser.guid in this.data.keys) {
+          const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+          decrypt = input => crypt.decrypt(input, key);
+        }
+
+        this.decrypted.name = await decrypt(this.data.name);
       }
 
-      this.decrypted.name = decrypt(this.data.name);
-    }
+      this.cryptReady = true;
+      return true;
+    })();
 
     return this;
   }
@@ -114,7 +123,7 @@ export class Conversation extends Entity {
 
       // Encrypt the conversation name.
       if (this.decrypted.name != null) {
-        this.data.name = crypt.encrypt(this.decrypted.name, key);
+        this.data.name = await crypt.encrypt(this.decrypted.name, key);
       } else {
         this.data.name = null;
       }
