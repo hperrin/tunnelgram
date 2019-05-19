@@ -1,4 +1,3 @@
-import aesjs from 'aes-js';
 import base64js from 'base64-js';
 
 const root = (self || window);
@@ -25,8 +24,8 @@ export class AESEncryptionService {
   async encryptBytes (bytes, key) {
     const cryptKey = key.substr(0, 64);
     const cryptIV = key.substr(64, 32);
-    const keyBytes = Uint8Array.from(aesjs.utils.hex.toBytes(cryptKey));
-    const ivBytes = Uint8Array.from(aesjs.utils.hex.toBytes(cryptIV));
+    const keyBytes = this.decodeHex(cryptKey);
+    const ivBytes = this.decodeHex(cryptIV);
 
     const cryptoKey = await root.crypto.subtle.importKey(
       'raw',
@@ -75,25 +74,39 @@ export class AESEncryptionService {
     return bytes;
   }
 
+  encodeHex (bytes) {
+    return Array.from(bytes).map(byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  decodeHex (text) {
+    const result = new Uint8Array(text.length / 2);
+
+    for (let i = 0; i < text.length; i += 2) {
+      result[i / 2] = parseInt(text.substr(i, 2), 16);
+    }
+
+    return result;
+  }
+
   generateKey () {
     let keyArray = new Uint8Array(48);
     (root.crypto || root.msCrypto).getRandomValues(keyArray);
-    return aesjs.utils.hex.fromBytes(keyArray);
+    return this.encodeHex(keyArray);
   }
 
   generatePad () {
     let keyArray = new Uint8Array(8);
     (root.crypto || root.msCrypto).getRandomValues(keyArray);
-    return aesjs.utils.hex.fromBytes(keyArray);
+    return this.encodeHex(keyArray);
   }
 
   xorHex (keyA, keyB) {
-    let bytesA = aesjs.utils.hex.toBytes(keyA);
-    let bytesB = aesjs.utils.hex.toBytes(keyB);
+    let bytesA = this.decodeHex(keyA);
+    let bytesB = this.decodeHex(keyB);
 
     const xoredBytes = this.xorBytes(bytesA, bytesB);
 
-    return aesjs.utils.hex.fromBytes(xoredBytes);
+    return this.encodeHex(xoredBytes);
   }
 
   xorBase64ToHex (keyA, keyB) {
@@ -104,10 +117,10 @@ export class AESEncryptionService {
 
     const xoredBytes = this.xorBytes(bytesA, bytesB);
 
-    return aesjs.utils.hex.fromBytes(xoredBytes);
+    return this.encodeHex(xoredBytes);
   }
 
   xorBytes (bytesA, bytesB) {
-    return bytesA.map((byte, i) => byte ^ bytesB[i]);
+    return Uint8Array.from(bytesA.map((byte, i) => byte ^ bytesB[i]));
   }
 }

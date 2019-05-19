@@ -197,6 +197,9 @@
         }
         PubSub.updateArray(messages, update);
         await Promise.all(messages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise));
+        if (destroyed || queryConversationGuid !== conversation.guid) {
+          return;
+        }
         messages = messages;
         loading = false;
         createNewReadlineIfNeeded();

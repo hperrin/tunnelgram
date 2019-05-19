@@ -49,7 +49,6 @@ export class Message extends Entity {
       this.mode = entityData.mode;
     }
 
-
     this.cryptReady = false;
     this.cryptReadyPromise = (async () => {
       let decrypt = async input => input;

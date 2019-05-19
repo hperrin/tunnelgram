@@ -3,11 +3,9 @@ import PrivateKey from '../Entities/Tunnelwire/PrivateKey';
 import PublicKey from '../Entities/Tunnelwire/PublicKey';
 import {AESEncryptionService} from './AESEncryptionService';
 import {storage} from './StorageService';
-import sha512 from 'hash.js/lib/hash/sha/512';
 import JSEncrypt from 'jsencrypt';
-import aesjs from 'aes-js';
-import base64js from 'base64-js';
-import utf8 from 'utf8';
+
+const root = (self || window);
 
 class EncryptionService extends AESEncryptionService {
   constructor () {
@@ -33,39 +31,34 @@ class EncryptionService extends AESEncryptionService {
     this.aesEncryptionWorker = new Worker('dist/Workers/AESEncryption.js');
     this.aesEncryptionWorkerCounter = 0;
     this.aesEncryptionWorkerCallbacks = {};
-    this.aesEncryptionWorker.onmessage = (e) => {
+    this.aesEncryptionWorker.onmessage = e => {
       const {counter, result} = e.data;
       this.aesEncryptionWorkerCallbacks[counter](result);
       delete this.aesEncryptionWorkerCallbacks[counter];
     };
 
     (async () => {
-      this.userPrivateKey = await this.getUserPrivateKey();
-      this.userPublicKey = await this.getUserPublicKey();
+      await this.getUserPrivateKey();
+      await this.getUserPublicKey();
       if (this.userPrivateKey != null && this.userPublicKey != null) {
         this.resolve();
       }
     })();
 
     // Load the private key when the user logs in.
-    User.on('login', async (user) => {
+    User.on('login', async () => {
       try {
         const privatePromise = PrivateKey.current();
         const publicPromise = PublicKey.current();
         let privateKey = await privatePromise;
         let publicKey = await publicPromise;
-        const keyBytes = aesjs.utils.hex.toBytes(this.key);
-        const ivBytes = aesjs.utils.hex.toBytes(this.iv);
-        const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
 
         if (privateKey && publicKey) {
           // The user has been here before, so get the private key from the entity.
 
           // Decrypt the private key.
-          const encryptedPrivateKeyString = privateKey.get('text');
-          const encryptedPrivateKeyBytes = base64js.toByteArray(encryptedPrivateKeyString);
-          const privateKeyBytes = aesCtr.decrypt(encryptedPrivateKeyBytes);
-          const privateKeyString = aesjs.utils.utf8.fromBytes(privateKeyBytes);
+          const encryptedPrivateKey = privateKey.get('text');
+          const privateKeyString = await this.decrypt(encryptedPrivateKey, this.key+this.iv);
 
           await this.setUserPrivateKey(privateKeyString);
 
@@ -78,9 +71,7 @@ class EncryptionService extends AESEncryptionService {
 
           // Encrypt the private key.
           const privateKeyString = this.userPrivateKey;
-          const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
-          const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
-          const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
+          const encryptedPrivateKeyString = await this.encrypt(privateKeyString, this.key+this.iv);
 
           privateKey.set({text: encryptedPrivateKeyString});
           const privateKeySave = privateKey.save();
@@ -118,9 +109,11 @@ class EncryptionService extends AESEncryptionService {
       this.unsetUserKeys();
     });
 
-    const computeNewPassword = password => {
+    const computeNewPassword = async password => {
       // Generate a hash of the password.
-      const hash = sha512().update(password).digest('hex');
+      const passwordBytes = this.decodeUtf8(password);
+      const hashBytes = new Uint8Array(await root.crypto.subtle.digest('SHA-512', passwordBytes));
+      const hash = this.encodeHex(hashBytes);
       // The first 32 bytes (64 hex chars) is used as the key for AES, and not sent to the server.
       this.key = hash.substr(0, 64);
       // The next 16 bytes (32 hex chars) is used as the initialization vector for Output Feedback Mode, and not sent to the server.
@@ -133,7 +126,7 @@ class EncryptionService extends AESEncryptionService {
     const _register = User.prototype.register;
     User.prototype.register = async function (creds) {
       const {password} = creds;
-      creds.password = computeNewPassword(password);
+      creds.password = await computeNewPassword(password);
 
       // Generate a Public/Private key pair.
       const keyPair = new JSEncrypt();
@@ -147,34 +140,31 @@ class EncryptionService extends AESEncryptionService {
 
     // Override loginUser to retrieve the key and change the password.
     const _loginUser = User.loginUser;
-    User.loginUser = function (creds) {
+    User.loginUser = async function (creds) {
       const {password} = creds;
-      creds.password = computeNewPassword(password);
+      creds.password = await computeNewPassword(password);
 
-      return _loginUser.call(this, creds);
+      return await _loginUser.call(this, creds);
     }
 
     // Override changePassword to re-encrypt the key and change the password.
     const _changePassword = User.prototype.changePassword;
-    User.prototype.changePassword = function (creds) {
+    User.prototype.changePassword = async function (creds) {
       const {password, oldPassword} = creds;
       // Compute the old password first.
-      creds.oldPassword = computeNewPassword(oldPassword);
+      creds.oldPassword = await computeNewPassword(oldPassword);
       // Compute the new password second, so that.key and that.iv are current.
-      creds.password = computeNewPassword(password);
+      creds.password = await computeNewPassword(password);
 
       // Re-encrypt the private key.
-      const keyBytes = aesjs.utils.hex.toBytes(that.key);
-      const ivBytes = aesjs.utils.hex.toBytes(that.iv);
-      const aesCtr = new aesjs.ModeOfOperation.ofb(keyBytes, ivBytes);
       const privateKeyString = that.userPrivateKey;
-      const privateKeyBytes = aesjs.utils.utf8.toBytes(privateKeyString);
-      const encryptedPrivateKeyBytes = aesCtr.encrypt(privateKeyBytes);
-      const encryptedPrivateKeyString = base64js.fromByteArray(encryptedPrivateKeyBytes);
+      const privateKeyBytes = this.decodeUtf8(privateKeyString);
+      const encryptedPrivateKeyBytes = await this.encryptBytes(privateKeyBytes, that.key+that.iv);
+      const encryptedPrivateKeyString = this.encodeBase64(encryptedPrivateKeyBytes);
 
       creds.encryptedPrivateKeyString = encryptedPrivateKeyString;
 
-      return _changePassword.call(this, creds);
+      return await _changePassword.call(this, creds);
     }
   }
 
@@ -189,11 +179,13 @@ class EncryptionService extends AESEncryptionService {
   }
 
   async getUserPrivateKey () {
-    return await this.storage.getItem('twPrivateKey');
+    this.userPrivateKey = await this.storage.getItem('twPrivateKey');
+    return this.userPrivateKey;
   }
 
   async getUserPublicKey () {
-    return await this.storage.getItem('twPublicKey');
+    this.userPublicKey = await this.storage.getItem('twPublicKey');
+    return this.userPublicKey;
   }
 
   async unsetUserKeys () {
