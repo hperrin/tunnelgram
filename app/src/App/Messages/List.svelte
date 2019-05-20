@@ -38,14 +38,16 @@
     </div>
     <div class="d-flex flex-column align-items-start">
       {#each conversation.pending as message}
-        <MessageItem
-          bind:message
-          on:rendered={rescrollToBottom}
-          pending="true"
-          nextMessageUserIsDifferent={false}
-          prevMessageUserIsDifferent={false}
-          showTime={messages.length && showTime(messages[0].cdate)}
-        ></MessageItem>
+        {#if message.cryptReady}
+          <MessageItem
+            bind:message
+            on:rendered={rescrollToBottom}
+            pending="true"
+            nextMessageUserIsDifferent={false}
+            prevMessageUserIsDifferent={false}
+            showTime={messages.length && showTime(messages[0].cdate)}
+          ></MessageItem>
+        {/if}
       {/each}
     </div>
   {/if}
@@ -90,7 +92,7 @@
       }, {
         'type': '&',
         'ref': ['conversation', conversation.guid],
-        'gt': ['cdate', messages.length ? messages[messages.length - 1].cdate : 0]
+        'gt': ['cdate', messages.length ? messages[0].cdate : 0]
       }).then(async newMessages => {
         await Promise.all(newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise));
         messages = [...newMessages, ...messages];
