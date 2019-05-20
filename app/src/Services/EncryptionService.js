@@ -111,7 +111,7 @@ class EncryptionService extends AESEncryptionService {
 
     const computeNewPassword = async password => {
       // Generate a hash of the password.
-      const passwordBytes = this.decodeUtf8(password);
+      const passwordBytes = this.encodeUtf8(password);
       const hashBytes = new Uint8Array(await root.crypto.subtle.digest('SHA-512', passwordBytes));
       const hash = this.encodeHex(hashBytes);
       // The first 32 bytes (64 hex chars) is used as the key for AES, and not sent to the server.
@@ -158,7 +158,7 @@ class EncryptionService extends AESEncryptionService {
 
       // Re-encrypt the private key.
       const privateKeyString = that.userPrivateKey;
-      const privateKeyBytes = this.decodeUtf8(privateKeyString);
+      const privateKeyBytes = this.encodeUtf8(privateKeyString);
       const encryptedPrivateKeyBytes = await this.encryptBytes(privateKeyBytes, that.key+that.iv);
       const encryptedPrivateKeyString = this.encodeBase64(encryptedPrivateKeyBytes);
 

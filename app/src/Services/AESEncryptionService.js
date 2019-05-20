@@ -7,7 +7,7 @@ export class AESEncryptionService {
     // Decrypt the text.
     const encryptedBytes = this.decodeBase64(text);
     const bytes = await this.decryptBytes(encryptedBytes, key);
-    return this.encodeUtf8(bytes);
+    return this.decodeUtf8(bytes);
   }
 
   async decryptBytes (bytes, key) {
@@ -16,7 +16,7 @@ export class AESEncryptionService {
 
   async encrypt (text, key) {
     // Encrypt the text.
-    const bytes = this.decodeUtf8(text);
+    const bytes = this.encodeUtf8(text);
     const encryptedBytes = await this.encryptBytes(bytes, key);
     return this.encodeBase64(encryptedBytes);
   }
@@ -62,16 +62,12 @@ export class AESEncryptionService {
     return base64js.toByteArray(text);
   }
 
-  encodeUtf8 (bytes) {
-    const enc = new TextDecoder('utf-8');
-    const text = enc.decode(bytes);
-    return text;
+  encodeUtf8 (text) {
+    return new TextEncoder("utf-8").encode(text);
   }
 
-  decodeUtf8 (text) {
-    const enc = new TextEncoder();
-    const bytes = enc.encode(text);
-    return bytes;
+  decodeUtf8 (bytes) {
+    return new TextDecoder().decode(bytes);
   }
 
   encodeHex (bytes) {
