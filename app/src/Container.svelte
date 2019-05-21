@@ -1,3 +1,33 @@
+<script>
+  import {User} from 'tilmeld-client';
+  import Login from 'tilmeld-components/src/Login';
+  import LoadingIndicator from './App/LoadingIndicator';
+  import FrontPage from './App/FrontPage';
+  import App from './App/App';
+  import {logout, brand, user, crypt} from './stores';
+
+  const cryptoAvailable = (() => {
+    return !!((window.crypto || window.msCrypto).getRandomValues);
+  })();
+  let cryptReady = false;
+  let cryptError = null;
+
+  (async () => {
+    try {
+      await $crypt.ready;
+      cryptReady = true;
+    } catch (e) {
+      cryptError = e;
+    }
+  })();
+</script>
+
+<style>
+  .login-container :global(.login-dialog-container, .login-dialog) {
+    width: 100%;
+  }
+</style>
+
 {#if !cryptoAvailable}
   <div class="container">
     <div class="lead py-3">Your browser doesn't support the Crypto API, and therefore can't do secure encryption. Unfortunately, this means {$brand} will not work on this browser.</div>
@@ -75,33 +105,3 @@
     {/if}
   </div>
 {/if}
-
-<script>
-  import {User} from 'tilmeld-client';
-  import Login from 'tilmeld-components/src/Login';
-  import LoadingIndicator from './App/LoadingIndicator';
-  import FrontPage from './App/FrontPage';
-  import App from './App/App';
-  import {logout, brand, user, crypt} from './stores';
-
-  const cryptoAvailable = (() => {
-    return !!((window.crypto || window.msCrypto).getRandomValues);
-  })();
-  let cryptReady = false;
-  let cryptError = null;
-
-  (async () => {
-    try {
-      await $crypt.ready;
-      cryptReady = true;
-    } catch (e) {
-      cryptError = e;
-    }
-  })();
-</script>
-
-<style>
-  .login-container :global(.login-dialog-container, .login-dialog) {
-    width: 100%;
-  }
-</style>

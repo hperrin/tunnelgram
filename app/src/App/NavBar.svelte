@@ -1,3 +1,25 @@
+<script>
+  import {navigate} from '../Services/router';
+  import Conversation from '../Entities/Tunnelgram/Conversation';
+  import {Dropdown} from '../Services/Val/BSN';
+  import {conversation, view} from '../stores';
+
+  let notificationsDropdown;
+  let notificationsDropdownComponent;
+  $: if (notificationsDropdown && !notificationsDropdownComponent) {
+    notificationsDropdownComponent = new Dropdown(notificationsDropdown);
+  } else if (!notificationsDropdown && notificationsDropdownComponent) {
+    notificationsDropdownComponent = null;
+  }
+
+  async function setNotifications (key) {
+    const notif = $conversation.saveNotificationSetting(key);
+    $conversation = $conversation;
+    await notif;
+    $conversation = $conversation;
+  }
+</script>
+
 <ul class="navbar-nav ml-auto">
   {#if $conversation.isUserJoined()}
     <li class="nav-item dropdown" bind:this={notificationsDropdown}>
@@ -57,25 +79,3 @@
     </li>
   {/if}
 </ul>
-
-<script>
-  import {navigate} from '../Services/router';
-  import Conversation from '../Entities/Tunnelgram/Conversation';
-  import {Dropdown} from '../Services/Val/BSN';
-  import {conversation, view} from '../stores';
-
-  let notificationsDropdown;
-  let notificationsDropdownComponent;
-  $: if (notificationsDropdown && !notificationsDropdownComponent) {
-    notificationsDropdownComponent = new Dropdown(notificationsDropdown);
-  } else if (!notificationsDropdown && notificationsDropdownComponent) {
-    notificationsDropdownComponent = null;
-  }
-
-  async function setNotifications (key) {
-    const notif = $conversation.saveNotificationSetting(key);
-    $conversation = $conversation;
-    await notif;
-    $conversation = $conversation;
-  }
-</script>

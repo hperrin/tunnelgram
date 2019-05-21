@@ -1,84 +1,3 @@
-<form on:submit|preventDefault={newMessage}>
-  {#if images.length || video != null || mediaLoading}
-    <div class="d-flex flex-wrap justify-content-start align-items-start position-relative bg-secondary pt-2 pl-2">
-      {#each images as image, i}
-        <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
-          <img src={image.thumbnailImg} alt={image.name} title={image.name} width={image.thumbnailWidth} height={image.thumbnailHeight}>
-          {#if image.dataType !== 'image/gif'}
-            <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click={() => rotateImage(i)} title="Rotate">
-              <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
-            </button>
-          {/if}
-          <button type="button" class="btn btn-sm btn-danger rounded-circle thumbnailOverlay thumbnailButton" style="right: 4px; top: 4px;" on:click={() => images = removeIndex(images, i)} title="Remove">
-            <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
-          </button>
-          <span class="badge badge-light thumbnailOverlay" style="left: 4px; bottom: 4px; pointer-events: none;">
-            {image.dataWidth}x{image.dataHeight}
-          </span>
-          <span class="badge badge-light thumbnailOverlay" style="right: 4px; bottom: 4px; pointer-events: none;">
-            {round(image.data.length / 1024 / 1024, 1)}MB
-          </span>
-        </div>
-      {/each}
-      {#if video != null}
-        <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 border border-light position-relative" style="min-width: 152px; min-height: 152px;">
-          <video poster={video.thumbnailImg} width={video.thumbnailWidth} height={video.thumbnailHeight} title={video.name} controls>
-            <source src={video.objectURL} type={video.dataType} />
-          </video>
-          <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click={() => video = null}>
-            <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
-          </button>
-          <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
-            {video.dataWidth}x{video.dataHeight} - {Math.floor(video.dataDuration / 60)}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
-          </span>
-          <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
-            {round(video.data.length / 1024 / 1024, 1)}MB
-          </span>
-        </div>
-      {/if}
-      {#if mediaLoading === 'image'}
-        <div class="d-flex justify-content-center align-items-center mr-2 mb-2 text-white" style="width: 152px; height: 152px;">
-          <LoadingIndicator width="80" height="80" text="Resampling..." />
-        </div>
-      {/if}
-      {#if mediaLoading === 'video'}
-        <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 text-white" style="width: 152px; height: 152px;">
-          <LoadingIndicator width="150" height="150" text={transcoder == null ? 'Loading...' : (transcodeProgress == null ? 'Preparing...' : 'Transcoding...'+'\n'+Math.floor(transcodeProgress * 100)+'%')} progress={transcodeProgress} />
-        </div>
-        {#if transcoder != null}
-          <button type="button" class="btn btn-sm btn-danger position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click={cancelVideoTranscode}>
-            Cancel
-          </button>
-        {/if}
-      {/if}
-    </div>
-  {/if}
-  <div class="d-flex align-items-stretch border-dark border-top">
-    <input class="d-none" type="file" bind:this={fileInput} on:change={event => handleFiles(event.target.files)} accept="image/*, video/*" multiple>
-    {#if $inCordova}
-      <div class="add-media-dropdown btn-group dropup p-0" bind:this={addMediaDropdown}>
-        <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center dropdown-toggle" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" title="Add picture/video" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
-        </button>
-        <div class="dropdown-menu">
-          <button class="dropdown-item p-3" type="button" on:click={cordovaCapturePhoto}>Take a photo</button>
-          <button class="dropdown-item p-3" type="button" on:click={cordovaCaptureVideo}>Take a video</button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item p-3" type="button" on:click={() => fileInput.click()}>Browse library</button>
-        </div>
-      </div>
-    {:else}
-      <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click={() => fileInput.click()} title="Add picture/video">
-        <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
-      </button>
-    {/if}
-    <textarea class="text-editor form-control border-0 text-dark" bind:value={text} placeholder="New message" on:keydown={event => handleKeyDown(event)} on:keyup={handleKeyUp} bind:this={textEditor}></textarea>
-    <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled={messageIsEmpty || mediaLoading} title="Send message">
-      <i class="fas fa-comment"></i>
-    </button>
-  </div>
-</form>
-
 <script>
   import {onDestroy, createEventDispatcher} from 'svelte';
   import emoji from 'node-emoji';
@@ -576,3 +495,84 @@
     height: 2.2em;
   }
 </style>
+
+<form on:submit|preventDefault={newMessage}>
+  {#if images.length || video != null || mediaLoading}
+    <div class="d-flex flex-wrap justify-content-start align-items-start position-relative bg-secondary pt-2 pl-2">
+      {#each images as image, i}
+        <div class="d-flex justify-content-center align-items-center mr-2 mb-2 border border-light position-relative" style="width: 152px; height: 152px;">
+          <img src={image.thumbnailImg} alt={image.name} title={image.name} width={image.thumbnailWidth} height={image.thumbnailHeight}>
+          {#if image.dataType !== 'image/gif'}
+            <button type="button" class="btn btn-sm btn-info rounded-circle thumbnailOverlay thumbnailButton" style="left: 4px; top: 4px;" on:click={() => rotateImage(i)} title="Rotate">
+              <i class="fas fa-undo fa-flip-horizontal text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+            </button>
+          {/if}
+          <button type="button" class="btn btn-sm btn-danger rounded-circle thumbnailOverlay thumbnailButton" style="right: 4px; top: 4px;" on:click={() => images = removeIndex(images, i)} title="Remove">
+            <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+          </button>
+          <span class="badge badge-light thumbnailOverlay" style="left: 4px; bottom: 4px; pointer-events: none;">
+            {image.dataWidth}x{image.dataHeight}
+          </span>
+          <span class="badge badge-light thumbnailOverlay" style="right: 4px; bottom: 4px; pointer-events: none;">
+            {round(image.data.length / 1024 / 1024, 1)}MB
+          </span>
+        </div>
+      {/each}
+      {#if video != null}
+        <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 border border-light position-relative" style="min-width: 152px; min-height: 152px;">
+          <video poster={video.thumbnailImg} width={video.thumbnailWidth} height={video.thumbnailHeight} title={video.name} controls>
+            <source src={video.objectURL} type={video.dataType} />
+          </video>
+          <button type="button" class="btn btn-sm btn-danger rounded-circle position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click={() => video = null}>
+            <i class="fas fa-times text-white d-inline-block" style="width: 1em; height: 1em;"></i>
+          </button>
+          <span class="badge badge-light position-absolute" style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
+            {video.dataWidth}x{video.dataHeight} - {Math.floor(video.dataDuration / 60)}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
+          </span>
+          <span class="badge badge-light position-absolute" style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
+            {round(video.data.length / 1024 / 1024, 1)}MB
+          </span>
+        </div>
+      {/if}
+      {#if mediaLoading === 'image'}
+        <div class="d-flex justify-content-center align-items-center mr-2 mb-2 text-white" style="width: 152px; height: 152px;">
+          <LoadingIndicator width="80" height="80" text="Resampling..." />
+        </div>
+      {/if}
+      {#if mediaLoading === 'video'}
+        <div class="d-flex justify-content-center align-items-center mr-auto ml-auto mb-2 text-white" style="width: 152px; height: 152px;">
+          <LoadingIndicator width="150" height="150" text={transcoder == null ? 'Loading...' : (transcodeProgress == null ? 'Preparing...' : 'Transcoding...'+'\n'+Math.floor(transcodeProgress * 100)+'%')} progress={transcodeProgress} />
+        </div>
+        {#if transcoder != null}
+          <button type="button" class="btn btn-sm btn-danger position-absolute" style="opacity: .8; right: 4px; top: 4px;" on:click={cancelVideoTranscode}>
+            Cancel
+          </button>
+        {/if}
+      {/if}
+    </div>
+  {/if}
+  <div class="d-flex align-items-stretch border-dark border-top">
+    <input class="d-none" type="file" bind:this={fileInput} on:change={event => handleFiles(event.target.files)} accept="image/*, video/*" multiple>
+    {#if $inCordova}
+      <div class="add-media-dropdown btn-group dropup p-0" bind:this={addMediaDropdown}>
+        <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center dropdown-toggle" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" title="Add picture/video" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
+        </button>
+        <div class="dropdown-menu">
+          <button class="dropdown-item p-3" type="button" on:click={cordovaCapturePhoto}>Take a photo</button>
+          <button class="dropdown-item p-3" type="button" on:click={cordovaCaptureVideo}>Take a video</button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item p-3" type="button" on:click={() => fileInput.click()}>Browse library</button>
+        </div>
+      </div>
+    {:else}
+      <button class="btn btn-lg btn-success p-0 d-inline-flex justify-content-center align-items-center" style="width: 60px; min-width: 60px; font-size: .8em;" type="button" on:click={() => fileInput.click()} title="Add picture/video">
+        <i class="fas fa-camera"></i>&nbsp;/&nbsp;<i class="fas fa-video"></i>
+      </button>
+    {/if}
+    <textarea class="text-editor form-control border-0 text-dark" bind:value={text} placeholder="New message" on:keydown={event => handleKeyDown(event)} on:keyup={handleKeyUp} bind:this={textEditor}></textarea>
+    <button class="btn btn-lg btn-primary" style="width: 60px; min-width: 60px;" type="submit" disabled={messageIsEmpty || mediaLoading} title="Send message">
+      <i class="fas fa-comment"></i>
+    </button>
+  </div>
+</form>

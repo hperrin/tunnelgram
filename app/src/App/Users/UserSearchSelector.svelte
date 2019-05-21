@@ -1,41 +1,3 @@
-<div class="{className} position-relative" bind:this={container}>
-  <input
-    type="search"
-    class="form-control w-100"
-    id="username"
-    bind:this={usernameElem}
-    placeholder="Username or name"
-    on:keydown={event => handleUserSearchKeyDown(event)}
-    bind:value={username}
-    disabled={disabled}
-    autocomplete="off"
-    on:focus={() => showUserSearchDropdown = true}
-  >
-  {#if !disabled && (localUsers.length || serverUsersLoading)}
-    <div class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
-      {#each localUsers as user (user.guid)}
-        <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-          <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
-        </a>
-      {/each}
-      {#if serverUsersLoading}
-        <span class="dropdown-item-text d-flex justify-content-center">
-          <LoadingIndicator width="18" height="18" />
-        </span>
-      {:else if serverUsers.length}
-        <span class="dropdown-item-text d-flex justify-content-center my-2">
-          Others
-        </span>
-        {#each serverUsers as user (user.guid)}
-          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
-          </a>
-        {/each}
-      {/if}
-    </div>
-  {/if}
-</div>
-
 <script>
   import {onMount, onDestroy, createEventDispatcher} from 'svelte';
   import {Nymph} from 'nymph-client';
@@ -230,3 +192,41 @@
     showUserSearchDropdown = true;
   }
 </script>
+
+<div class="{className} position-relative" bind:this={container}>
+  <input
+    type="search"
+    class="form-control w-100"
+    id="username"
+    bind:this={usernameElem}
+    placeholder="Username or name"
+    on:keydown={event => handleUserSearchKeyDown(event)}
+    bind:value={username}
+    disabled={disabled}
+    autocomplete="off"
+    on:focus={() => showUserSearchDropdown = true}
+  >
+  {#if !disabled && (localUsers.length || serverUsersLoading)}
+    <div class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
+      {#each localUsers as user (user.guid)}
+        <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+          <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+        </a>
+      {/each}
+      {#if serverUsersLoading}
+        <span class="dropdown-item-text d-flex justify-content-center">
+          <LoadingIndicator width="18" height="18" />
+        </span>
+      {:else if serverUsers.length}
+        <span class="dropdown-item-text d-flex justify-content-center my-2">
+          Others
+        </span>
+        {#each serverUsers as user (user.guid)}
+          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
+            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+          </a>
+        {/each}
+      {/if}
+    </div>
+  {/if}
+</div>

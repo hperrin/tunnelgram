@@ -1,58 +1,3 @@
-<svelte:window on:resize={rescrollToBottom} />
-<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={setIsAtBottom} on:scroll={handleScroll}>
-  {#if loading}
-    <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-      <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
-      <LoadingIndicator width="200" height="200" />
-    </div>
-  {:else}
-    {#if reachedEarliestMessage}
-      <ConversationHeader bind:conversation />
-    {:else}
-      <div class="d-flex align-items-center justify-content-center {loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
-        <div class="col-auto">
-          <LoadingIndicator width="50" height="50" />
-        </div>
-      </div>
-    {/if}
-    <div class="d-flex flex-column-reverse" bind:this={messageContainer}>
-      {#each messages as message, i (message.guid)}
-        <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
-          <MessageItem
-            bind:message
-            on:rendered={rescrollToBottom}
-            on:deleted={() => removeMessage(message)}
-            nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
-            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
-            showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}
-          ></MessageItem>
-          {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
-            <div class="d-flex align-items-center w-100 mb-2 readline" bind:this={readlineEl}>
-              <hr class="mx-2 flex-grow-1">
-              <small class="text-muted">new messages</small>
-              <hr class="mx-2 flex-grow-1">
-            </div>
-          {/if}
-        </div>
-      {/each}
-    </div>
-    <div class="d-flex flex-column align-items-start">
-      {#each conversation.pending as message}
-        {#if message.cryptReady}
-          <MessageItem
-            bind:message
-            on:rendered={rescrollToBottom}
-            pending="true"
-            nextMessageUserIsDifferent={false}
-            prevMessageUserIsDifferent={false}
-            showTime={messages.length && showTime(messages[0].cdate)}
-          ></MessageItem>
-        {/if}
-      {/each}
-    </div>
-  {/if}
-</div>
-
 <script>
   import {onMount, onDestroy, afterUpdate, tick} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
@@ -384,3 +329,58 @@
     }
   }
 </script>
+
+<svelte:window on:resize={rescrollToBottom} />
+<div class="position-absolute h-100 w-100 pt-3" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overflow-x: hidden;" bind:this={container} on:scroll={setIsAtBottom} on:scroll={handleScroll}>
+  {#if loading}
+    <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
+      <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 88px; height: 88px;"></div>
+      <LoadingIndicator width="200" height="200" />
+    </div>
+  {:else}
+    {#if reachedEarliestMessage}
+      <ConversationHeader bind:conversation />
+    {:else}
+      <div class="d-flex align-items-center justify-content-center {loadingEarlierMessages ? '' : 'visibility-hidden'}" style="height: 150px;">
+        <div class="col-auto">
+          <LoadingIndicator width="50" height="50" />
+        </div>
+      </div>
+    {/if}
+    <div class="d-flex flex-column-reverse" bind:this={messageContainer}>
+      {#each messages as message, i (message.guid)}
+        <div class="d-flex flex-column align-items-start message-box" data-cdate={'' + message.cdate}>
+          <MessageItem
+            bind:message
+            on:rendered={rescrollToBottom}
+            on:deleted={() => removeMessage(message)}
+            nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
+            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
+            showTime={i < (messages.length - 1) && showTime(messages[i + 1].cdate, message.cdate)}
+          ></MessageItem>
+          {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
+            <div class="d-flex align-items-center w-100 mb-2 readline" bind:this={readlineEl}>
+              <hr class="mx-2 flex-grow-1">
+              <small class="text-muted">new messages</small>
+              <hr class="mx-2 flex-grow-1">
+            </div>
+          {/if}
+        </div>
+      {/each}
+    </div>
+    <div class="d-flex flex-column align-items-start">
+      {#each conversation.pending as message}
+        {#if message.cryptReady}
+          <MessageItem
+            bind:message
+            on:rendered={rescrollToBottom}
+            pending="true"
+            nextMessageUserIsDifferent={false}
+            prevMessageUserIsDifferent={false}
+            showTime={messages.length && showTime(messages[0].cdate)}
+          ></MessageItem>
+        {/if}
+      {/each}
+    </div>
+  {/if}
+</div>

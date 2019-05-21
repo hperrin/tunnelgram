@@ -1,3 +1,56 @@
+<script>
+  import {navigate} from '../../Services/router';
+  import Conversation from '../../Entities/Tunnelgram/Conversation';
+  import {conversation, user} from '../../stores';
+
+  let name = '';
+  let openJoining = false;
+  let clearingReadline = false;
+  let confirmLeave = false;
+  let leavingConversation = false;
+
+  $: currentUserIsAdmin = $conversation.data.mode === Conversation.MODE_CHAT || $user.inArray($conversation.data.acFull);
+
+  let previousConversation = null;
+  $: if (previousConversation !== $conversation) {
+    name = $conversation.decrypted.name;
+    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      openJoining = $conversation.data.openJoining;
+    }
+    previousConversation = $conversation;
+  };
+
+  function save () {
+    if (name === '') {
+      $conversation.decrypted.name = null;
+    } else {
+      $conversation.decrypted.name = name;
+    }
+    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      $conversation.data.openJoining = openJoining;
+    }
+    $conversation.save();
+    $conversation = $conversation;
+  }
+
+  async function clearReadline () {
+    clearingReadline = true;
+    await $conversation.clearReadline();
+    $conversation = $conversation;
+    clearingReadline = false;
+  }
+
+  function showConfirmLeave () {
+    confirmLeave = true;
+  }
+
+  function leave () {
+    leavingConversation = true;
+    navigate('/c');
+    $conversation.leave();
+  }
+</script>
+
 <div class="d-flex flex-column align-items-center p-3">
   <form class="d-flex flex-column justify-content-start w-std-page" on:submit|preventDefault={save}>
     <h3 class="mt-3">{Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings</h3>
@@ -53,56 +106,3 @@
     </div>
   {/if}
 </div>
-
-<script>
-  import {navigate} from '../../Services/router';
-  import Conversation from '../../Entities/Tunnelgram/Conversation';
-  import {conversation, user} from '../../stores';
-
-  let name = '';
-  let openJoining = false;
-  let clearingReadline = false;
-  let confirmLeave = false;
-  let leavingConversation = false;
-
-  $: currentUserIsAdmin = $conversation.data.mode === Conversation.MODE_CHAT || $user.inArray($conversation.data.acFull);
-
-  let previousConversation = null;
-  $: if (previousConversation !== $conversation) {
-    name = $conversation.decrypted.name;
-    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
-      openJoining = $conversation.data.openJoining;
-    }
-    previousConversation = $conversation;
-  };
-
-  function save () {
-    if (name === '') {
-      $conversation.decrypted.name = null;
-    } else {
-      $conversation.decrypted.name = name;
-    }
-    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
-      $conversation.data.openJoining = openJoining;
-    }
-    $conversation.save();
-    $conversation = $conversation;
-  }
-
-  async function clearReadline () {
-    clearingReadline = true;
-    await $conversation.clearReadline();
-    $conversation = $conversation;
-    clearingReadline = false;
-  }
-
-  function showConfirmLeave () {
-    confirmLeave = true;
-  }
-
-  function leave () {
-    leavingConversation = true;
-    navigate('/c');
-    $conversation.leave();
-  }
-</script>

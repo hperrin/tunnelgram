@@ -1,39 +1,3 @@
-<div class="d-flex w-100 justify-content-center align-items-center">
-  <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px; height: 60px;">
-    {#each avatarUsersAndWidth.users as user (user.guid)}
-      <Avatar bind:user size={avatarUsersAndWidth.width} />
-    {/each}
-  </div>
-  <div class="pl-2" style="width: calc(100% - 60px);">
-    <div class="d-flex w-100 justify-content-between align-items-start">
-      <h5 class="mb-0" style="word-break: break-word;">{conversation.getName($settings)}</h5>
-      <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">{modifiedDate}</small>
-    </div>
-    <div class="d-flex w-100 justify-content-between align-items-end">
-      {#if conversation.data.lastMessage}
-        <small class="last-message">
-          {#if conversation.data.lastMessage.decrypted.text != null}
-            {conversation.data.lastMessage.decrypted.text}
-          {:else if conversation.data.lastMessage.decrypted.images.length === 1}
-            [A photo]
-          {:else if conversation.data.lastMessage.decrypted.images.length > 1}
-            [Photos]
-          {:else if conversation.data.lastMessage.decrypted.video !== null}
-            [A video]
-          {/if}
-        </small>
-      {:else}
-        <span>&nbsp;</span>
-      {/if}
-      {#if unreadCount === 0}
-        <span>&nbsp;</span>
-      {:else}
-        <span class="badge badge-primary">{unreadCount === true ? 'New' : unreadCount}</span>
-      {/if}
-    </div>
-  </div>
-</div>
-
 <script>
   import {onMount, onDestroy} from 'svelte';
   import Avatar from '../Users/Avatar';
@@ -119,3 +83,39 @@
     text-overflow: ellipsis;
   }
 </style>
+
+<div class="d-flex w-100 justify-content-center align-items-center">
+  <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px; height: 60px;">
+    {#each avatarUsersAndWidth.users as user (user.guid)}
+      <Avatar bind:user size={avatarUsersAndWidth.width} />
+    {/each}
+  </div>
+  <div class="pl-2" style="width: calc(100% - 60px);">
+    <div class="d-flex w-100 justify-content-between align-items-start">
+      <h5 class="mb-0" style="word-break: break-word;">{conversation.getName($settings)}</h5>
+      <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">{modifiedDate}</small>
+    </div>
+    <div class="d-flex w-100 justify-content-between align-items-end">
+      {#if conversation.data.lastMessage}
+        <small class="last-message">
+          {#if conversation.data.lastMessage.decrypted.text != null}
+            {conversation.data.lastMessage.decrypted.text}
+          {:else if conversation.data.lastMessage.decrypted.images.length === 1}
+            [A photo]
+          {:else if conversation.data.lastMessage.decrypted.images.length > 1}
+            [Photos]
+          {:else if conversation.data.lastMessage.decrypted.video !== null}
+            [A video]
+          {/if}
+        </small>
+      {:else}
+        <span>&nbsp;</span>
+      {/if}
+      {#if unreadCount === 0}
+        <span>&nbsp;</span>
+      {:else}
+        <span class="badge badge-primary">{unreadCount === true ? 'New' : unreadCount}</span>
+      {/if}
+    </div>
+  </div>
+</div>

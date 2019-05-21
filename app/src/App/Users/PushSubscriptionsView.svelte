@@ -1,3 +1,9 @@
+<script>
+  import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
+  import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
+  import PushSubscriptionsList from './PushSubscriptionsList';
+</script>
+
 <div class="h-100 w-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center p-3">
     <div class="d-flex flex-column justify-content-start w-std-page">
@@ -25,9 +31,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
-  import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
-  import PushSubscriptionsList from './PushSubscriptionsList';
-</script>

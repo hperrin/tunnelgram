@@ -1,3 +1,7 @@
+<script>
+  import {brand} from '../stores';
+</script>
+
 <div class="card" style="width: 100%;">
   <img class="card-img-top" src="og-image.png" alt="Media image: Easy, secure messaging on all your devices.">
   <div class="card-body">
@@ -73,7 +77,3 @@
     </p>
   </div>
 </div>
-
-<script>
-  import {brand} from '../stores';
-</script>

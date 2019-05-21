@@ -1,3 +1,11 @@
+<script>
+  export let width;
+  export let height;
+  export let title = null;
+  export let text = null;
+  export let progress = null;
+</script>
+
 <div style="display: flex; justify-content: center; align-items: center; position: relative; width: {width}px; height: {height}px;">
   {#if text || title}
     <div style="text-align: center; font-size: .9em; text-overflow: ellipsis; overflow: hidden; max-height: 80%; max-width: 80%;">
@@ -15,11 +23,3 @@
     </circle>
   </svg>
 </div>
-
-<script>
-  export let width;
-  export let height;
-  export let title = null;
-  export let text = null;
-  export let progress = null;
-</script>
