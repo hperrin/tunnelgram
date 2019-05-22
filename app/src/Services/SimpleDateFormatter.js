@@ -1,7 +1,7 @@
-import {format} from 'timeago.js';
+import { format } from 'timeago.js';
 
 export class SimpleDateFormatter {
-  constructor (date) {
+  constructor(date) {
     if (date instanceof Date) {
       this.date = date;
     } else {
@@ -9,7 +9,7 @@ export class SimpleDateFormatter {
     }
   }
 
-  format (style, length) {
+  format(style, length) {
     let options;
 
     switch (style) {
@@ -21,26 +21,26 @@ export class SimpleDateFormatter {
           day: 'numeric',
           hour: 'numeric',
           minute: '2-digit',
-          second: '2-digit'
+          second: '2-digit',
         };
         break;
       case 'ymd':
         options = {
           year: 'numeric',
           month: length,
-          day: 'numeric'
+          day: 'numeric',
         };
         break;
       case 'md':
         options = {
           month: length,
-          day: 'numeric'
+          day: 'numeric',
         };
         break;
       case 'wh':
         options = {
           weekday: length,
-          hour: 'numeric'
+          hour: 'numeric',
         };
         break;
       case 'ago':

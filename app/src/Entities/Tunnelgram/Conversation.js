@@ -1,20 +1,20 @@
-import {Nymph, Entity} from 'nymph-client';
-import {User} from 'tilmeld-client';
-import {Message} from './Message';
-import {saveEntities, restoreEntities} from '../../Services/entityRefresh';
-import {crypt} from '../../Services/EncryptionService';
+import { Nymph, Entity } from 'nymph-client';
+import { User } from 'tilmeld-client';
+import { Message } from './Message';
+import { saveEntities, restoreEntities } from '../../Services/entityRefresh';
+import { crypt } from '../../Services/EncryptionService';
 import * as ConversationConstants from './ConversationConstants';
 
 let currentUser = null;
 
-User.current().then(user => currentUser = user);
-User.on('login', user => currentUser = user);
-User.on('logout', () => currentUser = null);
+User.current().then(user => (currentUser = user));
+User.on('login', user => (currentUser = user));
+User.on('logout', () => (currentUser = null));
 
 export class Conversation extends Entity {
   // === Constructor ===
 
-  constructor (id) {
+  constructor(id) {
     super(id);
     this.containsSleepingReference = false;
     this.pending = [];
@@ -23,7 +23,7 @@ export class Conversation extends Entity {
     this.unreadCountPromise = null;
     this.unreadCountPromiseReadline = null;
     this.decrypted = {
-      name: null
+      name: null,
     };
     this.data.name = null;
     this.data.mode = Conversation.MODE_CHAT;
@@ -38,10 +38,14 @@ export class Conversation extends Entity {
 
   // === Instance Methods ===
 
-  init (entityData, ...args) {
+  init(entityData, ...args) {
     const savedEntities = saveEntities(this);
 
-    if (this.readline !== entityData.readline || (this.data.lastMessage && this.data.lastMessage.guid) !== (entityData.data.lastMessage && entityData.data.lastMessage.guid)) {
+    if (
+      this.readline !== entityData.readline ||
+      (this.data.lastMessage && this.data.lastMessage.guid) !==
+        (entityData.data.lastMessage && entityData.data.lastMessage.guid)
+    ) {
       this.unreadCountPromise = null;
     }
 
@@ -65,8 +69,15 @@ export class Conversation extends Entity {
       // Decrypt the conversation name.
       if (this.data.name != null) {
         let decrypt = async input => input;
-        if (this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC && currentUser && this.data.keys && currentUser.guid in this.data.keys) {
-          const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+        if (
+          this.data.mode !== Conversation.MODE_CHANNEL_PUBLIC &&
+          currentUser &&
+          this.data.keys &&
+          currentUser.guid in this.data.keys
+        ) {
+          const key = crypt
+            .decryptRSA(this.data.keys[currentUser.guid])
+            .slice(0, 96);
           decrypt = input => crypt.decrypt(input, key);
         }
 
@@ -80,7 +91,7 @@ export class Conversation extends Entity {
     return this;
   }
 
-  toJSON () {
+  toJSON() {
     const obj = super.toJSON();
 
     obj.readline = this.readline;
@@ -89,7 +100,7 @@ export class Conversation extends Entity {
     return obj;
   }
 
-  async save () {
+  async save() {
     if (!this.guid && !currentUser.inArray(this.data.acFull)) {
       this.data.acFull.push(currentUser);
     }
@@ -101,7 +112,10 @@ export class Conversation extends Entity {
     } else {
       let key;
 
-      if (this.decrypted.name != null || this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
+      if (
+        this.decrypted.name != null ||
+        this.data.mode === Conversation.MODE_CHANNEL_PRIVATE
+      ) {
         if (this.data.keys && currentUser.guid in this.data.keys) {
           key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
         } else {
@@ -113,7 +127,10 @@ export class Conversation extends Entity {
         for (let user of this.data.acFull) {
           if (!(user.guid in this.data.keys)) {
             const pad = crypt.generatePad();
-            encryptPromises.push({guid: user.guid, promise: crypt.encryptRSAForUser(key + pad, user)});
+            encryptPromises.push({
+              guid: user.guid,
+              promise: crypt.encryptRSAForUser(key + pad, user),
+            });
           }
         }
         for (let entry of encryptPromises) {
@@ -132,9 +149,9 @@ export class Conversation extends Entity {
     return await super.save();
   }
 
-  getName (settings) {
+  getName(settings) {
     if (this.guid == null) {
-      return 'New '+Conversation.MODE_NAME[this.data.mode];
+      return 'New ' + Conversation.MODE_NAME[this.data.mode];
     } else if (this.decrypted.name != null) {
       return this.decrypted.name;
     } else if (this.data.acFull.length === 1) {
@@ -158,10 +175,13 @@ export class Conversation extends Entity {
         names.push('You');
       }
     }
-    return (this.data.mode === Conversation.MODE_CHAT ? '' : 'Channel with ')+names.join(', ');
+    return (
+      (this.data.mode === Conversation.MODE_CHAT ? '' : 'Channel with ') +
+      names.join(', ')
+    );
   }
 
-  async unreadCount () {
+  async unreadCount() {
     if (this.readline == null) {
       return true;
     }
@@ -173,22 +193,28 @@ export class Conversation extends Entity {
       }
     }
 
-    if (!this.unreadCountPromise || this.unreadCountPromiseReadline < this.readline) {
+    if (
+      !this.unreadCountPromise ||
+      this.unreadCountPromiseReadline < this.readline
+    ) {
       this.unreadCountPromiseReadline = this.readline;
-      this.unreadCountPromise = Nymph.getEntities({
-        'class': Message.class,
-        'return': 'guid'
-      }, {
-        'type': '&',
-        'ref': ['conversation', this.guid],
-        'gt': ['cdate', this.readline]
-      });
+      this.unreadCountPromise = Nymph.getEntities(
+        {
+          class: Message.class,
+          return: 'guid',
+        },
+        {
+          type: '&',
+          ref: ['conversation', this.guid],
+          gt: ['cdate', this.readline],
+        },
+      );
     }
 
     return ((await this.unreadCountPromise) || []).length;
   }
 
-  saveReadline (...args) {
+  saveReadline(...args) {
     if (!this.isUserJoined()) {
       return;
     }
@@ -197,13 +223,13 @@ export class Conversation extends Entity {
     return this.serverCall('saveReadline', args, true);
   }
 
-  clearReadline (...args) {
+  clearReadline(...args) {
     this.readline = null;
     this.unreadCountPromise = null;
     return this.serverCall('clearReadline', args, true);
   }
 
-  saveNotificationSetting (...args) {
+  saveNotificationSetting(...args) {
     this.notifications = args[0];
     return this.serverCall('saveNotificationSetting', args, true);
   }
@@ -220,7 +246,9 @@ export class Conversation extends Entity {
     let userKey = null;
 
     if (this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
-      const key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+      const key = crypt
+        .decryptRSA(this.data.keys[currentUser.guid])
+        .slice(0, 96);
       const pad = crypt.generatePad();
       userKey = await crypt.encryptRSAForUser(key + pad, user);
     }
@@ -245,7 +273,9 @@ export class Conversation extends Entity {
       if (currentUser.inArray(this.data.acFull)) {
         return true;
       }
-      return !!currentUser.data.groups.filter(group => group.guid === this.data.group.guid).length;
+      return !!currentUser.data.groups.filter(
+        group => group.guid === this.data.group.guid,
+      ).length;
     }
     return true;
   }
@@ -263,7 +293,7 @@ export class Conversation extends Entity {
 // The name of the server class
 Conversation.class = 'Tunnelgram\\Conversation';
 // Cache expiry time. 3 hours.
-Conversation.CACHE_EXPIRY = 1000*60*60*3;
+Conversation.CACHE_EXPIRY = 1000 * 60 * 60 * 3;
 
 Object.assign(Conversation, ConversationConstants);
 

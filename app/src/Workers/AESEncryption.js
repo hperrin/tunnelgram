@@ -1,9 +1,9 @@
-import {AESEncryptionService} from '../Services/AESEncryptionService';
+import { AESEncryptionService } from '../Services/AESEncryptionService';
 
 const crypt = new AESEncryptionService();
 
 onmessage = e => {
-  const {counter, action, args} = e.data;
+  const { counter, action, args } = e.data;
   if (!(action in crypt)) {
     return;
   }
@@ -12,5 +12,5 @@ onmessage = e => {
   if (result instanceof Uint8Array) {
     transferrables = [result.buffer];
   }
-  postMessage({counter, result}, transferrables);
+  postMessage({ counter, result }, transferrables);
 };

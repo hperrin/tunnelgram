@@ -1,8 +1,8 @@
 <script>
-  import {navigate} from '../Services/router';
+  import { navigate } from '../Services/router';
   import Conversation from '../Entities/Tunnelgram/Conversation';
-  import {Dropdown} from '../Services/Val/BSN';
-  import {conversation, view} from '../stores';
+  import { Dropdown } from '../Services/Val/BSN';
+  import { conversation, view } from '../stores';
 
   let notificationsDropdown;
   let notificationsDropdownComponent;
@@ -12,7 +12,7 @@
     notificationsDropdownComponent = null;
   }
 
-  async function setNotifications (key) {
+  async function setNotifications(key) {
     const notif = $conversation.saveNotificationSetting(key);
     $conversation = $conversation;
     await notif;
@@ -23,25 +23,46 @@
 <ul class="navbar-nav ml-auto">
   {#if $conversation.isUserJoined()}
     <li class="nav-item dropdown" bind:this={notificationsDropdown}>
-      <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="notificationsDropdown" title="Notifications" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <a
+        class="nav-link dropdown-toggle"
+        href="javascript:void(0)"
+        id="notificationsDropdown"
+        title="Notifications"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false">
         {#if $conversation.notifications === Conversation.NOTIFICATIONS_ALL}
-          <span><i class="fas fa-bell"></i></span>
+          <span>
+            <i class="fas fa-bell" />
+          </span>
         {:else if $conversation.notifications === Conversation.NOTIFICATIONS_MENTIONS}
-          <span><i class="far fa-bell"></i></span>
+          <span>
+            <i class="far fa-bell" />
+          </span>
         {:else if $conversation.notifications === Conversation.NOTIFICATIONS_DIRECT}
-          <span><i class="far fa-bell"></i></span>
+          <span>
+            <i class="far fa-bell" />
+          </span>
         {:else if $conversation.notifications === Conversation.NOTIFICATIONS_NONE}
-          <span><i class="fas fa-bell-slash"></i></span>
+          <span>
+            <i class="fas fa-bell-slash" />
+          </span>
         {/if}
-        <span class="sr-only">({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})</span>
+        <span class="sr-only">
+          ({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})
+        </span>
       </a>
-      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="notificationsDropdown">
-        <h6 class="dropdown-header">
-          Notification Setting
-        </h6>
+      <div
+        class="dropdown-menu dropdown-menu-right"
+        aria-labelledby="notificationsDropdown">
+        <h6 class="dropdown-header">Notification Setting</h6>
         {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
-          <a class="dropdown-item {$conversation.notifications === key ? 'active' : ''}" href="javascript:void(0)" on:click={() => setNotifications(key)}>
-            {Conversation.NOTIFICATIONS_NAME[key]}
+          <a
+            class="dropdown-item {$conversation.notifications === key ? 'active' : ''}"
+            href="javascript:void(0)"
+            on:click={() => setNotifications(key)}>
+             {Conversation.NOTIFICATIONS_NAME[key]}
           </a>
         {/each}
       </div>
@@ -49,18 +70,25 @@
   {/if}
   <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
     <a class="nav-link" href="#/c/{$conversation.guid}" title="Conversation">
-      <i class="fas fa-comments"></i>
+      <i class="fas fa-comments" />
       {#if $view === 'conversation'}
         <span class="sr-only">(current)</span>
       {/if}
     </a>
   </li>
   <li class="nav-item {$view === 'people' ? 'active' : ''}">
-    <a class="nav-link" href="#/c/{$conversation.guid}/people" title="People ({$conversation.data.acFull.length})">
+    <a
+      class="nav-link"
+      href="#/c/{$conversation.guid}/people"
+      title="People ({$conversation.data.acFull.length})">
       <span class="fa-layers fa-fw">
-        <i class="fas fa-users"></i>
+        <i class="fas fa-users" />
         {#if $conversation.data.mode === Conversation.MODE_CHAT}
-          <span class="fa-layers-counter fa-layers-bottom-right bg-info" style="transform: scale(0.6); bottom: -.4em; right: -.4em;">{$conversation.data.acFull.length}</span>
+          <span
+            class="fa-layers-counter fa-layers-bottom-right bg-info"
+            style="transform: scale(0.6); bottom: -.4em; right: -.4em;">
+             {$conversation.data.acFull.length}
+          </span>
         {/if}
       </span>
       {#if $view === 'people'}
@@ -70,8 +98,11 @@
   </li>
   {#if $conversation.isUserJoined()}
     <li class="nav-item {$view === 'settings' ? 'active' : ''}">
-      <a class="nav-link" href="#/c/{$conversation.guid}/settings" title="Settings">
-        <i class="fas fa-cog"></i>
+      <a
+        class="nav-link"
+        href="#/c/{$conversation.guid}/settings"
+        title="Settings">
+        <i class="fas fa-cog" />
         {#if $view === 'settings'}
           <span class="sr-only">(current)</span>
         {/if}

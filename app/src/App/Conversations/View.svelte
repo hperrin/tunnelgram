@@ -3,7 +3,7 @@
   import Messages from './Messages';
   import People from './People';
   import Settings from './Settings';
-  import {conversation, view} from '../../stores';
+  import { conversation, view } from '../../stores';
 </script>
 
 {#if !$conversation.guid}

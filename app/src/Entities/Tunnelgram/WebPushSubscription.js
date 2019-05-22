@@ -1,9 +1,9 @@
-import {Nymph, Entity} from 'nymph-client';
+import { Nymph, Entity } from 'nymph-client';
 
 export class WebPushSubscription extends Entity {
   // === Constructor ===
 
-  constructor (id) {
+  constructor(id) {
     super(id);
     this.data.endpoint = '';
     this.data.keys = {};
@@ -11,7 +11,7 @@ export class WebPushSubscription extends Entity {
 
   // === Static Methods ===
 
-  static getVapidPublicKey (...args) {
+  static getVapidPublicKey(...args) {
     return WebPushSubscription.serverCallStatic('getVapidPublicKey', args);
   }
 }

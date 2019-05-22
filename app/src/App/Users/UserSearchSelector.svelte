@@ -1,11 +1,11 @@
 <script>
-  import {onMount, onDestroy, createEventDispatcher} from 'svelte';
-  import {Nymph} from 'nymph-client';
-  import {User} from 'tilmeld-client';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { Nymph } from 'nymph-client';
+  import { User } from 'tilmeld-client';
   import Avatar from './Avatar';
   import DisplayName from './DisplayName';
   import LoadingIndicator from '../LoadingIndicator';
-  import {conversations, settings, user} from '../../stores';
+  import { conversations, settings, user } from '../../stores';
 
   const dispatch = createEventDispatcher();
 
@@ -59,11 +59,17 @@
           if (searchUser.guid in $settings.decrypted.nicknames) {
             name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
           }
-          if (name.startsWith(searchQuery) || searchUser.data.username.toLowerCase().startsWith(searchQuery)) {
+          if (
+            name.startsWith(searchQuery) ||
+            searchUser.data.username.toLowerCase().startsWith(searchQuery)
+          ) {
             if (!searchUser.inArray(startsWithUsers)) {
               startsWithUsers.push(searchUser);
             }
-          } else if (name.includes(searchQuery) || searchUser.data.username.toLowerCase().includes(searchQuery)) {
+          } else if (
+            name.includes(searchQuery) ||
+            searchUser.data.username.toLowerCase().includes(searchQuery)
+          ) {
             if (!searchUser.inArray(containUsers)) {
               containUsers.push(searchUser);
             }
@@ -78,35 +84,47 @@
       userSearchTimer = window.setTimeout(async () => {
         const guids = [];
         for (let guid in $settings.decrypted.nicknames) {
-          if ($settings.decrypted.nicknames[guid].toLowerCase().includes(searchQuery)) {
+          if (
+            $settings.decrypted.nicknames[guid]
+              .toLowerCase()
+              .includes(searchQuery)
+          ) {
             guids.push(guid);
           }
         }
-        const nickPromise = guids.length ? Nymph.getEntities({
-          'class': User.class
-        }, {
-          'type': '|',
-          'guid': guids
-        }) : Promise.resolve([]);
+        const nickPromise = guids.length
+          ? Nymph.getEntities(
+              {
+                class: User.class,
+              },
+              {
+                type: '|',
+                guid: guids,
+              },
+            )
+          : Promise.resolve([]);
 
-        const firstArgs = [{
-          'class': User.class,
-          'limit': 10
-        }, {
-          'type': '&',
-          '!guid': [
-            ...Object.keys($settings.decrypted.nicknames),
-            $user.guid,
-            ...localUsers.map(user => user.guid)
-          ]
-        }];
+        const firstArgs = [
+          {
+            class: User.class,
+            limit: 10,
+          },
+          {
+            type: '&',
+            '!guid': [
+              ...Object.keys($settings.decrypted.nicknames),
+              $user.guid,
+              ...localUsers.map(user => user.guid),
+            ],
+          },
+        ];
         const unPromise = Nymph.getEntities(...firstArgs, {
-          'type': '&',
-          'ilike': ['username', searchQuery+'%']
+          type: '&',
+          ilike: ['username', searchQuery + '%'],
         });
         const namePromise = Nymph.getEntities(...firstArgs, {
-          'type': '&',
-          'ilike': ['name', '%'+searchQuery+'%']
+          type: '&',
+          ilike: ['name', '%' + searchQuery + '%'],
         });
 
         const nickUsers = await nickPromise;
@@ -143,8 +161,7 @@
     document.body.removeEventListener('click', bodyClickHandler);
   });
 
-
-  function handleUserSearchKeyDown (event) {
+  function handleUserSearchKeyDown(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
     } else if (event.keyCode === 40 && userSearchDropdown) {
@@ -157,7 +174,7 @@
     }
   }
 
-  function handleUserSearchResultKeyDown (event) {
+  function handleUserSearchResultKeyDown(event) {
     if (event.keyCode === 38) {
       let previousEl = event.target.previousElementSibling;
       while (previousEl && !previousEl.classList.contains('dropdown-item')) {
@@ -183,11 +200,11 @@
     }
   }
 
-  export function clear () {
+  export function clear() {
     username = '';
   }
 
-  export function focus () {
+  export function focus() {
     usernameElem.focus();
     showUserSearchDropdown = true;
   }
@@ -202,15 +219,26 @@
     placeholder="Username or name"
     on:keydown={event => handleUserSearchKeyDown(event)}
     bind:value={username}
-    disabled={disabled}
+    {disabled}
     autocomplete="off"
-    on:focus={() => showUserSearchDropdown = true}
-  >
+    on:focus={() => (showUserSearchDropdown = true)} />
   {#if !disabled && (localUsers.length || serverUsersLoading)}
-    <div class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}" bind:this={userSearchDropdown}>
+    <div
+      class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}"
+      bind:this={userSearchDropdown}>
       {#each localUsers as user (user.guid)}
-        <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-          <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+        <a
+          class="d-flex justify-content-between align-items-center dropdown-item"
+          href="javascript:void(0)"
+          on:click={() => dispatch('user-selected', user)}
+          on:keydown={event => handleUserSearchResultKeyDown(event)}>
+          <span>
+            <span class="mr-2">
+              <Avatar bind:user />
+            </span>
+            <DisplayName bind:user />
+            ({user.data.username})
+          </span>
         </a>
       {/each}
       {#if serverUsersLoading}
@@ -222,8 +250,19 @@
           Others
         </span>
         {#each serverUsers as user (user.guid)}
-          <a class="d-flex justify-content-between align-items-center dropdown-item" href="javascript:void(0)" on:click={() => dispatch('user-selected', user)} on:keydown={event => handleUserSearchResultKeyDown(event)}>
-            <span><span class="mr-2"><Avatar bind:user /></span> <DisplayName bind:user /> ({user.data.username})</span>
+          <a
+            class="d-flex justify-content-between align-items-center
+            dropdown-item"
+            href="javascript:void(0)"
+            on:click={() => dispatch('user-selected', user)}
+            on:keydown={event => handleUserSearchResultKeyDown(event)}>
+            <span>
+              <span class="mr-2">
+                <Avatar bind:user />
+              </span>
+              <DisplayName bind:user />
+              ({user.data.username})
+            </span>
           </a>
         {/each}
       {/if}

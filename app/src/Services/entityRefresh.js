@@ -1,7 +1,7 @@
-import {Entity} from 'nymph-client';
+import { Entity } from 'nymph-client';
 
 // Save referenced entities in an entity's data.
-export function saveEntities (entity) {
+export function saveEntities(entity) {
   let savedEntities = {};
 
   for (let k in entity.data) {
@@ -29,18 +29,21 @@ const addEntitiesToObject = (item, entitiesObject) => {
   }
 };
 
-
 // Restore referenced entities into an entity's data.
 // Returns true if there are any sleeping references still in the entity's data
 // after the restore.
-export function restoreEntities (entity, savedEntities) {
+export function restoreEntities(entity, savedEntities) {
   let data = {
-    containsSleepingReference: false
+    containsSleepingReference: false,
   };
 
   for (let k in entity.data) {
     if (entity.data.hasOwnProperty(k)) {
-      entity.data[k] = retoreEntitiesFromObject(entity.data[k], savedEntities, data);
+      entity.data[k] = retoreEntitiesFromObject(
+        entity.data[k],
+        savedEntities,
+        data,
+      );
     }
   }
 
@@ -63,7 +66,9 @@ const retoreEntitiesFromObject = (item, entitiesObject, data) => {
     }
   } else if (Array.isArray(item)) {
     // Recurse into lower arrays.
-    return item.map(item => retoreEntitiesFromObject(item, entitiesObject, data));
+    return item.map(item =>
+      retoreEntitiesFromObject(item, entitiesObject, data),
+    );
   } else if (item instanceof Object) {
     for (let k in item) {
       if (item.hasOwnProperty(k)) {

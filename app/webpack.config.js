@@ -10,7 +10,7 @@ module.exports = {
     minimizer: [
       new TerserPlugin({
         sourceMap: true,
-      })
+      }),
     ],
   },
   // devtool: devMode && 'source-map',
@@ -18,13 +18,28 @@ module.exports = {
   entry: {
     main: path.resolve(__dirname, 'src', 'index.js'),
     showdown: path.resolve(__dirname, 'src', 'index.showdown.js'),
-    '../ServiceWorker': path.resolve(__dirname, 'src', 'Workers', 'ServiceWorker.js'),
-    'Workers/ResizeImage': path.resolve(__dirname, 'src', 'Workers', 'ResizeImage.js'),
-    'Workers/AESEncryption': path.resolve(__dirname, 'src', 'Workers', 'AESEncryption.js')
+    '../ServiceWorker': path.resolve(
+      __dirname,
+      'src',
+      'Workers',
+      'ServiceWorker.js',
+    ),
+    'Workers/ResizeImage': path.resolve(
+      __dirname,
+      'src',
+      'Workers',
+      'ResizeImage.js',
+    ),
+    'Workers/AESEncryption': path.resolve(
+      __dirname,
+      'src',
+      'Workers',
+      'AESEncryption.js',
+    ),
   },
   output: {
     path: path.resolve(__dirname),
-    filename: 'dist/[name].js'
+    filename: 'dist/[name].js',
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -33,21 +48,31 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env': {
-        'NODE_ENV': devMode || JSON.stringify('production')
-      }
-    })
+        NODE_ENV: devMode || JSON.stringify('production'),
+      },
+    }),
   ],
   resolve: {
-    extensions: ['.wasm', '.mjs', '.js', '.json', '.svelte', '.html', '.css', '.sass', '.scss'],
-    mainFields: ['svelte', 'browser', 'module', 'main']
+    extensions: [
+      '.wasm',
+      '.mjs',
+      '.js',
+      '.json',
+      '.svelte',
+      '.html',
+      '.css',
+      '.sass',
+      '.scss',
+    ],
+    mainFields: ['svelte', 'browser', 'module', 'main'],
   },
   module: {
     rules: [
       {
         test: /\/src\/Services\/Val\/.+\.js$/,
         use: {
-          loader: 'val-loader'
-        }
+          loader: 'val-loader',
+        },
       },
       {
         test: /\.(html|svelte)$/,
@@ -56,16 +81,16 @@ module.exports = {
           options: {
             dev: devMode,
             emitCss: true,
-          }
-        }
+          },
+        },
       },
       {
         test: /\.(sa|sc|c)ss$/,
         use: [
           devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
           'css-loader',
-          'sass-loader'
-        ]
+          'sass-loader',
+        ],
       },
       {
         exclude: /\/node_modules\/localforage\//,
@@ -75,13 +100,16 @@ module.exports = {
           options: {
             presets: ['@babel/preset-env'],
             plugins: [
-              ['@babel/transform-classes', {
-                builtins: ['Error']
-              }]
-            ]
-          }
-        }
-      }
-    ]
-  }
+              [
+                '@babel/transform-classes',
+                {
+                  builtins: ['Error'],
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+  },
 };

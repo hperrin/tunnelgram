@@ -4,7 +4,10 @@
   import PushSubscriptionsList from './PushSubscriptionsList';
 </script>
 
-<div class="h-100 w-100" style="overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;">
+<div
+  class="h-100 w-100"
+  style="overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;">
   <div class="d-flex flex-column align-items-center p-3">
     <div class="d-flex flex-column justify-content-start w-std-page">
       <p>
@@ -18,7 +21,10 @@
         An app push subscription is used to send you message notifications on a
         mobile device through the Tunnelgram app installed from the app store.
       </p>
-      <PushSubscriptionsList entity={AppPushSubscription} name="app" showBrowser={false} />
+      <PushSubscriptionsList
+        entity={AppPushSubscription}
+        name="app"
+        showBrowser={false} />
     </div>
     <div class="d-flex flex-column justify-content-start w-std-page">
       <h3 class="mt-3">Your Web Push Subscriptions</h3>
@@ -27,7 +33,10 @@
         browser, like Chrome on a laptop or if you've installed the website to
         your home screen.
       </p>
-      <PushSubscriptionsList entity={WebPushSubscription} name="web" showBrowser={true} />
+      <PushSubscriptionsList
+        entity={WebPushSubscription}
+        name="web"
+        showBrowser={true} />
     </div>
   </div>
 </div>

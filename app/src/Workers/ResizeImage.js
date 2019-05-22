@@ -5,12 +5,12 @@ let canvas2;
 let img;
 
 onmessage = e => {
-  const {counter, args} = e.data;
+  const { counter, args } = e.data;
   canvas = e.data.canvas;
   canvas2 = e.data.canvas2;
   img = e.data.img;
   const result = resizeImage(...args);
-  postMessage({counter, result});
+  postMessage({ counter, result });
 };
 
 const resizeImage = (type, maxWidth, maxHeight, imgWidth, imgHeight, crop) => {
@@ -52,7 +52,7 @@ const resizeImage = (type, maxWidth, maxHeight, imgWidth, imgHeight, crop) => {
   return {
     data: canvas.transferToImageBitmap(),
     width: destWidth,
-    height: destHeight
+    height: destHeight,
   };
 };
 
@@ -66,7 +66,17 @@ function scale(canvas, canvas2, img, ratio, destWidth, destHeight, x, y) {
   canvas2.width = destWidth;
   canvas2.height = destHeight;
   const ctx2 = canvas2.getContext('2d');
-  ctx2.drawImage(canvas, x * -1, y * -1, destWidth, destHeight, 0, 0, destWidth, destHeight);
+  ctx2.drawImage(
+    canvas,
+    x * -1,
+    y * -1,
+    destWidth,
+    destHeight,
+    0,
+    0,
+    destWidth,
+    destHeight,
+  );
 
   //resize canvas
   canvas.width = destWidth;

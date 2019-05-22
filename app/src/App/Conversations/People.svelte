@@ -2,10 +2,10 @@
   import UserSearchSelector from '../Users/UserSearchSelector';
   import Avatar from '../Users/Avatar';
   import DisplayName from '../Users/DisplayName';
-  import {navigate} from '../../Services/router';
+  import { navigate } from '../../Services/router';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import ErrHandler from '../../ErrHandler';
-  import {conversation, user} from '../../stores';
+  import { conversation, user } from '../../stores';
 
   const CHANNEL_USERS_PAGE_SIZE = 15;
 
@@ -17,10 +17,18 @@
   let channelUsersLoading = false;
   let channelUsersReachedEnd = false;
 
-  $: currentUserIsAdmin = $conversation.data.mode === Conversation.MODE_CHAT || $user.inArray($conversation.data.acFull);
-  $: nonAdminChannelUsers = channelUsers.filter(user => !user.inArray($conversation.data.acFull));
+  $: currentUserIsAdmin =
+    $conversation.data.mode === Conversation.MODE_CHAT ||
+    $user.inArray($conversation.data.acFull);
+  $: nonAdminChannelUsers = channelUsers.filter(
+    user => !user.inArray($conversation.data.acFull),
+  );
 
-  $: if ($conversation && $conversation.containsSleepingReference && !$conversation._tgCalledReadyAll) {
+  $: if (
+    $conversation &&
+    $conversation.containsSleepingReference &&
+    !$conversation._tgCalledReadyAll
+  ) {
     // Ready the conversation's referenced entities.
     $conversation._tgCalledReadyAll = true;
     $conversation.readyAll(1).then(() => {
@@ -39,7 +47,7 @@
     loadMoreChannelUsers();
   }
 
-  async function addUser (user) {
+  async function addUser(user) {
     if ($conversation.data.mode === Conversation.MODE_CHAT) {
       addAcFullUser(user);
     } else {
@@ -57,7 +65,7 @@
     }
   }
 
-  async function removeChannelUser (user) {
+  async function removeChannelUser(user) {
     try {
       removingChannelUser = true;
       await $conversation.removeChannelUser(user);
@@ -68,18 +76,18 @@
     removingChannelUser = false;
   }
 
-  function addAcFullUser (user) {
+  function addAcFullUser(user) {
     addUserError = null;
     addingUser = false;
 
     if ($user.is(user)) {
-      addUserError = 'You\'re already in this conversation.';
+      addUserError = "You're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
 
     if (user.inArray($conversation.data.acFull)) {
-      addUserError = 'They\'re already in this conversation.';
+      addUserError = "They're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
@@ -87,14 +95,20 @@
     $conversation.data.acFull.push(user);
     $conversation = $conversation;
     addingUser = true;
-    $conversation.save().then(() => {
-      userSearchSelector.clear();
-      userSearchSelector.focus();
-    }, ErrHandler).finally(() => addingUser = false);
+    $conversation
+      .save()
+      .then(() => {
+        userSearchSelector.clear();
+        userSearchSelector.focus();
+      }, ErrHandler)
+      .finally(() => (addingUser = false));
   }
 
-  async function loadMoreChannelUsers () {
-    if ($conversation.data.mode === Conversation.MODE_CHAT || channelUsersReachedEnd) {
+  async function loadMoreChannelUsers() {
+    if (
+      $conversation.data.mode === Conversation.MODE_CHAT ||
+      channelUsersReachedEnd
+    ) {
       return;
     }
 
@@ -104,7 +118,7 @@
     try {
       moreUsers = await $conversation.getGroupUsers(
         CHANNEL_USERS_PAGE_SIZE,
-        channelUsers.length
+        channelUsers.length,
       );
     } catch (errObj) {
       ErrHandler(errObj);
@@ -137,28 +151,34 @@
           New members can see all past messages in this channel.
         {/if}
       </p>
-      <UserSearchSelector bind:this={userSearchSelector} className="d-block" disabled={addingUser} on:user-selected={event => addUser(event.detail)} />
+      <UserSearchSelector
+        bind:this={userSearchSelector}
+        className="d-block"
+        disabled={addingUser}
+        on:user-selected={event => addUser(event.detail)} />
       {#if addUserError != null}
         <div class="alert alert-danger mt-3 mb-0" role="alert">
-          {addUserError}
+           {addUserError}
         </div>
       {/if}
     {/if}
     <h3 class="mt-3">
       {#if $conversation.data.mode === Conversation.MODE_CHAT}
         People in this Chat
-      {:else}
-        Channel Admins
-      {/if}
+      {:else}Channel Admins{/if}
     </h3>
     <div class="list-group mt-3 text-body">
       {#each $conversation.data.acFull as curUser (curUser.guid)}
-        <a class="list-group-item d-flex justify-content-between align-items-center" href="#/u/{curUser.data.username}">
+        <a
+          class="list-group-item d-flex justify-content-between
+          align-items-center"
+          href="#/u/{curUser.data.username}">
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
               <Avatar bind:user={curUser} />
             </span>
-            <DisplayName bind:user={curUser} /> ({curUser.data.username})
+            <DisplayName bind:user={curUser} />
+            ({curUser.data.username})
           </span>
           {#if $user.guid === curUser.guid}
             <span>(You)</span>
@@ -170,22 +190,34 @@
       <h3 class="mt-3">Channel Members</h3>
       <div class="list-group mt-3 text-body">
         {#each nonAdminChannelUsers as curUser (curUser.guid)}
-          <span class="list-group-item d-flex justify-content-between align-items-center">
-            <a class="d-flex align-items-center" href="#/u/{curUser.data.username}">
+          <span
+            class="list-group-item d-flex justify-content-between
+            align-items-center">
+            <a
+              class="d-flex align-items-center"
+              href="#/u/{curUser.data.username}">
               <span class="mr-2" style="line-height: 0;">
                 <Avatar bind:user={curUser} />
               </span>
-              <DisplayName bind:user={curUser} /> ({curUser.data.username})
+              <DisplayName bind:user={curUser} />
+              ({curUser.data.username})
             </a>
             {#if $user.guid === curUser.guid}
               <span>(You)</span>
             {:else if currentUserIsAdmin}
               <span>
-                <button class="btn btn-primary btn-sm" disabled={addingUser || removingChannelUser} on:click|preventDefault={() => confirm('Are you sure you want to promote this member to admin?') && addAcFullUser(curUser)}>
+                <button
+                  class="btn btn-primary btn-sm"
+                  disabled={addingUser || removingChannelUser}
+                  on:click|preventDefault={() => confirm('Are you sure you want to promote this member to admin?') && addAcFullUser(curUser)}>
                   Make Admin
                 </button>
-                <button class="btn btn-danger btn-sm" title="Remove user" disabled={removingChannelUser} on:click|preventDefault={() => removeChannelUser(curUser)}>
-                  <i class="fas fa-minus"></i>
+                <button
+                  class="btn btn-danger btn-sm"
+                  title="Remove user"
+                  disabled={removingChannelUser}
+                  on:click|preventDefault={() => removeChannelUser(curUser)}>
+                  <i class="fas fa-minus" />
                 </button>
               </span>
             {/if}
@@ -199,7 +231,13 @@
         <div class="mt-3">One second...</div>
       {/if}
       {#if !channelUsersReachedEnd}
-        <button type="button" class="btn btn-light mt-3 w-100" disabled={channelUsersLoading} on:click={loadMoreChannelUsers}>Show More</button>
+        <button
+          type="button"
+          class="btn btn-light mt-3 w-100"
+          disabled={channelUsersLoading}
+          on:click={loadMoreChannelUsers}>
+          Show More
+        </button>
       {/if}
     {/if}
   </div>

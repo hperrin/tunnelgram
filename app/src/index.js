@@ -1,15 +1,15 @@
 import './Services/XMLHttpRequestWrapper';
 import './setup/icons';
 import './setup/pnotify';
-import {Nymph, PubSub} from 'nymph-client';
-import {User, Group} from 'tilmeld-client';
-import {router} from './Services/router';
+import { Nymph, PubSub } from 'nymph-client';
+import { User, Group } from 'tilmeld-client';
+import { router } from './Services/router';
 import './Services/OfflineServerCallsService';
-import {cache} from './Services/EntityCacheService';
-import {crypt} from './Services/EncryptionService';
-import {storage} from './Services/StorageService';
-import {urlBase64ToUint8Array} from './Services/urlBase64';
-import {VideoService} from './Services/VideoService';
+import { cache } from './Services/EntityCacheService';
+import { crypt } from './Services/EncryptionService';
+import { storage } from './Services/StorageService';
+import { urlBase64ToUint8Array } from './Services/urlBase64';
+import { VideoService } from './Services/VideoService';
 import Conversation from './Entities/Tunnelgram/Conversation';
 import Message from './Entities/Tunnelgram/Message';
 import AppPushSubscription from './Entities/Tunnelgram/AppPushSubscription';
@@ -19,7 +19,7 @@ import Settings from './Entities/Tunnelgram/Settings';
 import Container from './Container';
 import ErrHandler from './ErrHandler';
 
-import {get} from 'svelte/store';
+import { get } from 'svelte/store';
 import * as store from './stores';
 
 import './scss/styles.scss';
@@ -30,14 +30,14 @@ if ('serviceWorker' in navigator) {
   if (navigator.serviceWorker.controller) {
     swRegPromise = navigator.serviceWorker.getRegistration('/');
     swRegPromise.then(reg => {
-      console.log('Service worker has been retrieved for scope: '+ reg.scope);
+      console.log('Service worker has been retrieved for scope: ' + reg.scope);
     });
   } else {
     swRegPromise = navigator.serviceWorker.register('/ServiceWorker.js', {
-      scope: '/'
+      scope: '/',
     });
     swRegPromise.then(reg => {
-      console.log('Service worker has been registered for scope: '+ reg.scope);
+      console.log('Service worker has been registered for scope: ' + reg.scope);
     });
   }
 }
@@ -45,7 +45,7 @@ if ('serviceWorker' in navigator) {
 // This stores the function to set up the Web Push Notification subscription.
 let setupSubscription;
 
-export function refreshAll () {
+export function refreshAll() {
   cache.clear();
 
   const settings = get(store.settings);
@@ -68,10 +68,10 @@ export function refreshAll () {
     conversations[i] = newConv;
   }
   store.conversations.set(conversations);
-};
+}
 
 let forwardCount = 0;
-function navigateToContinueUrl () {
+function navigateToContinueUrl() {
   const route = router.lastRouteResolved();
   if (route && route.url !== '/' && route.url !== '') {
     forwardCount++;
@@ -80,8 +80,8 @@ function navigateToContinueUrl () {
       debugger;
       return;
     }
-    const url = route.url + (route.query !== '' ? '?'+route.query : '');
-    router.navigate('/?continue='+encodeURIComponent(url));
+    const url = route.url + (route.query !== '' ? '?' + route.query : '');
+    router.navigate('/?continue=' + encodeURIComponent(url));
   }
 }
 
@@ -104,7 +104,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       return;
     }
 
-    const guid = (params && params.id) ? parseFloat(params.id) : null;
+    const guid = params && params.id ? parseFloat(params.id) : null;
     const view = (params && params.view) || 'conversation';
     const conversation = get(store.conversation);
     const conversations = get(store.conversations);
@@ -130,27 +130,33 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
     } else {
       store.loadingConversation.set(true);
       crypt.ready.then(() => {
-        Nymph.getEntity({
-          'class': Conversation.class
-        }, {
-          'type': '&',
-          'guid': guid
-        }).then(conv => {
-          store.conversation.set(conv);
-          store.view.set(view);
-          store.convosOut.set(false);
-          store.loadingConversation.set(false);
-        }, err => {
-          ErrHandler(err);
-          store.loadingConversation.set(false);
-          router.navigate('/');
-        });
+        Nymph.getEntity(
+          {
+            class: Conversation.class,
+          },
+          {
+            type: '&',
+            guid: guid,
+          },
+        ).then(
+          conv => {
+            store.conversation.set(conv);
+            store.view.set(view);
+            store.convosOut.set(false);
+            store.loadingConversation.set(false);
+          },
+          err => {
+            ErrHandler(err);
+            store.loadingConversation.set(false);
+            router.navigate('/');
+          },
+        );
       });
     }
   };
 
   const userHandler = params => {
-    const {username} = params;
+    const { username } = params;
     const user = get(store.user);
 
     if (!user) {
@@ -166,17 +172,20 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       store.loadingUser.set(false);
     } else {
       crypt.ready.then(() => {
-        User.byUsername(username).then(viewUser => {
-          store.viewUser.set(viewUser);
-          store.viewUserIsSelf.set(false);
-          store.view.set('user');
-          store.convosOut.set(false);
-          store.loadingUser.set(false);
-        }, err => {
-          ErrHandler(err);
-          store.loadingUser.set(false);
-          router.navigate('/');
-        });
+        User.byUsername(username).then(
+          viewUser => {
+            store.viewUser.set(viewUser);
+            store.viewUserIsSelf.set(false);
+            store.view.set('user');
+            store.convosOut.set(false);
+            store.loadingUser.set(false);
+          },
+          err => {
+            ErrHandler(err);
+            store.loadingUser.set(false);
+            router.navigate('/');
+          },
+        );
       });
     }
   };
@@ -189,39 +198,46 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       } else {
         done();
       }
-    }
+    },
   });
 
-  router.on(() => {
-    store.convosOut.set(true);
-  }).on({
-    'c': {uses: conversationHandler},
-    'c/:id': {uses: conversationHandler},
-    'c/:id/:view': {uses: conversationHandler},
-    'u/:username': {uses: userHandler},
-    'pushSubscriptions': () => {
-      if (!get(store.user)) {
-        return;
-      }
+  router
+    .on(() => {
+      store.convosOut.set(true);
+    })
+    .on({
+      c: { uses: conversationHandler },
+      'c/:id': { uses: conversationHandler },
+      'c/:id/:view': { uses: conversationHandler },
+      'u/:username': { uses: userHandler },
+      pushSubscriptions: () => {
+        if (!get(store.user)) {
+          return;
+        }
 
-      store.view.set('pushSubscriptions');
-      store.convosOut.set(false);
-      store.loadingConversation.set(false);
-      store.loadingUser.set(false);
-    },
-    'pwa-home': () => {
+        store.view.set('pushSubscriptions');
+        store.convosOut.set(false);
+        store.loadingConversation.set(false);
+        store.loadingUser.set(false);
+      },
+      'pwa-home': () => {
+        router.navigate('/');
+      },
+    })
+    .notFound(() => {
       router.navigate('/');
-    }
-  }).notFound(() => {
-    router.navigate('/');
-  }).resolve();
+    })
+    .resolve();
 
   store.conversation.subscribe(conversation => {
     if (conversation && conversation.guid) {
       const conversations = get(store.conversations);
       // Refresh conversations' readlines when current conversation changes.
       for (let i in conversations) {
-        if (conversation === conversations[i] || conversation.is(conversations[i])) {
+        if (
+          conversation === conversations[i] ||
+          conversation.is(conversations[i])
+        ) {
           conversations[i] = conversation;
           store.conversations.set(conversations);
           break;
@@ -240,7 +256,9 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
         // Check for a continue route and navigate to it.
         const route = router.lastRouteResolved();
         if (route) {
-          const queryMatch = route.query.match(/(?:^|&)continue=([^&]+)(?:&|$)/);
+          const queryMatch = route.query.match(
+            /(?:^|&)continue=([^&]+)(?:&|$)/,
+          );
           if (queryMatch) {
             router.navigate(decodeURIComponent(queryMatch[1]));
           }
@@ -276,7 +294,9 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       // Cordova OneSignal Push Subscriptions
 
       // When user consents to notifications, tell OneSignal.
-      store.requestNotificationPermission.set(() => window.plugins.OneSignal.provideUserConsent(true));
+      store.requestNotificationPermission.set(() =>
+        window.plugins.OneSignal.provideUserConsent(true),
+      );
 
       // This won't resolve until the user allows notifications and OneSignal
       // registers the device and returns a player ID. This should only happen
@@ -290,7 +310,7 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
       // exists.)
       const appPushSubscription = new AppPushSubscription();
       appPushSubscription.set({
-        playerId
+        playerId,
       });
       appPushSubscription.save().catch(ErrHandler);
     } else {
@@ -301,7 +321,8 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
 
       // Support for push, notifications, and push payloads.
       const pushSupport = 'PushManager' in window;
-      const notificationSupport = 'showNotification' in ServiceWorkerRegistration.prototype;
+      const notificationSupport =
+        'showNotification' in ServiceWorkerRegistration.prototype;
       // Maybe I'll use these if I can figure out how to get payloads to work.
       // const payloadSupport = 'getKey' in PushSubscription.prototype;
       // const aesgcmSupport = PushManager.supportedContentEncodings.indexOf('aesgcm') > -1;
@@ -319,17 +340,23 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
               if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                   command: 'subscribe',
-                  subscriptionOptions: subscriptionOptions
+                  subscriptionOptions: subscriptionOptions,
                 });
 
                 const messageListenerFunction = event => {
-                  navigator.serviceWorker.removeEventListener('message', messageListenerFunction);
+                  navigator.serviceWorker.removeEventListener(
+                    'message',
+                    messageListenerFunction,
+                  );
                   switch (event.data.command) {
                     case 'subscribe-success':
                       resolve(getSubscription());
                       break;
                     case 'subscribe-failure':
-                      reject('Subscription from worker failed: ' + event.data.message);
+                      reject(
+                        'Subscription from worker failed: ' +
+                          event.data.message,
+                      );
                       break;
                     default:
                       reject('Invalid command: ' + event.data.command);
@@ -337,17 +364,27 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
                   }
                 };
 
-                navigator.serviceWorker.addEventListener('message', messageListenerFunction);
+                navigator.serviceWorker.addEventListener(
+                  'message',
+                  messageListenerFunction,
+                );
               } else {
-                if (subscriptionOptions.hasOwnProperty('applicationServerKey')) {
-                  subscriptionOptions.applicationServerKey = new Uint8Array(subscriptionOptions.applicationServerKey);
+                if (
+                  subscriptionOptions.hasOwnProperty('applicationServerKey')
+                ) {
+                  subscriptionOptions.applicationServerKey = new Uint8Array(
+                    subscriptionOptions.applicationServerKey,
+                  );
                 }
 
-                registration.pushManager.subscribe(subscriptionOptions).then(subscription => {
-                  resolve(subscription);
-                }).catch(error => {
-                  reject('Subscription from self failed: ' + error.message);
-                });
+                registration.pushManager
+                  .subscribe(subscriptionOptions)
+                  .then(subscription => {
+                    resolve(subscription);
+                  })
+                  .catch(error => {
+                    reject('Subscription from self failed: ' + error.message);
+                  });
               }
             });
           };
@@ -359,12 +396,15 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
             store.webPushSubscription.set(subscription);
 
             try {
-              const webPushSubscriptionServerCheck = await Nymph.getEntity({
-                class: WebPushSubscription.class
-              }, {
-                'type': '&',
-                'strict': ['endpoint', subscription.endpoint]
-              });
+              const webPushSubscriptionServerCheck = await Nymph.getEntity(
+                {
+                  class: WebPushSubscription.class,
+                },
+                {
+                  type: '&',
+                  strict: ['endpoint', subscription.endpoint],
+                },
+              );
 
               if (webPushSubscriptionServerCheck != null) {
                 return;
@@ -380,16 +420,18 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
             if (!vapidPublicKey) {
               return;
             }
-            const convertedVapidKey = Array.from(urlBase64ToUint8Array(vapidPublicKey));
+            const convertedVapidKey = Array.from(
+              urlBase64ToUint8Array(vapidPublicKey),
+            );
 
             // Make the subscription.
             try {
               subscription = await subscribeFromWorkerOrSelf({
                 userVisibleOnly: true,
-                applicationServerKey: convertedVapidKey
+                applicationServerKey: convertedVapidKey,
               });
             } catch (e) {
-              console.log('Push subscription failed: '+e);
+              console.log('Push subscription failed: ' + e);
               return;
             }
 
@@ -403,8 +445,8 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
             endpoint: subscriptionData.endpoint,
             keys: {
               p256dh: subscriptionData.keys.p256dh,
-              auth: subscriptionData.keys.auth
-            }
+              auth: subscriptionData.keys.auth,
+            },
           });
           webPushSubscription.save().catch(ErrHandler);
         };
@@ -412,7 +454,9 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
         // Set notification permission asker.
         store.requestNotificationPermission.set(async () => {
           const permissionResult = await new Promise(async resolve => {
-            const promise = Notification.requestPermission(value => resolve(value));
+            const promise = Notification.requestPermission(value =>
+              resolve(value),
+            );
             if (promise) {
               resolve(await promise);
             }
@@ -442,7 +486,6 @@ PubSub.on('disconnect', () => store.disconnected.set(true));
   const app = new Container({
     target: document.querySelector('main'),
     props: {},
-    store
   });
 })();
 

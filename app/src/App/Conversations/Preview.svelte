@@ -1,10 +1,10 @@
 <script>
-  import {onMount, onDestroy} from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import Avatar from '../Users/Avatar';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
-  import {SimpleDateFormatter} from '../../Services/SimpleDateFormatter';
+  import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
   import ErrHandler from '../../ErrHandler';
-  import {settings, user} from '../../stores';
+  import { settings, user } from '../../stores';
 
   export let conversation = new Conversation();
   let unreadCount = 0;
@@ -24,11 +24,11 @@
       users = conversation.data.acFull.filter(u => !$user.is(u));
     }
     let i = 1;
-    while (i**2 < users.length) {
+    while (i ** 2 < users.length) {
       i++;
     }
     const width = Math.floor(60 / i);
-    return {users, width};
+    return { users, width };
   })();
 
   $: if (conversation) {
@@ -38,9 +38,16 @@
     })();
   }
 
-  $: if (conversation && conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+  $: if (
+    conversation &&
+    conversation.containsSleepingReference &&
+    !conversation._tgCalledReadyAll
+  ) {
     // Ready the conversation's referenced entities.
-    if (conversation.containsSleepingReference && !conversation._tgCalledReadyAll) {
+    if (
+      conversation.containsSleepingReference &&
+      !conversation._tgCalledReadyAll
+    ) {
       conversation._tgCalledReadyAll = true;
       conversation.readyAll(1).then(() => {
         conversation.containsSleepingReference = false;
@@ -52,8 +59,14 @@
     }
   }
 
-  $: if (conversation && conversation.data.lastMessage && !conversation.data.lastMessage.cryptReady) {
-    conversation.data.lastMessage.cryptReadyPromise.then(() => conversation = conversation);
+  $: if (
+    conversation &&
+    conversation.data.lastMessage &&
+    !conversation.data.lastMessage.cryptReady
+  ) {
+    conversation.data.lastMessage.cryptReadyPromise.then(
+      () => (conversation = conversation),
+    );
   }
 
   onMount(() => {
@@ -68,9 +81,14 @@
     }
   });
 
-  function updateTime () {
-    modifiedDate = new SimpleDateFormatter(Math.min(conversation.mdate, (+new Date()) / 100)).format('ago', 'short');
-    longModifiedDate = new SimpleDateFormatter(conversation.mdate).format('wymdhms', 'short');
+  function updateTime() {
+    modifiedDate = new SimpleDateFormatter(
+      Math.min(conversation.mdate, +new Date() / 100),
+    ).format('ago', 'short');
+    longModifiedDate = new SimpleDateFormatter(conversation.mdate).format(
+      'wymdhms',
+      'short',
+    );
   }
 </script>
 
@@ -85,15 +103,21 @@
 </style>
 
 <div class="d-flex w-100 justify-content-center align-items-center">
-  <div class="d-flex justify-content-center align-items-center flex-wrap" style="width: 60px; height: 60px;">
+  <div
+    class="d-flex justify-content-center align-items-center flex-wrap"
+    style="width: 60px; height: 60px;">
     {#each avatarUsersAndWidth.users as user (user.guid)}
       <Avatar bind:user size={avatarUsersAndWidth.width} />
     {/each}
   </div>
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
-      <h5 class="mb-0" style="word-break: break-word;">{conversation.getName($settings)}</h5>
-      <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">{modifiedDate}</small>
+      <h5 class="mb-0" style="word-break: break-word;">
+         {conversation.getName($settings)}
+      </h5>
+      <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">
+         {modifiedDate}
+      </small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
       {#if conversation.data.lastMessage}
@@ -109,12 +133,14 @@
           {/if}
         </small>
       {:else}
-        <span>&nbsp;</span>
+        <span style="display: inline-block;" />
       {/if}
       {#if unreadCount === 0}
-        <span>&nbsp;</span>
+        <span style="display: inline-block;" />
       {:else}
-        <span class="badge badge-primary">{unreadCount === true ? 'New' : unreadCount}</span>
+        <span class="badge badge-primary">
+           {unreadCount === true ? 'New' : unreadCount}
+        </span>
       {/if}
     </div>
   </div>

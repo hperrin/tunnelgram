@@ -1,10 +1,10 @@
-import {storage} from './StorageService';
-import {Nymph} from 'nymph-client';
+import { storage } from './StorageService';
+import { Nymph } from 'nymph-client';
 
 class EntityCacheService {
-  constructor () {
+  constructor() {
     this.resolve;
-    this.ready = new Promise(resolve => this.resolve = resolve);
+    this.ready = new Promise(resolve => (this.resolve = resolve));
     this.loadCache().then(() => {
       this.resolve();
       window.setTimeout(this.cleanup(), 5000);
@@ -12,22 +12,25 @@ class EntityCacheService {
     this.pendingCache = {};
   }
 
-  async loadCache () {
+  async loadCache() {
     try {
       this.cache = await storage.getItem('tgEntityCache');
-      if (!this.cache || this.cache.version !== EntityCacheService.CACHE_VERSION) {
-        this.cache = {version: EntityCacheService.CACHE_VERSION};
+      if (
+        !this.cache ||
+        this.cache.version !== EntityCacheService.CACHE_VERSION
+      ) {
+        this.cache = { version: EntityCacheService.CACHE_VERSION };
       }
     } catch (e) {
-      this.cache = {version: EntityCacheService.CACHE_VERSION};
+      this.cache = { version: EntityCacheService.CACHE_VERSION };
     }
   }
 
-  async saveCache () {
+  async saveCache() {
     return await storage.setItem('tgEntityCache', this.cache);
   }
 
-  async getEntityData (guid) {
+  async getEntityData(guid) {
     await this.ready;
 
     if (this.pendingCache.hasOwnProperty(guid)) {
@@ -35,7 +38,7 @@ class EntityCacheService {
     }
 
     if (this.cache.hasOwnProperty(guid)) {
-      if (this.cache[guid].retrieved < (new Date() - this.cache[guid].expiry)) {
+      if (this.cache[guid].retrieved < new Date() - this.cache[guid].expiry) {
         // Retrieved longer ago than the expiry.
         delete this.cache[guid];
         this.saveCache();
@@ -47,7 +50,7 @@ class EntityCacheService {
     return null;
   }
 
-  async setEntityData (guid, data) {
+  async setEntityData(guid, data) {
     // Save the data before awaiting so it doesn't get converted to real
     // entities.
     const saveData = JSON.stringify(data);
@@ -55,7 +58,7 @@ class EntityCacheService {
     await this.ready;
 
     // 10 days is the default expiry.
-    let expiry = 1000*60*60*24*10;
+    let expiry = 1000 * 60 * 60 * 24 * 10;
     const entityClass = Nymph.getEntityClass(data.class);
 
     if (entityClass.CACHE_EXPIRY) {
@@ -65,7 +68,7 @@ class EntityCacheService {
     this.cache[guid] = {
       retrieved: new Date(),
       data: saveData,
-      expiry
+      expiry,
     };
     if (this.pendingCache.hasOwnProperty(guid)) {
       this.pendingCache[guid].resolve(true);
@@ -74,7 +77,7 @@ class EntityCacheService {
     this.saveCache();
   }
 
-  async deleteEntityData (guid) {
+  async deleteEntityData(guid) {
     await this.ready;
 
     delete this.cache[guid];
@@ -82,16 +85,16 @@ class EntityCacheService {
     this.saveCache();
   }
 
-  setPendingData (guid) {
+  setPendingData(guid) {
     let resolve;
-    const promise = new Promise(res => resolve = res);
+    const promise = new Promise(res => (resolve = res));
     promise.resolve = resolve;
     this.pendingCache[guid] = promise;
   }
 
-  cleanup () {
+  cleanup() {
     for (let guid in this.cache) {
-      if (this.cache[guid].retrieved < (new Date() - this.cache[guid].expiry)) {
+      if (this.cache[guid].retrieved < new Date() - this.cache[guid].expiry) {
         // Retrieved longer ago than the expiry.
         delete this.cache[guid];
       }
@@ -99,8 +102,8 @@ class EntityCacheService {
     this.saveCache();
   }
 
-  clear () {
-    this.cache = {version: EntityCacheService.CACHE_VERSION};
+  clear() {
+    this.cache = { version: EntityCacheService.CACHE_VERSION };
     this.pendingCache = {};
     this.saveCache();
   }
@@ -122,16 +125,18 @@ Nymph.getEntityData = async (...args) => {
   //   {'class': this.sleepingReference[2]},
   //   {'type': '&', 'guid': this.sleepingReference[1]}
   // )
-  if (!(
-    args.length === 2 &&
-    Object.keys(args[0]).length === 1 &&
-    args[0].hasOwnProperty('class') &&
-    Object.keys(args[1]).length === 2 &&
-    args[1].hasOwnProperty('type') &&
-    args[1].type === '&' &&
-    args[1].hasOwnProperty('guid') &&
-    typeof args[1].guid === 'number'
-  )) {
+  if (
+    !(
+      args.length === 2 &&
+      Object.keys(args[0]).length === 1 &&
+      args[0].hasOwnProperty('class') &&
+      Object.keys(args[1]).length === 2 &&
+      args[1].hasOwnProperty('type') &&
+      args[1].type === '&' &&
+      args[1].hasOwnProperty('guid') &&
+      typeof args[1].guid === 'number'
+    )
+  ) {
     return await _getEntityData.apply(Nymph, args);
   }
 
@@ -212,4 +217,4 @@ Nymph.getEntities = (...args) => {
   return promise;
 };
 
-export {EntityCacheService, cache};
+export { EntityCacheService, cache };

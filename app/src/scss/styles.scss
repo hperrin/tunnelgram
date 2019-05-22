@@ -1,5 +1,7 @@
 // Prevent pull to refresh
-html, body, main {
+html,
+body,
+main {
   overscroll-behavior: none;
 }
 
@@ -8,17 +10,17 @@ $font-size-base: 1rem;
 
 // Tunnelgram September
 // html {
-$primary:       #284D86;
-$secondary:     #313E50;
-$success:       #46A554;
-$info:          #91B5AA;
-$warning:       #CE9A5B;
-$danger:        #BA4F52;
-$light:         #F7F9F9;
-$dark:          #031926;
+$primary: #284d86;
+$secondary: #313e50;
+$success: #46a554;
+$info: #91b5aa;
+$warning: #ce9a5b;
+$danger: #ba4f52;
+$light: #f7f9f9;
+$dark: #031926;
 
 // Bootstrap
-@import "./bootstrap.scss";
+@import './bootstrap.scss';
 
 // Faded background colors
 .bg-primary-light {

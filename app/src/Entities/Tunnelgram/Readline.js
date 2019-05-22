@@ -1,4 +1,4 @@
-import {Nymph, Entity} from 'nymph-client';
+import { Nymph, Entity } from 'nymph-client';
 
 export class Readline extends Entity {}
 
@@ -7,7 +7,7 @@ export class Readline extends Entity {}
 // The name of the server class
 Readline.class = 'Tunnelgram\\Readline';
 // Cache expiry time. 3 hours.
-Readline.CACHE_EXPIRY = 1000*60*60*3;
+Readline.CACHE_EXPIRY = 1000 * 60 * 60 * 3;
 
 Nymph.setEntityClass(Readline.class, Readline);
 

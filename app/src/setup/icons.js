@@ -58,5 +58,5 @@ fontawesome.library.add(
   fasExclamationCircle,
   fasInfoCircle,
   fasCheckCircle,
-  fasExclamationTriangle
+  fasExclamationTriangle,
 );

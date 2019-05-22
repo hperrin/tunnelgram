@@ -1,13 +1,13 @@
 <script>
-  import {User} from 'tilmeld-client';
+  import { User } from 'tilmeld-client';
   import Login from 'tilmeld-components/src/Login';
   import LoadingIndicator from './App/LoadingIndicator';
   import FrontPage from './App/FrontPage';
   import App from './App/App';
-  import {logout, brand, user, crypt} from './stores';
+  import { logout, brand, user, crypt } from './stores';
 
   const cryptoAvailable = (() => {
-    return !!((window.crypto || window.msCrypto).getRandomValues);
+    return !!(window.crypto || window.msCrypto).getRandomValues;
   })();
   let cryptReady = false;
   let cryptError = null;
@@ -30,19 +30,32 @@
 
 {#if !cryptoAvailable}
   <div class="container">
-    <div class="lead py-3">Your browser doesn't support the Crypto API, and therefore can't do secure encryption. Unfortunately, this means {$brand} will not work on this browser.</div>
-    <div class="lead py-3">You should update your browser to the latest version in order to use {$brand}.</div>
+    <div class="lead py-3">
+      Your browser doesn't support the Crypto API, and therefore can't do secure
+      encryption. Unfortunately, this means {$brand} will not work on this
+      browser.
+    </div>
+    <div class="lead py-3">
+      You should update your browser to the latest version in order to use {$brand}.
+    </div>
   </div>
 {:else}
   <div class="d-flex flex-column flex-grow-1" style="min-height: 100%;">
     {#if $user === false}
-      <div class="d-flex justify-content-center align-items-center flex-grow-1" style="height: 100%;">
-        <div style="background-image: url(images/android-chrome-192x192.png); background-size: cover; position: absolute; width: 120px; height: 120px;"></div>
+      <div
+        class="d-flex justify-content-center align-items-center flex-grow-1"
+        style="height: 100%;">
+        <div
+          style="background-image: url(images/android-chrome-192x192.png);
+          background-size: cover; position: absolute; width: 120px; height:
+          120px;" />
         <LoadingIndicator width="300" height="300" />
       </div>
     {/if}
     {#if $user === null}
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="height: max-content;">
+      <nav
+        class="navbar navbar-expand-lg navbar-dark bg-dark"
+        style="height: max-content;">
         <div class="container-fluid">
           <span class="navbar-brand align-items-center">
             <span>{$brand}</span>
@@ -52,7 +65,9 @@
       <div class="bg-light text-dark">
         <div class="container mt-3">
           <div class="row">
-            <div class="login-container col-md-4 order-md-2 mb-3 d-flex justify-content-center align-items-start flex-grow-1">
+            <div
+              class="login-container col-md-4 order-md-2 mb-3 d-flex
+              justify-content-center align-items-start flex-grow-1">
               <div class="card" style="width: 100%;">
                 <div class="card-body pb-0">
                   <Login
@@ -65,8 +80,7 @@
                     classButton="btn btn-secondary"
                     classButtonToggle="flex-grow-1"
                     classButtonActive="active"
-                    disableActiveButton={false}
-                  />
+                    disableActiveButton={false} />
                 </div>
               </div>
             </div>
@@ -75,30 +89,38 @@
             </div>
           </div>
           <div class="text-center mb-3">
-            &copy; Copyright 2018-2019 Hunter Perrin. All rights reserved.
-            <a href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">Privacy Policy</a>
+            © Copyright 2018-2019 Hunter Perrin. All rights reserved.
+            <a
+              href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">
+              Privacy Policy
+            </a>
           </div>
         </div>
       </div>
     {/if}
     {#if $user && $user.guid}
-      <div class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0" style="height: 0;">
+      <div
+        class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0"
+        style="height: 0;">
         {#if cryptReady}
           <App />
         {:else if cryptError}
-            <div>
-              Error during encryption setup: {cryptError}
-            </div>
-            <div>
-              <a href="javascript:void(0)" on:click={logout}>Log Out</a>
-            </div>
+          <div>Error during encryption setup: {cryptError} </div>
+          <div>
+            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
+          </div>
         {:else}
-          <div class="d-flex flex-column align-items-center justify-content-center" style="height: 200px;">
+          <div
+            class="d-flex flex-column align-items-center justify-content-center"
+            style="height: 200px;">
             <LoadingIndicator width="100" height="100" />
             <h3>Setting up encryption...</h3>
           </div>
           <div class="text-center text-muted">
-            <small>Stuck? <a href="javascript:void(0)" on:click={logout}>Log Out</a></small>
+            <small>
+              Stuck?
+              <a href="javascript:void(0)" on:click={logout}>Log Out</a>
+            </small>
           </div>
         {/if}
       </div>

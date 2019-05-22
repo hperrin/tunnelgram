@@ -1,14 +1,14 @@
-import {User} from 'tilmeld-client';
+import { User } from 'tilmeld-client';
 import PrivateKey from '../Entities/Tunnelwire/PrivateKey';
 import PublicKey from '../Entities/Tunnelwire/PublicKey';
-import {AESEncryptionService} from './AESEncryptionService';
-import {storage} from './StorageService';
+import { AESEncryptionService } from './AESEncryptionService';
+import { storage } from './StorageService';
 import JSEncrypt from 'jsencrypt';
 
-const root = (self || window);
+const root = self || window;
 
 class EncryptionService extends AESEncryptionService {
-  constructor () {
+  constructor() {
     super();
 
     const that = this;
@@ -32,7 +32,7 @@ class EncryptionService extends AESEncryptionService {
     this.aesEncryptionWorkerCounter = 0;
     this.aesEncryptionWorkerCallbacks = {};
     this.aesEncryptionWorker.onmessage = e => {
-      const {counter, result} = e.data;
+      const { counter, result } = e.data;
       this.aesEncryptionWorkerCallbacks[counter](result);
       delete this.aesEncryptionWorkerCallbacks[counter];
     };
@@ -58,7 +58,10 @@ class EncryptionService extends AESEncryptionService {
 
           // Decrypt the private key.
           const encryptedPrivateKey = privateKey.get('text');
-          const privateKeyString = await this.decrypt(encryptedPrivateKey, this.key+this.iv);
+          const privateKeyString = await this.decrypt(
+            encryptedPrivateKey,
+            this.key + this.iv,
+          );
 
           await this.setUserPrivateKey(privateKeyString);
 
@@ -71,28 +74,35 @@ class EncryptionService extends AESEncryptionService {
 
           // Encrypt the private key.
           const privateKeyString = this.userPrivateKey;
-          const encryptedPrivateKeyString = await this.encrypt(privateKeyString, this.key+this.iv);
+          const encryptedPrivateKeyString = await this.encrypt(
+            privateKeyString,
+            this.key + this.iv,
+          );
 
-          privateKey.set({text: encryptedPrivateKeyString});
+          privateKey.set({ text: encryptedPrivateKeyString });
           const privateKeySave = privateKey.save();
 
           // And save the public key.
           const publicKey = new PublicKey();
           const publicKeyString = this.userPublicKey;
-          publicKey.set({text: publicKeyString});
+          publicKey.set({ text: publicKeyString });
           const publicKeySave = publicKey.save();
 
           try {
             await privateKeySave;
             await publicKeySave;
           } catch (e) {
-            this.reject('Error storing encryption keys! You need to manually store them. I will print them in the console.');
+            this.reject(
+              'Error storing encryption keys! You need to manually store them. I will print them in the console.',
+            );
             console.log('Encrypted Private Key: ', encryptedPrivateKeyString);
             console.log('Public Key: ', publicKeyString);
             return;
           }
         } else {
-          this.reject('Server provided inconsistent keys. Please refresh the page.');
+          this.reject(
+            'Server provided inconsistent keys. Please refresh the page.',
+          );
           return;
         }
 
@@ -112,7 +122,9 @@ class EncryptionService extends AESEncryptionService {
     const computeNewPassword = async password => {
       // Generate a hash of the password.
       const passwordBytes = this.encodeUtf8(password);
-      const hashBytes = new Uint8Array(await root.crypto.subtle.digest('SHA-512', passwordBytes));
+      const hashBytes = new Uint8Array(
+        await root.crypto.subtle.digest('SHA-512', passwordBytes),
+      );
       const hash = this.encodeHex(hashBytes);
       // The first 32 bytes (64 hex chars) is used as the key for AES, and not sent to the server.
       this.key = hash.substr(0, 64);
@@ -124,8 +136,8 @@ class EncryptionService extends AESEncryptionService {
 
     // Override register to set up new user encryption.
     const _register = User.prototype.register;
-    User.prototype.register = async function (creds) {
-      const {password} = creds;
+    User.prototype.register = async function(creds) {
+      const { password } = creds;
       creds.password = await computeNewPassword(password);
 
       // Generate a Public/Private key pair.
@@ -140,17 +152,17 @@ class EncryptionService extends AESEncryptionService {
 
     // Override loginUser to retrieve the key and change the password.
     const _loginUser = User.loginUser;
-    User.loginUser = async function (creds) {
-      const {password} = creds;
+    User.loginUser = async function(creds) {
+      const { password } = creds;
       creds.password = await computeNewPassword(password);
 
       return await _loginUser.call(this, creds);
-    }
+    };
 
     // Override changePassword to re-encrypt the key and change the password.
     const _changePassword = User.prototype.changePassword;
-    User.prototype.changePassword = async function (creds) {
-      const {password, oldPassword} = creds;
+    User.prototype.changePassword = async function(creds) {
+      const { password, oldPassword } = creds;
       // Compute the old password first.
       creds.oldPassword = await computeNewPassword(oldPassword);
       // Compute the new password second, so that.key and that.iv are current.
@@ -159,36 +171,41 @@ class EncryptionService extends AESEncryptionService {
       // Re-encrypt the private key.
       const privateKeyString = that.userPrivateKey;
       const privateKeyBytes = this.encodeUtf8(privateKeyString);
-      const encryptedPrivateKeyBytes = await this.encryptBytes(privateKeyBytes, that.key+that.iv);
-      const encryptedPrivateKeyString = this.encodeBase64(encryptedPrivateKeyBytes);
+      const encryptedPrivateKeyBytes = await this.encryptBytes(
+        privateKeyBytes,
+        that.key + that.iv,
+      );
+      const encryptedPrivateKeyString = this.encodeBase64(
+        encryptedPrivateKeyBytes,
+      );
 
       creds.encryptedPrivateKeyString = encryptedPrivateKeyString;
 
       return await _changePassword.call(this, creds);
-    }
+    };
   }
 
-  async setUserPrivateKey (privateKey) {
+  async setUserPrivateKey(privateKey) {
     this.userPrivateKey = privateKey;
     await this.storage.setItem('twPrivateKey', privateKey);
   }
 
-  async setUserPublicKey (publicKey) {
+  async setUserPublicKey(publicKey) {
     this.userPublicKey = publicKey;
     await this.storage.setItem('twPublicKey', publicKey);
   }
 
-  async getUserPrivateKey () {
+  async getUserPrivateKey() {
     this.userPrivateKey = await this.storage.getItem('twPrivateKey');
     return this.userPrivateKey;
   }
 
-  async getUserPublicKey () {
+  async getUserPublicKey() {
     this.userPublicKey = await this.storage.getItem('twPublicKey');
     return this.userPublicKey;
   }
 
-  async unsetUserKeys () {
+  async unsetUserKeys() {
     await this.storage.removeItem('twPrivateKey');
     await this.storage.removeItem('twPublicKey');
     this.decryptor = null;
@@ -202,7 +219,7 @@ class EncryptionService extends AESEncryptionService {
     });
   }
 
-  decryptRSA (text) {
+  decryptRSA(text) {
     if (!this.userPrivateKey) {
       throw new Error('Tried to decrypt RSA without private key!');
     }
@@ -213,7 +230,7 @@ class EncryptionService extends AESEncryptionService {
     return this.decryptor.decrypt(text);
   }
 
-  encryptRSA (text, publicKey) {
+  encryptRSA(text, publicKey) {
     let encryptor;
     if (publicKey == null) {
       publicKey = this.userPublicKey;
@@ -235,12 +252,15 @@ class EncryptionService extends AESEncryptionService {
       publicKey = this.userPublicKeys[guid];
     } else {
       try {
-        const publicKeyEntity = await Nymph.getEntity({
-          'class': PublicKey.class
-        }, {
-          'type': '&',
-          'ref': ['user', guid]
-        });
+        const publicKeyEntity = await Nymph.getEntity(
+          {
+            class: PublicKey.class,
+          },
+          {
+            type: '&',
+            ref: ['user', guid],
+          },
+        );
         publicKey = publicKeyEntity.get('text');
         this.userPublicKeys[guid] = publicKey;
       } catch (e) {
@@ -250,22 +270,25 @@ class EncryptionService extends AESEncryptionService {
     return this.encryptRSA(text, publicKey);
   }
 
-  callAESEncryptionWorker (action, args, transferrables) {
+  callAESEncryptionWorker(action, args, transferrables) {
     this.aesEncryptionWorkerCounter++;
     const counter = this.aesEncryptionWorkerCounter;
 
     let resolve;
-    const promise = new Promise(r => resolve = r);
+    const promise = new Promise(r => (resolve = r));
 
     this.aesEncryptionWorkerCallbacks[counter] = result => {
       resolve(result);
     };
 
-    this.aesEncryptionWorker.postMessage({
-      counter,
-      action,
-      args
-    }, transferrables);
+    this.aesEncryptionWorker.postMessage(
+      {
+        counter,
+        action,
+        args,
+      },
+      transferrables,
+    );
 
     return promise;
   }
@@ -273,4 +296,4 @@ class EncryptionService extends AESEncryptionService {
 
 const crypt = new EncryptionService();
 
-export {EncryptionService, crypt};
+export { EncryptionService, crypt };

@@ -14,5 +14,5 @@ window.tgShowdownConverter = new showdown.Converter({
   simpleLineBreaks: true,
   requireSpaceBeforeHeadingText: true,
   openLinksInNewWindow: true,
-  extensions: [xssFilter]
+  extensions: [xssFilter],
 });

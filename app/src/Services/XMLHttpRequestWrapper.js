@@ -1,24 +1,24 @@
-import {Nymph, PubSub} from 'nymph-client';
-import {urlBase64ToBase64} from './urlBase64';
-import {storage} from './StorageService';
+import { Nymph, PubSub } from 'nymph-client';
+import { urlBase64ToBase64 } from './urlBase64';
+import { storage } from './StorageService';
 
 const _XMLHttpRequest = window.XMLHttpRequest;
 
 export class XMLHttpRequestWrapper {
-  constructor (...args) {
+  constructor(...args) {
     this._xsrfTokenSet = false;
     this.xhr = new _XMLHttpRequest(...args);
     return this;
   }
 
-  static saveToken (token) {
+  static saveToken(token) {
     if (XMLHttpRequestWrapper.tilmeldAuthToken !== token) {
       XMLHttpRequestWrapper.setToken(token);
       storage.setItem('tilmeldAuthToken', token);
     }
   }
 
-  static setToken (token) {
+  static setToken(token) {
     if (token === '' || token == null) {
       XMLHttpRequestWrapper.tilmeldAuthToken = null;
       XMLHttpRequestWrapper.tilmeldXsrfToken = null;
@@ -42,15 +42,17 @@ export class XMLHttpRequestWrapper {
     }
   }
 
-  static async loadTokenFromStorage () {
-    const token = await new Promise(resolve => storage.getItem('tilmeldAuthToken').then(token => resolve(token)));
+  static async loadTokenFromStorage() {
+    const token = await new Promise(resolve =>
+      storage.getItem('tilmeldAuthToken').then(token => resolve(token)),
+    );
     if (token) {
       XMLHttpRequestWrapper.setToken(token);
     }
     XMLHttpRequestWrapper._resolve(true);
   }
 
-  async send (...args) {
+  async send(...args) {
     await XMLHttpRequestWrapper._ready;
 
     const _onreadystatechange = this.onreadystatechange;
@@ -65,9 +67,15 @@ export class XMLHttpRequestWrapper {
     };
 
     if (XMLHttpRequestWrapper.tilmeldAuthToken != null) {
-      this.xhr.setRequestHeader('X-TILMELDAUTH', XMLHttpRequestWrapper.tilmeldAuthToken);
+      this.xhr.setRequestHeader(
+        'X-TILMELDAUTH',
+        XMLHttpRequestWrapper.tilmeldAuthToken,
+      );
       if (!this._xsrfTokenSet) {
-        this.xhr.setRequestHeader('X-Xsrf-Token', XMLHttpRequestWrapper.tilmeldXsrfToken);
+        this.xhr.setRequestHeader(
+          'X-Xsrf-Token',
+          XMLHttpRequestWrapper.tilmeldXsrfToken,
+        );
       }
     }
 
@@ -75,98 +83,98 @@ export class XMLHttpRequestWrapper {
   }
 
   // The rest of the functions/properties.
-  abort (...args) {
+  abort(...args) {
     return this.xhr.abort(...args);
   }
-  getAllResponseHeaders (...args) {
+  getAllResponseHeaders(...args) {
     return this.xhr.getAllResponseHeaders(...args);
   }
-  getResponseHeader (...args) {
+  getResponseHeader(...args) {
     return this.xhr.getResponseHeader(...args);
   }
-  open (...args) {
+  open(...args) {
     return this.xhr.open(...args);
   }
-  overrideMimeType (...args) {
+  overrideMimeType(...args) {
     return this.xhr.overrideMimeType(...args);
   }
-  setRequestHeader (...args) {
+  setRequestHeader(...args) {
     if (args[0] === 'X-Xsrf-Token') {
       this._xsrfTokenSet = true;
     }
     return this.xhr.setRequestHeader(...args);
   }
-  get onreadystatechange () {
+  get onreadystatechange() {
     return this.xhr.onreadystatechange;
   }
-  set onreadystatechange (value) {
-    return this.xhr.onreadystatechange = value;
+  set onreadystatechange(value) {
+    return (this.xhr.onreadystatechange = value);
   }
-  get readyState () {
+  get readyState() {
     return this.xhr.readyState;
   }
-  set readyState (value) {
-    return this.xhr.readyState = value;
+  set readyState(value) {
+    return (this.xhr.readyState = value);
   }
-  get response () {
+  get response() {
     return this.xhr.response;
   }
-  set response (value) {
-    return this.xhr.response = value;
+  set response(value) {
+    return (this.xhr.response = value);
   }
-  get responseText () {
+  get responseText() {
     return this.xhr.responseText;
   }
-  set responseText (value) {
-    return this.xhr.responseText = value;
+  set responseText(value) {
+    return (this.xhr.responseText = value);
   }
-  get responseType () {
+  get responseType() {
     return this.xhr.responseType;
   }
-  set responseType (value) {
-    return this.xhr.responseType = value;
+  set responseType(value) {
+    return (this.xhr.responseType = value);
   }
-  get responseURL () {
+  get responseURL() {
     return this.xhr.responseURL;
   }
-  set responseURL (value) {
-    return this.xhr.responseURL = value;
+  set responseURL(value) {
+    return (this.xhr.responseURL = value);
   }
-  get responseXML () {
+  get responseXML() {
     return this.xhr.responseXML;
   }
-  set responseXML (value) {
-    return this.xhr.responseXML = value;
+  set responseXML(value) {
+    return (this.xhr.responseXML = value);
   }
-  get status () {
+  get status() {
     return this.xhr.status;
   }
-  set status (value) {
-    return this.xhr.status = value;
+  set status(value) {
+    return (this.xhr.status = value);
   }
-  get statusText () {
+  get statusText() {
     return this.xhr.statusText;
   }
-  set statusText (value) {
-    return this.xhr.statusText = value;
+  set statusText(value) {
+    return (this.xhr.statusText = value);
   }
-  get timeout () {
+  get timeout() {
     return this.xhr.timeout;
   }
-  set timeout (value) {
-    return this.xhr.timeout = value;
+  set timeout(value) {
+    return (this.xhr.timeout = value);
   }
-  get upload () {
+  get upload() {
     return this.xhr.upload;
   }
-  set upload (value) {
-    return this.xhr.upload = value;
+  set upload(value) {
+    return (this.xhr.upload = value);
   }
-  get withCredentials () {
+  get withCredentials() {
     return this.xhr.withCredentials;
   }
-  set withCredentials (value) {
-    return this.xhr.withCredentials = value;
+  set withCredentials(value) {
+    return (this.xhr.withCredentials = value);
   }
 }
 
@@ -177,6 +185,8 @@ XMLHttpRequestWrapper.tilmeldAuthToken = null;
 if (window.inCordova) {
   window.XMLHttpRequest = XMLHttpRequestWrapper;
   XMLHttpRequestWrapper._resolve;
-  XMLHttpRequestWrapper._ready = new Promise(res => XMLHttpRequestWrapper._resolve = res);
+  XMLHttpRequestWrapper._ready = new Promise(
+    res => (XMLHttpRequestWrapper._resolve = res),
+  );
   XMLHttpRequestWrapper.loadTokenFromStorage();
 }

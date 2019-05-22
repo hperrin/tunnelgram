@@ -1,16 +1,16 @@
-import {Nymph, Entity} from 'nymph-client';
+import { Nymph, Entity } from 'nymph-client';
 
 export class PrivateKey extends Entity {
   // === Constructor ===
 
-  constructor (id) {
+  constructor(id) {
     super(id);
     this.data.text = '';
   }
 
   // === Static Methods ===
 
-  static current (...args) {
+  static current(...args) {
     return PrivateKey.serverCallStatic('current', args);
   }
 }

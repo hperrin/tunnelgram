@@ -1,7 +1,7 @@
-import {writable} from 'svelte/store';
+import { writable } from 'svelte/store';
 import PNotify from 'pnotify/dist/es/PNotify';
 import Conversation from './Entities/Tunnelgram/Conversation';
-import {crypt as cryptService} from './Services/EncryptionService';
+import { crypt as cryptService } from './Services/EncryptionService';
 
 export * from './userStores';
 
@@ -54,5 +54,8 @@ export const requestPersistentStorage = writable(() => {
 });
 export const beforeInstallPromptEvent = writable(null);
 export const webPushSubscription = writable(null);
-export const inPWA = writable(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true);
+export const inPWA = writable(
+  window.matchMedia('(display-mode: standalone)').matches ||
+    navigator.standalone === true,
+);
 export const inCordova = writable(window.inCordova);

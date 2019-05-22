@@ -1,18 +1,19 @@
 // Based on: https://stackoverflow.com/a/14845805
 export class EditImageService {
-  constructor (img, type) {
+  constructor(img, type) {
     // Create two canvas.
     this.canvas = document.createElement('canvas');
     this.canvasCopy = document.createElement('canvas');
 
-    this.offscreenCanvasSupport = false && !!this.canvas.transferControlToOffscreen;
+    this.offscreenCanvasSupport =
+      false && !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
       this.resizeImageWorker = new Worker('dist/Workers/ResizeImage.js');
       this.resizeImageWorkerCounter = 0;
       this.resizeImageWorkerCallbacks = {};
-      this.resizeImageWorker.onmessage = (e) => {
-        const {counter, result} = e.data;
+      this.resizeImageWorker.onmessage = e => {
+        const { counter, result } = e.data;
         this.resizeImageWorkerCallbacks[counter](result);
         delete this.resizeImageWorkerCallbacks[counter];
       };
@@ -22,21 +23,21 @@ export class EditImageService {
     this.type = type;
   }
 
-  destroy () {
+  destroy() {
     if (this.offscreenCanvasSupport) {
       this.resizeImageWorker.terminate();
     }
   }
 
-  resizeContain (maxWidth, maxHeight) {
+  resizeContain(maxWidth, maxHeight) {
     return this.resize(maxWidth, maxHeight, false);
   }
 
-  resizeCrop (maxWidth, maxHeight) {
+  resizeCrop(maxWidth, maxHeight) {
     return this.resize(maxWidth, maxHeight, true);
   }
 
-  async resize (maxWidth = 150, maxHeight = 150, crop) {
+  async resize(maxWidth = 150, maxHeight = 150, crop) {
     const imgWidth = this.img.videoWidth || this.img.naturalWidth;
     const imgHeight = this.img.videoHeight || this.img.naturalHeight;
 
@@ -44,13 +45,19 @@ export class EditImageService {
       const canvas2 = document.createElement('canvas');
       const offscreenCanvas = this.canvas.transferControlToOffscreen();
       const offscreenCanvas2 = canvas2.transferControlToOffscreen();
-      const bitmap = await window.createImageBitmap(this.img, 0, 0, imgWidth, imgHeight);
+      const bitmap = await window.createImageBitmap(
+        this.img,
+        0,
+        0,
+        imgWidth,
+        imgHeight,
+      );
 
       this.resizeImageWorkerCounter++;
       const counter = this.resizeImageWorkerCounter;
 
       let resolve;
-      const promise = new Promise(r => resolve = r);
+      const promise = new Promise(r => (resolve = r));
 
       this.resizeImageWorkerCallbacks[counter] = result => {
         const canvas = document.createElement('canvas');
@@ -58,17 +65,20 @@ export class EditImageService {
         canvas.width = result.width;
         canvas.height = result.height;
         ctx.drawImage(result.data, 0, 0, result.width, result.height);
-        result.data = canvas.toDataURL(this.type, .95);
+        result.data = canvas.toDataURL(this.type, 0.95);
         resolve(result);
       };
 
-      this.resizeImageWorker.postMessage({
-        counter,
-        args: [this.type, maxWidth, maxHeight, imgWidth, imgHeight, crop],
-        canvas: offscreenCanvas,
-        canvas2: offscreenCanvas2,
-        img: bitmap
-      }, [offscreenCanvas]);
+      this.resizeImageWorker.postMessage(
+        {
+          counter,
+          args: [this.type, maxWidth, maxHeight, imgWidth, imgHeight, crop],
+          canvas: offscreenCanvas,
+          canvas2: offscreenCanvas2,
+          img: bitmap,
+        },
+        [offscreenCanvas],
+      );
 
       return await promise;
     } else {
@@ -108,20 +118,20 @@ export class EditImageService {
       scale(this.canvas, this.img, ratio, destWidth, destHeight, x, y);
 
       return {
-        data: this.canvas.toDataURL(this.type, .95),
+        data: this.canvas.toDataURL(this.type, 0.95),
         width: destWidth,
-        height: destHeight
+        height: destHeight,
       };
     }
   }
 
-  rotate () {
+  rotate() {
     rotate(this.canvas, this.img);
-    return this.canvas.toDataURL(this.type, .95);
+    return this.canvas.toDataURL(this.type, 0.95);
   }
 }
 
-function scale (canvas, img, ratio, destWidth, destHeight, x, y) {
+function scale(canvas, img, ratio, destWidth, destHeight, x, y) {
   const canvas2 = document.createElement('canvas');
 
   const ctx = canvas.getContext('2d');
@@ -133,7 +143,17 @@ function scale (canvas, img, ratio, destWidth, destHeight, x, y) {
   canvas2.width = destWidth;
   canvas2.height = destHeight;
   const ctx2 = canvas2.getContext('2d');
-  ctx2.drawImage(canvas, -x, -y, destWidth, destHeight, 0, 0, destWidth, destHeight);
+  ctx2.drawImage(
+    canvas,
+    -x,
+    -y,
+    destWidth,
+    destHeight,
+    0,
+    0,
+    destWidth,
+    destHeight,
+  );
 
   //resize canvas
   canvas.width = destWidth;
@@ -143,7 +163,7 @@ function scale (canvas, img, ratio, destWidth, destHeight, x, y) {
   ctx.drawImage(canvas2, 0, 0);
 }
 
-function rotate (canvas, img) {
+function rotate(canvas, img) {
   const imgWidth = img.videoWidth || img.naturalWidth;
   const imgHeight = img.videoHeight || img.naturalHeight;
 

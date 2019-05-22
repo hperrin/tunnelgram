@@ -1,6 +1,6 @@
-import {tick} from 'svelte';
-import {writable, get} from 'svelte/store';
-import {User} from 'tilmeld-client';
+import { tick } from 'svelte';
+import { writable, get } from 'svelte/store';
+import { User } from 'tilmeld-client';
 import ErrHandler from './ErrHandler';
 
 let ready;
@@ -8,7 +8,7 @@ let ready;
 export const user = writable(false);
 export const userAvatar = writable(null);
 export const userIsTilmeldAdmin = writable(false);
-export const userReadyPromise = new Promise(resolve => ready = resolve);
+export const userReadyPromise = new Promise(resolve => (ready = resolve));
 
 let subscription;
 
@@ -22,7 +22,7 @@ User.current().then(userValue => {
   if (userValue) {
     subscription = userValue.subscribe(userValue => {
       user.set(userValue);
-    })
+    });
   }
   ready();
 }, ErrHandler);
@@ -36,7 +36,7 @@ User.on('login', userValue => {
   // PubSub subscription.
   subscription = userValue.subscribe(userValue => {
     user.set(userValue);
-  })
+  });
 });
 User.on('logout', async () => {
   // Svelte freaks out if $user isn't available while it's destroying everything.
@@ -64,13 +64,13 @@ user.subscribe(userValue => {
       });
     }
   } else {
-    userAvatar.set(null)
+    userAvatar.set(null);
     userIsTilmeldAdmin.set(false);
   }
   previousUserValue = userValue;
 });
 
-export function logout () {
+export function logout() {
   if (get(user)) {
     get(user).logout();
   }

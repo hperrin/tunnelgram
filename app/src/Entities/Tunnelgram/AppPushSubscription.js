@@ -1,9 +1,9 @@
-import {Nymph, Entity} from 'nymph-client';
+import { Nymph, Entity } from 'nymph-client';
 
 export class AppPushSubscription extends Entity {
   // === Constructor ===
 
-  constructor (id) {
+  constructor(id) {
     super(id);
     this.data.playerId = '';
   }

@@ -1,126 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>Tunnelgram</title>
-  <meta charset="utf-8" />
-  <meta name="description" content="Easy, secure messenger. Encrypted messaging on all your devices." />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <head>
+    <title>Tunnelgram</title>
+    <meta charset="utf-8" />
+    <meta
+      name="description"
+      content="Easy, secure messenger. Encrypted messaging on all your devices."
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
 
-  <!-- PWA Stuff -->
-  <link rel="manifest" href="/site.webmanifest?v=9BPPr7gv28" />
-  <link rel="fluid-icon" href="/images/android-chrome-512x512.png?v=9BPPr7gv28" title="Tunnelgram" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=9BPPr7gv28" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=9BPPr7gv28" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=9BPPr7gv28" />
-  <link rel="mask-icon" href="/images/safari-pinned-tab.svg?v=9BPPr7gv28" color="#284d86" />
-  <link rel="shortcut icon" href="/favicon.ico?v=9BPPr7gv28" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Tunnelgram" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-transparent" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="application-name" content="Tunnelgram" />
-  <meta name="msapplication-TileColor" content="#284d86" />
-  <meta name="msapplication-config" content="/images/browserconfig.xml?v=9BPPr7gv28" />
-  <meta name="msapplication-navbutton-color" content="#031926" />
-  <meta name="theme-color" content="#031926" />
+    <!-- PWA Stuff -->
+    <link rel="manifest" href="/site.webmanifest?v=9BPPr7gv28" />
+    <link
+      rel="fluid-icon"
+      href="/images/android-chrome-512x512.png?v=9BPPr7gv28"
+      title="Tunnelgram"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/images/favicon-32x32.png?v=9BPPr7gv28"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/images/favicon-16x16.png?v=9BPPr7gv28"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png?v=9BPPr7gv28"
+    />
+    <link
+      rel="mask-icon"
+      href="/images/safari-pinned-tab.svg?v=9BPPr7gv28"
+      color="#284d86"
+    />
+    <link rel="shortcut icon" href="/favicon.ico?v=9BPPr7gv28" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Tunnelgram" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-transparent"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Tunnelgram" />
+    <meta name="msapplication-TileColor" content="#284d86" />
+    <meta
+      name="msapplication-config"
+      content="/images/browserconfig.xml?v=9BPPr7gv28"
+    />
+    <meta name="msapplication-navbutton-color" content="#031926" />
+    <meta name="theme-color" content="#031926" />
 
-  <!-- Open Graph -->
-  <meta property="og:site_name" content="Tunnelgram" />
-  <meta property="og:title" content="Tunnelgram Messenger" />
-  <meta property="og:url" content="https://tunnelgram.com" />
-  <meta property="og:description" content="Easy, secure messenger. Encrypted messaging on all your devices." />
-  <meta property="og:image" content="https://tunnelgram.com/og-image.png?v=9BPPr7gv28" />
-  <meta property="og:image:type" content="image/png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="676" />
+    <!-- Open Graph -->
+    <meta property="og:site_name" content="Tunnelgram" />
+    <meta property="og:title" content="Tunnelgram Messenger" />
+    <meta property="og:url" content="https://tunnelgram.com" />
+    <meta
+      property="og:description"
+      content="Easy, secure messenger. Encrypted messaging on all your devices."
+    />
+    <meta
+      property="og:image"
+      content="https://tunnelgram.com/og-image.png?v=9BPPr7gv28"
+    />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="676" />
 
-  <!-- Nymph Config -->
-  <script type="text/javascript">
-    (function(){
-      var s = document.createElement("script"); s.setAttribute("src", "https://www.promisejs.org/polyfills/promise-5.0.0.min.js");
-      (typeof Promise !== "undefined" && typeof Promise.all === "function") || document.getElementsByTagName('head')[0].appendChild(s);
-    })();
-    (function(){
-      var s = document.createElement("script"); s.setAttribute("src", "https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.4/fetch.min.js");
-      (typeof fetch !== "undefined") || document.getElementsByTagName('head')[0].appendChild(s);
-    })();
-    NymphOptions = {
-      restURL: '/rest.php',
-      pubsubURL: window.location.hostname === 'tunnelgram.com' ? 'wss://pubsub.tunnelgram.com' : 'ws://'+window.location.hostname+':8081'
-    };
-  </script>
+    <!-- Nymph Config -->
+    <script type="text/javascript">
+      (function() {
+        var s = document.createElement('script');
+        s.setAttribute(
+          'src',
+          'https://www.promisejs.org/polyfills/promise-5.0.0.min.js',
+        );
+        (typeof Promise !== 'undefined' && typeof Promise.all === 'function') ||
+          document.getElementsByTagName('head')[0].appendChild(s);
+      })();
+      (function() {
+        var s = document.createElement('script');
+        s.setAttribute(
+          'src',
+          'https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.4/fetch.min.js',
+        );
+        typeof fetch !== 'undefined' ||
+          document.getElementsByTagName('head')[0].appendChild(s);
+      })();
+      NymphOptions = {
+        restURL: '/rest.php',
+        pubsubURL:
+          window.location.hostname === 'tunnelgram.com'
+            ? 'wss://pubsub.tunnelgram.com'
+            : 'ws://' + window.location.hostname + ':8081',
+      };
+    </script>
 
-  <!-- DNS Prefetch -->
-  <link rel="dns-prefetch" href="https://tunnelgram.blob.core.windows.net" />
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://tunnelgram.blob.core.windows.net" />
 
-  <!-- Bundled Styles -->
-  <link rel="stylesheet" href="/dist/main.css" />
-  <link rel="preload" href="/node_modules/pform/css/pform.css" as="style" />
-  <link rel="preload" href="/node_modules/pform/css/pform-bootstrap.css" as="style" />
-  <link rel="preload" href="/node_modules/github-markdown-css/github-markdown.css" as="style" />
-  <link rel="preload" href="/node_modules/@fortawesome/fontawesome/styles.css" as="style" />
-  <link rel="preload" href="/node_modules/photoswipe/dist/photoswipe.css" as="style" />
-  <link rel="preload" href="/node_modules/photoswipe/dist/default-skin/default-skin.css" as="style" />
+    <!-- Bundled Styles -->
+    <link rel="stylesheet" href="/dist/main.css" />
+    <link rel="preload" href="/node_modules/pform/css/pform.css" as="style" />
+    <link
+      rel="preload"
+      href="/node_modules/pform/css/pform-bootstrap.css"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="/node_modules/github-markdown-css/github-markdown.css"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="/node_modules/@fortawesome/fontawesome/styles.css"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="/node_modules/photoswipe/dist/photoswipe.css"
+      as="style"
+    />
+    <link
+      rel="preload"
+      href="/node_modules/photoswipe/dist/default-skin/default-skin.css"
+      as="style"
+    />
 
-  <style type="text/css">
-    html, body {
-      margin: 0;
-      padding: 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      overscroll-behavior: none;
-      -webkit-transform: translate3d(0,0,0);
-    }
-    html, body, div.markdown-body {
-      font-family: sans-serif;
-    }
-  </style>
-</head>
-<body style="background-color: #031926; color: #fff;">
-  <div id="initialLoader" style="display: flex; justify-content: center; align-items: center; position: absolute; width: 100%; height: 100%;">
-    <div style="background-image: url('images/android-chrome-192x192.png'); background-size: cover; width: 120px; height: 120px;"></div>
-    <svg class="lds-dual-ring" width="260px" height="260px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="position: absolute; background: none;">
-      <circle cx="50" cy="50" fill="none" stroke-linecap="round" r="48" stroke-width="4" stroke="#337ab7" stroke-dasharray="75.398 75.398" transform="rotate(99 50 50)">
-        <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="2s" begin="0s" repeatCount="indefinite"></animateTransform>
-      </circle>
-    </svg>
-  </div>
-  <main class="d-flex flex-column" style="min-height: 100%;"></main>
-  <!-- Additional Stylesheets (deferred) -->
-  <script type="text/javascript">
-    (function() {
-      function include(href) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        link.type = 'text/css';
-        var prev = document.getElementsByTagName('link')[0];
-        prev.parentNode.insertBefore(link, prev);
+    <style type="text/css">
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        overscroll-behavior: none;
+        -webkit-transform: translate3d(0, 0, 0);
       }
-      // PForm
-      include('/node_modules/pform/css/pform.css');
-      include('/node_modules/pform/css/pform-bootstrap.css');
-      // Markdown GitHub Style CSS
-      include('/node_modules/github-markdown-css/github-markdown.css');
-      // Font Awesome
-      include('/node_modules/@fortawesome/fontawesome/styles.css');
-      // PhotoSwipe
-      include('/node_modules/photoswipe/dist/photoswipe.css');
-      include('/node_modules/photoswipe/dist/default-skin/default-skin.css');
-    })();
-  </script>
-  <!-- Bundled JS -->
-  <script src="/dist/main.js"></script>
-  <script src="/dist/showdown.js"></script>
-  <noscript>
-    Looks like you don't have JavaScript enabled. I like you. You care about
-    security and privacy. Unfortunately, the way Tunnelgram works requires
-    JavaScript. You'll have to turn it back on in order to use Tunnelgram.
-  </noscript>
-</body>
+      html,
+      body,
+      div.markdown-body {
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body style="background-color: #031926; color: #fff;">
+    <div
+      id="initialLoader"
+      style="display: flex; justify-content: center; align-items: center; position: absolute; width: 100%; height: 100%;"
+    >
+      <div
+        style="background-image: url('images/android-chrome-192x192.png'); background-size: cover; width: 120px; height: 120px;"
+      ></div>
+      <svg
+        class="lds-dual-ring"
+        width="260px"
+        height="260px"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid"
+        style="position: absolute; background: none;"
+      >
+        <circle
+          cx="50"
+          cy="50"
+          fill="none"
+          stroke-linecap="round"
+          r="48"
+          stroke-width="4"
+          stroke="#337ab7"
+          stroke-dasharray="75.398 75.398"
+          transform="rotate(99 50 50)"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            calcMode="linear"
+            values="0 50 50;360 50 50"
+            keyTimes="0;1"
+            dur="2s"
+            begin="0s"
+            repeatCount="indefinite"
+          ></animateTransform>
+        </circle>
+      </svg>
+    </div>
+    <main class="d-flex flex-column" style="min-height: 100%;"></main>
+    <!-- Additional Stylesheets (deferred) -->
+    <script type="text/javascript">
+      (function() {
+        function include(href) {
+          var link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          link.type = 'text/css';
+          var prev = document.getElementsByTagName('link')[0];
+          prev.parentNode.insertBefore(link, prev);
+        }
+        // PForm
+        include('/node_modules/pform/css/pform.css');
+        include('/node_modules/pform/css/pform-bootstrap.css');
+        // Markdown GitHub Style CSS
+        include('/node_modules/github-markdown-css/github-markdown.css');
+        // Font Awesome
+        include('/node_modules/@fortawesome/fontawesome/styles.css');
+        // PhotoSwipe
+        include('/node_modules/photoswipe/dist/photoswipe.css');
+        include('/node_modules/photoswipe/dist/default-skin/default-skin.css');
+      })();
+    </script>
+    <!-- Bundled JS -->
+    <script src="/dist/main.js"></script>
+    <script src="/dist/showdown.js"></script>
+    <noscript>
+      Looks like you don't have JavaScript enabled. I like you. You care about
+      security and privacy. Unfortunately, the way Tunnelgram works requires
+      JavaScript. You'll have to turn it back on in order to use Tunnelgram.
+    </noscript>
+  </body>
 </html>

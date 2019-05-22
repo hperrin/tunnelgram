@@ -1,7 +1,7 @@
 <script>
-  import {navigate} from '../../Services/router';
+  import { navigate } from '../../Services/router';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
-  import {conversation, user} from '../../stores';
+  import { conversation, user } from '../../stores';
 
   let name = '';
   let openJoining = false;
@@ -9,7 +9,9 @@
   let confirmLeave = false;
   let leavingConversation = false;
 
-  $: currentUserIsAdmin = $conversation.data.mode === Conversation.MODE_CHAT || $user.inArray($conversation.data.acFull);
+  $: currentUserIsAdmin =
+    $conversation.data.mode === Conversation.MODE_CHAT ||
+    $user.inArray($conversation.data.acFull);
 
   let previousConversation = null;
   $: if (previousConversation !== $conversation) {
@@ -18,9 +20,9 @@
       openJoining = $conversation.data.openJoining;
     }
     previousConversation = $conversation;
-  };
+  }
 
-  function save () {
+  function save() {
     if (name === '') {
       $conversation.decrypted.name = null;
     } else {
@@ -33,18 +35,18 @@
     $conversation = $conversation;
   }
 
-  async function clearReadline () {
+  async function clearReadline() {
     clearingReadline = true;
     await $conversation.clearReadline();
     $conversation = $conversation;
     clearingReadline = false;
   }
 
-  function showConfirmLeave () {
+  function showConfirmLeave() {
     confirmLeave = true;
   }
 
-  function leave () {
+  function leave() {
     leavingConversation = true;
     navigate('/c');
     $conversation.leave();
@@ -52,20 +54,36 @@
 </script>
 
 <div class="d-flex flex-column align-items-center p-3">
-  <form class="d-flex flex-column justify-content-start w-std-page" on:submit|preventDefault={save}>
-    <h3 class="mt-3">{Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings</h3>
+  <form
+    class="d-flex flex-column justify-content-start w-std-page"
+    on:submit|preventDefault={save}>
+    <h3 class="mt-3">
+       {Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings
+    </h3>
     {#if currentUserIsAdmin}
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" class="form-control" bind:value={name} id="name" aria-describedby="nameHelp" placeholder="Name">
-        <small id="nameHelp" class="form-text text-muted">Visible to everyone. Leave blank to use auto-generated name based on participants.</small>
+        <input
+          type="text"
+          class="form-control"
+          bind:value={name}
+          id="name"
+          aria-describedby="nameHelp"
+          placeholder="Name" />
+        <small id="nameHelp" class="form-text text-muted">
+          Visible to everyone. Leave blank to use auto-generated name based on
+          participants.
+        </small>
       </div>
       {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
         <div class="form-group">
           <label for="openJoining">Open Joining</label>
           <div>
             <label>
-              <input type="checkbox" bind:checked={openJoining} id="openJoining">
+              <input
+                type="checkbox"
+                bind:checked={openJoining}
+                id="openJoining" />
               Allow anyone to join and send messages.
             </label>
           </div>
@@ -78,10 +96,16 @@
     <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
       <div class="alert alert-info">
         If you want to start fresh, you can clear your readline and notification
-        settings. Try this if you keep getting notified of new messages here, even
-        though you've seen them all.
+        settings. Try this if you keep getting notified of new messages here,
+        even though you've seen them all.
       </div>
-      <button type="button" class="btn btn-info" on:click={clearReadline} disabled={clearingReadline}>Clear my Readline/Notification Settings</button>
+      <button
+        type="button"
+        class="btn btn-info"
+        on:click={clearReadline}
+        disabled={clearingReadline}>
+        Clear my Readline/Notification Settings
+      </button>
     </div>
     <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
       {#if !confirmLeave}
@@ -96,12 +120,22 @@
             permanently deleted.
           </div>
         {/if}
-        <button type="button" class="btn btn-danger" on:click={showConfirmLeave} disabled={leavingConversation}>Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
+        <button
+          type="button"
+          class="btn btn-danger"
+          on:click={showConfirmLeave}
+          disabled={leavingConversation}>
+          Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
+        </button>
       {:else}
-        <div class="alert alert-danger">
-          Are you sure you want to leave?
-        </div>
-        <button type="button" class="btn btn-danger" on:click={leave} disabled={leavingConversation}>Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}</button>
+        <div class="alert alert-danger">Are you sure you want to leave?</div>
+        <button
+          type="button"
+          class="btn btn-danger"
+          on:click={leave}
+          disabled={leavingConversation}>
+          Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
+        </button>
       {/if}
     </div>
   {/if}
