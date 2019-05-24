@@ -15,8 +15,8 @@ class PublicKey extends \Nymph\Entity {
   public function __construct($id = 0) {
     $this->text = '';
     $this->acUser = \Tilmeld\Tilmeld::FULL_ACCESS;
-    $this->acGroup = \Tilmeld\Tilmeld::FULL_ACCESS;
-    $this->acOther = \Tilmeld\Tilmeld::FULL_ACCESS;
+    $this->acGroup = \Tilmeld\Tilmeld::READ_ACCESS;
+    $this->acOther = \Tilmeld\Tilmeld::READ_ACCESS;
     parent::__construct($id);
   }
 
