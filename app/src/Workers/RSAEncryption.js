@@ -1,13 +1,14 @@
-import { AESEncryptionService } from '../Services/AESEncryptionService';
+import './makeWindowCryptoAvailable';
+import { RSAEncryptionService } from '../Services/RSAEncryptionService';
 
-const crypt = new AESEncryptionService();
+const crypt = new RSAEncryptionService();
 
-onmessage = async e => {
+onmessage = e => {
   const { counter, action, args } = e.data;
   if (!(action in crypt)) {
     return;
   }
-  let result = await crypt[action](...args);
+  let result = crypt[action](...args);
   let transferrables;
   if (result instanceof Uint8Array) {
     transferrables = [result.buffer];

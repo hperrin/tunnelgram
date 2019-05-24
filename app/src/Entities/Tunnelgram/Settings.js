@@ -35,7 +35,7 @@ export class Settings extends Entity {
     this.cryptReadyPromise = (async () => {
       // Decrypt the nicknames.
       if (currentUser && this.data.key) {
-        const key = crypt.decryptRSA(this.data.key);
+        const key = await crypt.decryptRSA(this.data.key);
         for (let id in this.data.nicknames) {
           this.decrypted.nicknames[id] = await crypt.decrypt(
             this.data.nicknames[id],

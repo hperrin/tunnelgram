@@ -36,6 +36,12 @@ module.exports = {
       'Workers',
       'AESEncryption.js',
     ),
+    'Workers/RSAEncryption': path.resolve(
+      __dirname,
+      'src',
+      'Workers',
+      'RSAEncryption.js',
+    ),
   },
   output: {
     path: path.resolve(__dirname),

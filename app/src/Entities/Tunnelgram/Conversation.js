@@ -75,9 +75,8 @@ export class Conversation extends Entity {
           this.data.keys &&
           currentUser.guid in this.data.keys
         ) {
-          const key = crypt
-            .decryptRSA(this.data.keys[currentUser.guid])
-            .slice(0, 96);
+          const decryptedKey = await crypt.decryptRSA(this.data.keys[currentUser.guid]);
+          const key = decryptedKey.slice(0, 96);
           decrypt = input => crypt.decrypt(input, key);
         }
 
@@ -117,7 +116,8 @@ export class Conversation extends Entity {
         this.data.mode === Conversation.MODE_CHANNEL_PRIVATE
       ) {
         if (this.data.keys && currentUser.guid in this.data.keys) {
-          key = crypt.decryptRSA(this.data.keys[currentUser.guid]).slice(0, 96);
+          const decryptedKey = await crypt.decryptRSA(this.data.keys[currentUser.guid]);
+          key = decryptedKey.slice(0, 96);
         } else {
           this.data.keys = {};
           key = crypt.generateKey();
@@ -246,9 +246,8 @@ export class Conversation extends Entity {
     let userKey = null;
 
     if (this.data.mode === Conversation.MODE_CHANNEL_PRIVATE) {
-      const key = crypt
-        .decryptRSA(this.data.keys[currentUser.guid])
-        .slice(0, 96);
+      const decryptedKey = await crypt.decryptRSA(this.data.keys[currentUser.guid]);
+      const key = decryptedKey.slice(0, 96);
       const pad = crypt.generatePad();
       userKey = await crypt.encryptRSAForUser(key + pad, user);
     }

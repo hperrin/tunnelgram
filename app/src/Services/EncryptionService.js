@@ -3,7 +3,6 @@ import PrivateKey from '../Entities/Tunnelwire/PrivateKey';
 import PublicKey from '../Entities/Tunnelwire/PublicKey';
 import { AESEncryptionService } from './AESEncryptionService';
 import { storage } from './StorageService';
-import JSEncrypt from 'jsencrypt';
 
 const root = self || window;
 
@@ -13,10 +12,8 @@ class EncryptionService extends AESEncryptionService {
 
     const that = this;
     this.storage = storage;
-    this.decryptor = null;
     this.key = null;
     this.iv = null;
-    this.encryptors = {};
     this.userPublicKeys = {};
     this.userPrivateKey = null;
     this.userPublicKey = null;
@@ -27,14 +24,16 @@ class EncryptionService extends AESEncryptionService {
       this.reject = reject;
     });
 
-    // Async encryption/decryption is provided through a service worker.
-    this.aesEncryptionWorker = new Worker('dist/Workers/AESEncryption.js');
-    this.aesEncryptionWorkerCounter = 0;
-    this.aesEncryptionWorkerCallbacks = {};
-    this.aesEncryptionWorker.onmessage = e => {
+    // Async encryption/decryption for PKCS1 is provided through a web worker.
+    this.rsaEncryptionWorker = {
+      worker: new Worker('dist/Workers/RSAEncryption.js'),
+      counter: 0,
+      callbacks: {},
+    };
+    this.rsaEncryptionWorker.worker.onmessage = e => {
       const { counter, result } = e.data;
-      this.aesEncryptionWorkerCallbacks[counter](result);
-      delete this.aesEncryptionWorkerCallbacks[counter];
+      this.rsaEncryptionWorker.callbacks[counter](result);
+      delete this.rsaEncryptionWorker.callbacks[counter];
     };
 
     (async () => {
@@ -208,7 +207,7 @@ class EncryptionService extends AESEncryptionService {
   async unsetUserKeys() {
     await this.storage.removeItem('twPrivateKey');
     await this.storage.removeItem('twPublicKey');
-    this.decryptor = null;
+    await this.callEncryptionWorker(this.rsaEncryptionWorker, 'resetRsa');
     this.key = null;
     this.iv = null;
     this.resolve = null;
@@ -219,30 +218,26 @@ class EncryptionService extends AESEncryptionService {
     });
   }
 
-  decryptRSA(text) {
-    if (!this.userPrivateKey) {
-      throw new Error('Tried to decrypt RSA without private key!');
+  async decryptRSA(text, privateKey) {
+    if (privateKey == null) {
+      if (!this.userPrivateKey) {
+        throw new Error('Tried to decrypt RSA without private key!');
+      }
+      privateKey = this.userPrivateKey;
     }
-    if (!this.decryptor) {
-      this.decryptor = new JSEncrypt();
-      this.decryptor.setPrivateKey(this.userPrivateKey);
-    }
-    return this.decryptor.decrypt(text);
+    const result = await this.callEncryptionWorker(this.rsaEncryptionWorker, 'decryptRSA', [text, privateKey]);
+    return result;
   }
 
-  encryptRSA(text, publicKey) {
-    let encryptor;
+  async encryptRSA(text, publicKey) {
     if (publicKey == null) {
+      if (!this.userPublicKey) {
+        throw new Error('Tried to encrypt RSA without public key!');
+      }
       publicKey = this.userPublicKey;
     }
-    if (this.encryptors.hasOwnProperty(publicKey)) {
-      encryptor = this.encryptors[publicKey];
-    } else {
-      encryptor = new JSEncrypt();
-      encryptor.setPublicKey(publicKey);
-      this.encryptors[publicKey] = encryptor;
-    }
-    return encryptor.encrypt(text);
+    const result = await this.callEncryptionWorker(this.rsaEncryptionWorker, 'encryptRSA', [text, publicKey]);
+    return result;
   }
 
   async encryptRSAForUser(text, userOrGuid) {
@@ -267,21 +262,20 @@ class EncryptionService extends AESEncryptionService {
         return null;
       }
     }
-    return this.encryptRSA(text, publicKey);
+    return await this.encryptRSA(text, publicKey);
   }
 
-  callAESEncryptionWorker(action, args, transferrables) {
-    this.aesEncryptionWorkerCounter++;
-    const counter = this.aesEncryptionWorkerCounter;
+  callEncryptionWorker(worker, action, args, transferrables) {
+    const counter = worker.counter++;
 
     let resolve;
     const promise = new Promise(r => (resolve = r));
 
-    this.aesEncryptionWorkerCallbacks[counter] = result => {
+    worker.callbacks[counter] = result => {
       resolve(result);
     };
 
-    this.aesEncryptionWorker.postMessage(
+    worker.worker.postMessage(
       {
         counter,
         action,
