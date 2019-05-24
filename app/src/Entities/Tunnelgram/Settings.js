@@ -9,8 +9,6 @@ User.on('login', user => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
 export class Settings extends Entity {
-  // === Constructor ===
-
   constructor(id) {
     super(id);
     this.decrypted = {
@@ -22,12 +20,11 @@ export class Settings extends Entity {
     this.cryptReadyPromise = Promise.resolve(true);
   }
 
-  // === Instance Methods ===
-
   init(entityData) {
     super.init(entityData);
 
     if (entityData == null) {
+      this.cryptReady = true;
       return this;
     }
 
@@ -69,8 +66,6 @@ export class Settings extends Entity {
     return await super.save();
   }
 
-  // === Static Methods ===
-
   static async current() {
     if (!currentUser) {
       return new Settings();
@@ -96,8 +91,6 @@ export class Settings extends Entity {
     return existing || new Settings();
   }
 }
-
-// === Static Properties ===
 
 // The name of the server class
 Settings.class = 'Tunnelgram\\Settings';

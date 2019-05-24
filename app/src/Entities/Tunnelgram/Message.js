@@ -11,8 +11,6 @@ User.on('login', user => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
 export class Message extends Entity {
-  // === Constructor ===
-
   constructor(id) {
     super(id);
     this.containsSleepingReference = false;
@@ -34,8 +32,6 @@ export class Message extends Entity {
     this.cryptReady = true;
     this.cryptReadyPromise = Promise.resolve(true);
   }
-
-  // === Instance Methods ===
 
   init(entityData, ...args) {
     const savedEntities = saveEntities(this);
@@ -352,8 +348,6 @@ export class Message extends Entity {
     return this.savePromise;
   }
 }
-
-// === Static Properties ===
 
 // The name of the server class
 Message.class = 'Tunnelgram\\Message';
