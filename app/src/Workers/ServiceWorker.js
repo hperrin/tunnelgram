@@ -56,18 +56,13 @@ self.addEventListener('fetch', event => {
   }
 
   function fetchAndAddToCache(cacheType, cache, request) {
-    return fetch(request).then(
-      response => {
-        console.log(
-          '[' + cacheType + ' Cache] add item to offline: ' + response.url,
-        );
-        cache.put(request, response.clone());
-        return response;
-      },
-      () => {
-        // Ignore errors.
-      },
-    );
+    return fetch(request).then(response => {
+      console.log(
+        '[' + cacheType + ' Cache] add item to offline: ' + response.url,
+      );
+      cache.put(request, response.clone());
+      return response;
+    });
   }
 
   if (
@@ -148,7 +143,7 @@ self.addEventListener('message', event => {
 
       registration.pushManager
         .subscribe(subscriptionOptions)
-        .then(subscription => {
+        .then(() => {
           sendMessageToAllClients('subscribe-success');
         })
         .catch(error => {
