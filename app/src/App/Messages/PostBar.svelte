@@ -9,7 +9,7 @@
   import { EditImageService } from '../../Services/EditImageService';
   import { VideoService } from '../../Services/VideoService';
   import ErrHandler from '../../ErrHandler';
-  import { inCordova, brand } from '../../stores';
+  import { brand } from '../../stores';
 
   const dispatch = createEventDispatcher();
   const mobile = (() => {
@@ -95,10 +95,10 @@
       const idx = message.arraySearch(conversation.pending);
       if (idx !== false) {
         conversation.pending.splice(idx, 1);
-      }
 
-      if (!destroyed) {
-        conversation = conversation;
+        if (!destroyed) {
+          conversation = conversation;
+        }
       }
     };
 
@@ -667,7 +667,7 @@
       on:change={event => handleFiles(event.target.files)}
       accept="image/*, video/*"
       multiple />
-    {#if $inCordova}
+    {#if window.inCordova}
       <div
         class="add-media-dropdown btn-group dropup p-0"
         bind:this={addMediaDropdown}>

@@ -4,21 +4,11 @@
   import LoadingIndicator from './App/LoadingIndicator';
   import FrontPage from './App/FrontPage';
   import App from './App/App';
-  import { logout, brand, user, crypt } from './stores';
+  import { crypt } from './Services/EncryptionService';
+  import { logout, brand, user } from './stores';
 
   const cryptoAvailable = (() => {
     return !!(window.crypto || window.msCrypto).getRandomValues;
-  })();
-  let cryptReady = false;
-  let cryptError = null;
-
-  (async () => {
-    try {
-      await $crypt.ready;
-      cryptReady = true;
-    } catch (e) {
-      cryptError = e;
-    }
   })();
 </script>
 
@@ -102,14 +92,7 @@
       <div
         class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0"
         style="height: 0;">
-        {#if cryptReady}
-          <App />
-        {:else if cryptError}
-          <div>Error during encryption setup: {cryptError} </div>
-          <div>
-            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
-          </div>
-        {:else}
+        {#await crypt.ready}
           <div
             class="d-flex flex-column align-items-center justify-content-center"
             style="height: 200px;">
@@ -122,7 +105,14 @@
               <a href="javascript:void(0)" on:click={logout}>Log Out</a>
             </small>
           </div>
-        {/if}
+        {:then unused}
+          <App />
+        {:catch cryptError}
+          <div>Error during encryption setup: {cryptError} </div>
+          <div>
+            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
+          </div>
+        {/await}
       </div>
     {/if}
   </div>

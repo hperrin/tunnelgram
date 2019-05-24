@@ -1,12 +1,13 @@
 <script>
-  import { onMount, onDestroy, afterUpdate, tick } from 'svelte';
+  import { onDestroy, afterUpdate, tick } from 'svelte';
   import { Nymph, PubSub } from 'nymph-client';
   import Message from '../../Entities/Tunnelgram/Message';
   import ConversationHeader from '../Conversations/Header';
   import LoadingIndicator from '../LoadingIndicator';
+  import RelativeDate from './RelativeDate';
   import MessageItem from './Item';
   import ErrHandler from '../../ErrHandler';
-  import { user } from '../../stores';
+  import { user, disconnected } from '../../stores';
 
   const MESSAGE_PAGE_SIZE = 20;
 
@@ -16,7 +17,6 @@
   let messageContainer;
   let readlineEl;
   let loading;
-  let disconnected = false;
   let isAtBottom = true;
   let showReadline = null;
   let initialReadline = null;
@@ -28,33 +28,8 @@
   let updateReadlineRaf;
   let destroyed = false;
   let subscription;
-  const onPubSubConnect = () => {
-    if (disconnected) {
-      Nymph.getEntities(
-        {
-          class: Message.class,
-          sort: 'cdate',
-          reverse: true,
-        },
-        {
-          type: '&',
-          ref: ['conversation', conversation.guid],
-          gt: ['cdate', messages.length ? messages[0].cdate : 0],
-        },
-      ).then(async newMessages => {
-        await Promise.all(
-          newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
-        );
-        messages = [...newMessages, ...messages];
-      });
-    }
-    disconnected = false;
-  };
-  const onPubSubDisconnect = () => {
-    disconnected = true;
-  };
 
-  let previousConversationGuid = null;
+  let previousConversationGuid = -1;
   $: if (previousConversationGuid !== conversation.guid) {
     previousConversationGuid = conversation.guid;
     messages = [];
@@ -74,15 +49,34 @@
     }
   }
 
+  let previousDisconnected = $disconnected;
+  $: if (previousDisconnected !== $disconnected) {
+    previousDisconnected = $disconnected;
+    if (!$disconnected) {
+      Nymph.getEntities(
+        {
+          class: Message.class,
+          sort: 'cdate',
+          reverse: true,
+        },
+        {
+          type: '&',
+          ref: ['conversation', conversation.guid],
+          gt: ['cdate', messages.length ? messages[0].cdate : 0],
+        },
+      ).then(async newMessages => {
+        await Promise.all(
+          newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
+        );
+        messages = [...newMessages, ...messages];
+      });
+    }
+  }
+
   $: if (showReadline === null && initialReadline !== 0 && messages.length) {
     showReadline = initialReadline > 0 && initialReadline < messages[0].cdate;
     scrollWaitReadline = showReadline;
   }
-
-  onMount(() => {
-    PubSub.on('connect', onPubSubConnect);
-    PubSub.on('disconnect', onPubSubDisconnect);
-  });
 
   let previousScrollToDistanceFromBottom = scrollToDistanceFromBottom;
   afterUpdate(() => {
@@ -128,9 +122,6 @@
     if (subscription) {
       subscription.unsubscribe();
     }
-
-    PubSub.off('connect', onPubSubConnect);
-    PubSub.off('disconnect', onPubSubDisconnect);
   });
 
   function subscribe() {
@@ -221,7 +212,7 @@
   }
 
   function showTime(time1, time2) {
-    if (time2 === undefined) {
+    if (time2 == null) {
       time2 = +new Date() / 1000;
     }
     const now = +new Date() / 1000;
@@ -409,13 +400,17 @@
         <div
           class="d-flex flex-column align-items-start message-box"
           data-cdate={'' + message.cdate}>
+          {#if i < messages.length - 1 && showTime(messages[i + 1].cdate, message.cdate)}
+            <small class="d-flex justify-content-center w-100 mb-2 text-muted">
+              <RelativeDate bind:message />
+            </small>
+          {/if}
           <MessageItem
             bind:message
             on:rendered={rescrollToBottom}
             on:deleted={() => removeMessage(message)}
             nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
-            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
-            showTime={i < messages.length - 1 && showTime(messages[i + 1].cdate, message.cdate)} />
+            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid} />
           {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
             <div
               class="d-flex align-items-center w-100 mb-2 readline"
@@ -429,15 +424,19 @@
       {/each}
     </div>
     <div class="d-flex flex-column align-items-start">
-      {#each conversation.pending as message}
+      {#each conversation.pending as message, i}
         {#if message.cryptReady}
+          {#if i === 0 && messages.length && showTime(messages[0].cdate)}
+            <small class="d-flex justify-content-center w-100 mb-2 text-muted">
+              <RelativeDate bind:message />
+            </small>
+          {/if}
           <MessageItem
             bind:message
             on:rendered={rescrollToBottom}
             pending="true"
             nextMessageUserIsDifferent={false}
-            prevMessageUserIsDifferent={false}
-            showTime={messages.length && showTime(messages[0].cdate)} />
+            prevMessageUserIsDifferent={false} />
         {/if}
       {/each}
     </div>

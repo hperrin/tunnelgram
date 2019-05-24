@@ -1,12 +1,12 @@
-import { writable } from 'svelte/store';
+import { writable, readable } from 'svelte/store';
+import { PubSub } from 'nymph-client';
 import PNotify from 'pnotify/dist/es/PNotify';
 import Conversation from './Entities/Tunnelgram/Conversation';
-import { crypt as cryptService } from './Services/EncryptionService';
 
 export * from './userStores';
 
-export const brand = writable('Tunnelgram');
-export const brandWeb = writable('Tunnelgram.com');
+export const brand = readable('Tunnelgram');
+export const brandWeb = readable('Tunnelgram.com');
 export const conversations = writable([]);
 conversations.subscribe(async convos => {
   if (convos) {
@@ -35,7 +35,6 @@ export const view = writable('conversation');
 export const viewUser = writable(null);
 export const viewUserIsSelf = writable(null);
 export const convosOut = writable(true);
-export const crypt = writable(cryptService);
 export const settings = writable(null);
 settings.subscribe(async sett => {
   if (sett && !sett.cryptReady) {
@@ -43,7 +42,11 @@ settings.subscribe(async sett => {
     settings.set(sett);
   }
 });
-export const disconnected = writable(!navigator.onLine);
+export const disconnected = readable(true, set => {
+  PubSub.on('connect', () => set(false));
+  PubSub.on('disconnect', () => set(true));
+  set(!PubSub.isConnectionOpen());
+});
 export const requestNotificationPermission = writable(() => {
   // This is the deault permission asker for sending desktop notifications
   // when the page is open in the browser.
@@ -54,8 +57,7 @@ export const requestPersistentStorage = writable(() => {
 });
 export const beforeInstallPromptEvent = writable(null);
 export const webPushSubscription = writable(null);
-export const inPWA = writable(
+export const inPWA = readable(
   window.matchMedia('(display-mode: standalone)').matches ||
     navigator.standalone === true,
 );
-export const inCordova = writable(window.inCordova);

@@ -17,7 +17,6 @@
   export let message = null;
   export let nextMessageUserIsDifferent = true;
   export let prevMessageUserIsDifferent = true;
-  export let showTime = false;
   export let pending = false;
   let showActions = false;
   let formattedText = null;
@@ -26,9 +25,7 @@
   let flipped = false;
   let flipSecond;
   let flipFirst;
-  let createdDateRelative;
   let destroyed;
-  let interval;
   let createdDateLong;
   let createdDateShort;
 
@@ -40,6 +37,9 @@
     pending ||
     (message.data.user != null && message.data.user.data.username != null);
   $: shouldEmbiggen = (() => {
+    if (isChannel) {
+      return false;
+    }
     // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
     if (
       message.decrypted.text != null &&
@@ -107,16 +107,10 @@
     messageContainerGesture = null;
   }
 
-  let previousMessage = null;
-  $: if (previousMessage !== message) {
-    previousMessage = message;
+  let previousMessageGuid = -1;
+  $: if (previousMessageGuid !== message.guid) {
+    previousMessageGuid = message.guid;
     waitForShowdown();
-
-    if (interval) {
-      window.clearInterval(interval);
-    }
-    interval = window.setInterval(updateTime, 10000);
-    updateTime();
 
     createdDateLong =
       message.cdate == null
@@ -134,9 +128,6 @@
 
   onDestroy(() => {
     destroyed = true;
-    if (interval) {
-      window.clearInterval(interval);
-    }
   });
 
   // If showdown isn't available, wait until it is.
@@ -190,33 +181,6 @@
     saveFailed = null;
     showActions = false;
     handlePending();
-  }
-
-  function updateTime() {
-    if (!showTime) {
-      createdDateRelative = '';
-      return;
-    }
-    let { cdate } = message;
-    if (cdate == null) {
-      cdate = +new Date() / 1000;
-    }
-    const now = +new Date() / 1000;
-    const cdateFormatter = new SimpleDateFormatter(
-      Math.min(cdate, +new Date() / 1000),
-    );
-    if (now - cdate > 10 * 30 * 24 * 60 * 60) {
-      // More than 10 months ago.
-      createdDateRelative = cdateFormatter.format('ymd', 'short');
-    } else if (now - cdate > 6 * 24 * 60 * 60) {
-      // More than 6 days ago.
-      createdDateRelative = cdateFormatter.format('md', 'short');
-    } else if (now - cdate > 24 * 60 * 60) {
-      // More than 1 day ago.
-      createdDateRelative = cdateFormatter.format('wh', 'short');
-    } else {
-      createdDateRelative = cdateFormatter.format('ago', 'long');
-    }
   }
 
   function handleFlipAnimationEnd() {
@@ -290,11 +254,6 @@
   }
 </style>
 
-{#if showTime}
-  <small class="d-flex justify-content-center w-100 mb-2 text-muted">
-     {createdDateRelative}
-  </small>
-{/if}
 {#if message.data.informational}
   <div class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if isMessageUserReady}
@@ -305,7 +264,7 @@
         title={displayName}>
         <Avatar user={messageUser} size={avatarSize} />
       </a>
-      <small>
+      <small title={createdDateLong}>
         {#if message.data.text === 'joined'}
           <DisplayName bind:user={messageUser} />
           joined
@@ -346,26 +305,6 @@
   <div
     class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel ? 'flex-row-reverse' : ''}"
     style="opacity: {pending ? '.6' : '1'};">
-    {#if showActions && isOwner}
-      <div class="h1 my-0" style="font-size: 0;">
-        <button
-          type="button"
-          class="btn btn-sm btn-danger mx-2"
-          on:click={deleteMessage}
-          title="Delete message">
-          <i class="fas fa-trash-alt" />
-        </button>
-        {#if pending && saveFailed}
-          <button
-            type="button"
-            class="btn btn-sm btn-success mx-2"
-            on:click={retrySave}
-            title="Retry sending">
-            <i class="fas fa-sync" />
-          </button>
-        {/if}
-      </div>
-    {/if}
     {#if !isOwner && !isChannel}
       {#if nextMessageUserIsDifferent && isMessageUserReady}
         <a
@@ -386,9 +325,9 @@
     <div
       class="{stageClass}
       {flipFirst || flipSecond ? 'raise-to-top perspective-stage' : ''}"
-      style={shouldEmbiggen ? '' : 'max-width: 80%;'}>
+      style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}>
       <div
-        class="{isChannel ? (isOwner ? 'border-primary border-left' : 'border-info border-left') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
+        class="{isChannel ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' + (isOwner ? 'border-primary' : 'border-info') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
         mx-2 my-0 {flipper ? 'flipper' : ''}
         {flipFirst ? 'flip-first' : ''}
         {flipSecond ? 'flip-second' : ''}"
@@ -441,10 +380,28 @@
         {/if}
       </div>
     </div>
-    {#if showActions && !pending}
-      <div class="mr-2 my-0">
-        <small class="text-muted">{createdDateShort}</small>
-      </div>
+    {#if showActions && isOwner}
+      <button
+        type="button"
+        class="btn btn-sm btn-danger mx-2"
+        on:click={deleteMessage}
+        title="Delete message">
+        <i class="fas fa-trash-alt" />
+      </button>
+      {#if pending && saveFailed}
+        <button
+          type="button"
+          class="btn btn-sm btn-success mx-2"
+          on:click={retrySave}
+          title="Retry sending">
+          <i class="fas fa-sync" />
+        </button>
+      {/if}
+      {#if !pending}
+        <div class="mr-2 my-0">
+          <small class="text-muted">{createdDateShort}</small>
+        </div>
+      {/if}
     {/if}
     {#if pending}
       <small class="text-muted">

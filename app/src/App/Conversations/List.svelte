@@ -1,18 +1,23 @@
 <script>
-  import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
+  import { onDestroy, tick, createEventDispatcher } from 'svelte';
   import { Nymph, PubSub } from 'nymph-client';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from '../LoadingIndicator';
   import Preview from './Preview';
   import { navigate } from '../../Services/router';
   import ErrHandler from '../../ErrHandler';
-  import { conversation, conversations, user, settings } from '../../stores';
+  import {
+    conversation,
+    conversations,
+    user,
+    settings,
+    disconnected,
+  } from '../../stores';
 
   const CONVERSATION_PAGE_SIZE = 8;
 
   const dispatch = createEventDispatcher();
 
-  let disconnected = false;
   let loading = true;
   let loadingEarlierConversations = false;
   let reachedEarliestConversation = false;
@@ -20,42 +25,6 @@
   let destroyed = false;
   let subscription;
   let container;
-  const onPubSubConnect = () => {
-    if (disconnected) {
-      Nymph.getEntities(
-        {
-          class: Conversation.class,
-          sort: 'mdate',
-          reverse: true,
-        },
-        {
-          type: '|',
-          ref: [
-            ['acFull', $user.guid],
-            ...$user.data.groups.map(group => ['group', group.guid]),
-          ],
-        },
-        {
-          type: '&',
-          gt: [
-            'mdate',
-            $conversations.length
-              ? Math.max(...$conversations.map(c => c.mdate))
-              : 0,
-          ],
-        },
-      ).then(newConversations => {
-        $conversations = [
-          ...newConversations,
-          ...$conversations.filter(c => !c.inArray(newConversations)),
-        ];
-      });
-    }
-    disconnected = false;
-  };
-  const onPubSubDisconnect = () => {
-    disconnected = true;
-  };
 
   $: filteredConversations = Object.fromEntries(
     (() => {
@@ -90,6 +59,46 @@
     })().map(conv => [conv.guid, true]),
   );
 
+  let previousDisconnected = $disconnected;
+  $: if (previousDisconnected !== $disconnected) {
+    previousDisconnected = $disconnected;
+    if (!$disconnected) {
+      Nymph.getEntities(
+        {
+          class: Conversation.class,
+          sort: 'mdate',
+          reverse: true,
+        },
+        {
+          type: '|',
+          ref: [
+            ['acFull', $user.guid],
+            ...$user.data.groups.map(group => ['group', group.guid]),
+          ],
+        },
+        {
+          type: '&',
+          gt: [
+            'mdate',
+            $conversations.length
+              ? Math.max(...$conversations.map(c => c.mdate))
+              : 0,
+          ],
+        },
+      ).then(async newConversations => {
+        await Promise.all(
+          newConversations
+            .filter(c => !c.cryptReady)
+            .map(c => c.cryptReadyPromise),
+        );
+        $conversations = [
+          ...newConversations,
+          ...$conversations.filter(c => !c.inArray(newConversations)),
+        ];
+      });
+    }
+  }
+
   let previousUser = null;
   let previousUserGroupsLength = 0;
   $: if (
@@ -112,19 +121,11 @@
     handleScroll();
   }
 
-  onMount(() => {
-    PubSub.on('connect', onPubSubConnect);
-    PubSub.on('disconnect', onPubSubDisconnect);
-  });
-
   onDestroy(() => {
     destroyed = true;
     if (subscription) {
       subscription.unsubscribe();
     }
-
-    PubSub.off('connect', onPubSubConnect);
-    PubSub.off('disconnect', onPubSubDisconnect);
   });
 
   function subscribe() {

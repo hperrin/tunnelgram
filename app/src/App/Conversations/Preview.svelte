@@ -83,7 +83,7 @@
 
   function updateTime() {
     modifiedDate = new SimpleDateFormatter(
-      Math.min(conversation.mdate, +new Date() / 100),
+      Math.min(conversation.mdate, +new Date() / 1000),
     ).format('ago', 'short');
     longModifiedDate = new SimpleDateFormatter(conversation.mdate).format(
       'wymdhms',

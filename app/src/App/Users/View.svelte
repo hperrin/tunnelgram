@@ -39,7 +39,7 @@
   $: shortLinkPreview =
     'tngm.me/' + encodeURIComponent($viewUser.data.username);
 
-  let previousViewUserGuid = null;
+  let previousViewUserGuid = -1;
   $: if ($viewUserIsSelf) {
     existingConversations = null;
     existingConversationsError = false;

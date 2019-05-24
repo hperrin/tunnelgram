@@ -320,7 +320,7 @@
   <div
     class="alert alert-warning d-flex justify-content-center align-items-center
     m-0">
-    Waiting for network...
+    Trying to connect...
     <span class="network-waiting-container">
       <span class="network-waiting">
         <i class="fas fa-wifi" />

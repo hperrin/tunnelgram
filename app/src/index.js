@@ -1,7 +1,7 @@
 import './Services/XMLHttpRequestWrapper';
 import './setup/icons';
 import './setup/pnotify';
-import { Nymph, PubSub } from 'nymph-client';
+import { Nymph } from 'nymph-client';
 import { User, Group } from 'tilmeld-client';
 import { router } from './Services/router';
 import './Services/OfflineServerCallsService';
@@ -91,9 +91,6 @@ window.addEventListener('beforeinstallprompt', e => {
   // Stash the event so it can be triggered later.
   store.beforeInstallPromptEvent.set(e);
 });
-
-PubSub.on('connect', () => store.disconnected.set(false));
-PubSub.on('disconnect', () => store.disconnected.set(true));
 
 // Everything is this function requires the logged in user status to be known.
 (async () => {
