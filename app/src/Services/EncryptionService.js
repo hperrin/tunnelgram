@@ -225,7 +225,11 @@ class EncryptionService extends AESEncryptionService {
       }
       privateKey = this.userPrivateKey;
     }
-    const result = await this.callEncryptionWorker(this.rsaEncryptionWorker, 'decryptRSA', [text, privateKey]);
+    const result = await this.callEncryptionWorker(
+      this.rsaEncryptionWorker,
+      'decryptRSA',
+      [text, privateKey],
+    );
     return result;
   }
 
@@ -236,7 +240,11 @@ class EncryptionService extends AESEncryptionService {
       }
       publicKey = this.userPublicKey;
     }
-    const result = await this.callEncryptionWorker(this.rsaEncryptionWorker, 'encryptRSA', [text, publicKey]);
+    const result = await this.callEncryptionWorker(
+      this.rsaEncryptionWorker,
+      'encryptRSA',
+      [text, publicKey],
+    );
     return result;
   }
 

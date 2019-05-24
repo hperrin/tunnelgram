@@ -59,7 +59,9 @@ export class Message extends Entity {
         this.data.keys &&
         this.data.keys.hasOwnProperty(currentUser.guid)
       ) {
-        const decryptedKey = await crypt.decryptRSA(this.data.keys[currentUser.guid]);
+        const decryptedKey = await crypt.decryptRSA(
+          this.data.keys[currentUser.guid],
+        );
         let key = decryptedKey.slice(0, 96);
         if (this.mode === Conversation.MODE_CHANNEL_PRIVATE) {
           // key is the conversation key (See Message.php/jsonSerialize). XOR it
@@ -257,7 +259,9 @@ export class Message extends Entity {
           // Store a plaintext key.
           this.data.key = crypt.generateKey();
           // Get the channel key.
-          const decryptedKey = await crypt.decryptRSA(this.data.conversation.data.keys[currentUser.guid]);
+          const decryptedKey = await crypt.decryptRSA(
+            this.data.conversation.data.keys[currentUser.guid],
+          );
           const channelKey = decryptedKey.slice(0, 96);
           // The encryption key is the result of XORing the two.
           key = crypt.xorHex(channelKey, this.data.key);
