@@ -287,7 +287,7 @@ class EncryptionService extends AESEncryptionService {
       {
         counter,
         action,
-        args,
+        args: args || [],
       },
       transferrables,
     );
