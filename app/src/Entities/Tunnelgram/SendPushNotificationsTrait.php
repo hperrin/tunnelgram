@@ -13,31 +13,13 @@ use Minishlink\WebPush\Subscription;
 
 trait SendPushNotificationsTrait {
   public function sendPushNotifications($recipientGuids, $options) {
-    $pid = \pcntl_fork();
-    if ($pid == -1) {
-      php_error('Couldn\'t fork process for push notifications.');
-      $this->sendAppPushNotifications($recipientGuids, $options);
-      $this->sendWebPushNotifications($recipientGuids, $options);
-    } else if ($pid) {
-      // We are the parent.
-
-      // Reconnect to the DB, since the connection doesn't survive the fork.
-      Nymph::disconnect();
-      Nymph::connect();
-
-      return;
-    } else {
-      // We are the child.
-
-      // Reconnect to the DB, since the connection doesn't survive the fork.
-      Nymph::disconnect();
-      Nymph::connect();
-
+    // Register a shutdown function, so the long process of sending
+    // notifications doesn't keep the request pending.
+    register_shutdown_function(function () use ($recipientGuids, $options) {
       // Send the push notifications.
       $this->sendAppPushNotifications($recipientGuids, $options);
       $this->sendWebPushNotifications($recipientGuids, $options);
-      exit;
-    }
+    });
   }
 
   public function sendAppPushNotifications($recipientGuids, $options) {

@@ -57,7 +57,8 @@ if (getenv('MYSQL_CA_CERT')) {
   'port' => ((int) getenv('PUBSUB_PORT')) ?? 8080,
   'entries' => [
     (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
-  ]
+  ],
+  'broadcast_counts' => false
 ]);
 
 // uMailPHP's configuration.
