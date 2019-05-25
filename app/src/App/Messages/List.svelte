@@ -154,14 +154,15 @@
               reachedEarliestMessage = true;
             }
           }
-          PubSub.updateArray(messages, update);
+          const newMessages = [...messages];
+          PubSub.updateArray(newMessages, update);
           await Promise.all(
-            messages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
+            newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
           );
           if (destroyed || queryConversationGuid !== conversation.guid) {
             return;
           }
-          messages = messages;
+          messages = newMessages;
           loading = false;
           createNewReadlineIfNeeded();
 
