@@ -170,7 +170,19 @@
             const ent = update.data;
             for (let i = 0; i < conversation.pending.length; i++) {
               const cur = conversation.pending[i];
-              if (ent.guid === cur.guid) {
+              let match = false;
+              if (cur.guid) {
+                if (ent.guid === cur.guid) {
+                  match = true;
+                }
+              } else if (ent.encryption && ent.mode === Conversation.MODE_CHAT) {
+                if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
+                  match = true;
+                }
+              } else if (ent.decrypted.text === cur.decrypted.text && ent.decrypted.images.length === cur.decrypted.images.length && !!ent.decrypted.video === !!cur.decrypted.video) {
+                match = true;
+              }
+              if (match) {
                 conversation.pending.splice(i, 1);
                 conversation = conversation;
                 break;
