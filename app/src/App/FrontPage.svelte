@@ -1,7 +1,3 @@
-<script>
-  import { brand } from '../stores';
-</script>
-
 <div class="card" style="width: 100%;">
   <img
     class="card-img-top"
@@ -106,3 +102,7 @@
     </p>
   </div>
 </div>
+
+<script>
+  import { brand } from '../stores';
+</script>

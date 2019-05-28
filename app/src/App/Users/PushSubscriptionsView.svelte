@@ -1,9 +1,3 @@
-<script>
-  import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
-  import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
-  import PushSubscriptionsList from './PushSubscriptionsList';
-</script>
-
 <div
   class="h-100 w-100"
   style="overflow-y: auto; -webkit-overflow-scrolling: touch;
@@ -40,3 +34,9 @@
     </div>
   </div>
 </div>
+
+<script>
+  import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
+  import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
+  import PushSubscriptionsList from './PushSubscriptionsList';
+</script>

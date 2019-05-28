@@ -1,3 +1,192 @@
+{#if $disconnected}
+  <div
+    class="alert alert-warning d-flex justify-content-center align-items-center
+    m-0">
+    Trying to connect...
+    <span class="network-waiting-container">
+      <span class="network-waiting">
+        <i class="fas fa-wifi" />
+      </span>
+    </span>
+  </div>
+{/if}
+{#if $beforeInstallPromptEvent && !hideInstallPrompt}
+  <div
+    class="alert alert-info d-flex justify-content-between align-items-center
+    m-0">
+    <div>
+      Wanna install {$brandWeb} to your device for a native app experience?
+      <a
+        href="javascript:void(0)"
+        on:click={() => (hideInstallPrompt = true) && $beforeInstallPromptEvent.prompt()}>
+        Yeah
+      </a>
+    </div>
+
+    <a
+      class="ml-2"
+      href="javascript:void(0)"
+      on:click={() => (hideInstallPrompt = true)}
+      title="Close">
+      <i class="fas fa-times" />
+    </a>
+  </div>
+{:else if !hideNotificationPrompt}
+  <div
+    class="alert alert-info d-flex justify-content-between align-items-center
+    m-0">
+    <div>
+      Do you want notifications for new messages?
+      <a
+        href="javascript:void(0)"
+        on:click={() => (hideNotificationPrompt = true) && $requestNotificationPermission()}>
+        Yeah
+      </a>
+    </div>
+
+    <a
+      class="ml-2"
+      href="javascript:void(0)"
+      on:click={() => (hideNotificationPrompt = true)}
+      title="Close">
+      <i class="fas fa-times" />
+    </a>
+  </div>
+{:else if false && !hidePersistentStoragePrompt}
+  <div
+    class="alert alert-info d-flex justify-content-between align-items-center
+    m-0">
+    <div>
+      Do you want to stay logged in when your device runs low on space?
+      <a
+        href="javascript:void(0)"
+        on:click={() => (hidePersistentStoragePrompt = true) && $requestPersistentStorage()}>
+        Yeah
+      </a>
+    </div>
+
+    <a
+      class="ml-2"
+      href="javascript:void(0)"
+      on:click={() => (hidePersistentStoragePrompt = true)}
+      title="Close">
+      <i class="fas fa-times" />
+    </a>
+  </div>
+{/if}
+<div
+  class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
+  <div
+    class="convos d-flex flex-column h-100 bg-dark text-light"
+    bind:this={convos}>
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+      <div class="container-fluid">
+        <span class="navbar-brand align-items-center">
+          <span>{$brand}</span>
+        </span>
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown" bind:this={menuDropdown}>
+            <a
+              class="nav-link dropdown-toggle p-0 d-flex align-items-center"
+              href="javascript:void(0)"
+              id="userDropdown"
+              role="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false">
+              <Avatar bind:user={$user} size={32} />
+            </a>
+            <div
+              class="dropdown-menu dropdown-menu-right"
+              aria-labelledby="userDropdown">
+              <h6 class="dropdown-header">{$user.data.name}</h6>
+              <a class="dropdown-item" href="#/u/{$user.data.username}">
+                Your Account
+              </a>
+              <a class="dropdown-item" href="#/pushSubscriptions">
+                Push Subscriptions
+              </a>
+              <div class="dropdown-divider" />
+              <a
+                class="dropdown-item"
+                href="javascript:void(0)"
+                on:click={logout}>
+                Log Out
+              </a>
+              {#if $userIsTilmeldAdmin}
+                <div class="dropdown-divider" />
+                <h6 class="dropdown-header">Admin</h6>
+                <a class="dropdown-item" href="/user/" target="_blank">
+                  User Admin App
+                </a>
+              {/if}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
+      <ConversationList
+        on:tunnelgram-notification={event => notification(event.detail)} />
+    </div>
+  </div>
+  <!-- This needs the width:0 style, or it will offset the list during loading. -->
+  <div
+    class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark"
+    style="width: 0;"
+    bind:this={mainUi}>
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+      <div class="container-fluid">
+        <ul class="navbar-nav d-md-none">
+          <li class="nav-item">
+            <a
+              class="nav-link border-secondary rounded px-2"
+              href="#/"
+              title="Back to list">
+              <i class="fas fa-arrow-left" />
+            </a>
+          </li>
+        </ul>
+        <span class="page-name navbar-text">
+          <span>
+            {#if $view === 'pushSubscriptions'}
+              Push Subscriptions
+            {:else if $view === 'user'}
+              {$viewUser.data.name}
+            {:else if $settings && $conversation.guid}
+              {$conversation.getName($settings)}
+            {:else}
+              <span style="display: inline-block;" />
+            {/if}
+          </span>
+        </span>
+        {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
+          <NavBar />
+        {/if}
+      </div>
+    </nav>
+    <div
+      style="overflow-y: auto; -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain; height: 100%; flex-basis: 0; flex-grow: 1;">
+      {#if $loadingConversation || $loadingUser}
+        <div class="d-flex h-100 align-items-center justify-content-center">
+          <div
+            style="background-image: url(images/android-chrome-192x192.png);
+            background-size: cover; position: absolute; width: 88px; height:
+            88px;" />
+          <LoadingIndicator width="200" height="200" />
+        </div>
+      {:else if $view === 'user'}
+        <UserView />
+      {:else if $view === 'pushSubscriptions'}
+        <PushSubscriptionsView />
+      {:else}
+        <ConversationView />
+      {/if}
+    </div>
+  </div>
+</div>
+
 <script>
   import { onMount } from 'svelte';
   import PNotify from 'pnotify/dist/es/PNotify';
@@ -315,192 +504,3 @@
     }
   }
 </style>
-
-{#if $disconnected}
-  <div
-    class="alert alert-warning d-flex justify-content-center align-items-center
-    m-0">
-    Trying to connect...
-    <span class="network-waiting-container">
-      <span class="network-waiting">
-        <i class="fas fa-wifi" />
-      </span>
-    </span>
-  </div>
-{/if}
-{#if $beforeInstallPromptEvent && !hideInstallPrompt}
-  <div
-    class="alert alert-info d-flex justify-content-between align-items-center
-    m-0">
-    <div>
-      Wanna install {$brandWeb} to your device for a native app experience?
-      <a
-        href="javascript:void(0)"
-        on:click={() => (hideInstallPrompt = true) && $beforeInstallPromptEvent.prompt()}>
-        Yeah
-      </a>
-    </div>
-
-    <a
-      class="ml-2"
-      href="javascript:void(0)"
-      on:click={() => (hideInstallPrompt = true)}
-      title="Close">
-      <i class="fas fa-times" />
-    </a>
-  </div>
-{:else if !hideNotificationPrompt}
-  <div
-    class="alert alert-info d-flex justify-content-between align-items-center
-    m-0">
-    <div>
-      Do you want notifications for new messages?
-      <a
-        href="javascript:void(0)"
-        on:click={() => (hideNotificationPrompt = true) && $requestNotificationPermission()}>
-        Yeah
-      </a>
-    </div>
-
-    <a
-      class="ml-2"
-      href="javascript:void(0)"
-      on:click={() => (hideNotificationPrompt = true)}
-      title="Close">
-      <i class="fas fa-times" />
-    </a>
-  </div>
-{:else if false && !hidePersistentStoragePrompt}
-  <div
-    class="alert alert-info d-flex justify-content-between align-items-center
-    m-0">
-    <div>
-      Do you want to stay logged in when your device runs low on space?
-      <a
-        href="javascript:void(0)"
-        on:click={() => (hidePersistentStoragePrompt = true) && $requestPersistentStorage()}>
-        Yeah
-      </a>
-    </div>
-
-    <a
-      class="ml-2"
-      href="javascript:void(0)"
-      on:click={() => (hidePersistentStoragePrompt = true)}
-      title="Close">
-      <i class="fas fa-times" />
-    </a>
-  </div>
-{/if}
-<div
-  class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}">
-  <div
-    class="convos d-flex flex-column h-100 bg-dark text-light"
-    bind:this={convos}>
-    <nav class="navbar navbar-expand navbar-dark bg-dark">
-      <div class="container-fluid">
-        <span class="navbar-brand align-items-center">
-          <span>{$brand}</span>
-        </span>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item dropdown" bind:this={menuDropdown}>
-            <a
-              class="nav-link dropdown-toggle p-0 d-flex align-items-center"
-              href="javascript:void(0)"
-              id="userDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false">
-              <Avatar bind:user={$user} size={32} />
-            </a>
-            <div
-              class="dropdown-menu dropdown-menu-right"
-              aria-labelledby="userDropdown">
-              <h6 class="dropdown-header">{$user.data.name}</h6>
-              <a class="dropdown-item" href="#/u/{$user.data.username}">
-                Your Account
-              </a>
-              <a class="dropdown-item" href="#/pushSubscriptions">
-                Push Subscriptions
-              </a>
-              <div class="dropdown-divider" />
-              <a
-                class="dropdown-item"
-                href="javascript:void(0)"
-                on:click={logout}>
-                Log Out
-              </a>
-              {#if $userIsTilmeldAdmin}
-                <div class="dropdown-divider" />
-                <h6 class="dropdown-header">Admin</h6>
-                <a class="dropdown-item" href="/user/" target="_blank">
-                  User Admin App
-                </a>
-              {/if}
-            </div>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
-      <ConversationList
-        on:tunnelgram-notification={event => notification(event.detail)} />
-    </div>
-  </div>
-  <!-- This needs the width:0 style, or it will offset the list during loading. -->
-  <div
-    class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark"
-    style="width: 0;"
-    bind:this={mainUi}>
-    <nav class="navbar navbar-expand navbar-dark bg-dark">
-      <div class="container-fluid">
-        <ul class="navbar-nav d-md-none">
-          <li class="nav-item">
-            <a
-              class="nav-link border-secondary rounded px-2"
-              href="#/"
-              title="Back to list">
-              <i class="fas fa-arrow-left" />
-            </a>
-          </li>
-        </ul>
-        <span class="page-name navbar-text">
-          <span>
-            {#if $view === 'pushSubscriptions'}
-              Push Subscriptions
-            {:else if $view === 'user'}
-              {$viewUser.data.name}
-            {:else if $settings && $conversation.guid}
-              {$conversation.getName($settings)}
-            {:else}
-              <span style="display: inline-block;" />
-            {/if}
-          </span>
-        </span>
-        {#if ['conversation', 'people', 'settings'].indexOf($view) !== -1 && $conversation.guid}
-          <NavBar />
-        {/if}
-      </div>
-    </nav>
-    <div
-      style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain; height: 100%; flex-basis: 0; flex-grow: 1;">
-      {#if $loadingConversation || $loadingUser}
-        <div class="d-flex h-100 align-items-center justify-content-center">
-          <div
-            style="background-image: url(images/android-chrome-192x192.png);
-            background-size: cover; position: absolute; width: 88px; height:
-            88px;" />
-          <LoadingIndicator width="200" height="200" />
-        </div>
-      {:else if $view === 'user'}
-        <UserView />
-      {:else if $view === 'pushSubscriptions'}
-        <PushSubscriptionsView />
-      {:else}
-        <ConversationView />
-      {/if}
-    </div>
-  </div>
-</div>

@@ -1,3 +1,62 @@
+<div
+  class="h-100"
+  style="overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;"
+  bind:this={container}
+  on:scroll={handleScroll}>
+  <div class="list-group">
+    <a
+      href="#/c"
+      on:click={() => (search = '')}
+      class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
+      <h5 class="mb-0 d-flex w-100 align-items-center">
+        <i class="fas fa-plus-circle mr-1" />
+        New Conversation
+      </h5>
+    </a>
+    {#if $conversations.length > 1}
+      <div class="list-group-item d-flex p-0 border-0">
+        <input
+          type="text"
+          class="form-control bg-secondary border-0 text-light"
+          bind:value={search}
+          name="search"
+          placeholder="Search people"
+          autocomplete="off" />
+      </div>
+    {/if}
+    {#each $conversations as curConversation (curConversation.guid)}
+      <a
+        href="#/c/{curConversation.guid}"
+        on:click={() => (search = '')}
+        class="list-group-item p-2 list-group-item-action rounded-0 flex-column
+        align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''}
+        {filteredConversations[curConversation.guid] ? '' : 'd-none'}"
+        style="cursor: pointer;">
+        <Preview bind:conversation={curConversation} />
+      </a>
+    {/each}
+    {#if !loading && !$conversations.length}
+      <div
+        class="list-group-item p-2 rounded-0 flex-column align-items-start
+        bg-transparent border-0">
+        {#if $conversations.length}
+          No matching conversations.
+        {:else}You have no conversations yet.{/if}
+      </div>
+    {/if}
+    {#if loading || !reachedEarliestConversation}
+      <div
+        class="list-group-item p-2 rounded-0 d-flex align-items-center
+        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}">
+        <div class="col-auto">
+          <LoadingIndicator width="50" height="50" />
+        </div>
+      </div>
+    {/if}
+  </div>
+</div>
+
 <script>
   import { onDestroy, tick, createEventDispatcher } from 'svelte';
   import { Nymph, PubSub } from 'nymph-client';
@@ -228,62 +287,3 @@
     loadingEarlierConversations = false;
   }
 </script>
-
-<div
-  class="h-100"
-  style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;"
-  bind:this={container}
-  on:scroll={handleScroll}>
-  <div class="list-group">
-    <a
-      href="#/c"
-      on:click={() => (search = '')}
-      class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
-      <h5 class="mb-0 d-flex w-100 align-items-center">
-        <i class="fas fa-plus-circle mr-1" />
-        New Conversation
-      </h5>
-    </a>
-    {#if $conversations.length > 1}
-      <div class="list-group-item d-flex p-0 border-0">
-        <input
-          type="text"
-          class="form-control bg-secondary border-0 text-light"
-          bind:value={search}
-          name="search"
-          placeholder="Search people"
-          autocomplete="off" />
-      </div>
-    {/if}
-    {#each $conversations as curConversation (curConversation.guid)}
-      <a
-        href="#/c/{curConversation.guid}"
-        on:click={() => (search = '')}
-        class="list-group-item p-2 list-group-item-action rounded-0 flex-column
-        align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''}
-        {filteredConversations[curConversation.guid] ? '' : 'd-none'}"
-        style="cursor: pointer;">
-        <Preview bind:conversation={curConversation} />
-      </a>
-    {/each}
-    {#if !loading && !$conversations.length}
-      <div
-        class="list-group-item p-2 rounded-0 flex-column align-items-start
-        bg-transparent border-0">
-        {#if $conversations.length}
-          No matching conversations.
-        {:else}You have no conversations yet.{/if}
-      </div>
-    {/if}
-    {#if loading || !reachedEarliestConversation}
-      <div
-        class="list-group-item p-2 rounded-0 d-flex align-items-center
-        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}">
-        <div class="col-auto">
-          <LoadingIndicator width="50" height="50" />
-        </div>
-      </div>
-    {/if}
-  </div>
-</div>

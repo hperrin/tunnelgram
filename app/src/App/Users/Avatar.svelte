@@ -1,3 +1,22 @@
+<span
+  class="{className} rounded-circle d-inline-block"
+  style="width: {size}px; height: {size}px;">
+  {#if user.data.avatar}
+    <span
+      class="rounded-circle d-flex justify-content-center align-items-center
+      bg-info text-white w-100 h-100"
+      style="background-size: contain; background-image: url({avatarUrl});" />
+  {:else}
+    <span
+      class="rounded-circle d-flex justify-content-center align-items-center
+      bg-info text-white w-100 h-100"
+      style="font-size: {parseFloat(size) * 0.55}px; line-height: {parseFloat(size) * 0.55}px;
+      pointer-events: none; user-select: none;">
+      {iconLetters}
+    </span>
+  {/if}
+</span>
+
 <script>
   import { settings } from '../../stores';
 
@@ -33,22 +52,3 @@
     return letters;
   })();
 </script>
-
-<span
-  class="{className} rounded-circle d-inline-block"
-  style="width: {size}px; height: {size}px;">
-  {#if user.data.avatar}
-    <span
-      class="rounded-circle d-flex justify-content-center align-items-center
-      bg-info text-white w-100 h-100"
-      style="background-size: contain; background-image: url({avatarUrl});" />
-  {:else}
-    <span
-      class="rounded-circle d-flex justify-content-center align-items-center
-      bg-info text-white w-100 h-100"
-      style="font-size: {parseFloat(size) * 0.55}px; line-height: {parseFloat(size) * 0.55}px;
-      pointer-events: none; user-select: none;">
-      {iconLetters}
-    </span>
-  {/if}
-</span>

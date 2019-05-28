@@ -1,3 +1,5 @@
+{text}
+
 <script>
   import { onDestroy } from 'svelte';
   import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
@@ -46,5 +48,3 @@
     }
   }
 </script>
-
-{text}

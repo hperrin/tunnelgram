@@ -2,5 +2,5 @@
   "singleQuote": true,
   "trailingComma": "all",
   "pluginSearchDirs": ["."],
-  "sortOrder": "scripts-styles-markup"
+  "svelteSortOrder": "markup-scripts-styles"
 }

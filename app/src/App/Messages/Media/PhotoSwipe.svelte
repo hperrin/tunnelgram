@@ -1,50 +1,3 @@
-<script>
-  import { onMount } from 'svelte';
-  import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
-  import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
-
-  export let items = [];
-  export let options = {};
-  let photoswipe;
-  let pswp;
-
-  onMount(() => {
-    const defaultOptions = {
-      shareButtons: [
-        {
-          id: 'download',
-          label: 'Download photo',
-          url: '{{raw_image_url}}',
-          download: true,
-        },
-      ],
-    };
-
-    pswp = new PhotoSwipe(
-      photoswipe,
-      PhotoSwipeUI_Default,
-      items,
-      Object.assign({}, defaultOptions, options),
-    );
-  });
-
-  export function listen(event, callback) {
-    pswp.listen(event, callback);
-  }
-
-  export function invalidateCurrItems() {
-    pswp.invalidateCurrItems();
-  }
-
-  export function updateSize(value) {
-    pswp.updateSize(value);
-  }
-
-  export function init() {
-    pswp.init();
-  }
-</script>
-
 <div
   bind:this={photoswipe}
   class="pswp"
@@ -95,3 +48,50 @@
     </div>
   </div>
 </div>
+
+<script>
+  import { onMount } from 'svelte';
+  import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
+  import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
+
+  export let items = [];
+  export let options = {};
+  let photoswipe;
+  let pswp;
+
+  onMount(() => {
+    const defaultOptions = {
+      shareButtons: [
+        {
+          id: 'download',
+          label: 'Download photo',
+          url: '{{raw_image_url}}',
+          download: true,
+        },
+      ],
+    };
+
+    pswp = new PhotoSwipe(
+      photoswipe,
+      PhotoSwipeUI_Default,
+      items,
+      Object.assign({}, defaultOptions, options),
+    );
+  });
+
+  export function listen(event, callback) {
+    pswp.listen(event, callback);
+  }
+
+  export function invalidateCurrItems() {
+    pswp.invalidateCurrItems();
+  }
+
+  export function updateSize(value) {
+    pswp.updateSize(value);
+  }
+
+  export function init() {
+    pswp.init();
+  }
+</script>

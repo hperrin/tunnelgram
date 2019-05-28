@@ -1,3 +1,5 @@
+{#if nickname != null}{nickname}{:else}{user.data[prop] || defaultValue}{/if}
+
 <script>
   import { settings } from '../../stores';
 
@@ -10,5 +12,3 @@
       ? $settings.decrypted.nicknames[user.guid]
       : null;
 </script>
-
-{#if nickname != null}{nickname}{:else}{user.data[prop] || defaultValue}{/if}

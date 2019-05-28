@@ -1,23 +1,3 @@
-<script>
-  import ErrHandler from '../../ErrHandler';
-
-  export let conversation;
-  let joining = false;
-
-  $: showJoin = conversation && conversation.canUserJoin();
-
-  async function join() {
-    joining = true;
-    try {
-      await conversation.join();
-      conversation = conversation;
-    } catch (errObj) {
-      ErrHandler(errObj);
-    }
-    joining = false;
-  }
-</script>
-
 <form on:submit|preventDefault={join}>
   <div
     class="d-flex justify-content-between align-items-center border-dark
@@ -41,3 +21,23 @@
     {/if}
   </div>
 </form>
+
+<script>
+  import ErrHandler from '../../ErrHandler';
+
+  export let conversation;
+  let joining = false;
+
+  $: showJoin = conversation && conversation.canUserJoin();
+
+  async function join() {
+    joining = true;
+    try {
+      await conversation.join();
+      conversation = conversation;
+    } catch (errObj) {
+      ErrHandler(errObj);
+    }
+    joining = false;
+  }
+</script>

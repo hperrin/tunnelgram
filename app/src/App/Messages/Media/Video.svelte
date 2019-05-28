@@ -1,3 +1,52 @@
+<div
+  class="d-flex flex-wrap justify-content-center bg-secondary text-white"
+  style="max-width: 450px; font-size: 1em;">
+  <div class="d-flex justify-content-center align-items-center">
+    {#await thumbnailPromise}
+      <LoadingIndicator
+        width={resource.thumbnailWidth}
+        height={resource.thumbnailHeight}
+        text="Decrypting..." />
+    {:then thumbnail}
+      <div>
+        {#if loading}
+          <LoadingIndicator
+            width={resource.thumbnailWidth}
+            height={resource.thumbnailHeight}
+            text="Decrypting..." />
+        {:else if source}
+          <video
+            poster={resource.thumbnailSrc}
+            width={resource.thumbnailWidth}
+            height={resource.thumbnailHeight}
+            title={resource.name}
+            controls
+            autoplay
+            playsinline>
+            <source src={source} type={resource.dataType} />
+          </video>
+        {:else}
+          <div
+            class="d-flex justify-content-center align-items-center
+            position-relative"
+            tabindex="0"
+            on:click={loadVideo}
+            style="cursor: pointer;">
+            <i class="fas fa-play-circle position-absolute h1 text-white" />
+            <div
+              class="imageThumbnail"
+              style="background-image: url({resource.thumbnailSrc || ''});
+              width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;"
+              title={resource.name} />
+          </div>
+        {/if}
+      </div>
+    {:catch e}
+      <span class="badge badge-warning">error</span>
+    {/await}
+  </div>
+</div>
+
 <script>
   import LoadingIndicator from '../../LoadingIndicator';
   import { crypt } from '../../../Services/EncryptionService';
@@ -48,52 +97,3 @@
     background-size: cover;
   }
 </style>
-
-<div
-  class="d-flex flex-wrap justify-content-center bg-secondary text-white"
-  style="max-width: 450px; font-size: 1em;">
-  <div class="d-flex justify-content-center align-items-center">
-    {#await thumbnailPromise}
-      <LoadingIndicator
-        width={resource.thumbnailWidth}
-        height={resource.thumbnailHeight}
-        text="Decrypting..." />
-    {:then thumbnail}
-      <div>
-        {#if loading}
-          <LoadingIndicator
-            width={resource.thumbnailWidth}
-            height={resource.thumbnailHeight}
-            text="Decrypting..." />
-        {:else if source}
-          <video
-            poster={resource.thumbnailSrc}
-            width={resource.thumbnailWidth}
-            height={resource.thumbnailHeight}
-            title={resource.name}
-            controls
-            autoplay
-            playsinline>
-            <source src={source} type={resource.dataType} />
-          </video>
-        {:else}
-          <div
-            class="d-flex justify-content-center align-items-center
-            position-relative"
-            tabindex="0"
-            on:click={loadVideo}
-            style="cursor: pointer;">
-            <i class="fas fa-play-circle position-absolute h1 text-white" />
-            <div
-              class="imageThumbnail"
-              style="background-image: url({resource.thumbnailSrc || ''});
-              width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;"
-              title={resource.name} />
-          </div>
-        {/if}
-      </div>
-    {:catch e}
-      <span class="badge badge-warning">error</span>
-    {/await}
-  </div>
-</div>

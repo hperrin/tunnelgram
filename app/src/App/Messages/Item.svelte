@@ -1,3 +1,167 @@
+{#if message.data.informational}
+  <div class="d-flex align-items-center w-100 mb-2 text-muted">
+    {#if isMessageUserReady}
+      <a
+        class="mx-2"
+        style="line-height: 1;"
+        href="#/u/{messageUser.data.username}"
+        title={displayName}>
+        <Avatar user={messageUser} size={avatarSize} />
+      </a>
+      <small title={createdDateLong}>
+        {#if message.data.text === 'joined'}
+          <DisplayName bind:user={messageUser} />
+          joined
+        {:else if message.data.text === 'left'}
+          <DisplayName bind:user={messageUser} />
+          left
+        {:else if message.data.text === 'added'}
+          <DisplayName bind:user={messageUser} />
+          added
+          <DisplayName bind:user={message.data.relatedUser} />
+        {:else if message.data.text === 'removed'}
+          <DisplayName bind:user={messageUser} />
+          removed
+          <DisplayName bind:user={message.data.relatedUser} />
+        {:else if message.data.text === 'promoted'}
+          <DisplayName bind:user={messageUser} />
+          promoted
+          <DisplayName bind:user={message.data.relatedUser} />
+        {:else}{message.data.text}{/if}
+      </small>
+    {/if}
+  </div>
+{:else}
+  {#if isChannel && prevMessageUserIsDifferent && isMessageUserReady}
+    <div class="d-flex align-items-center w-100 my-2 text-muted">
+      <a
+        class="mx-2"
+        style="line-height: 1;"
+        href="#/u/{messageUser.data.username}"
+        title={displayName}>
+        <Avatar user={messageUser} size={avatarSize} />
+      </a>
+      <small>
+        <DisplayName bind:user={messageUser} />
+      </small>
+    </div>
+  {/if}
+  <div
+    class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel ? 'flex-row-reverse' : ''}"
+    style="opacity: {pending ? '.6' : '1'};">
+    {#if !isOwner && !isChannel}
+      {#if nextMessageUserIsDifferent && isMessageUserReady}
+        <a
+          class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
+          href="#/u/{messageUser.data.username}"
+          title={displayName}>
+          <Avatar user={messageUser} size={avatarSize} />
+        </a>
+      {:else}
+        <div class="d-inline-block ml-2 my-0">
+          <div style="height: {avatarSize}px; width: {avatarSize}px;" />
+        </div>
+      {/if}
+    {/if}
+    {#if isChannel}
+      <div class="d-inline-block my-0" style="width: {avatarSize / 2}px;" />
+    {/if}
+    <div
+      class="{stageClass}
+      {flipFirst || flipSecond ? 'raise-to-top perspective-stage' : ''}"
+      style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}>
+      <div
+        class="{isChannel ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' + (isOwner ? 'border-primary' : 'border-info') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
+        mx-2 my-0 {flipper ? 'flipper' : ''}
+        {flipFirst ? 'flip-first' : ''}
+        {flipSecond ? 'flip-second' : ''}"
+        style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
+        tabindex="0"
+        role="button"
+        on:animationend={handleFlipAnimationEnd}
+        on:dblclick={toggleActions}
+        title={createdDateLong}
+        bind:this={messageContainer}>
+        {#if shouldEmbiggen}
+          <div
+            class="d-inline-block"
+            on:click={() => (flipFirst = !!flipper)}
+            style="font-size: 1.1rem">
+            {#if message.decrypted.text != null}
+              <span class="h1">
+                {flipped ? message.decrypted.secretText : message.decrypted.text}
+              </span>
+            {:else if message.decrypted.images.length}
+              <div class={shadowClass}>
+                <ImageGrid resources={message.decrypted.images} />
+              </div>
+            {:else if message.decrypted.video != null}
+              <div class={shadowClass}>
+                <Video resource={message.decrypted.video} />
+              </div>
+            {/if}
+          </div>
+        {:else}
+          {#if message.decrypted.images.length && (!flipper || flipped)}
+            <div class="card-header p-0 w-100 d-flex justify-content-center">
+              <ImageGrid resources={message.decrypted.images} />
+            </div>
+          {:else if message.decrypted.video != null && (!flipper || flipped)}
+            <div class="card-header p-0 w-100 d-flex justify-content-center">
+              <Video resource={message.decrypted.video} />
+            </div>
+          {/if}
+          {#if flipped ? formattedSecretText != null : formattedText != null}
+            <div
+              class="card-body py-1 px-2 m-0"
+              on:click={() => (flipFirst = !!flipper)}>
+              <div class="message card-text markdown-body">
+                {@html flipped ? formattedSecretText : formattedText}
+              </div>
+            </div>
+          {/if}
+        {/if}
+      </div>
+    </div>
+    {#if showActions && isOwner}
+      <button
+        type="button"
+        class="btn btn-sm btn-danger mx-2"
+        on:click={deleteMessage}
+        title="Delete message">
+        <i class="fas fa-trash-alt" />
+      </button>
+      {#if pending && saveFailed}
+        <button
+          type="button"
+          class="btn btn-sm btn-success mx-2"
+          on:click={retrySave}
+          title="Retry sending">
+          <i class="fas fa-sync" />
+        </button>
+      {/if}
+      {#if !pending}
+        <div class="mr-2 my-0">
+          <small class="text-muted">{createdDateShort}</small>
+        </div>
+      {/if}
+    {/if}
+    {#if pending}
+      <small class="text-muted">
+        {#if saveFailed}
+          <span title="Failed to send message">
+            <i class="fas fa-exclamation-circle" />
+          </span>
+        {:else}
+          <span title="Sending message...">
+            <i class="fas fa-sync fa-spin" />
+          </span>
+        {/if}
+      </small>
+    {/if}
+  </div>
+{/if}
+
 <script>
   import { onDestroy, tick, createEventDispatcher } from 'svelte';
   import TinyGesture from 'tinygesture';
@@ -253,167 +417,3 @@
     }
   }
 </style>
-
-{#if message.data.informational}
-  <div class="d-flex align-items-center w-100 mb-2 text-muted">
-    {#if isMessageUserReady}
-      <a
-        class="mx-2"
-        style="line-height: 1;"
-        href="#/u/{messageUser.data.username}"
-        title={displayName}>
-        <Avatar user={messageUser} size={avatarSize} />
-      </a>
-      <small title={createdDateLong}>
-        {#if message.data.text === 'joined'}
-          <DisplayName bind:user={messageUser} />
-          joined
-        {:else if message.data.text === 'left'}
-          <DisplayName bind:user={messageUser} />
-          left
-        {:else if message.data.text === 'added'}
-          <DisplayName bind:user={messageUser} />
-          added
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else if message.data.text === 'removed'}
-          <DisplayName bind:user={messageUser} />
-          removed
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else if message.data.text === 'promoted'}
-          <DisplayName bind:user={messageUser} />
-          promoted
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else}{message.data.text}{/if}
-      </small>
-    {/if}
-  </div>
-{:else}
-  {#if isChannel && prevMessageUserIsDifferent && isMessageUserReady}
-    <div class="d-flex align-items-center w-100 my-2 text-muted">
-      <a
-        class="mx-2"
-        style="line-height: 1;"
-        href="#/u/{messageUser.data.username}"
-        title={displayName}>
-        <Avatar user={messageUser} size={avatarSize} />
-      </a>
-      <small>
-        <DisplayName bind:user={messageUser} />
-      </small>
-    </div>
-  {/if}
-  <div
-    class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel ? 'flex-row-reverse' : ''}"
-    style="opacity: {pending ? '.6' : '1'};">
-    {#if !isOwner && !isChannel}
-      {#if nextMessageUserIsDifferent && isMessageUserReady}
-        <a
-          class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
-          href="#/u/{messageUser.data.username}"
-          title={displayName}>
-          <Avatar user={messageUser} size={avatarSize} />
-        </a>
-      {:else}
-        <div class="d-inline-block ml-2 my-0">
-          <div style="height: {avatarSize}px; width: {avatarSize}px;" />
-        </div>
-      {/if}
-    {/if}
-    {#if isChannel}
-      <div class="d-inline-block my-0" style="width: {avatarSize / 2}px;" />
-    {/if}
-    <div
-      class="{stageClass}
-      {flipFirst || flipSecond ? 'raise-to-top perspective-stage' : ''}"
-      style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}>
-      <div
-        class="{isChannel ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' + (isOwner ? 'border-primary' : 'border-info') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
-        mx-2 my-0 {flipper ? 'flipper' : ''}
-        {flipFirst ? 'flip-first' : ''}
-        {flipSecond ? 'flip-second' : ''}"
-        style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
-        tabindex="0"
-        role="button"
-        on:animationend={handleFlipAnimationEnd}
-        on:dblclick={toggleActions}
-        title={createdDateLong}
-        bind:this={messageContainer}>
-        {#if shouldEmbiggen}
-          <div
-            class="d-inline-block"
-            on:click={() => (flipFirst = !!flipper)}
-            style="font-size: 1.1rem">
-            {#if message.decrypted.text != null}
-              <span class="h1">
-                {flipped ? message.decrypted.secretText : message.decrypted.text}
-              </span>
-            {:else if message.decrypted.images.length}
-              <div class={shadowClass}>
-                <ImageGrid resources={message.decrypted.images} />
-              </div>
-            {:else if message.decrypted.video != null}
-              <div class={shadowClass}>
-                <Video resource={message.decrypted.video} />
-              </div>
-            {/if}
-          </div>
-        {:else}
-          {#if message.decrypted.images.length && (!flipper || flipped)}
-            <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <ImageGrid resources={message.decrypted.images} />
-            </div>
-          {:else if message.decrypted.video != null && (!flipper || flipped)}
-            <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <Video resource={message.decrypted.video} />
-            </div>
-          {/if}
-          {#if flipped ? formattedSecretText != null : formattedText != null}
-            <div
-              class="card-body py-1 px-2 m-0"
-              on:click={() => (flipFirst = !!flipper)}>
-              <div class="message card-text markdown-body">
-                {@html flipped ? formattedSecretText : formattedText}
-              </div>
-            </div>
-          {/if}
-        {/if}
-      </div>
-    </div>
-    {#if showActions && isOwner}
-      <button
-        type="button"
-        class="btn btn-sm btn-danger mx-2"
-        on:click={deleteMessage}
-        title="Delete message">
-        <i class="fas fa-trash-alt" />
-      </button>
-      {#if pending && saveFailed}
-        <button
-          type="button"
-          class="btn btn-sm btn-success mx-2"
-          on:click={retrySave}
-          title="Retry sending">
-          <i class="fas fa-sync" />
-        </button>
-      {/if}
-      {#if !pending}
-        <div class="mr-2 my-0">
-          <small class="text-muted">{createdDateShort}</small>
-        </div>
-      {/if}
-    {/if}
-    {#if pending}
-      <small class="text-muted">
-        {#if saveFailed}
-          <span title="Failed to send message">
-            <i class="fas fa-exclamation-circle" />
-          </span>
-        {:else}
-          <span title="Sending message...">
-            <i class="fas fa-sync fa-spin" />
-          </span>
-        {/if}
-      </small>
-    {/if}
-  </div>
-{/if}

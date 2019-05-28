@@ -1,11 +1,3 @@
-<script>
-  export let width;
-  export let height;
-  export let title = null;
-  export let text = null;
-  export let progress = null;
-</script>
-
 <div
   style="display: flex; justify-content: center; align-items: center; position:
   relative; width: {width}px; height: {height}px;">
@@ -51,3 +43,11 @@
     </circle>
   </svg>
 </div>
+
+<script>
+  export let width;
+  export let height;
+  export let title = null;
+  export let text = null;
+  export let progress = null;
+</script>

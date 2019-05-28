@@ -1,3 +1,191 @@
+<div
+  class="h-100 w-100"
+  style="overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;">
+  <div class="d-flex flex-column align-items-center p-3">
+    <div class="d-flex justify-content-center flex-wrap w-100">
+      <div class="d-inline-block position-relative m-3">
+        {#if $viewUserIsSelf}
+          <input
+            class="d-none"
+            type="file"
+            bind:this={avatarInput}
+            on:change={event => handleAvatar(event.target.files)} />
+          <button
+            class="position-absolute btn btn-primary btn-sm rounded"
+            on:click={() => avatarInput.click()}
+            style="right: 0; bottom: 0;">
+            <i class="fas fa-upload fa-2x" />
+          </button>
+        {/if}
+        {#if avatarLoading}
+          <div
+            class="d-flex position-absolute h-100 w-100 justify-content-center
+            align-items-center">
+            <LoadingIndicator width="160" height="160" />
+          </div>
+        {/if}
+        <Avatar bind:user={$viewUser} size="160" />
+      </div>
+      <div class="m-3">
+        <canvas bind:this={code} />
+      </div>
+    </div>
+    <h2>{$viewUser.data.name}</h2>
+    <div>
+      {$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
+    </div>
+    <div>
+      <button class="btn btn-link" title="Share" on:click={shareShortLink}>
+        {shortLinkPreview}
+        <i class="fas fa-share" />
+      </button>
+    </div>
+
+    <div class="d-flex flex-column justify-content-start w-std-page">
+      {#if !$viewUserIsSelf}
+        <div class="form-group">
+          <label for="viewUserNickname">Nickname</label>
+          <div class="d-flex">
+            <input
+              type="text"
+              class="form-control flex-grow-1"
+              id="viewUserNickname"
+              bind:value={nickname}
+              aria-describedby="viewUserNicknameHelp"
+              placeholder="Enter nickname"
+              autocomplete="nickname" />
+            <button
+              type="button"
+              class="btn btn-primary ml-2"
+              style="width: 100px;"
+              on:click={saveSettings}>
+              Save
+            </button>
+          </div>
+          <small id="viewUserNicknameHelp" class="form-text text-muted">
+            Only visible to you.
+          </small>
+        </div>
+      {/if}
+
+      {#if $viewUserIsSelf}
+        <div class="form-group">
+          <label for="accountDetailsUsername">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            id="accountDetailsUsername"
+            bind:value={$viewUser.data.username}
+            placeholder="Enter username"
+            autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="accountDetailsFirstName">First name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="accountDetailsFirstName"
+            bind:value={$viewUser.data.nameFirst}
+            placeholder="Enter name"
+            autocomplete="given-name" />
+        </div>
+        <div class="form-group">
+          <label for="accountDetailsLastName">Last name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="accountDetailsLastName"
+            bind:value={$viewUser.data.nameLast}
+            placeholder="Enter name"
+            autocomplete="family-name" />
+        </div>
+        <div class="form-group">
+          <label for="accountDetailsPhone">Phone</label>
+          <input
+            type="tel"
+            class="form-control"
+            id="accountDetailsPhone"
+            bind:value={$viewUser.data.phone}
+            placeholder="Enter phone number"
+            autocomplete="tel" />
+        </div>
+        <div class="form-group">
+          <span>Password</span>
+          <ChangePassword
+            layout="compact"
+            classInput="form-control"
+            classSubmit="btn btn-primary"
+            classButton="btn btn-secondary" />
+        </div>
+        <div class="dropdown" bind:this={experimentsDropdown}>
+          <button
+            class="btn btn-secondary dropdown-toggle"
+            type="button"
+            id="experimentsButton"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false">
+            Experiments
+          </button>
+          <div class="dropdown-menu" aria-labelledby="experimentsButton">
+            <!-- <a class="dropdown-item" href="javascript:void(0)" on:click={() => setExperiment('EXPERIMENT_WEB_PUSH', EXPERIMENT_WEB_PUSH = !EXPERIMENT_WEB_PUSH)}><input type="checkbox" checked={EXPERIMENT_WEB_PUSH}> Web Push Notifications</a> -->
+            <span class="dropdown-item">No experiments right now.</span>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button
+            type="button"
+            class="btn btn-primary w-100"
+            on:click={saveUser}>
+            Save changes
+          </button>
+        </div>
+      {:else}
+        <div>
+          {#if existingConversations}
+            {#if existingConversations.length}
+              <h3 class="mt-3">Your Chats and Channels Together</h3>
+              <div class="list-group mt-3 text-body">
+                {#each existingConversations as conversation (conversation.guid)}
+                  <a
+                    class="list-group-item list-group-item-action"
+                    href="#/c/{conversation.guid}">
+                    <Preview bind:conversation />
+                  </a>
+                {/each}
+              </div>
+              <h3 class="mt-3">Or Start a New Chat</h3>
+            {/if}
+            <button
+              type="button"
+              class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
+              mt-3 w-100"
+              on:click={newConversation}
+              disabled={startingConversation}>
+              Start a Chat with {$viewUser.data.nameFirst}
+            </button>
+          {:else if existingConversationsError}
+            <div class="alert alert-danger my-3" role="alert">
+              Oops... something went wrong.
+            </div>
+            <button
+              type="button"
+              class="btn btn-light mt-3 w-100"
+              on:click={newConversation}
+              disabled={startingConversation}>
+              Start a Chat with {$viewUser.data.nameFirst}
+            </button>
+          {:else}
+            <div>One second...</div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
+
 <script>
   import { onDestroy } from 'svelte';
   import { Nymph } from 'nymph-client';
@@ -217,191 +405,3 @@
     avatarLoading = false;
   }
 </script>
-
-<div
-  class="h-100 w-100"
-  style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;">
-  <div class="d-flex flex-column align-items-center p-3">
-    <div class="d-flex justify-content-center flex-wrap w-100">
-      <div class="d-inline-block position-relative m-3">
-        {#if $viewUserIsSelf}
-          <input
-            class="d-none"
-            type="file"
-            bind:this={avatarInput}
-            on:change={event => handleAvatar(event.target.files)} />
-          <button
-            class="position-absolute btn btn-primary btn-sm rounded"
-            on:click={() => avatarInput.click()}
-            style="right: 0; bottom: 0;">
-            <i class="fas fa-upload fa-2x" />
-          </button>
-        {/if}
-        {#if avatarLoading}
-          <div
-            class="d-flex position-absolute h-100 w-100 justify-content-center
-            align-items-center">
-            <LoadingIndicator width="160" height="160" />
-          </div>
-        {/if}
-        <Avatar bind:user={$viewUser} size="160" />
-      </div>
-      <div class="m-3">
-        <canvas bind:this={code} />
-      </div>
-    </div>
-    <h2>{$viewUser.data.name}</h2>
-    <div>
-      {$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
-    </div>
-    <div>
-      <button class="btn btn-link" title="Share" on:click={shareShortLink}>
-        {shortLinkPreview}
-        <i class="fas fa-share" />
-      </button>
-    </div>
-
-    <div class="d-flex flex-column justify-content-start w-std-page">
-      {#if !$viewUserIsSelf}
-        <div class="form-group">
-          <label for="viewUserNickname">Nickname</label>
-          <div class="d-flex">
-            <input
-              type="text"
-              class="form-control flex-grow-1"
-              id="viewUserNickname"
-              bind:value={nickname}
-              aria-describedby="viewUserNicknameHelp"
-              placeholder="Enter nickname"
-              autocomplete="nickname" />
-            <button
-              type="button"
-              class="btn btn-primary ml-2"
-              style="width: 100px;"
-              on:click={saveSettings}>
-              Save
-            </button>
-          </div>
-          <small id="viewUserNicknameHelp" class="form-text text-muted">
-            Only visible to you.
-          </small>
-        </div>
-      {/if}
-
-      {#if $viewUserIsSelf}
-        <div class="form-group">
-          <label for="accountDetailsUsername">Username</label>
-          <input
-            type="text"
-            class="form-control"
-            id="accountDetailsUsername"
-            bind:value={$viewUser.data.username}
-            placeholder="Enter username"
-            autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label for="accountDetailsFirstName">First name</label>
-          <input
-            type="text"
-            class="form-control"
-            id="accountDetailsFirstName"
-            bind:value={$viewUser.data.nameFirst}
-            placeholder="Enter name"
-            autocomplete="given-name" />
-        </div>
-        <div class="form-group">
-          <label for="accountDetailsLastName">Last name</label>
-          <input
-            type="text"
-            class="form-control"
-            id="accountDetailsLastName"
-            bind:value={$viewUser.data.nameLast}
-            placeholder="Enter name"
-            autocomplete="family-name" />
-        </div>
-        <div class="form-group">
-          <label for="accountDetailsPhone">Phone</label>
-          <input
-            type="tel"
-            class="form-control"
-            id="accountDetailsPhone"
-            bind:value={$viewUser.data.phone}
-            placeholder="Enter phone number"
-            autocomplete="tel" />
-        </div>
-        <div class="form-group">
-          <span>Password</span>
-          <ChangePassword
-            layout="compact"
-            classInput="form-control"
-            classSubmit="btn btn-primary"
-            classButton="btn btn-secondary" />
-        </div>
-        <div class="dropdown" bind:this={experimentsDropdown}>
-          <button
-            class="btn btn-secondary dropdown-toggle"
-            type="button"
-            id="experimentsButton"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false">
-            Experiments
-          </button>
-          <div class="dropdown-menu" aria-labelledby="experimentsButton">
-            <!-- <a class="dropdown-item" href="javascript:void(0)" on:click={() => setExperiment('EXPERIMENT_WEB_PUSH', EXPERIMENT_WEB_PUSH = !EXPERIMENT_WEB_PUSH)}><input type="checkbox" checked={EXPERIMENT_WEB_PUSH}> Web Push Notifications</a> -->
-            <span class="dropdown-item">No experiments right now.</span>
-          </div>
-        </div>
-
-        <div class="mt-3">
-          <button
-            type="button"
-            class="btn btn-primary w-100"
-            on:click={saveUser}>
-            Save changes
-          </button>
-        </div>
-      {:else}
-        <div>
-          {#if existingConversations}
-            {#if existingConversations.length}
-              <h3 class="mt-3">Your Chats and Channels Together</h3>
-              <div class="list-group mt-3 text-body">
-                {#each existingConversations as conversation (conversation.guid)}
-                  <a
-                    class="list-group-item list-group-item-action"
-                    href="#/c/{conversation.guid}">
-                    <Preview bind:conversation />
-                  </a>
-                {/each}
-              </div>
-              <h3 class="mt-3">Or Start a New Chat</h3>
-            {/if}
-            <button
-              type="button"
-              class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
-              mt-3 w-100"
-              on:click={newConversation}
-              disabled={startingConversation}>
-              Start a Chat with {$viewUser.data.nameFirst}
-            </button>
-          {:else if existingConversationsError}
-            <div class="alert alert-danger my-3" role="alert">
-              Oops... something went wrong.
-            </div>
-            <button
-              type="button"
-              class="btn btn-light mt-3 w-100"
-              on:click={newConversation}
-              disabled={startingConversation}>
-              Start a Chat with {$viewUser.data.nameFirst}
-            </button>
-          {:else}
-            <div>One second...</div>
-          {/if}
-        </div>
-      {/if}
-    </div>
-  </div>
-</div>

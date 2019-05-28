@@ -1,12 +1,3 @@
-<script>
-  import Conversation from '../../Entities/Tunnelgram/Conversation';
-  import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
-  import { settings } from '../../stores';
-
-  export let conversation;
-  let showModeHelp = false;
-</script>
-
 <div
   class="d-flex flex-column justify-content-center align-items-center"
   style="min-height: 150px;">
@@ -28,3 +19,12 @@
     </p>
   {/if}
 </div>
+
+<script>
+  import Conversation from '../../Entities/Tunnelgram/Conversation';
+  import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
+  import { settings } from '../../stores';
+
+  export let conversation;
+  let showModeHelp = false;
+</script>

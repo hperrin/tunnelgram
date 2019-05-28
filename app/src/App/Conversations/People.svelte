@@ -1,3 +1,106 @@
+<div class="d-flex flex-column align-items-center p-3">
+  <div class="d-flex flex-column justify-content-start w-std-page">
+    {#if currentUserIsAdmin}
+      <h3 class="mt-3">Add Someone</h3>
+      <p>
+        {#if $conversation.data.mode === Conversation.MODE_CHAT}
+          New people can only see messages sent after you add them.
+        {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE}
+          New members can see all past messages in this channel.
+        {/if}
+      </p>
+      <UserSearchSelector
+        bind:this={userSearchSelector}
+        className="d-block"
+        disabled={addingUser}
+        on:user-selected={event => addUser(event.detail)} />
+      {#if addUserError != null}
+        <div class="alert alert-danger mt-3 mb-0" role="alert">
+          {addUserError}
+        </div>
+      {/if}
+    {/if}
+    <h3 class="mt-3">
+      {#if $conversation.data.mode === Conversation.MODE_CHAT}
+        People in this Chat
+      {:else}Channel Admins{/if}
+    </h3>
+    <div class="list-group mt-3 text-body">
+      {#each $conversation.data.acFull as curUser (curUser.guid)}
+        <a
+          class="list-group-item d-flex justify-content-between
+          align-items-center"
+          href="#/u/{curUser.data.username}">
+          <span class="d-flex align-items-center">
+            <span class="mr-2" style="line-height: 0;">
+              <Avatar bind:user={curUser} />
+            </span>
+            <DisplayName bind:user={curUser} />
+            ({curUser.data.username})
+          </span>
+          {#if $user.guid === curUser.guid}
+            <span>(You)</span>
+          {/if}
+        </a>
+      {/each}
+    </div>
+    {#if $conversation.data.mode !== Conversation.MODE_CHAT}
+      <h3 class="mt-3">Channel Members</h3>
+      <div class="list-group mt-3 text-body">
+        {#each nonAdminChannelUsers as curUser (curUser.guid)}
+          <span
+            class="list-group-item d-flex justify-content-between
+            align-items-center">
+            <a
+              class="d-flex align-items-center"
+              href="#/u/{curUser.data.username}">
+              <span class="mr-2" style="line-height: 0;">
+                <Avatar bind:user={curUser} />
+              </span>
+              <DisplayName bind:user={curUser} />
+              ({curUser.data.username})
+            </a>
+            {#if $user.guid === curUser.guid}
+              <span>(You)</span>
+            {:else if currentUserIsAdmin}
+              <span>
+                <button
+                  class="btn btn-primary btn-sm"
+                  disabled={addingUser || removingChannelUser}
+                  on:click|preventDefault={() => confirm('Are you sure you want to promote this member to admin?') && addAcFullUser(curUser)}>
+                  Make Admin
+                </button>
+                <button
+                  class="btn btn-danger btn-sm"
+                  title="Remove user"
+                  disabled={removingChannelUser}
+                  on:click|preventDefault={() => removeChannelUser(curUser)}>
+                  <i class="fas fa-minus" />
+                </button>
+              </span>
+            {/if}
+          </span>
+        {/each}
+      </div>
+      {#if !nonAdminChannelUsers.length && !channelUsersLoading}
+        <div class="mt-3">No regular members.</div>
+      {/if}
+      {#if channelUsersLoading}
+        <div class="mt-3">One second...</div>
+      {/if}
+      {#if !channelUsersReachedEnd}
+        <button
+          type="button"
+          class="btn btn-light mt-3 w-100"
+          disabled={channelUsersLoading}
+          on:click={loadMoreChannelUsers}>
+          Show More
+        </button>
+      {/if}
+    {/if}
+  </div>
+</div>
+
 <script>
   import UserSearchSelector from '../Users/UserSearchSelector';
   import Avatar from '../Users/Avatar';
@@ -139,106 +242,3 @@
     channelUsersLoading = false;
   }
 </script>
-
-<div class="d-flex flex-column align-items-center p-3">
-  <div class="d-flex flex-column justify-content-start w-std-page">
-    {#if currentUserIsAdmin}
-      <h3 class="mt-3">Add Someone</h3>
-      <p>
-        {#if $conversation.data.mode === Conversation.MODE_CHAT}
-          New people can only see messages sent after you add them.
-        {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE}
-          New members can see all past messages in this channel.
-        {/if}
-      </p>
-      <UserSearchSelector
-        bind:this={userSearchSelector}
-        className="d-block"
-        disabled={addingUser}
-        on:user-selected={event => addUser(event.detail)} />
-      {#if addUserError != null}
-        <div class="alert alert-danger mt-3 mb-0" role="alert">
-          {addUserError}
-        </div>
-      {/if}
-    {/if}
-    <h3 class="mt-3">
-      {#if $conversation.data.mode === Conversation.MODE_CHAT}
-        People in this Chat
-      {:else}Channel Admins{/if}
-    </h3>
-    <div class="list-group mt-3 text-body">
-      {#each $conversation.data.acFull as curUser (curUser.guid)}
-        <a
-          class="list-group-item d-flex justify-content-between
-          align-items-center"
-          href="#/u/{curUser.data.username}">
-          <span class="d-flex align-items-center">
-            <span class="mr-2" style="line-height: 0;">
-              <Avatar bind:user={curUser} />
-            </span>
-            <DisplayName bind:user={curUser} />
-            ({curUser.data.username})
-          </span>
-          {#if $user.guid === curUser.guid}
-            <span>(You)</span>
-          {/if}
-        </a>
-      {/each}
-    </div>
-    {#if $conversation.data.mode !== Conversation.MODE_CHAT}
-      <h3 class="mt-3">Channel Members</h3>
-      <div class="list-group mt-3 text-body">
-        {#each nonAdminChannelUsers as curUser (curUser.guid)}
-          <span
-            class="list-group-item d-flex justify-content-between
-            align-items-center">
-            <a
-              class="d-flex align-items-center"
-              href="#/u/{curUser.data.username}">
-              <span class="mr-2" style="line-height: 0;">
-                <Avatar bind:user={curUser} />
-              </span>
-              <DisplayName bind:user={curUser} />
-              ({curUser.data.username})
-            </a>
-            {#if $user.guid === curUser.guid}
-              <span>(You)</span>
-            {:else if currentUserIsAdmin}
-              <span>
-                <button
-                  class="btn btn-primary btn-sm"
-                  disabled={addingUser || removingChannelUser}
-                  on:click|preventDefault={() => confirm('Are you sure you want to promote this member to admin?') && addAcFullUser(curUser)}>
-                  Make Admin
-                </button>
-                <button
-                  class="btn btn-danger btn-sm"
-                  title="Remove user"
-                  disabled={removingChannelUser}
-                  on:click|preventDefault={() => removeChannelUser(curUser)}>
-                  <i class="fas fa-minus" />
-                </button>
-              </span>
-            {/if}
-          </span>
-        {/each}
-      </div>
-      {#if !nonAdminChannelUsers.length && !channelUsersLoading}
-        <div class="mt-3">No regular members.</div>
-      {/if}
-      {#if channelUsersLoading}
-        <div class="mt-3">One second...</div>
-      {/if}
-      {#if !channelUsersReachedEnd}
-        <button
-          type="button"
-          class="btn btn-light mt-3 w-100"
-          disabled={channelUsersLoading}
-          on:click={loadMoreChannelUsers}>
-          Show More
-        </button>
-      {/if}
-    {/if}
-  </div>
-</div>
