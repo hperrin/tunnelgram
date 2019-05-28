@@ -584,12 +584,12 @@
           <span
             class="badge badge-light thumbnailOverlay"
             style="left: 4px; bottom: 4px; pointer-events: none;">
-             {image.dataWidth}x{image.dataHeight}
+            {image.dataWidth}x{image.dataHeight}
           </span>
           <span
             class="badge badge-light thumbnailOverlay"
             style="right: 4px; bottom: 4px; pointer-events: none;">
-             {round(image.data.length / 1024 / 1024, 1)}MB
+            {round(image.data.length / 1024 / 1024, 1)}MB
           </span>
         </div>
       {/each}
@@ -618,13 +618,12 @@
           <span
             class="badge badge-light position-absolute"
             style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
-             {video.dataWidth}x{video.dataHeight} - {Math.floor(video.dataDuration / 60)}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
-
+            {video.dataWidth}x{video.dataHeight} - {Math.floor(video.dataDuration / 60)}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
           </span>
           <span
             class="badge badge-light position-absolute"
             style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
-             {round(video.data.length / 1024 / 1024, 1)}MB
+            {round(video.data.length / 1024 / 1024, 1)}MB
           </span>
         </div>
       {/if}

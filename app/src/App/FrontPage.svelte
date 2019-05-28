@@ -18,12 +18,12 @@
       your friends with the peace of mind that no one else can see.
     </p>
     <p class="card-text">
-       {$brand} messages, photos, and videos are
+      {$brand} messages, photos, and videos are
       <strong>encrypted on your device,</strong>
       and can
       <strong>only be decrypted by the recipients on their device.</strong>
-      Not Facebook, Google, Verizon, or AT&T; not even {$brand}'s own servers.
-      Only your friends and you.
+      Not Facebook, Google, Verizon, or AT&amp;T; not even {$brand}'s own
+      servers. Only your friends and you.
     </p>
     <p class="card-text">
       Unlike with other E2EE messengers, you can
@@ -53,7 +53,7 @@
       <strong>Tunnelgram just works like a messenger should.</strong>
     </p>
     <p class="card-text">
-       {$brand} is
+      {$brand} is
       <a href="https://github.com/hperrin/tunnelgram" target="_blank">
         fully open source
       </a>
@@ -68,7 +68,7 @@
       of the code it's built on.
     </p>
     <p class="card-text">
-       {$brand} is not a big corporation. It's built by me,
+      {$brand} is not a big corporation. It's built by me,
       <a href="https://github.com/hperrin" target="_blank">Hunter Perrin.</a>
       I've been writing software for over two decades. I've worked at Facebook
       and Google, and I know who can see the messages you send over their
@@ -77,7 +77,7 @@
       encrypted messenger.
     </p>
     <p class="card-text">
-       {$brand} is hosted at my expense, so I hope to offset the cost through
+      {$brand} is hosted at my expense, so I hope to offset the cost through
       <a href="https://www.patreon.com/tunnelgram" target="_blank">Patreon.</a>
       Basically, the more I make through Patreon, the more time and resources I
       can devote to {$brand}. If I make enough to hire more people, we can make {$brand}

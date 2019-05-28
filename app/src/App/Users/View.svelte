@@ -253,12 +253,11 @@
     </div>
     <h2>{$viewUser.data.name}</h2>
     <div>
-       {$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
-
+      {$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
     </div>
     <div>
       <button class="btn btn-link" title="Share" on:click={shareShortLink}>
-         {shortLinkPreview}
+        {shortLinkPreview}
         <i class="fas fa-share" />
       </button>
     </div>

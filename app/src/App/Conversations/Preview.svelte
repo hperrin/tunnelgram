@@ -113,10 +113,10 @@
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0" style="word-break: break-word;">
-         {conversation.getName($settings)}
+        {conversation.getName($settings)}
       </h5>
       <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">
-         {modifiedDate}
+        {modifiedDate}
       </small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
@@ -139,7 +139,7 @@
         <span style="display: inline-block;" />
       {:else}
         <span class="badge badge-primary">
-           {unreadCount === true ? 'New' : unreadCount}
+          {unreadCount === true ? 'New' : unreadCount}
         </span>
       {/if}
     </div>

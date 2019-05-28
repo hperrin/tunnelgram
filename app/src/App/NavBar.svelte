@@ -62,7 +62,7 @@
             class="dropdown-item {$conversation.notifications === key ? 'active' : ''}"
             href="javascript:void(0)"
             on:click={() => setNotifications(key)}>
-             {Conversation.NOTIFICATIONS_NAME[key]}
+            {Conversation.NOTIFICATIONS_NAME[key]}
           </a>
         {/each}
       </div>
@@ -87,7 +87,7 @@
           <span
             class="fa-layers-counter fa-layers-bottom-right bg-info"
             style="transform: scale(0.6); bottom: -.4em; right: -.4em;">
-             {$conversation.data.acFull.length}
+            {$conversation.data.acFull.length}
           </span>
         {/if}
       </span>

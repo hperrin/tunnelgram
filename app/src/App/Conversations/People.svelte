@@ -158,7 +158,7 @@
         on:user-selected={event => addUser(event.detail)} />
       {#if addUserError != null}
         <div class="alert alert-danger mt-3 mb-0" role="alert">
-           {addUserError}
+          {addUserError}
         </div>
       {/if}
     {/if}

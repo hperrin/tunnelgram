@@ -109,7 +109,7 @@
         type="button"
         on:click={() => ($conversation.data.mode = mode)}
         aria-pressed={$conversation.data.mode === mode}>
-         {Conversation.MODE_NAME[mode]}
+        {Conversation.MODE_NAME[mode]}
       </button>
     {/each}
   </h2>
@@ -157,7 +157,6 @@
     {/if}
     <h3 class="mt-3">
       Add {$conversation.data.mode === Conversation.MODE_CHAT ? 'People' : 'Channel Admins'}
-
     </h3>
     <UserSearchSelector
       bind:this={userSearchSelector}
@@ -166,7 +165,7 @@
       on:user-selected={event => addUser(event.detail)} />
     {#if addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
-         {addUserError}
+        {addUserError}
       </div>
     {/if}
     <ul class="list-group mt-3 text-body">
@@ -210,8 +209,7 @@
             class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
             mt-3 w-100"
             disabled={startingConversation}>
-             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
-
+            {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else if existingConversationsError}
           <div class="alert alert-danger my-3" role="alert">
@@ -221,8 +219,7 @@
             type="submit"
             class="btn btn-light mt-3 w-100"
             disabled={startingConversation}>
-             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
-
+            {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else}
           <div>One second...</div>

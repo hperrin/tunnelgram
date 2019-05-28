@@ -48,7 +48,7 @@
       bg-info text-white w-100 h-100"
       style="font-size: {parseFloat(size) * 0.55}px; line-height: {parseFloat(size) * 0.55}px;
       pointer-events: none; user-select: none;">
-       {iconLetters}
+      {iconLetters}
     </span>
   {/if}
 </span>

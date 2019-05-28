@@ -79,7 +79,7 @@
             </div>
           </div>
           <div class="text-center mb-3">
-            © Copyright 2018-2019 Hunter Perrin. All rights reserved.
+            &copy; Copyright 2018-2019 Hunter Perrin. All rights reserved.
             <a
               href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">
               Privacy Policy
@@ -108,7 +108,7 @@
         {:then unused}
           <App />
         {:catch cryptError}
-          <div>Error during encryption setup: {cryptError} </div>
+          <div>Error during encryption setup: {cryptError}</div>
           <div>
             <a href="javascript:void(0)" on:click={logout}>Log Out</a>
           </div>

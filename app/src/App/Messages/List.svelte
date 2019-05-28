@@ -157,7 +157,9 @@
           const newMessages = [...messages];
           PubSub.updateArray(newMessages, update);
           await Promise.all(
-            newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
+            newMessages
+              .filter(m => !m.cryptReady)
+              .map(m => m.cryptReadyPromise),
           );
           if (destroyed || queryConversationGuid !== conversation.guid) {
             return;
@@ -176,11 +178,18 @@
                 if (ent.guid === cur.guid) {
                   match = true;
                 }
-              } else if (ent.encryption && ent.mode === Conversation.MODE_CHAT) {
+              } else if (
+                ent.encryption &&
+                ent.mode === Conversation.MODE_CHAT
+              ) {
                 if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
                   match = true;
                 }
-              } else if (ent.decrypted.text === cur.decrypted.text && ent.decrypted.images.length === cur.decrypted.images.length && !!ent.decrypted.video === !!cur.decrypted.video) {
+              } else if (
+                ent.decrypted.text === cur.decrypted.text &&
+                ent.decrypted.images.length === cur.decrypted.images.length &&
+                !!ent.decrypted.video === !!cur.decrypted.video
+              ) {
                 match = true;
               }
               if (match) {

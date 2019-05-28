@@ -11,4 +11,4 @@
       : null;
 </script>
 
-{#if nickname != null}{nickname} {:else}{user.data[prop] || defaultValue} {/if}
+{#if nickname != null}{nickname}{:else}{user.data[prop] || defaultValue}{/if}

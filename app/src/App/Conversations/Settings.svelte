@@ -58,7 +58,7 @@
     class="d-flex flex-column justify-content-start w-std-page"
     on:submit|preventDefault={save}>
     <h3 class="mt-3">
-       {Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings
+      {Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings
     </h3>
     {#if currentUserIsAdmin}
       <div class="form-group">

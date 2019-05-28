@@ -86,30 +86,28 @@
           <p class="mb-1 d-flex flex-column">
             {#if showBrowser}
               <span>
-                 {subscription.agent.os.name || ''} {subscription.agent.os.version || ''}
-
+                {subscription.agent.os.name || ''}
+                {subscription.agent.os.version || ''}
               </span>
             {/if}
             <span>
-               {subscription.agent.device.vendor || ''} {subscription.agent.device.model || ''}
-
+              {subscription.agent.device.vendor || ''}
+              {subscription.agent.device.model || ''}
             </span>
           </p>
           <small
             title={new SimpleDateFormatter(subscription.cdate).format('wymdhms', 'short')}>
             Created: {new SimpleDateFormatter(subscription.cdate).format('ago', 'long')}
-
           </small>
           /
           <small
             title={new SimpleDateFormatter(subscription.mdate).format('wymdhms', 'short')}>
             Last used: {new SimpleDateFormatter(subscription.mdate).format('ago', 'long')}
-
           </small>
         </div>
       {/each}
     </div>
   {/if}
 {:catch err}
-  <div class="mt-3">An error occurred: {JSON.stringify(err)} </div>
+  <div class="mt-3">An error occurred: {JSON.stringify(err)}</div>
 {/await}

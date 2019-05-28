@@ -417,7 +417,7 @@
             <div
               class="dropdown-menu dropdown-menu-right"
               aria-labelledby="userDropdown">
-              <h6 class="dropdown-header"> {$user.data.name} </h6>
+              <h6 class="dropdown-header">{$user.data.name}</h6>
               <a class="dropdown-item" href="#/u/{$user.data.username}">
                 Your Account
               </a>

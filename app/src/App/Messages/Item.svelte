@@ -345,8 +345,7 @@
             style="font-size: 1.1rem">
             {#if message.decrypted.text != null}
               <span class="h1">
-                 {flipped ? message.decrypted.secretText : message.decrypted.text}
-
+                {flipped ? message.decrypted.secretText : message.decrypted.text}
               </span>
             {:else if message.decrypted.images.length}
               <div class={shadowClass}>
