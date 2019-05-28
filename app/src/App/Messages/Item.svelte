@@ -5,7 +5,8 @@
         class="mx-2"
         style="line-height: 1;"
         href="#/u/{messageUser.data.username}"
-        title={displayName}>
+        title={displayName}
+      >
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small title={createdDateLong}>
@@ -38,7 +39,8 @@
         class="mx-2"
         style="line-height: 1;"
         href="#/u/{messageUser.data.username}"
-        title={displayName}>
+        title={displayName}
+      >
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
@@ -48,13 +50,15 @@
   {/if}
   <div
     class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel ? 'flex-row-reverse' : ''}"
-    style="opacity: {pending ? '.6' : '1'};">
+    style="opacity: {pending ? '.6' : '1'};"
+  >
     {#if !isOwner && !isChannel}
       {#if nextMessageUserIsDifferent && isMessageUserReady}
         <a
           class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
           href="#/u/{messageUser.data.username}"
-          title={displayName}>
+          title={displayName}
+        >
           <Avatar user={messageUser} size={avatarSize} />
         </a>
       {:else}
@@ -69,7 +73,8 @@
     <div
       class="{stageClass}
       {flipFirst || flipSecond ? 'raise-to-top perspective-stage' : ''}"
-      style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}>
+      style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}
+    >
       <div
         class="{isChannel ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' + (isOwner ? 'border-primary' : 'border-info') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
         mx-2 my-0 {flipper ? 'flipper' : ''}
@@ -81,12 +86,14 @@
         on:animationend={handleFlipAnimationEnd}
         on:dblclick={toggleActions}
         title={createdDateLong}
-        bind:this={messageContainer}>
+        bind:this={messageContainer}
+      >
         {#if shouldEmbiggen}
           <div
             class="d-inline-block"
             on:click={() => (flipFirst = !!flipper)}
-            style="font-size: 1.1rem">
+            style="font-size: 1.1rem"
+          >
             {#if message.decrypted.text != null}
               <span class="h1">
                 {flipped ? message.decrypted.secretText : message.decrypted.text}
@@ -114,7 +121,8 @@
           {#if flipped ? formattedSecretText != null : formattedText != null}
             <div
               class="card-body py-1 px-2 m-0"
-              on:click={() => (flipFirst = !!flipper)}>
+              on:click={() => (flipFirst = !!flipper)}
+            >
               <div class="message card-text markdown-body">
                 {@html flipped ? formattedSecretText : formattedText}
               </div>
@@ -128,7 +136,8 @@
         type="button"
         class="btn btn-sm btn-danger mx-2"
         on:click={deleteMessage}
-        title="Delete message">
+        title="Delete message"
+      >
         <i class="fas fa-trash-alt" />
       </button>
       {#if pending && saveFailed}
@@ -136,7 +145,8 @@
           type="button"
           class="btn btn-sm btn-success mx-2"
           on:click={retrySave}
-          title="Retry sending">
+          title="Retry sending"
+        >
           <i class="fas fa-sync" />
         </button>
       {/if}

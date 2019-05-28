@@ -1,7 +1,8 @@
 <div
   class="h-100 w-100"
   style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;">
+  overscroll-behavior: contain;"
+>
   <div class="d-flex flex-column align-items-center p-3">
     <div class="d-flex flex-column justify-content-start w-std-page">
       <p>
@@ -18,7 +19,8 @@
       <PushSubscriptionsList
         entity={AppPushSubscription}
         name="app"
-        showBrowser={false} />
+        showBrowser={false}
+      />
     </div>
     <div class="d-flex flex-column justify-content-start w-std-page">
       <h3 class="mt-3">Your Web Push Subscriptions</h3>
@@ -30,7 +32,8 @@
       <PushSubscriptionsList
         entity={WebPushSubscription}
         name="web"
-        showBrowser={true} />
+        showBrowser={true}
+      />
     </div>
   </div>
 </div>

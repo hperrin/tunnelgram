@@ -1,7 +1,8 @@
 <form on:submit|preventDefault={join}>
   <div
     class="d-flex justify-content-between align-items-center border-dark
-    border-top">
+    border-top"
+  >
     {#if showJoin}
       <div class="alert alert-info m-0" style="flex-grow: 1;">
         If you'd like to post in this channel, you can join it.
@@ -11,7 +12,8 @@
         style="width: 60px; min-width: 60px;"
         type="submit"
         disabled={joining}
-        title="Join channel">
+        title="Join channel"
+      >
         Join
       </button>
     {:else}

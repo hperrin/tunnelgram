@@ -2,5 +2,6 @@
   "singleQuote": true,
   "trailingComma": "all",
   "pluginSearchDirs": ["."],
-  "svelteSortOrder": "markup-scripts-styles"
+  "svelteSortOrder": "markup-scripts-styles",
+  "svelteBracketNewLine": true
 }

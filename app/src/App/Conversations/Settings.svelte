@@ -1,7 +1,8 @@
 <div class="d-flex flex-column align-items-center p-3">
   <form
     class="d-flex flex-column justify-content-start w-std-page"
-    on:submit|preventDefault={save}>
+    on:submit|preventDefault={save}
+  >
     <h3 class="mt-3">
       {Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings
     </h3>
@@ -14,7 +15,8 @@
           bind:value={name}
           id="name"
           aria-describedby="nameHelp"
-          placeholder="Name" />
+          placeholder="Name"
+        />
         <small id="nameHelp" class="form-text text-muted">
           Visible to everyone. Leave blank to use auto-generated name based on
           participants.
@@ -28,7 +30,8 @@
               <input
                 type="checkbox"
                 bind:checked={openJoining}
-                id="openJoining" />
+                id="openJoining"
+              />
               Allow anyone to join and send messages.
             </label>
           </div>
@@ -48,7 +51,8 @@
         type="button"
         class="btn btn-info"
         on:click={clearReadline}
-        disabled={clearingReadline}>
+        disabled={clearingReadline}
+      >
         Clear my Readline/Notification Settings
       </button>
     </div>
@@ -69,7 +73,8 @@
           type="button"
           class="btn btn-danger"
           on:click={showConfirmLeave}
-          disabled={leavingConversation}>
+          disabled={leavingConversation}
+        >
           Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
         </button>
       {:else}
@@ -78,7 +83,8 @@
           type="button"
           class="btn btn-danger"
           on:click={leave}
-          disabled={leavingConversation}>
+          disabled={leavingConversation}
+        >
           Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
         </button>
       {/if}

@@ -1,19 +1,22 @@
 <div
   class="d-flex flex-wrap justify-content-center bg-secondary text-white"
-  style="max-width: 450px; font-size: 1em;">
+  style="max-width: 450px; font-size: 1em;"
+>
   <div class="d-flex justify-content-center align-items-center">
     {#await thumbnailPromise}
       <LoadingIndicator
         width={resource.thumbnailWidth}
         height={resource.thumbnailHeight}
-        text="Decrypting..." />
+        text="Decrypting..."
+      />
     {:then thumbnail}
       <div>
         {#if loading}
           <LoadingIndicator
             width={resource.thumbnailWidth}
             height={resource.thumbnailHeight}
-            text="Decrypting..." />
+            text="Decrypting..."
+          />
         {:else if source}
           <video
             poster={resource.thumbnailSrc}
@@ -22,7 +25,8 @@
             title={resource.name}
             controls
             autoplay
-            playsinline>
+            playsinline
+          >
             <source src={source} type={resource.dataType} />
           </video>
         {:else}
@@ -31,13 +35,15 @@
             position-relative"
             tabindex="0"
             on:click={loadVideo}
-            style="cursor: pointer;">
+            style="cursor: pointer;"
+          >
             <i class="fas fa-play-circle position-absolute h1 text-white" />
             <div
               class="imageThumbnail"
               style="background-image: url({resource.thumbnailSrc || ''});
               width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;"
-              title={resource.name} />
+              title={resource.name}
+            />
           </div>
         {/if}
       </div>

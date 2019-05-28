@@ -3,7 +3,8 @@
   class="pswp"
   tabindex="-1"
   role="dialog"
-  aria-hidden="true">
+  aria-hidden="true"
+>
   <div class="pswp__bg" />
   <div class="pswp__scroll-wrap">
     <div class="pswp__container">
@@ -19,7 +20,8 @@
         <button class="pswp__button pswp__button--share" title="Download" />
         <button
           class="pswp__button pswp__button--fs"
-          title="Toggle fullscreen" />
+          title="Toggle fullscreen"
+        />
         <button class="pswp__button pswp__button--zoom" title="Zoom in/out" />
 
         <div class="pswp__preloader">
@@ -37,10 +39,12 @@
 
       <button
         class="pswp__button pswp__button--arrow--left"
-        title="Previous (arrow left)" />
+        title="Previous (arrow left)"
+      />
       <button
         class="pswp__button pswp__button--arrow--right"
-        title="Next (arrow right)" />
+        title="Next (arrow right)"
+      />
 
       <div class="pswp__caption">
         <div class="pswp__caption__center" />

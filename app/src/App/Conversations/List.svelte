@@ -3,12 +3,14 @@
   style="overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;"
   bind:this={container}
-  on:scroll={handleScroll}>
+  on:scroll={handleScroll}
+>
   <div class="list-group">
     <a
       href="#/c"
       on:click={() => (search = '')}
-      class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}">
+      class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}"
+    >
       <h5 class="mb-0 d-flex w-100 align-items-center">
         <i class="fas fa-plus-circle mr-1" />
         New Conversation
@@ -22,7 +24,8 @@
           bind:value={search}
           name="search"
           placeholder="Search people"
-          autocomplete="off" />
+          autocomplete="off"
+        />
       </div>
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
@@ -32,14 +35,16 @@
         class="list-group-item p-2 list-group-item-action rounded-0 flex-column
         align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''}
         {filteredConversations[curConversation.guid] ? '' : 'd-none'}"
-        style="cursor: pointer;">
+        style="cursor: pointer;"
+      >
         <Preview bind:conversation={curConversation} />
       </a>
     {/each}
     {#if !loading && !$conversations.length}
       <div
         class="list-group-item p-2 rounded-0 flex-column align-items-start
-        bg-transparent border-0">
+        bg-transparent border-0"
+      >
         {#if $conversations.length}
           No matching conversations.
         {:else}You have no conversations yet.{/if}
@@ -48,7 +53,8 @@
     {#if loading || !reachedEarliestConversation}
       <div
         class="list-group-item p-2 rounded-0 d-flex align-items-center
-        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}">
+        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}"
+      >
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>

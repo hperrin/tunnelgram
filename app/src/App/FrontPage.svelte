@@ -2,7 +2,8 @@
   <img
     class="card-img-top"
     src="og-image.png"
-    alt="Media image: Easy, secure messaging on all your devices." />
+    alt="Media image: Easy, secure messaging on all your devices."
+  />
   <div class="card-body">
     <h1 class="card-title display-5">{$brand}!</h1>
     <p class="card-text lead">The easiest end to end encrypted messenger.</p>
@@ -35,14 +36,16 @@
       other than log in on the new phone. There's no need to
       <a
         href="https://support.signal.org/hc/en-us/articles/360007062012"
-        target="_blank">
+        target="_blank"
+      >
         leave any groups, unregister any numbers, tell your contacts about your
         new phone,
       </a>
       or
       <a
         href="https://faq.whatsapp.com/en/android/28000018/?category=5245246"
-        target="_blank">
+        target="_blank"
+      >
         transfer anything from your old phone.
       </a>
 
@@ -56,7 +59,8 @@
       (server and client) and uses the
       <a
         href="https://github.com/hperrin/tunnelgram/blob/master/README.md#the-tunnelwire-encryption-scheme"
-        target="_blank">
+        target="_blank"
+      >
         Tunnelwire Encryption Scheme,
       </a>
       so you can see
@@ -83,7 +87,8 @@
       class="btn btn-primary btn-lg lead"
       href="https://www.patreon.com/tunnelgram"
       target="_blank"
-      role="button">
+      role="button"
+    >
       Support on Patreon
     </a>
   </div>

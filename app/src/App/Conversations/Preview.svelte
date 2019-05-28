@@ -1,7 +1,8 @@
 <div class="d-flex w-100 justify-content-center align-items-center">
   <div
     class="d-flex justify-content-center align-items-center flex-wrap"
-    style="width: 60px; height: 60px;">
+    style="width: 60px; height: 60px;"
+  >
     {#each avatarUsersAndWidth.users as user (user.guid)}
       <Avatar bind:user size={avatarUsersAndWidth.width} />
     {/each}

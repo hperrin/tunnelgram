@@ -1,7 +1,8 @@
 {#await subscriptionsPromise}
   <div
     class="d-flex align-items-center justify-content-center"
-    style="height: 200px;">
+    style="height: 200px;"
+  >
     <div class="col-auto">
       <LoadingIndicator width="50" height="50" />
     </div>
@@ -27,10 +28,12 @@
               type="button"
               class="btn btn-sm btn-danger rounded-circle"
               on:click={() => remove(subscription)}
-              disabled={subscription.deleting}>
+              disabled={subscription.deleting}
+            >
               <i
                 class="fas fa-times text-white d-inline-block"
-                style="width: 1em; height: 1em;" />
+                style="width: 1em; height: 1em;"
+              />
             </button>
           </div>
           <p class="mb-1 d-flex flex-column">
@@ -46,12 +49,14 @@
             </span>
           </p>
           <small
-            title={new SimpleDateFormatter(subscription.cdate).format('wymdhms', 'short')}>
+            title={new SimpleDateFormatter(subscription.cdate).format('wymdhms', 'short')}
+          >
             Created: {new SimpleDateFormatter(subscription.cdate).format('ago', 'long')}
           </small>
           /
           <small
-            title={new SimpleDateFormatter(subscription.mdate).format('wymdhms', 'short')}>
+            title={new SimpleDateFormatter(subscription.mdate).format('wymdhms', 'short')}
+          >
             Last used: {new SimpleDateFormatter(subscription.mdate).format('ago', 'long')}
           </small>
         </div>

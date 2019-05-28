@@ -1,7 +1,8 @@
 <div
   class="h-100 w-100"
   style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;">
+  overscroll-behavior: contain;"
+>
   <div class="d-flex flex-column align-items-center p-3">
     <div class="d-flex justify-content-center flex-wrap w-100">
       <div class="d-inline-block position-relative m-3">
@@ -10,18 +11,21 @@
             class="d-none"
             type="file"
             bind:this={avatarInput}
-            on:change={event => handleAvatar(event.target.files)} />
+            on:change={event => handleAvatar(event.target.files)}
+          />
           <button
             class="position-absolute btn btn-primary btn-sm rounded"
             on:click={() => avatarInput.click()}
-            style="right: 0; bottom: 0;">
+            style="right: 0; bottom: 0;"
+          >
             <i class="fas fa-upload fa-2x" />
           </button>
         {/if}
         {#if avatarLoading}
           <div
             class="d-flex position-absolute h-100 w-100 justify-content-center
-            align-items-center">
+            align-items-center"
+          >
             <LoadingIndicator width="160" height="160" />
           </div>
         {/if}
@@ -54,12 +58,14 @@
               bind:value={nickname}
               aria-describedby="viewUserNicknameHelp"
               placeholder="Enter nickname"
-              autocomplete="nickname" />
+              autocomplete="nickname"
+            />
             <button
               type="button"
               class="btn btn-primary ml-2"
               style="width: 100px;"
-              on:click={saveSettings}>
+              on:click={saveSettings}
+            >
               Save
             </button>
           </div>
@@ -78,7 +84,8 @@
             id="accountDetailsUsername"
             bind:value={$viewUser.data.username}
             placeholder="Enter username"
-            autocomplete="username" />
+            autocomplete="username"
+          />
         </div>
         <div class="form-group">
           <label for="accountDetailsFirstName">First name</label>
@@ -88,7 +95,8 @@
             id="accountDetailsFirstName"
             bind:value={$viewUser.data.nameFirst}
             placeholder="Enter name"
-            autocomplete="given-name" />
+            autocomplete="given-name"
+          />
         </div>
         <div class="form-group">
           <label for="accountDetailsLastName">Last name</label>
@@ -98,7 +106,8 @@
             id="accountDetailsLastName"
             bind:value={$viewUser.data.nameLast}
             placeholder="Enter name"
-            autocomplete="family-name" />
+            autocomplete="family-name"
+          />
         </div>
         <div class="form-group">
           <label for="accountDetailsPhone">Phone</label>
@@ -108,7 +117,8 @@
             id="accountDetailsPhone"
             bind:value={$viewUser.data.phone}
             placeholder="Enter phone number"
-            autocomplete="tel" />
+            autocomplete="tel"
+          />
         </div>
         <div class="form-group">
           <span>Password</span>
@@ -116,7 +126,8 @@
             layout="compact"
             classInput="form-control"
             classSubmit="btn btn-primary"
-            classButton="btn btn-secondary" />
+            classButton="btn btn-secondary"
+          />
         </div>
         <div class="dropdown" bind:this={experimentsDropdown}>
           <button
@@ -125,7 +136,8 @@
             id="experimentsButton"
             data-toggle="dropdown"
             aria-haspopup="true"
-            aria-expanded="false">
+            aria-expanded="false"
+          >
             Experiments
           </button>
           <div class="dropdown-menu" aria-labelledby="experimentsButton">
@@ -138,7 +150,8 @@
           <button
             type="button"
             class="btn btn-primary w-100"
-            on:click={saveUser}>
+            on:click={saveUser}
+          >
             Save changes
           </button>
         </div>
@@ -151,7 +164,8 @@
                 {#each existingConversations as conversation (conversation.guid)}
                   <a
                     class="list-group-item list-group-item-action"
-                    href="#/c/{conversation.guid}">
+                    href="#/c/{conversation.guid}"
+                  >
                     <Preview bind:conversation />
                   </a>
                 {/each}
@@ -163,7 +177,8 @@
               class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
               mt-3 w-100"
               on:click={newConversation}
-              disabled={startingConversation}>
+              disabled={startingConversation}
+            >
               Start a Chat with {$viewUser.data.nameFirst}
             </button>
           {:else if existingConversationsError}
@@ -174,7 +189,8 @@
               type="button"
               class="btn btn-light mt-3 w-100"
               on:click={newConversation}
-              disabled={startingConversation}>
+              disabled={startingConversation}
+            >
               Start a Chat with {$viewUser.data.nameFirst}
             </button>
           {:else}

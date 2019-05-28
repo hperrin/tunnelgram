@@ -5,14 +5,17 @@
   hidden;"
   bind:this={container}
   on:scroll={setIsAtBottom}
-  on:scroll={handleScroll}>
+  on:scroll={handleScroll}
+>
   {#if loading}
     <div
       class="d-flex align-items-center justify-content-center"
-      style="height: 100%;">
+      style="height: 100%;"
+    >
       <div
         style="background-image: url(images/android-chrome-192x192.png);
-        background-size: cover; position: absolute; width: 88px; height: 88px;" />
+        background-size: cover; position: absolute; width: 88px; height: 88px;"
+      />
       <LoadingIndicator width="200" height="200" />
     </div>
   {:else}
@@ -21,7 +24,8 @@
     {:else}
       <div
         class="d-flex align-items-center justify-content-center {loadingEarlierMessages ? '' : 'visibility-hidden'}"
-        style="height: 150px;">
+        style="height: 150px;"
+      >
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
         </div>
@@ -31,7 +35,8 @@
       {#each messages as message, i (message.guid)}
         <div
           class="d-flex flex-column align-items-start message-box"
-          data-cdate={'' + message.cdate}>
+          data-cdate={'' + message.cdate}
+        >
           {#if i < messages.length - 1 && showTime(messages[i + 1].cdate, message.cdate)}
             <small class="d-flex justify-content-center w-100 mb-2 text-muted">
               <RelativeDate bind:message />
@@ -42,11 +47,13 @@
             on:rendered={rescrollToBottom}
             on:deleted={() => removeMessage(message)}
             nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
-            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid} />
+            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
+          />
           {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
             <div
               class="d-flex align-items-center w-100 mb-2 readline"
-              bind:this={readlineEl}>
+              bind:this={readlineEl}
+            >
               <hr class="mx-2 flex-grow-1" />
               <small class="text-muted">new messages</small>
               <hr class="mx-2 flex-grow-1" />
@@ -68,7 +75,8 @@
             on:rendered={rescrollToBottom}
             pending="true"
             nextMessageUserIsDifferent={false}
-            prevMessageUserIsDifferent={false} />
+            prevMessageUserIsDifferent={false}
+          />
         {/if}
       {/each}
     </div>

@@ -9,17 +9,20 @@
     bind:value={username}
     {disabled}
     autocomplete="off"
-    on:focus={() => (showUserSearchDropdown = true)} />
+    on:focus={() => (showUserSearchDropdown = true)}
+  />
   {#if !disabled && (localUsers.length || serverUsersLoading)}
     <div
       class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}"
-      bind:this={userSearchDropdown}>
+      bind:this={userSearchDropdown}
+    >
       {#each localUsers as user (user.guid)}
         <a
           class="d-flex justify-content-between align-items-center dropdown-item"
           href="javascript:void(0)"
           on:click={() => dispatch('user-selected', user)}
-          on:keydown={event => handleUserSearchResultKeyDown(event)}>
+          on:keydown={event => handleUserSearchResultKeyDown(event)}
+        >
           <span>
             <span class="mr-2">
               <Avatar bind:user />
@@ -43,7 +46,8 @@
             dropdown-item"
             href="javascript:void(0)"
             on:click={() => dispatch('user-selected', user)}
-            on:keydown={event => handleUserSearchResultKeyDown(event)}>
+            on:keydown={event => handleUserSearchResultKeyDown(event)}
+          >
             <span>
               <span class="mr-2">
                 <Avatar bind:user />

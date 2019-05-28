@@ -5,7 +5,8 @@
         class="btn btn-secondary flex-grow-1 {$conversation.data.mode === mode ? 'active' : ''}"
         type="button"
         on:click={() => ($conversation.data.mode = mode)}
-        aria-pressed={$conversation.data.mode === mode}>
+        aria-pressed={$conversation.data.mode === mode}
+      >
         {Conversation.MODE_NAME[mode]}
       </button>
     {/each}
@@ -26,7 +27,8 @@
   {/if}
   <form
     class="d-flex flex-column justify-content-start w-std-page"
-    on:submit|preventDefault={save}>
+    on:submit|preventDefault={save}
+  >
     {#if $conversation.data.mode !== Conversation.MODE_CHAT}
       <div class="form-group">
         <label for="name">Name</label>
@@ -35,7 +37,8 @@
           class="form-control"
           bind:value={$conversation.decrypted.name}
           id="name"
-          placeholder="Name" />
+          placeholder="Name"
+        />
       </div>
     {/if}
     {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
@@ -46,7 +49,8 @@
             <input
               type="checkbox"
               bind:checked={$conversation.data.openJoining}
-              id="openJoining" />
+              id="openJoining"
+            />
             Allow anyone to join and send messages.
           </label>
         </div>
@@ -59,7 +63,8 @@
       bind:this={userSearchSelector}
       className="d-block"
       disabled={startingConversation}
-      on:user-selected={event => addUser(event.detail)} />
+      on:user-selected={event => addUser(event.detail)}
+    />
     {#if addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
         {addUserError}
@@ -69,7 +74,8 @@
       {#each usersOtherThanCurrent as user (user.guid)}
         <li
           class="list-group-item d-flex justify-content-between
-          align-items-center">
+          align-items-center"
+        >
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
               <Avatar bind:user />
@@ -79,7 +85,8 @@
           <button
             class="btn btn-danger btn-sm"
             title="Remove user"
-            on:click={() => removeUser(user)}>
+            on:click={() => removeUser(user)}
+          >
             <i class="fas fa-minus" />
           </button>
         </li>
@@ -94,7 +101,8 @@
               {#each existingConversations as conversation (conversation.guid)}
                 <a
                   class="list-group-item list-group-item-action"
-                  href="#/c/{conversation.guid}">
+                  href="#/c/{conversation.guid}"
+                >
                   <Preview bind:conversation />
                 </a>
               {/each}
@@ -105,7 +113,8 @@
             type="submit"
             class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
             mt-3 w-100"
-            disabled={startingConversation}>
+            disabled={startingConversation}
+          >
             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else if existingConversationsError}
@@ -115,7 +124,8 @@
           <button
             type="submit"
             class="btn btn-light mt-3 w-100"
-            disabled={startingConversation}>
+            disabled={startingConversation}
+          >
             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else}
@@ -126,7 +136,8 @@
       <button
         type="submit"
         class="btn btn-primary mt-3 w-100"
-        disabled={startingConversation}>
+        disabled={startingConversation}
+      >
         Start the Channel
       </button>
     {/if}

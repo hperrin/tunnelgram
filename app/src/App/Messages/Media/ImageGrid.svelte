@@ -2,26 +2,30 @@
   bind:this={thumbnailContainer}
   class="d-flex flex-wrap justify-content-center bg-secondary text-white"
   style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px;
-  font-size: 1em;">
+  font-size: 1em;"
+>
   {#each resources as resource, index (resource.name)}
     <div class="d-flex justify-content-center align-items-center">
       {#await thumbnailPromises[index]}
         <LoadingIndicator
           width={thumbnailDimension}
           height={thumbnailDimension}
-          text="Decrypting..." />
+          text="Decrypting..."
+        />
       {:then thumbnail}
         <a
           href="javascript:void(0)"
           on:click={() => showBigImage(index)}
-          style="font-size: 0;">
+          style="font-size: 0;"
+        >
           <div
             class="imageThumbnail"
             style="background-image: url({resource.thumbnailSrc || ''});
             background-size: {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).width}px
             {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).height}px;
             width: {thumbnailDimension}px; height: {thumbnailDimension}px;"
-            title={resource.name} />
+            title={resource.name}
+          />
         </a>
       {:catch e}
         <span class="badge badge-warning">error</span>
