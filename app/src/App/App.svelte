@@ -165,7 +165,7 @@
             </a>
           </li>
         </ul>
-        <span class="page-name navbar-text">
+        <span class="page-name navbar-text mr-auto">
           <span>
             {#if $view === 'pushSubscriptions'}
               Push Subscriptions
@@ -291,7 +291,10 @@
       // Set the mainUi width to the proper value.
       mainUi.style.width = '100%';
       mainUiGesture = new TinyGesture(mainUi, { mouseSupport: false });
-      mainUiGesture.on('swiperight', () => ($convosOut = true));
+      mainUiGesture.on('swiperight', () => {
+        $convosOut = true;
+        navigate('/');
+      });
       mainUiGesture.on(
         'panmove',
         onPanMove.bind(
