@@ -5,6 +5,8 @@
   "author": "Hunter Perrin <hperrin@gmail.com>",
   "license": "Apache-2.0",
   "scripts": {
+    "run-(not ready)": "WEBPACK_HOT=true webpack-dev-server",
+    "analyze": "WEBPACK_ANALYZE=true NODE_ENV=production webpack",
     "build": "webpack",
     "build-prod": "NODE_ENV=production webpack",
     "watch": "webpack --watch",
@@ -14,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hperrin/nymph-template.git"
+    "url": "git+https://github.com/hperrin/tunnelgram.git"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
@@ -63,6 +65,8 @@
     "ua-parser-js": "^0.7.19",
     "val-loader": "^1.1.1",
     "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.2"
+    "webpack-bundle-analyzer": "^3.3.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.4.1"
   }
 }
