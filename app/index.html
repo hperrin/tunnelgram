@@ -7,10 +7,6 @@
 
   <!-- Nymph Config -->
   <script type="text/javascript">
-    (function(){
-      var s = document.createElement("script"); s.setAttribute("src", "https://www.promisejs.org/polyfills/promise-5.0.0.min.js");
-      (typeof Promise !== "undefined" && typeof Promise.all === "function") || document.getElementsByTagName('head')[0].appendChild(s);
-    })();
     NymphOptions = {
       restURL: '/rest.php',
       pubsubURL: 'ws://'+window.location.hostname+':8081'

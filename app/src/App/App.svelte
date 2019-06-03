@@ -66,7 +66,7 @@
 </div>
 
 <script>
-  import {onMount, onDestroy} from 'svelte';
+  import {onDestroy} from 'svelte';
   import {Nymph, PubSub} from 'nymph-client';
   import Todo from '../Entities/MyApp/Todo';
   import LoadingIndicator from './LoadingIndicator';
@@ -81,16 +81,15 @@
 
   $: remaining = $todos.filter(todo => !todo.get().done).length;
 
-  $: [$archived, subscribe()];
   let previousUser;
+  let previousArchived;
   $: {
-    if ($user && !$user.is(previousUser)) {
+    if ($user && (!$user.is(previousUser) || previousArchived !== $archived)) {
       subscribe();
     }
     previousUser = $user;
+    previousArchived = $archived;
   }
-
-  onMount(subscribe);
 
   onDestroy(() => {
     if (subscription) {

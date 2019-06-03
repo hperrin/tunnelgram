@@ -8,7 +8,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   resolve: {
-    extensions: ['.wasm', '.mjs', '.js', '.json', '.html', '.css'],
+    extensions: ['.wasm', '.mjs', '.js', '.json', '.html', '.svelte', '.css'],
   },
   module: {
     rules: [
