@@ -5,7 +5,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
   },
   resolve: {
     extensions: ['.wasm', '.mjs', '.js', '.json', '.html', '.svelte', '.css'],
@@ -15,15 +15,12 @@ module.exports = {
       {
         test: /\.(html|svelte)$/,
         use: {
-          loader: 'svelte-loader'
-        }
+          loader: 'svelte-loader',
+        },
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader'
-        ]
+        use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.js$/,
@@ -32,13 +29,16 @@ module.exports = {
           options: {
             presets: ['@babel/preset-env'],
             plugins: [
-              ['@babel/transform-classes', {
-                builtins: ['Error']
-              }]
-            ]
-          }
-        }
-      }
-    ]
-  }
+              [
+                '@babel/transform-classes',
+                {
+                  builtins: ['Error'],
+                },
+              ],
+            ],
+          },
+        },
+      },
+    ],
+  },
 };

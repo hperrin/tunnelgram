@@ -1,5 +1,5 @@
-import {writable, get} from 'svelte/store';
-import {User} from 'tilmeld-client';
+import { writable, get } from 'svelte/store';
+import { User } from 'tilmeld-client';
 import ErrHandler from './ErrHandler';
 
 export const user = writable(false);
@@ -33,13 +33,13 @@ user.subscribe(userValue => {
       });
     }
   } else {
-    userAvatar.set(null)
+    userAvatar.set(null);
     userIsTilmeldAdmin.set(false);
   }
   previousUserValue = userValue;
 });
 
-export function logout () {
+export function logout() {
   if (get(user)) {
     get(user).logout();
   }

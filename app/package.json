@@ -7,7 +7,13 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "prepare": "npm run build",
+    "prepare": "npm run lint && npm run build",
+    "lint": "npm run lint:js && npm run lint:php",
+    "lint:js": "prettier --check \"./{*.{html,config.js},src/**/*.{html,svelte,js,css,scss}}\"",
+    "lint:php": "phpcs -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
+    "format": "npm run format:js && npm run format:php",
+    "format:js": "prettier --write \"./{*.{html,config.js},src/**/*.{html,svelte,js,css,scss}}\"",
+    "format:php": "phpcbf -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,6 +30,8 @@
     "css-loader": "^2.1.1",
     "nymph-client": "^4.0.0",
     "pform": "^3.3.0",
+    "prettier": "^1.17.1",
+    "prettier-plugin-svelte": "^0.6.0",
     "style-loader": "^0.23.1",
     "svelte": "^3.4.4",
     "svelte-loader": "^2.13.4",

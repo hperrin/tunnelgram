@@ -1,29 +1,23 @@
-import {Nymph, Entity} from 'nymph-client';
+import { Nymph, Entity } from 'nymph-client';
 
 export class Todo extends Entity {
-  // === Constructor ===
-
-  constructor (id) {
+  constructor(id) {
     super(id);
     this.data.done = false;
   }
 
-  // === Instance Methods ===
-
-  archive (...args) {
+  archive(...args) {
     return this.serverCall('archive', args);
   }
 
-  share (...args) {
+  share(...args) {
     return this.serverCall('share', args);
   }
 
-  unshare (...args) {
+  unshare(...args) {
     return this.serverCall('unshare', args);
   }
 }
-
-// === Static Properties ===
 
 // The name of the server class
 Todo.class = 'MyApp\\Todo';

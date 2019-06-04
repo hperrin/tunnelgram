@@ -56,11 +56,16 @@ class Todo extends \Nymph\Entity {
     }
     try {
       v::notEmpty()
-        ->attribute('name', v::stringType()->notEmpty()->prnt()->length(1, 2048))
+        ->attribute(
+          'name',
+          v::stringType()->notEmpty()->prnt()->length(1, 2048)
+        )
         ->attribute('done', v::boolType())
         ->setName('todo')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (
+      \Respect\Validation\Exceptions\NestedValidationException $exception
+    ) {
       throw new \Exception($exception->getFullMessage());
     }
     return parent::save();

@@ -1,5 +1,9 @@
 <li class="nav-item {$archived ? '' : 'active'}">
-  <a class="nav-link" href="javascript:void(0)" on:click={() => $archived = false}>
+  <a
+    class="nav-link"
+    href="javascript:void(0)"
+    on:click={() => ($archived = false)}
+  >
     Pending
     {#if !$archived}
       <span class="sr-only">(current)</span>
@@ -7,7 +11,11 @@
   </a>
 </li>
 <li class="nav-item {$archived ? 'active' : ''}">
-  <a class="nav-link" href="javascript:void(0)" on:click={() => $archived = true}>
+  <a
+    class="nav-link"
+    href="javascript:void(0)"
+    on:click={() => ($archived = true)}
+  >
     Archived
     {#if $archived}
       <span class="sr-only">(current)</span>
@@ -16,5 +24,5 @@
 </li>
 
 <script>
-  import {archived} from '../stores';
+  import { archived } from '../stores';
 </script>
