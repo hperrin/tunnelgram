@@ -15,9 +15,9 @@
     "remove this line and change versions in require to dev-master for testing"
   ],
   "require": {
-    "sciactive/nymph-server": "^3.0@beta",
-    "sciactive/nymph-pubsub": "^3.0@beta",
-    "sciactive/tilmeld-server": "^1.0@beta",
+    "sciactive/nymph-server": "^3.0",
+    "sciactive/nymph-pubsub": "^3.0",
+    "sciactive/tilmeld-server": "^1.0",
     "respect/validation": "^1.1",
     "aws/aws-sdk-php": "^3.61",
     "ramsey/uuid": "^3.7",
@@ -26,5 +26,7 @@
     "php-http/guzzle6-adapter": "^1.1",
     "norkunas/onesignal-php-api": "^1.1"
   },
-  "minimum-stability": "beta"
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.4"
+  }
 }

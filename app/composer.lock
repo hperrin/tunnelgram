@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e66dfef1af7738079ac6565916f36013",
+    "content-hash": "a5af737f8fe87848d73186c42bf4afb4",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.95.0",
+            "version": "3.99.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "ae8bb13c2f53d0f6779bafde8a10e4b857263ad7"
+                "reference": "455e93cc4feb99847f88f4229659da2c79aa6371"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/ae8bb13c2f53d0f6779bafde8a10e4b857263ad7",
-                "reference": "ae8bb13c2f53d0f6779bafde8a10e4b857263ad7",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/455e93cc4feb99847f88f4229659da2c79aa6371",
+                "reference": "455e93cc4feb99847f88f4229659da2c79aa6371",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-05-24T18:17:19+00:00"
+            "time": "2019-06-04T18:08:27+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -1896,16 +1896,16 @@
         },
         {
             "name": "react/socket",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/socket.git",
-                "reference": "23b7372bb25cea934f6124f5bdac34e30161959e"
+                "reference": "4d49bd3d6ca0257ada8645dd0f8a2f1885e290b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/socket/zipball/23b7372bb25cea934f6124f5bdac34e30161959e",
-                "reference": "23b7372bb25cea934f6124f5bdac34e30161959e",
+                "url": "https://api.github.com/repos/reactphp/socket/zipball/4d49bd3d6ca0257ada8645dd0f8a2f1885e290b3",
+                "reference": "4d49bd3d6ca0257ada8645dd0f8a2f1885e290b3",
                 "shasum": ""
             },
             "require": {
@@ -1939,7 +1939,7 @@
                 "reactphp",
                 "stream"
             ],
-            "time": "2019-01-07T14:10:13+00:00"
+            "time": "2019-06-03T09:04:16+00:00"
         },
         {
             "name": "react/stream",
@@ -1989,16 +1989,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.30",
+            "version": "1.1.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "9bafee191d9c560827105a849e2b29d8446f0f6f"
+                "reference": "45d109fc830644fecc1145200d6351ce4f2769d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/9bafee191d9c560827105a849e2b29d8446f0f6f",
-                "reference": "9bafee191d9c560827105a849e2b29d8446f0f6f",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/45d109fc830644fecc1145200d6351ce4f2769d0",
+                "reference": "45d109fc830644fecc1145200d6351ce4f2769d0",
                 "shasum": ""
             },
             "require": {
@@ -2048,7 +2048,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2019-03-31T13:27:49+00:00"
+            "time": "2019-05-28T06:10:06+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -2102,23 +2102,23 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.0-beta.9",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "f41baafc351713e937602996367414c46ac0edf5"
+                "reference": "08c94366f3ce3d27ccd41ba4aa8d53175acd34d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/f41baafc351713e937602996367414c46ac0edf5",
-                "reference": "f41baafc351713e937602996367414c46ac0edf5",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/08c94366f3ce3d27ccd41ba4aa8d53175acd34d8",
+                "reference": "08c94366f3ce3d27ccd41ba4aa8d53175acd34d8",
                 "shasum": ""
             },
             "require": {
                 "cboden/ratchet": "0.4.*",
                 "ratchet/pawl": "^0.3.4",
                 "sciactive/hookphp": "^2.0",
-                "sciactive/nymph-server": "^3.0@beta",
+                "sciactive/nymph-server": "3.0.*",
                 "zendframework/zend-log": "2.*"
             },
             "require-dev": {
@@ -2154,20 +2154,20 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2019-05-06T00:00:00+00:00"
+            "time": "2019-05-31T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.24",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "900fed5bb328c21de7d599b6f45b57792b64cd7e"
+                "reference": "7ef466c675e3028d31e45a7e449b2dcfb1124a85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/900fed5bb328c21de7d599b6f45b57792b64cd7e",
-                "reference": "900fed5bb328c21de7d599b6f45b57792b64cd7e",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/7ef466c675e3028d31e45a7e449b2dcfb1124a85",
+                "reference": "7ef466c675e3028d31e45a7e449b2dcfb1124a85",
                 "shasum": ""
             },
             "require-dev": {
@@ -2208,27 +2208,27 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2019-05-16T00:00:00+00:00"
+            "time": "2019-05-31T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.0.0-beta.33",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "c7fb9e30b8cdf529bffe03428a98ff7b6fc44576"
+                "reference": "340a7645cfecf4ec41a8c9a63c89294ad8029b9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/c7fb9e30b8cdf529bffe03428a98ff7b6fc44576",
-                "reference": "c7fb9e30b8cdf529bffe03428a98ff7b6fc44576",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/340a7645cfecf4ec41a8c9a63c89294ad8029b9b",
+                "reference": "340a7645cfecf4ec41a8c9a63c89294ad8029b9b",
                 "shasum": ""
             },
             "require": {
                 "lcobucci/jwt": "^3.2",
                 "respect/validation": "^1.1",
                 "sciactive/hookphp": "^2.0",
-                "sciactive/nymph-server": "~3.0@beta",
+                "sciactive/nymph-server": "3.0.*",
                 "sciactive/umailphp": "^2.4"
             },
             "require-dev": {
@@ -2260,6 +2260,7 @@
             "keywords": [
                 "User management",
                 "Users",
+                "access control",
                 "acl",
                 "group management",
                 "group manager",
@@ -2267,7 +2268,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2019-05-16T00:00:00+00:00"
+            "time": "2019-06-03T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -2369,16 +2370,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.3.0-BETA2",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "704ffae70046342d56440e874004afc3d8b95eb7"
+                "reference": "e8da078912bed1339f046c3a9488a5cbd0605971"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/704ffae70046342d56440e874004afc3d8b95eb7",
-                "reference": "704ffae70046342d56440e874004afc3d8b95eb7",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/e8da078912bed1339f046c3a9488a5cbd0605971",
+                "reference": "e8da078912bed1339f046c3a9488a5cbd0605971",
                 "shasum": ""
             },
             "require": {
@@ -2420,20 +2421,20 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-05-20T16:16:12+00:00"
+            "time": "2019-05-29T18:10:42+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v4.3.0-BETA2",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "32cf67fe03e308904f36609c813b78bc34ebaccb"
+                "reference": "0b166aee243364cd9de05755d2e9651876090abb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/32cf67fe03e308904f36609c813b78bc34ebaccb",
-                "reference": "32cf67fe03e308904f36609c813b78bc34ebaccb",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/0b166aee243364cd9de05755d2e9651876090abb",
+                "reference": "0b166aee243364cd9de05755d2e9651876090abb",
                 "shasum": ""
             },
             "require": {
@@ -2479,11 +2480,11 @@
                 "mime",
                 "mime-type"
             ],
-            "time": "2019-04-17T15:26:35+00:00"
+            "time": "2019-05-22T13:16:28+00:00"
         },
         {
             "name": "symfony/options-resolver",
-            "version": "v4.3.0-BETA2",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
@@ -2771,7 +2772,7 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.0-BETA2",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
@@ -3667,14 +3668,62 @@
             "time": "2018-08-28T21:34:05+00:00"
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "squizlabs/php_codesniffer",
+            "version": "3.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
+                "reference": "b8a7362af1cc1aadb5bd36c3defc4dda2cf5f0a8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/b8a7362af1cc1aadb5bd36c3defc4dda2cf5f0a8",
+                "reference": "b8a7362af1cc1aadb5bd36c3defc4dda2cf5f0a8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-simplexml": "*",
+                "ext-tokenizer": "*",
+                "ext-xmlwriter": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "bin": [
+                "bin/phpcs",
+                "bin/phpcbf"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Greg Sherwood",
+                    "role": "lead"
+                }
+            ],
+            "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
+            "homepage": "https://github.com/squizlabs/PHP_CodeSniffer",
+            "keywords": [
+                "phpcs",
+                "standards"
+            ],
+            "time": "2019-04-10T23:49:02+00:00"
+        }
+    ],
     "aliases": [],
-    "minimum-stability": "beta",
-    "stability-flags": {
-        "sciactive/nymph-server": 10,
-        "sciactive/nymph-pubsub": 10,
-        "sciactive/tilmeld-server": 10
-    },
+    "minimum-stability": "stable",
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

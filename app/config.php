@@ -22,22 +22,22 @@ if (getenv('MYSQL_CA_CERT')) {
   $mysqlConnect = function () use ($nymphConfig) {
     $conn = mysqli_init();
     mysqli_ssl_set(
-        $conn,
-        null,
-        null,
-        getenv('MYSQL_CA_CERT'),
-        null,
-        null
+      $conn,
+      null,
+      null,
+      getenv('MYSQL_CA_CERT'),
+      null,
+      null
     );
     mysqli_real_connect(
-        $conn,
-        $nymphConfig['MySQL']['host'],
-        $nymphConfig['MySQL']['user'],
-        $nymphConfig['MySQL']['password'],
-        $nymphConfig['MySQL']['database'],
-        3306,
-        MYSQLI_CLIENT_SSL,
-        MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+      $conn,
+      $nymphConfig['MySQL']['host'],
+      $nymphConfig['MySQL']['user'],
+      $nymphConfig['MySQL']['password'],
+      $nymphConfig['MySQL']['database'],
+      3306,
+      MYSQLI_CLIENT_SSL,
+      MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
     );
     return $conn;
   };
