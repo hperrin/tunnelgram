@@ -1,15 +1,9 @@
 <?php
 
-// You can set this to your own time zone.
 date_default_timezone_set('America/Los_Angeles');
 
 $scheme = (($_SERVER['HTTPS'] ?? 'off') !== 'off') ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
-
-/*
- * You don't need to edit below here. It is set up to work inside your Docker
- * container.
- */
 
 require __DIR__.'/autoload.php';
 
