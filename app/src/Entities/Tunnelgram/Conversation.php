@@ -5,6 +5,7 @@ use Tilmeld\Entities\User;
 use Tilmeld\Entities\Group;
 use Nymph\Nymph;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 use Ramsey\Uuid\Uuid;
 
 class Conversation extends \Nymph\Entity {
@@ -74,20 +75,25 @@ class Conversation extends \Nymph\Entity {
       $acFullRefs[] = ['acFull', $curUser];
     }
 
-    $conversations = Nymph::getEntities([
-      'class' => 'Tunnelgram\Conversation'
-    ], ['&',
-      'ref' => $acFullRefs
-    ]);
+    $conversations = Nymph::getEntities(
+      [
+        'class' => 'Tunnelgram\Conversation'
+      ],
+      ['&',
+        'ref' => $acFullRefs
+      ]
+    );
 
     $count = count($acFulls);
 
-    $conversations = array_values(array_filter(
+    $conversations = array_values(
+      array_filter(
         $conversations,
-        function($conversation) use ($count) {
+        function ($conversation) use ($count) {
           return count($conversation->acFull) === $count;
         }
-    ));
+      )
+    );
 
     return $conversations;
   }
@@ -112,7 +118,9 @@ class Conversation extends \Nymph\Entity {
     if ($user->inArray($this->acFull)) {
       throw new \Exception('That user is a channel admin.');
     }
-    if ($this->mode === self::MODE_CHANNEL_PRIVATE && (!is_string($key) || empty($key))) {
+    if ($this->mode === self::MODE_CHANNEL_PRIVATE
+      && (!is_string($key) || empty($key))
+    ) {
       throw new \Exception('Private channels require a key for each member.');
     }
 
@@ -191,7 +199,9 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function leave() {
-    if ($this->mode !== self::MODE_CHAT && !Tilmeld::$currentUser->inArray($this->acFull)) {
+    if ($this->mode !== self::MODE_CHAT
+      && !Tilmeld::$currentUser->inArray($this->acFull)
+    ) {
       $this->handleDelete();
     } else {
       $this->delete();
@@ -206,21 +216,26 @@ class Conversation extends \Nymph\Entity {
     if ($this->mode === self::MODE_CHAT) {
       // Is the user in the conversation?
       if ($acFullIndex === false) {
-        throw new \Exception('You can only remove yourself from chats you are in.');
+        throw new \Exception(
+          'You can only remove yourself from chats you are in.'
+        );
       }
 
       // Delete all the user's messages.
       do {
-        $messages = Nymph::getEntities([
-          'class' => 'Tunnelgram\Message',
-          'limit' => 60
-        ], ['&',
-          'ref' => [
-            ['conversation', $this],
-            ['user', Tilmeld::$currentUser]
+        $messages = Nymph::getEntities(
+          [
+            'class' => 'Tunnelgram\Message',
+            'limit' => 60
           ],
-          '!strict' => ['informational', true]
-        ]);
+          ['&',
+            'ref' => [
+              ['conversation', $this],
+              ['user', Tilmeld::$currentUser]
+            ],
+            '!strict' => ['informational', true]
+          ]
+        );
         foreach ($messages as $message) {
           $message->delete();
         }
@@ -228,14 +243,17 @@ class Conversation extends \Nymph\Entity {
     }
 
     // Delete the user's readlines.
-    $readlines = Nymph::getEntities([
-      'class' => 'Tunnelgram\Readline'
-    ], ['&',
-      'ref' => [
-        ['conversation', $this],
-        ['user', Tilmeld::$currentUser]
+    $readlines = Nymph::getEntities(
+      [
+        'class' => 'Tunnelgram\Readline'
+      ],
+      ['&',
+        'ref' => [
+          ['conversation', $this],
+          ['user', Tilmeld::$currentUser]
+        ]
       ]
-    ]);
+    );
     foreach ($readlines as $readline) {
       $readline->delete();
     }
@@ -245,13 +263,16 @@ class Conversation extends \Nymph\Entity {
 
       // Delete all the messages associated with it.
       do {
-        $messages = Nymph::getEntities([
-          'class' => 'Tunnelgram\Message',
-          'limit' => 60,
-          'skip_ac' => true
-        ], ['&',
-          'ref' => ['conversation', $this]
-        ]);
+        $messages = Nymph::getEntities(
+          [
+            'class' => 'Tunnelgram\Message',
+            'limit' => 60,
+            'skip_ac' => true
+          ],
+          ['&',
+            'ref' => ['conversation', $this]
+          ]
+        );
         foreach ($messages as $message) {
           // Make sure we have permission to delete.
           $message->user = Tilmeld::$currentUser;
@@ -262,16 +283,19 @@ class Conversation extends \Nymph\Entity {
 
       // Delete all the readlines associated with it.
       do {
-        $readlines = Nymph::getEntities([
-          'class' => 'Tunnelgram\Readline',
-          'limit' => 60,
-          'skip_ac' => true
-        ], ['&',
-          'ref' => [
-            ['conversation', $this],
-            ['user', Tilmeld::$currentUser]
+        $readlines = Nymph::getEntities(
+          [
+            'class' => 'Tunnelgram\Readline',
+            'limit' => 60,
+            'skip_ac' => true
+          ],
+          ['&',
+            'ref' => [
+              ['conversation', $this],
+              ['user', Tilmeld::$currentUser]
+            ]
           ]
-        ]);
+        );
         foreach ($readlines as $readline) {
           // Make sure we have permission to delete.
           $readline->user = Tilmeld::$currentUser;
@@ -283,15 +307,18 @@ class Conversation extends \Nymph\Entity {
       if ($this->mode !== self::MODE_CHAT) {
         // Remove all the users from the group.
         do {
-          $users = Nymph::getEntities([
-            'class' => '\Tilmeld\Entities\User',
-            'limit' => 60,
-            'skip_ac' => true
-          ], ['&',
-            'ref' => [
-              ['groups', $this->group]
+          $users = Nymph::getEntities(
+            [
+              'class' => '\Tilmeld\Entities\User',
+              'limit' => 60,
+              'skip_ac' => true
+            ],
+            ['&',
+              'ref' => [
+                ['groups', $this->group]
+              ]
             ]
-          ]);
+          );
           foreach ($users as $user) {
             // Make sure we have permission to delete.
             $user->delGroup($this->group);
@@ -301,18 +328,24 @@ class Conversation extends \Nymph\Entity {
 
         // Check to make sure there are no users with this group anymore. If
         // there are, something went wrong and we don't want to delete it.
-        $user = Nymph::getEntity([
-          'class' => '\Tilmeld\Entities\User'
-        ], ['|',
-          'ref' => [
-            ['group', $this->group],
-            ['groups', $this->group]
+        $user = Nymph::getEntity(
+          [
+            'class' => '\Tilmeld\Entities\User'
+          ],
+          ['|',
+            'ref' => [
+              ['group', $this->group],
+              ['groups', $this->group]
+            ]
           ]
-        ]);
+        );
 
         if (!$user) {
           // Bypass Tilmeld's hooks to delete the group.
-          Nymph::$driver->_hookObject()->deleteEntityById($this->group->guid, '\Tilmeld\Entities\Group');
+          Nymph::$driver->_hookObject()->deleteEntityById(
+            $this->group->guid,
+            '\Tilmeld\Entities\Group'
+          );
         }
       }
 
@@ -361,20 +394,24 @@ class Conversation extends \Nymph\Entity {
     if ($this->curReadline) {
       $readline = $this->curReadline;
     } else {
-      $readline = Nymph::getEntity([
-        'class' => 'Tunnelgram\Readline'
-      ], ['&',
-        'ref' => [
-          ['user', Tilmeld::$currentUser],
-          ['conversation', $this]
+      $readline = Nymph::getEntity(
+        [
+          'class' => 'Tunnelgram\Readline'
+        ],
+        ['&',
+          'ref' => [
+            ['user', Tilmeld::$currentUser],
+            ['conversation', $this]
+          ]
         ]
-      ]);
+      );
     }
 
     if ($readline) {
       $object->readline = (float) $readline->readline;
-      $object->notifications =
-        $readline->notifications ?? Readline::NOTIFICATIONS_ALL;
+      $object->notifications = (
+        $readline->notifications ?? Readline::NOTIFICATIONS_ALL
+      );
       $this->curReadline = $readline;
     } else {
       $object->readline = null;
@@ -390,13 +427,15 @@ class Conversation extends \Nymph\Entity {
       $object->data['keys'] = $newKeys;
     }
 
-    if (
-      isset($object->data['lastMessage']) &&
-      Nymph::getEntity([
-        'class' => 'Tunnelgram\Message'
-      ], ['&',
-        'guid' => $this->lastMessage->guid
-      ]) === null
+    if (isset($object->data['lastMessage'])
+      && Nymph::getEntity(
+        [
+          'class' => 'Tunnelgram\Message'
+        ],
+        ['&',
+          'guid' => $this->lastMessage->guid
+        ]
+      ) === null
     ) {
       // If a user is added to a chat, they may not be able to see the last
       // message.
@@ -414,7 +453,9 @@ class Conversation extends \Nymph\Entity {
 
     parent::jsonAcceptData($data);
 
-    if ($this->mode === self::MODE_CHANNEL_PRIVATE && in_array('keys', $this->whitelistData)) {
+    if ($this->mode === self::MODE_CHANNEL_PRIVATE
+      && in_array('keys', $this->whitelistData)
+    ) {
       // When an admin updates the group, they will send only admin keys. We
       // need to update those and add back all the member keys.
       foreach ($this->keys as $guid => $value) {
@@ -433,14 +474,17 @@ class Conversation extends \Nymph\Entity {
 
   public function clearReadline() {
     // This also clears notification settings.
-    $readlines = Nymph::getEntities([
-      'class' => 'Tunnelgram\Readline'
-    ], ['&',
-      'ref' => [
-        ['user', Tilmeld::$currentUser],
-        ['conversation', $this]
+    $readlines = Nymph::getEntities(
+      [
+        'class' => 'Tunnelgram\Readline'
+      ],
+      ['&',
+        'ref' => [
+          ['user', Tilmeld::$currentUser],
+          ['conversation', $this]
+        ]
       ]
-    ]);
+    );
 
     foreach ($readlines as $readline) {
       $readline->delete();
@@ -453,14 +497,17 @@ class Conversation extends \Nymph\Entity {
     if ($this->curReadline) {
       $readline = $this->curReadline;
     } else {
-      $readlines = Nymph::getEntities([
-        'class' => 'Tunnelgram\Readline'
-      ], ['&',
-        'ref' => [
-          ['user', Tilmeld::$currentUser],
-          ['conversation', $this]
+      $readlines = Nymph::getEntities(
+        [
+          'class' => 'Tunnelgram\Readline'
+        ],
+        ['&',
+          'ref' => [
+            ['user', Tilmeld::$currentUser],
+            ['conversation', $this]
+          ]
         ]
-      ]);
+      );
 
       $count = count($readlines);
       if ($count) {
@@ -517,7 +564,10 @@ class Conversation extends \Nymph\Entity {
       $this->whitelistData = array_diff($this->whitelistData, ['mode']);
 
       if (!Tilmeld::checkPermissions($this, Tilmeld::FULL_ACCESS)) {
-        $this->whitelistData = array_diff($this->whitelistData, ['keys', 'name']);
+        $this->whitelistData = array_diff(
+          $this->whitelistData,
+          ['keys', 'name']
+        );
       }
     }
   }
@@ -553,14 +603,15 @@ class Conversation extends \Nymph\Entity {
 
       $removedCount = count($removedUsers);
 
-      if (
-        $removedCount &&
-        (
+      if ($removedCount
+        && (
           $removedCount > 1 ||
           !Tilmeld::$currentUser->is($removedUsers[0])
         )
       ) {
-        throw new \Exception('You can\'t remove others from a chat or channel admins.');
+        throw new \Exception(
+          'You can\'t remove others from a chat or channel admins.'
+        );
       }
 
       foreach ($removedUsers as $curUser) {
@@ -620,33 +671,36 @@ class Conversation extends \Nymph\Entity {
       v::notEmpty()
         ->attribute('mode', v::intType()->between(0, 2))
         ->attribute(
-            'keys',
-            v::arrayVal()->each(
-                v::stringType()->notEmpty()->prnt()->length(1, 1024),
-                v::intVal()->in($recipientGuids)
-            ),
-            (
-              isset($this->name) ||
-              $this->mode === self::MODE_CHANNEL_PRIVATE
-            ) && $this->mode !== self::MODE_CHANNEL_PUBLIC
+          'keys',
+          v::arrayVal()->each(
+            v::stringType()->notEmpty()->prnt()->length(1, 1024),
+            v::intVal()->in($recipientGuids)
+          ),
+          (
+            isset($this->name) ||
+            $this->mode === self::MODE_CHANNEL_PRIVATE
+          ) && $this->mode !== self::MODE_CHANNEL_PUBLIC
         )
-        ->attribute('name', v::when(
+        ->attribute(
+          'name',
+          v::when(
             v::nullType(),
             v::alwaysValid(),
             v::stringType()->notEmpty()->prnt()->length(
-                1,
-                ceil(128 * 1.4) // Base64 of 128B
+              1,
+              ceil(128 * 1.4) // Base64 of 128B
             )
-        ))
+          )
+        )
         ->attribute('lastMessage', v::instance('Tunnelgram\Message'), false)
         ->attribute(
-            'openJoining',
-            v::boolType(),
-            $this->mode === self::MODE_CHANNEL_PUBLIC
+          'openJoining',
+          v::boolType(),
+          $this->mode === self::MODE_CHANNEL_PUBLIC
         )
         ->setName('conversation')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
 
@@ -656,10 +710,10 @@ class Conversation extends \Nymph\Entity {
       $userGroup->groupname = 'channel-users-'.Uuid::uuid4()->toString();
       $userGroup->name = $userGroup->groupname;
       $userGroup->parent = Nymph::getEntity(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&',
-            'strict' => ['groupname', 'channel-users']
-          ]
+        ['class' => '\Tilmeld\Entities\Group'],
+        ['&',
+          'strict' => ['groupname', 'channel-users']
+        ]
       );
       if (!isset($userGroup->parent) || !isset($userGroup->group->guid)) {
         unset($userGroup->parent);
@@ -687,15 +741,15 @@ class Conversation extends \Nymph\Entity {
       }
       // Send push notifications to the recipients after script execution.
       $this->sendPushNotifications(
-          array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
-          [
-            'conversationGuid' => $this->guid,
-            'conversationNamed' => isset($this->name),
-            'senderName' => Tilmeld::$currentUser->name,
-            'names' => $names,
-            'type' => 'newConversation',
-            'mode' => $this->mode
-          ]
+        array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
+        [
+          'conversationGuid' => $this->guid,
+          'conversationNamed' => isset($this->name),
+          'senderName' => Tilmeld::$currentUser->name,
+          'names' => $names,
+          'type' => 'newConversation',
+          'mode' => $this->mode
+        ]
       );
     }
 

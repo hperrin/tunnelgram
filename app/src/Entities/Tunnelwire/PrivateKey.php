@@ -3,6 +3,7 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 class PrivateKey extends \Nymph\Entity {
   const ETYPE = 'private_key';
@@ -24,9 +25,12 @@ class PrivateKey extends \Nymph\Entity {
     if (!Tilmeld::gatekeeper()) {
       return false;
     }
-    $key = Nymph::getEntity(['class' => 'Tunnelwire\PrivateKey'], ['&',
-      'ref' => ['user', Tilmeld::$currentUser]
-    ]);
+    $key = Nymph::getEntity(
+      ['class' => 'Tunnelwire\PrivateKey'],
+      ['&',
+        'ref' => ['user', Tilmeld::$currentUser]
+      ]
+    );
     if (!isset($key) || !$key->guid) {
       return false;
     }
@@ -43,7 +47,7 @@ class PrivateKey extends \Nymph\Entity {
         ->attribute('text', v::stringType()->notEmpty()->length(1, 2048))
         ->setName('private key')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
     return parent::save();

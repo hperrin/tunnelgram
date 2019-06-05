@@ -47,41 +47,47 @@ if (getenv('MYSQL_CA_CERT')) {
 \Nymph\Nymph::configure($nymphConfig);
 
 // Nymph PubSub's configuration.
-\Nymph\PubSub\Server::configure([
-  'port' => ((int) getenv('PUBSUB_PORT')) ?? 8080,
-  'entries' => [
-    (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
-  ],
-  'broadcast_counts' => false
-]);
+\Nymph\PubSub\Server::configure(
+  [
+    'port' => ((int) getenv('PUBSUB_PORT')) ?? 8080,
+    'entries' => [
+      (getenv('PUBSUB_SCHEME') ?: 'ws').'://'.getenv('PUBSUB_HOST').'/'
+    ],
+    'broadcast_counts' => false
+  ]
+);
 
 // uMailPHP's configuration.
-\uMailPHP\Mail::configure([
-  'site_name' => 'Tunnelgram',
-  'site_link' => $scheme.'://'.$host.'/',
-  'master_address' => 'noreply@tunnelgram.com',
-  'testing_mode' => true,
-  'testing_email' => 'hunter@sciactive.com'
-]);
+\uMailPHP\Mail::configure(
+  [
+    'site_name' => 'Tunnelgram',
+    'site_link' => $scheme.'://'.$host.'/',
+    'master_address' => 'noreply@tunnelgram.com',
+    'testing_mode' => true,
+    'testing_email' => 'hunter@sciactive.com'
+  ]
+);
 
 
 // Tilmeld's configuration.
-\Tilmeld\Tilmeld::configure([
-  'app_url' => $scheme.'://'.$host.'/',
-  'setup_url' => $scheme.'://'.$host.'/user/',
-  'email_usernames' => false,
-  'enable_user_search' => true,
-  'user_fields' => ['name', 'phone'],
-  'reg_fields' => ['name'],
-  'verify_email' => false,
-  'pw_recovery' => false,
-  'verify_redirect' => $scheme.'://'.$host.'/',
-  'jwt_secret' => base64_decode(
+\Tilmeld\Tilmeld::configure(
+  [
+    'app_url' => $scheme.'://'.$host.'/',
+    'setup_url' => $scheme.'://'.$host.'/user/',
+    'email_usernames' => false,
+    'enable_user_search' => true,
+    'user_fields' => ['name', 'phone'],
+    'reg_fields' => ['name'],
+    'verify_email' => false,
+    'pw_recovery' => false,
+    'verify_redirect' => $scheme.'://'.$host.'/',
+    'jwt_secret' => base64_decode(
       getenv('TILMELD_SECRET')
         ?: trim(file_get_contents(getenv('TILMELD_SECRET_FILE')))
-  ),
- 'jwt_expire' => 60*60*24*182, // About 6 months
- 'jwt_renew' => 60*60*24*60 // About 2 months
-]);
+    ),
+    'jwt_expire' => 60 * 60 * 24 * 182, // About 6 months
+    'jwt_renew' => 60 * 60 * 24 * 60 // About 2 months
+  ]
+);
 
 require __DIR__.'/src/HookMethods.php';

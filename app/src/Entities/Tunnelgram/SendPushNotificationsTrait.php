@@ -15,85 +15,131 @@ trait SendPushNotificationsTrait {
   public function sendPushNotifications($recipientGuids, $options) {
     // Register a shutdown function, so the long process of sending
     // notifications doesn't keep the request pending.
-    register_shutdown_function(function () use ($recipientGuids, $options) {
-      // Send the push notifications.
-      $this->sendAppPushNotifications($recipientGuids, $options);
-      $this->sendWebPushNotifications($recipientGuids, $options);
-    });
+    register_shutdown_function(
+      function () use ($recipientGuids, $options) {
+        // Send the push notifications.
+        $this->sendAppPushNotifications($recipientGuids, $options);
+        $this->sendWebPushNotifications($recipientGuids, $options);
+      }
+    );
   }
 
   public function sendAppPushNotifications($recipientGuids, $options) {
     $config = new Config();
     $config->setApplicationId(getenv('ONESIGNAL_APP_ID'));
-    $config->setApplicationAuthKey(getenv('ONESIGNAL_REST_API_KEY')
-      ?: trim(file_get_contents(getenv('ONESIGNAL_REST_API_KEY_FILE'))));
+    $config->setApplicationAuthKey(
+      getenv('ONESIGNAL_REST_API_KEY')
+        ?: trim(file_get_contents(getenv('ONESIGNAL_REST_API_KEY_FILE')))
+    );
     // $config->setUserAuthKey('your_auth_key');
 
-    $guzzle = new GuzzleClient([
-      'timeout' => 5.0
-    ]);
+    $guzzle = new GuzzleClient(
+      [
+        'timeout' => 5.0
+      ]
+    );
 
     $client = new HttpClient(
-        new GuzzleAdapter($guzzle),
-        new GuzzleMessageFactory()
+      new GuzzleAdapter($guzzle),
+      new GuzzleMessageFactory()
     );
     $api = new OneSignal($config, $client);
 
     foreach ($recipientGuids as $guid) {
-      if (!$this->checkNotificationsSettingForPush($guid, $options['conversationGuid'])) {
+      if (!$this->checkNotificationsSettingForPush(
+        $guid,
+        $options['conversationGuid']
+      )
+      ) {
         // They're not having fun at this party.
         continue;
       }
 
-      $pushSubscriptions = Nymph::getEntities([
-        'class' => 'Tunnelgram\AppPushSubscription',
-        'skip_ac' => true
-      ], ['&',
-        'ref' => ['user', $guid]
-      ]);
+      $pushSubscriptions = Nymph::getEntities(
+        [
+          'class' => 'Tunnelgram\AppPushSubscription',
+          'skip_ac' => true
+        ],
+        ['&',
+          'ref' => ['user', $guid]
+        ]
+      );
       if ($pushSubscriptions) {
         // Construct the notification title for this user.
         $title = $options['conversationNamed'] ? (
             $options['type'] === 'newConversation'
-              ? 'New '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').' with '
-              : ($options['mode'] === Conversation::MODE_CHAT ? 'Chat' : 'Channel').' with '
+              ? 'New '.(
+                $options['mode'] === Conversation::MODE_CHAT
+                  ? 'chat'
+                  : 'channel'
+              ).' with '
+              : (
+                $options['mode'] === Conversation::MODE_CHAT
+                  ? 'Chat'
+                  : 'Channel'
+              ).' with '
           ) : '';
         $title .= implode(
-            ', ',
-            array_filter($options['names'], function ($k) use ($guid) {
+          ', ',
+          array_filter(
+            $options['names'],
+            function ($k) use ($guid) {
               return $k !== $guid;
-            }, ARRAY_FILTER_USE_KEY)
+            },
+            ARRAY_FILTER_USE_KEY
+          )
         );
 
         // Construct the notification message.
         if ($options['type'] === 'newConversation') {
-          $message = $options['senderName'].' started a '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').'.';
+          $message = (
+            $options['senderName'].
+              ' started a '.
+              (
+                $options['mode'] === Conversation::MODE_CHAT
+                  ? 'chat'
+                  : 'channel'
+              ).'.'
+          );
         } elseif ($options['type'] === 'info') {
-          $message = $options['senderName'].' updated the '.($options['mode'] === Conversation::MODE_CHAT ? 'chat' : 'channel').'.';
+          $message = (
+            $options['senderName'].
+              ' updated the '.
+              (
+                $options['mode'] === Conversation::MODE_CHAT
+                  ? 'chat'
+                  : 'channel'
+              ).'.'
+          );
         } else {
-          $message = $options['messageType'].' from '.$options['senderName'].'.';
+          $message = (
+            $options['messageType'].
+              ' from '.$options['senderName'].'.'
+          );
         }
 
         // Send the notification to each subscription.
         foreach ($pushSubscriptions as $appPushSubscription) {
-          $api->notifications->add([
-            'headings' => [
-              'en' => $title
-            ],
-            'contents' => [
-              'en' => $message
-            ],
-            'data' => ['conversationGuid' => $options['conversationGuid']],
-            'include_player_ids' => [$appPushSubscription->playerId],
-            'android_visibility' => 0,
-            'ios_badgeType' => 'Increase',
-            'ios_badgeCount' => 1,
-            // Not supported by OneSignal PHP client yet.
-            // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
-            'priority' => 10,
-            'android_group' => "tunnelgram_{$options['conversationGuid']}",
-            'adm_group' => "tunnelgram_{$options['conversationGuid']}"
-          ]);
+          $api->notifications->add(
+            [
+              'headings' => [
+                'en' => $title
+              ],
+              'contents' => [
+                'en' => $message
+              ],
+              'data' => ['conversationGuid' => $options['conversationGuid']],
+              'include_player_ids' => [$appPushSubscription->playerId],
+              'android_visibility' => 0,
+              'ios_badgeType' => 'Increase',
+              'ios_badgeCount' => 1,
+              // Not supported by OneSignal PHP client yet.
+              // 'thread_id' => "tunnelgram_{$options['conversationGuid']}",
+              'priority' => 10,
+              'android_group' => "tunnelgram_{$options['conversationGuid']}",
+              'adm_group' => "tunnelgram_{$options['conversationGuid']}"
+            ]
+          );
         }
       }
     }
@@ -110,26 +156,35 @@ trait SendPushNotificationsTrait {
     $webPush = new WebPush($auth);
     // $webPush->setAutomaticPadding(false);
     foreach ($recipientGuids as $guid) {
-      if (!$this->checkNotificationsSettingForPush($guid, $options['conversationGuid'])) {
+      if (!$this->checkNotificationsSettingForPush(
+        $guid,
+        $options['conversationGuid']
+      )
+      ) {
         // They're not having fun at this party.
         continue;
       }
 
-      $pushSubscriptions = Nymph::getEntities([
-        'class' => 'Tunnelgram\WebPushSubscription',
-        'skip_ac' => true
-      ], ['&',
-        'ref' => ['user', $guid]
-      ]);
+      $pushSubscriptions = Nymph::getEntities(
+        [
+          'class' => 'Tunnelgram\WebPushSubscription',
+          'skip_ac' => true
+        ],
+        ['&',
+          'ref' => ['user', $guid]
+        ]
+      );
       foreach ($pushSubscriptions as $webPushSubscription) {
-        $subscription = Subscription::create([
-          'endpoint' => $webPushSubscription->endpoint,
-          'keys' => [
-            'p256dh' => $webPushSubscription->keys['p256dh'],
-            'auth' => $webPushSubscription->keys['auth']
-          ],
-          'contentEncoding' => 'aesgcm'
-        ]);
+        $subscription = Subscription::create(
+          [
+            'endpoint' => $webPushSubscription->endpoint,
+            'keys' => [
+              'p256dh' => $webPushSubscription->keys['p256dh'],
+              'auth' => $webPushSubscription->keys['auth']
+            ],
+            'contentEncoding' => 'aesgcm'
+          ]
+        );
 
         $webPush->sendNotification($subscription);
       }
@@ -137,18 +192,24 @@ trait SendPushNotificationsTrait {
     $webPush->flush();
   }
 
-  private function checkNotificationsSettingForPush($userGuid, $conversationGuid) {
+  private function checkNotificationsSettingForPush(
+    $userGuid,
+    $conversationGuid
+  ) {
     // Check that they haven't turned notifications off.
-    $readline = Nymph::getEntity([
-      'class' => 'Tunnelgram\Readline',
-      'skip_ac' => true
-    ], ['&',
-      'ref' => [
-        ['user', $userGuid],
-        ['conversation', $conversationGuid]
+    $readline = Nymph::getEntity(
+      [
+        'class' => 'Tunnelgram\Readline',
+        'skip_ac' => true
       ],
-      'strict' => ['notifications', Readline::NOTIFICATIONS_NONE]
-    ]);
+      ['&',
+        'ref' => [
+          ['user', $userGuid],
+          ['conversation', $conversationGuid]
+        ],
+        'strict' => ['notifications', Readline::NOTIFICATIONS_NONE]
+      ]
+    );
 
     return !$readline;
   }

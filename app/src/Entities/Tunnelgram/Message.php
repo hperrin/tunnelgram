@@ -3,6 +3,7 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 use Ramsey\Uuid\Uuid;
 
 class Message extends \Nymph\Entity {
@@ -35,14 +36,19 @@ class Message extends \Nymph\Entity {
   }
 
   public function handleDelete() {
-    if (isset($this->conversation->lastMessage) && $this->is($this->conversation->lastMessage)) {
-      $this->conversation->lastMessage = Nymph::getEntity([
-        'class' => 'Tunnelgram\Message',
-        'reverse' => true,
-        'offset' => 1
-      ], ['&',
-        'ref' => ['conversation', $this->conversation]
-      ]);
+    if (isset($this->conversation->lastMessage)
+      && $this->is($this->conversation->lastMessage)
+    ) {
+      $this->conversation->lastMessage = Nymph::getEntity(
+        [
+          'class' => 'Tunnelgram\Message',
+          'reverse' => true,
+          'offset' => 1
+        ],
+        ['&',
+          'ref' => ['conversation', $this->conversation]
+        ]
+      );
       $this->conversation->save();
     }
     // Delete images from blob store.
@@ -67,7 +73,9 @@ class Message extends \Nymph\Entity {
   public function jsonSerialize($clientClassName = true) {
     $object = parent::jsonSerialize($clientClassName);
 
-    if (($this->informational ?? false) || $this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC) {
+    if (($this->informational ?? false)
+      || $this->conversation->mode === Conversation::MODE_CHANNEL_PUBLIC
+    ) {
       $object->mode = $this->conversation->mode;
       $object->encryption = false;
     } else {
@@ -101,7 +109,11 @@ class Message extends \Nymph\Entity {
       return false;
     }
 
-    if (!Tilmeld::checkPermissions($this->conversation, Tilmeld::WRITE_ACCESS)) {
+    if (!Tilmeld::checkPermissions(
+      $this->conversation,
+      Tilmeld::WRITE_ACCESS
+    )
+    ) {
       return false;
     }
 
@@ -114,7 +126,9 @@ class Message extends \Nymph\Entity {
       if ($this->conversation->mode === Conversation::MODE_CHAT) {
         $this->acRead = $this->conversation->acFull;
         $this->acOther = Tilmeld::NO_ACCESS;
-      } else if ($this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE) {
+      } elseif ($this->conversation->mode ===
+        Conversation::MODE_CHANNEL_PRIVATE
+      ) {
         $this->acRead = [$this->conversation->group];
         $this->acOther = Tilmeld::NO_ACCESS;
         unset($this->keys);
@@ -171,164 +185,164 @@ class Message extends \Nymph\Entity {
         ->attribute('informational', v::boolType(), false)
         ->attribute('relatedUser', v::instance('\Tilmeld\Entities\User'), false)
         ->attribute(
-            'key',
+          'key',
+          v::stringType()->notEmpty()->prnt()->length(1, 2048),
+          (
+            !($this->informational ?? false) &&
+            $this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE
+          )
+        )
+        ->attribute(
+          'keys',
+          v::arrayVal()->each(
             v::stringType()->notEmpty()->prnt()->length(1, 2048),
-            (
-              !($this->informational ?? false) &&
-              $this->conversation->mode === Conversation::MODE_CHANNEL_PRIVATE
-            )
-        )
-        ->attribute(
-            'keys',
-            v::arrayVal()->each(
-                v::stringType()->notEmpty()->prnt()->length(1, 2048),
-                v::intVal()->in($recipientGuids)
-            ),
-            (
-              !($this->informational ?? false) &&
-              $this->conversation->mode === Conversation::MODE_CHAT
-            )
+            v::intVal()->in($recipientGuids)
+          ),
+          (
+            !($this->informational ?? false) &&
+            $this->conversation->mode === Conversation::MODE_CHAT
+          )
         )
         ->when(
-            v::attribute('images'),
-            v::allOf(
-              v::not(v::attribute('video'))
-            ),
-            v::alwaysValid()
+          v::attribute('images'),
+          v::allOf(
+            v::not(v::attribute('video'))
+          ),
+          v::alwaysValid()
         )
         ->when(
-            v::attribute('video'),
-            v::allOf(
-              v::not(v::attribute('images'))
-            ),
-            v::alwaysValid()
+          v::attribute('video'),
+          v::allOf(
+            v::not(v::attribute('images'))
+          ),
+          v::alwaysValid()
         )
         ->attribute(
-            'text',
-            v::stringType()->notEmpty()->prnt()->length(
+          'text',
+          v::stringType()->notEmpty()->prnt()->length(
+            1,
+            ceil(4096 * 1.4) // Base64 of 4KiB
+          ),
+          false
+        )
+        ->attribute(
+          'images',
+          v::arrayVal()->length(1, 9)->each(
+            v::arrayVal()->length(10, 10)->keySet(
+              v::key(
+                'id',
+                v::regex('/'.Uuid::VALID_PATTERN.'/')
+              ),
+              v::key(
+                'name',
+                v::stringType()->notEmpty()->prnt()->length(
+                  1,
+                  ceil(2048 * 1.4) // Base64 of 2KiB
+                )
+              ),
+              v::key(
+                'thumbnail',
+                v::oneOf(
+                  v::stringType()->notEmpty()->prnt()->length(
+                    1,
+                    ceil(102400 * 1.4) // Base64 of 100KiB
+                  ),
+                  v::nullType()
+                )
+              ),
+              v::key(
+                'thumbnailType',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              ),
+              v::key(
+                'thumbnailWidth',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              ),
+              v::key(
+                'thumbnailHeight',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              ),
+              v::key(
+                'data',
+                v::stringType()->notEmpty()->prnt()->length(
+                  1,
+                  ceil(2097152 * 1.4) // Base64 of 2MiB
+                )
+              ),
+              v::key(
+                'dataType',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              ),
+              v::key(
+                'dataWidth',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              ),
+              v::key(
+                'dataHeight',
+                v::stringType()->notEmpty()->prnt()->length(1, 50)
+              )
+            )
+          ),
+          false
+        )
+        ->attribute(
+          'video',
+          v::arrayVal()->length(11, 11)->keySet(
+            v::key(
+              'id',
+              v::regex('/'.Uuid::VALID_PATTERN.'/')
+            ),
+            v::key(
+              'name',
+              v::stringType()->notEmpty()->prnt()->length(
                 1,
-                ceil(4096 * 1.4) // Base64 of 4KiB
+                ceil(2048 * 1.4) // Base64 of 2KiB
+              )
             ),
-            false
-        )
-        ->attribute(
-            'images',
-            v::arrayVal()->length(1, 9)->each(
-                v::arrayVal()->length(10, 10)->keySet(
-                    v::key(
-                        'id',
-                        v::regex('/'.Uuid::VALID_PATTERN.'/')
-                    ),
-                    v::key(
-                        'name',
-                        v::stringType()->notEmpty()->prnt()->length(
-                            1,
-                            ceil(2048 * 1.4) // Base64 of 2KiB
-                        )
-                    ),
-                    v::key(
-                        'thumbnail',
-                        v::oneOf(
-                            v::stringType()->notEmpty()->prnt()->length(
-                                1,
-                                ceil(102400 * 1.4) // Base64 of 100KiB
-                            ),
-                            v::nullType()
-                        )
-                    ),
-                    v::key(
-                        'thumbnailType',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    ),
-                    v::key(
-                        'thumbnailWidth',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    ),
-                    v::key(
-                        'thumbnailHeight',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    ),
-                    v::key(
-                        'data',
-                        v::stringType()->notEmpty()->prnt()->length(
-                            1,
-                            ceil(2097152 * 1.4) // Base64 of 2MiB
-                        )
-                    ),
-                    v::key(
-                        'dataType',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    ),
-                    v::key(
-                        'dataWidth',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    ),
-                    v::key(
-                        'dataHeight',
-                        v::stringType()->notEmpty()->prnt()->length(1, 50)
-                    )
-                )
+            v::key(
+              'thumbnail',
+              v::stringType()->notEmpty()->prnt()->length(
+                1,
+                ceil(409600 * 1.4) // Base64 of 400KiB
+              )
             ),
-            false
-        )
-        ->attribute(
-            'video',
-            v::arrayVal()->length(11, 11)->keySet(
-                v::key(
-                    'id',
-                    v::regex('/'.Uuid::VALID_PATTERN.'/')
-                ),
-                v::key(
-                    'name',
-                    v::stringType()->notEmpty()->prnt()->length(
-                        1,
-                        ceil(2048 * 1.4) // Base64 of 2KiB
-                    )
-                ),
-                v::key(
-                    'thumbnail',
-                    v::stringType()->notEmpty()->prnt()->length(
-                        1,
-                        ceil(409600 * 1.4) // Base64 of 400KiB
-                    )
-                ),
-                v::key(
-                    'thumbnailType',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'thumbnailWidth',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'thumbnailHeight',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'data',
-                    v::stringType()->notEmpty()->prnt()->length(
-                        1,
-                        ceil(20971520 * 1.4) // Base64 of 20MiB
-                    )
-                ),
-                v::key(
-                    'dataType',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'dataWidth',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'dataHeight',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                ),
-                v::key(
-                    'dataDuration',
-                    v::stringType()->notEmpty()->prnt()->length(1, 50)
-                )
+            v::key(
+              'thumbnailType',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
             ),
-            false
+            v::key(
+              'thumbnailWidth',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            ),
+            v::key(
+              'thumbnailHeight',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            ),
+            v::key(
+              'data',
+              v::stringType()->notEmpty()->prnt()->length(
+                1,
+                ceil(20971520 * 1.4) // Base64 of 20MiB
+              )
+            ),
+            v::key(
+              'dataType',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            ),
+            v::key(
+              'dataWidth',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            ),
+            v::key(
+              'dataHeight',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            ),
+            v::key(
+              'dataDuration',
+              v::stringType()->notEmpty()->prnt()->length(1, 50)
+            )
+          ),
+          false
         )
         ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
         ->setName('message')
@@ -341,15 +355,15 @@ class Message extends \Nymph\Entity {
         foreach ($this->images as &$curImg) {
           if ($curImg['thumbnail'] !== null) {
             $curImg['thumbnail'] = $client->upload(
-                'tunnelgram-thumbnails',
-                $curImg['id'],
-                base64_decode($curImg['thumbnail'])
+              'tunnelgram-thumbnails',
+              $curImg['id'],
+              base64_decode($curImg['thumbnail'])
             );
           }
           $curImg['data'] = $client->upload(
-              'tunnelgram-images',
-              $curImg['id'],
-              base64_decode($curImg['data'])
+            'tunnelgram-images',
+            $curImg['id'],
+            base64_decode($curImg['data'])
           );
         }
         unset($curImg);
@@ -360,17 +374,17 @@ class Message extends \Nymph\Entity {
         include(__DIR__.'/../../Blob/BlobClient.php');
         $client = new BlobClient();
         $this->video['thumbnail'] = $client->upload(
-            'tunnelgram-thumbnails',
-            $this->video['id'],
-            base64_decode($this->video['thumbnail'])
+          'tunnelgram-thumbnails',
+          $this->video['id'],
+          base64_decode($this->video['thumbnail'])
         );
         $this->video['data'] = $client->upload(
-            'tunnelgram-videos',
-            $this->video['id'],
-            base64_decode($this->video['data'])
+          'tunnelgram-videos',
+          $this->video['id'],
+          base64_decode($this->video['data'])
         );
       }
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
     $ret = parent::save();
@@ -386,25 +400,29 @@ class Message extends \Nymph\Entity {
       }
 
       if (count($recipientGuids) > 1) {
-        $showNameProp = count($this->conversation->acFull) > 2 ? 'nameFirst' : 'name';
+        $showNameProp = (
+          count($this->conversation->acFull) > 2 ? 'nameFirst' : 'name'
+        );
         $names = [];
         foreach ($this->conversation->acFull as $curUser) {
           $names[$curUser->guid] = $curUser->$showNameProp;
         }
         // Send push notifications to the recipients after script execution.
         $this->sendPushNotifications(
-            array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
-            [
-              'conversationGuid' => $this->conversation->guid,
-              'conversationNamed' => isset($this->conversation->name),
-              'senderName' => Tilmeld::$currentUser->name,
-              'names' => $names,
-              'type' => ($this->informational ?? false) ? 'info' : 'message',
-              'messageType' => isset($this->images)
+          array_diff($recipientGuids, [Tilmeld::$currentUser->guid]),
+          [
+            'conversationGuid' => $this->conversation->guid,
+            'conversationNamed' => isset($this->conversation->name),
+            'senderName' => Tilmeld::$currentUser->name,
+            'names' => $names,
+            'type' => ($this->informational ?? false) ? 'info' : 'message',
+            'messageType' => (
+              isset($this->images)
                 ? 'Photo'
                 : (isset($this->video) ? 'Video' : 'Message')
-            ]
-          );
+            )
+          ]
+        );
       }
     }
 

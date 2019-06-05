@@ -3,6 +3,7 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 class AppPushSubscription extends \Nymph\Entity {
   const ETYPE = 'app_push_subscription';
@@ -29,12 +30,15 @@ class AppPushSubscription extends \Nymph\Entity {
 
     if (!isset($this->guid)) {
       // Look for an entity with the same playerId.
-      $currentEntity = Nymph::getEntity([
-        'class' => 'Tunnelgram\AppPushSubscription'
-      ], ['&',
-        'ref' => ['user', Tilmeld::$currentUser],
-        'strict' => ['playerId', $this->playerId]
-      ]);
+      $currentEntity = Nymph::getEntity(
+        [
+          'class' => 'Tunnelgram\AppPushSubscription'
+        ],
+        ['&',
+          'ref' => ['user', Tilmeld::$currentUser],
+          'strict' => ['playerId', $this->playerId]
+        ]
+      );
       if ($currentEntity) {
         // Update the existing subscription.
         $this->guid = $currentEntity->guid;
@@ -54,26 +58,29 @@ class AppPushSubscription extends \Nymph\Entity {
         ->attribute('playerId', v::stringType()->notEmpty()->length(1, 1024))
         ->setName('app push subscription')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
 
     if (!isset($this->guid)) {
       // Allow no more than 15 subscriptions per user.
-      $subscriptions = Nymph::getEntities([
-        'class' => 'Tunnelgram\AppPushSubscription',
-        'sort' => 'mdate',
-        'return' => 'guid'
-      ], ['&',
-        'ref' => ['user', Tilmeld::$currentUser]
-      ]);
+      $subscriptions = Nymph::getEntities(
+        [
+          'class' => 'Tunnelgram\AppPushSubscription',
+          'sort' => 'mdate',
+          'return' => 'guid'
+        ],
+        ['&',
+          'ref' => ['user', Tilmeld::$currentUser]
+        ]
+      );
       $count = count($subscriptions);
       // Delete all but 14. (This will be the 15th.)
       if ($count > 14) {
         for ($i = 0; $i < $count - 14; $i++) {
           Nymph:deleteEntityByID(
-              $subscriptions[$i],
-              'Tunnelgram\AppPushSubscription'
+            $subscriptions[$i],
+            'Tunnelgram\AppPushSubscription'
           );
         }
       }

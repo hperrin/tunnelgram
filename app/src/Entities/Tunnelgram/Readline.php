@@ -2,6 +2,7 @@
 
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 class Readline extends \Nymph\Entity {
   const ETYPE = 'readline';
@@ -39,15 +40,20 @@ class Readline extends \Nymph\Entity {
       v::notEmpty()
         ->attribute('readline', v::floatType())
         ->attribute('conversation', v::instance('Tunnelgram\Conversation'))
-        ->attribute('notifications', v::intType()->in([
-          self::NOTIFICATIONS_ALL,
-          self::NOTIFICATIONS_MENTIONS,
-          self::NOTIFICATIONS_DIRECT,
-          self::NOTIFICATIONS_NONE
-        ]))
+        ->attribute(
+          'notifications',
+          v::intType()->in(
+            [
+              self::NOTIFICATIONS_ALL,
+              self::NOTIFICATIONS_MENTIONS,
+              self::NOTIFICATIONS_DIRECT,
+              self::NOTIFICATIONS_NONE
+            ]
+          )
+        )
         ->setName('readline')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
     return parent::save();

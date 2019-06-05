@@ -12,10 +12,10 @@
     "watch": "webpack --watch",
     "lint": "npm run lint:js && npm run lint:php",
     "lint:js": "prettier --check \"./{*.{html,config.js},src/**/*.{html,svelte,js,css,scss}}\"",
-    "lint:php": "phpcs -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
+    "lint:php": "phpcs -vs --extensions=php --ignore=vendor/*,node_modules/* --runtime-set ignore_warnings_on_exit 1 .",
     "format": "npm run format:js && npm run format:php",
     "format:js": "prettier --write \"./{*.{html,config.js},src/**/*.{html,svelte,js,css,scss}}\"",
-    "format:php": "phpcbf -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
+    "format:php": "phpcbf -vs --extensions=php --ignore=vendor/*,node_modules/* --runtime-set ignore_warnings_on_exit 1 .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

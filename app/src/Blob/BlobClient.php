@@ -26,12 +26,14 @@ class BlobClient {
   }
 
   private function uploadS3($bucket, $id, $file) {
-    $put = $this->client->putObject([
-      'ACL' => 'public-read',
-      'Bucket' => $bucket,
-      'Key' => $id,
-      'Body' => $file
-    ]);
+    $put = $this->client->putObject(
+      [
+        'ACL' => 'public-read',
+        'Bucket' => $bucket,
+        'Key' => $id,
+        'Body' => $file
+      ]
+    );
     return $put['ObjectURL'];
   }
 
@@ -49,10 +51,12 @@ class BlobClient {
   }
 
   private function deleteS3($bucket, $id) {
-    $result = $this->client->deleteObject([
-      'Bucket' => $bucket,
-      'Key' => $id
-    ]);
+    $result = $this->client->deleteObject(
+      [
+        'Bucket' => $bucket,
+        'Key' => $id
+      ]
+    );
     return isset($result);
   }
 }

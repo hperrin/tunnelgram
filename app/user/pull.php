@@ -25,12 +25,15 @@ if (empty($endpoint)) {
 
 try {
   // Get the subscription.
-  $webPushSubscription = Nymph::getEntity([
-    'class' => 'Tunnelgram\WebPushSubscription',
-    'skip_ac' => true
-  ], ['&',
-    'strict' => ['endpoint', $endpoint]
-  ]);
+  $webPushSubscription = Nymph::getEntity(
+    [
+      'class' => 'Tunnelgram\WebPushSubscription',
+      'skip_ac' => true
+    ],
+    ['&',
+      'strict' => ['endpoint', $endpoint]
+    ]
+  );
   if (!isset($webPushSubscription)
       || !isset($webPushSubscription->guid)
       || !isset($webPushSubscription->user)
@@ -49,16 +52,20 @@ try {
   $webPushSubscription->save();
 
   // Get all of the user's readlines that they have notifications on for.
-  $readlines = Nymph::getEntities([
-    'class' => 'Tunnelgram\Readline'
-  ], ['&',
-    'ref' => ['user', Tilmeld::$currentUser],
-    '!strict' => ['notifications', Tunnelgram\Readline::NOTIFICATIONS_NONE]
-  ]);
+  $readlines = Nymph::getEntities(
+    [
+      'class' => 'Tunnelgram\Readline'
+    ],
+    ['&',
+      'ref' => ['user', Tilmeld::$currentUser],
+      '!strict' => ['notifications', Tunnelgram\Readline::NOTIFICATIONS_NONE]
+    ]
+  );
 
   // Get all the readlines for conversations with unread messages.
   $readlineConversationGuids = [];
-  $unreadReadlines = array_values(array_filter(
+  $unreadReadlines = array_values(
+    array_filter(
       $readlines,
       function ($readline) use (&$readlineConversationGuids) {
         if (!isset($readline->conversation)
@@ -72,23 +79,30 @@ try {
         return $readline->readline
           < $readline->conversation->lastMessage->cdate;
       }
-  ));
+    )
+  );
 
   // Get all the conversations and their unread messages.
   $conversations = [];
-  $data = array_map(function ($readline) use (&$conversations) {
-    $conversations[] = $readline->conversation;
-    return [
-      'new' => false,
-      'conversation' => $readline->conversation,
-      'messages' => Nymph::getEntities([
-        'class' => 'Tunnelgram\Message'
-      ], ['&',
-        'ref' => ['conversation', $readline->conversation],
-        'gt' => ['cdate', $readline->readline]
-      ])
-    ];
-  }, $unreadReadlines);
+  $data = array_map(
+    function ($readline) use (&$conversations) {
+      $conversations[] = $readline->conversation;
+      return [
+        'new' => false,
+        'conversation' => $readline->conversation,
+        'messages' => Nymph::getEntities(
+          [
+            'class' => 'Tunnelgram\Message'
+          ],
+          ['&',
+            'ref' => ['conversation', $readline->conversation],
+            'gt' => ['cdate', $readline->readline]
+          ]
+        )
+      ];
+    },
+    $unreadReadlines
+  );
   // Look for conversations that don't have a readline.
   $selector = ['&',
     'ref' => ['acFull', Tilmeld::$currentUser]
@@ -96,21 +110,30 @@ try {
   if ($readlineConversationGuids) {
     $selector['!guid'] = $readlineConversationGuids;
   }
-  $newConversations = Nymph::getEntities([
-    'class' => 'Tunnelgram\Conversation'
-  ], $selector);
-  $newData = array_map(function ($conversation) use (&$conversations) {
-    $conversations[] = $conversation;
-    return [
-      'new' => true,
-      'conversation' => $conversation,
-      'messages' => Nymph::getEntities([
-        'class' => 'Tunnelgram\Message'
-      ], ['&',
-        'ref' => ['conversation', $conversation]
-      ])
-    ];
-  }, $newConversations);
+  $newConversations = Nymph::getEntities(
+    [
+      'class' => 'Tunnelgram\Conversation'
+    ],
+    $selector
+  );
+  $newData = array_map(
+    function ($conversation) use (&$conversations) {
+      $conversations[] = $conversation;
+      return [
+        'new' => true,
+        'conversation' => $conversation,
+        'messages' => Nymph::getEntities(
+          [
+            'class' => 'Tunnelgram\Message'
+          ],
+          ['&',
+            'ref' => ['conversation', $conversation]
+          ]
+        )
+      ];
+    },
+    $newConversations
+  );
   $data = array_merge($data, $newData);
 
   // This is for saving the users.
@@ -150,11 +173,13 @@ try {
   }
 
   header('Content-Type: application/json');
-  echo json_encode([
-    'currentUserGuid' => Tilmeld::$currentUser->guid,
-    'users' => $users,
-    'data' => $data
-  ]);
+  echo json_encode(
+    [
+      'currentUserGuid' => Tilmeld::$currentUser->guid,
+      'users' => $users,
+      'data' => $data
+    ]
+  );
 } catch (\Nymph\Exceptions\QueryFailedException $e) {
   echo $e->getMessage()."\n\n".$e->getQuery();
 }

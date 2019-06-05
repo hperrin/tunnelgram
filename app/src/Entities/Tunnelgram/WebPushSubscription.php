@@ -3,6 +3,7 @@
 use Nymph\Nymph;
 use Tilmeld\Tilmeld;
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 class WebPushSubscription extends \Nymph\Entity {
   const ETYPE = 'web_push_subscription';
@@ -37,12 +38,15 @@ class WebPushSubscription extends \Nymph\Entity {
 
     if (!isset($this->guid)) {
       // Look for an entity with the same endpoint.
-      $currentEntity = Nymph::getEntity([
-        'class' => 'Tunnelgram\WebPushSubscription'
-      ], ['&',
-        'ref' => ['user', Tilmeld::$currentUser],
-        'strict' => ['endpoint', $this->endpoint]
-      ]);
+      $currentEntity = Nymph::getEntity(
+        [
+          'class' => 'Tunnelgram\WebPushSubscription'
+        ],
+        ['&',
+          'ref' => ['user', Tilmeld::$currentUser],
+          'strict' => ['endpoint', $this->endpoint]
+        ]
+      );
       if ($currentEntity) {
         // Update the existing subscription...
         $keys = $this->keys;
@@ -64,34 +68,37 @@ class WebPushSubscription extends \Nymph\Entity {
         ->attribute('uaString', v::stringType()->notEmpty()->length(0, 1024))
         ->attribute('endpoint', v::stringType()->notEmpty()->length(1, 1024))
         ->attribute(
-            'keys',
-            v::arrayVal()->each(
-                v::stringType()->notEmpty()->prnt()->length(1, 1024),
-                v::stringType()->in(['p256dh', 'auth'])
-            )
+          'keys',
+          v::arrayVal()->each(
+            v::stringType()->notEmpty()->prnt()->length(1, 1024),
+            v::stringType()->in(['p256dh', 'auth'])
+          )
         )
         ->setName('web push subscription')
         ->assert($this->getValidatable());
-    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
 
     if (!isset($this->guid)) {
       // Allow no more than 15 subscriptions per user.
-      $subscriptions = Nymph::getEntities([
-        'class' => 'Tunnelgram\WebPushSubscription',
-        'sort' => 'mdate',
-        'return' => 'guid'
-      ], ['&',
-        'ref' => ['user', Tilmeld::$currentUser]
-      ]);
+      $subscriptions = Nymph::getEntities(
+        [
+          'class' => 'Tunnelgram\WebPushSubscription',
+          'sort' => 'mdate',
+          'return' => 'guid'
+        ],
+        ['&',
+          'ref' => ['user', Tilmeld::$currentUser]
+        ]
+      );
       $count = count($subscriptions);
       // Delete all but 14. (This will be the 15th.)
       if ($count > 14) {
         for ($i = 0; $i < $count - 14; $i++) {
           Nymph:deleteEntityByID(
-              $subscriptions[$i],
-              'Tunnelgram\WebPushSubscription'
+            $subscriptions[$i],
+            'Tunnelgram\WebPushSubscription'
           );
         }
       }

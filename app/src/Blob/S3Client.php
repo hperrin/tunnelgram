@@ -9,8 +9,14 @@ $options = [
 
 $blobAccessKey = getenv('BLOB_ACCESS_KEY') ?: getenv('BLOB_ACCESS_KEY_FILE');
 if ($blobAccessKey) {
-  $key = getenv('BLOB_ACCESS_KEY') ?: trim(file_get_contents(getenv('BLOB_ACCESS_KEY_FILE')));
-  $secret = getenv('BLOB_SECRET_KEY') ?: trim(file_get_contents(getenv('BLOB_SECRET_KEY_FILE')));
+  $key = (
+    getenv('BLOB_ACCESS_KEY')
+      ?: trim(file_get_contents(getenv('BLOB_ACCESS_KEY_FILE')))
+  );
+  $secret = (
+    getenv('BLOB_SECRET_KEY')
+      ?: trim(file_get_contents(getenv('BLOB_SECRET_KEY_FILE')))
+  );
   $options['credentials'] = [
     'key' => $key,
     'secret' => $secret
