@@ -6,35 +6,25 @@ For development, it provides a Docker setup that runs a DB (MySQL, PostgreSQL, o
 
 ## Installation
 
-1. Get [Docker](https://www.docker.com/products/docker-desktop). (On Ubuntu, see the next section.)
-2. Copy this template:
+1. [Get Docker](https://docs.docker.com/install/#supported-platforms).
+  * You can run the Docker install script on Linux with:
+    * `curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh`
+  * Or, from the repos on Ubuntu:
+    * `sudo apt-get install docker.io && sudo usermod -a -G docker $USER`
+    * Then log out and log back in.
+2. [Get Docker Compose](https://docs.docker.com/compose/install/)
+  * From the repos on Ubuntu:
+    * `sudo apt-get install docker-compose`
+3. Copy this template:
   * `npm install -g degit`
   * `degit hperrin/nymph-template nymph-app` (for MySQL)
     * `degit hperrin/nymph-template#postgres nymph-app` (for Postgres)
     * `degit hperrin/nymph-template#sqlite3 nymph-app` (for SQLite3)
   * `cd nymph-app`
-3. Run the app: `./run.sh`
-4. Go here [http://localhost:8080/](http://localhost:8080/)
+4. Run the app: `./run.sh`
+5. Go to [http://localhost:8080/](http://localhost:8080/)
 
 <small>On SQLite3, the very first time you create an entity (when you register the first user/create the first todo), the DB will become locked. You'll need to refresh the page, but then on it will be fine.</small>
-
-### Docker on Ubuntu 18.04
-
-```sh
-sudo apt-get install docker.io docker-compose && sudo usermod -a -G docker $USER
-```
-
-Then restart, so the group modification takes effect.
-
-### Docker on Ubuntu 17.10 and earlier
-
-```sh
-sudo apt-get install docker.io && sudo usermod -a -G docker $USER
-sudo wget -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m`
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-Then restart, so the group modification takes effect.
 
 ### NPM and Composer
 
