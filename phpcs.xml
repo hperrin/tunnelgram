@@ -5,24 +5,23 @@
   <arg name="tab-width" value="2"/>
 
   <!-- Include the whole PSR-2 standard -->
-  <rule ref="PSR2"/>
+  <rule ref="PSR2">
+    <!-- Braces on same line. -->
+    <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
+    <exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine" />
+    <exclude name="PEAR.Functions.FunctionDeclaration.BraceOnSameLine" />
+    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
+    <!-- Multiline condition complex indentation. -->
+    <exclude name="PEAR.ControlStructures.MultiLineCondition.StartWithBoolean" />
+    <exclude name="PEAR.ControlStructures.MultiLineCondition.Alignment" />
+    <!-- Conflicts with PEAR.Functions.FunctionDeclaration. -->
+    <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent" />
+  </rule>
 
 
   <!-- And change some of the rules to SciActive Code Style. -->
 
   <!-- Braces on same line. -->
-  <rule ref="PSR2.Classes.ClassDeclaration.OpenBraceNewLine">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Classes.ClassDeclaration.OpenBraceNewLine">
-    <severity>0</severity>
-  </rule>
-  <rule ref="PEAR.Functions.FunctionDeclaration.BraceOnSameLine">
-    <severity>0</severity>
-  </rule>
-  <rule ref="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine">
-    <severity>0</severity>
-  </rule>
   <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie">
     <properties>
       <property name="checkFunctions" value="true" />
@@ -108,6 +107,9 @@
 
   <!-- Now SciActive special blend of rules. -->
 
+  <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+    <message>@param annotation for parameter "%s" missing</message>
+	</rule>
   <rule ref="Generic.Files.LineEndings" />
   <rule ref="Generic.Classes.DuplicateClassName"/>
   <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
@@ -173,9 +175,5 @@
   <rule ref="Squiz.WhiteSpace.ScopeKeywordSpacing"/>
   <rule ref="Squiz.WhiteSpace.SemicolonSpacing"/>
 
-  <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
-  <rule ref="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-  <rule ref="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace">
-    <severity>0</severity>
-  </rule>
+  <rule ref="Squiz.WhiteSpace.ControlStructureSpacing" />
 </ruleset>
