@@ -6,7 +6,7 @@ For development, it provides a Docker setup that runs a DB (MySQL, PostgreSQL, o
 
 ## Installation
 
-1. Get [Docker](https://www.docker.com/community-edition). (On Ubuntu, see the next section.)
+1. Get [Docker](https://www.docker.com/products/docker-desktop). (On Ubuntu, see the next section.)
 2. Copy this template:
   * `npm install -g degit`
   * `degit hperrin/nymph-template nymph-app` (for MySQL)
