@@ -3,19 +3,19 @@ import { Nymph, Entity } from 'nymph-client';
 export class Todo extends Entity {
   constructor(id) {
     super(id);
-    this.data.done = false;
+    this.done = false;
   }
 
-  archive(...args) {
-    return this.serverCall('archive', args);
+  $archive(...args) {
+    return this.$serverCall('archive', args);
   }
 
-  share(...args) {
-    return this.serverCall('share', args);
+  $share(...args) {
+    return this.$serverCall('share', args);
   }
 
-  unshare(...args) {
-    return this.serverCall('unshare', args);
+  $unshare(...args) {
+    return this.$serverCall('unshare', args);
   }
 }
 

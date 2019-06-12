@@ -44,14 +44,14 @@
                 <img
                   class="rounded-circle"
                   src={$userAvatar ? $userAvatar : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoAgMAAADxkFD+AAAACVBMVEXMzMyWlpa3t7fI5tFIAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAF0lEQVQYlWNgGOagiQPOdGQZQHdQGQAArI4A0FwgBeUAAAAASUVORK5CYII='}
-                  alt={$user.data.nameFirst}
+                  alt={$user.nameFirst}
                 />
               </a>
               <div
                 class="dropdown-menu dropdown-menu-right"
                 aria-labelledby="userDropdown"
               >
-                <h6 class="dropdown-header">{$user.data.name}</h6>
+                <h6 class="dropdown-header">{$user.name}</h6>
                 <a
                   class="dropdown-item"
                   href="javascript:void(0)"
@@ -138,7 +138,7 @@
               type="email"
               class="form-control"
               id="accountDetailsEmail"
-              bind:value={$user.data.username}
+              bind:value={$user.username}
               placeholder="Enter email"
             />
           </div>
@@ -148,7 +148,7 @@
               type="text"
               class="form-control"
               id="accountDetailsFirstName"
-              bind:value={$user.data.nameFirst}
+              bind:value={$user.nameFirst}
               placeholder="Enter name"
             />
           </div>
@@ -158,7 +158,7 @@
               type="text"
               class="form-control"
               id="accountDetailsLastName"
-              bind:value={$user.data.nameLast}
+              bind:value={$user.nameLast}
               placeholder="Enter name"
             />
           </div>
@@ -168,7 +168,7 @@
               type="tel"
               class="form-control"
               id="accountDetailsPhone"
-              bind:value={$user.data.phone}
+              bind:value={$user.phone}
               placeholder="Enter phone number"
             />
           </div>
@@ -178,7 +178,7 @@
               <select
                 class="form-control"
                 id="accountDetailsTimezone"
-                bind:value={$user.data.timezone}
+                bind:value={$user.timezone}
               >
                 <option value="">--Default--</option>
                 {#each clientConfig.timezones as tz}
@@ -238,20 +238,8 @@
   });
 
   function saveUser() {
-    $user.save().then(userValue => {
+    $user.$save().then(userValue => {
       $user = userValue;
     }, ErrHandler);
-  }
-
-  function navbar(node) {
-    const navbar = new NavBar({ target: node });
-    return {
-      update(data) {
-        navbar.update(data);
-      },
-      destroy() {
-        navbar.destroy();
-      },
-    };
   }
 </script>

@@ -2,6 +2,7 @@
 namespace MyApp;
 
 use Respect\Validation\Validator as v;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 /**
  * @property string $name The todo's text.
@@ -63,9 +64,7 @@ class Todo extends \Nymph\Entity {
         ->attribute('done', v::boolType())
         ->setName('todo')
         ->assert($this->getValidatable());
-    } catch (
-      \Respect\Validation\Exceptions\NestedValidationException $exception
-    ) {
+    } catch (NestedValidationException $exception) {
       throw new \Exception($exception->getFullMessage());
     }
     return parent::save();

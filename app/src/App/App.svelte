@@ -1,5 +1,5 @@
 <div>
-  {#if _loading}
+  {#if loading}
     <div
       class="row align-items-center justify-content-center"
       style="height: 200px;"
@@ -72,7 +72,7 @@
               />
               Alpha
             </label>
-            &nbsp;&nbsp;&nbsp;
+            {@html '&nbsp;'}
             <label class="font-weight-normal">
               <input
                 type="radio"
@@ -125,14 +125,14 @@
   let userCount = null;
   let todoText = '';
   let subscription;
-  let _loading = false;
+  let loading = false;
 
-  $: remaining = $todos.filter(todo => !todo.get().done).length;
+  $: remaining = $todos.filter(todo => !todo.done).length;
 
   let previousUser;
   let previousArchived;
   $: {
-    if ($user && (!$user.is(previousUser) || previousArchived !== $archived)) {
+    if ($user && (!$user.$is(previousUser) || previousArchived !== $archived)) {
       subscribe();
     }
     previousUser = $user;
@@ -150,7 +150,7 @@
       subscription.unsubscribe();
     }
 
-    _loading = true;
+    loading = true;
 
     subscription = Nymph.getEntities(
       {
@@ -170,7 +170,7 @@
       },
     ).subscribe(
       update => {
-        _loading = false;
+        loading = false;
         if (update) {
           PubSub.updateArray($todos, update);
           $todos = Nymph.sort($todos, $sort);
@@ -188,8 +188,8 @@
       return;
     }
     const todo = new Todo();
-    todo.set('name', todoText);
-    todo.save().then(() => {
+    todo.name = todoText;
+    todo.$save().then(() => {
       todoText = '';
     }, ErrHandler);
   }
@@ -198,18 +198,14 @@
     $todos = Nymph.sort($todos, $sort);
   }
 
-  function save(todo) {
-    todo.save().then(null, ErrHandler);
-  }
-
   function archive() {
     const oldTodos = [...$todos];
     for (let i = 0; i < oldTodos.length; i++) {
       const todo = oldTodos[i];
-      if (todo.get().done) {
-        todo.archive().then(success => {
+      if (todo.done) {
+        todo.$archive().then(success => {
           if (!success) {
-            alert("Couldn't save changes to " + todo.get().name);
+            alert("Couldn't save changes to " + todo.name);
           }
         }, ErrHandler);
       }

@@ -24,11 +24,11 @@ user.subscribe(userValue => {
   if (userValue) {
     if (!previousUserValue) {
       // Get the user's avatar.
-      userValue.getAvatar().then(userAvatarValue => {
+      userValue.$getAvatar().then(userAvatarValue => {
         userAvatar.set(userAvatarValue);
       });
       // Is the user a Tilmeld admin?
-      userValue.gatekeeper('tilmeld/admin').then(userIsTilmeldAdminValue => {
+      userValue.$gatekeeper('tilmeld/admin').then(userIsTilmeldAdminValue => {
         userIsTilmeldAdmin.set(userIsTilmeldAdminValue);
       });
     }
@@ -41,6 +41,6 @@ user.subscribe(userValue => {
 
 export function logout() {
   if (get(user)) {
-    get(user).logout();
+    get(user).$logout();
   }
 }

@@ -1,8 +1,8 @@
 {
   "require": {
-    "sciactive/nymph-server": "^3.0",
+    "sciactive/nymph-server": "^3.1",
     "sciactive/nymph-pubsub": "^3.0",
-    "sciactive/tilmeld-server": "^1.0",
+    "sciactive/tilmeld-server": "^1.1",
     "respect/validation": "^1.1"
   },
   "require-dev": {

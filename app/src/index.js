@@ -23,6 +23,7 @@ const app = new Container({
 });
 
 // useful for debugging!
+window.app = app;
 window.stores = stores;
 window.Nymph = Nymph;
 window.refreshAll = refreshAll;
