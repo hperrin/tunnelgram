@@ -151,7 +151,9 @@
         },
       ).then(async newMessages => {
         await Promise.all(
-          newMessages.filter(m => !m.$cryptReady).map(m => m.$cryptReadyPromise),
+          newMessages
+            .filter(m => !m.$cryptReady)
+            .map(m => m.$cryptReadyPromise),
         );
         messages = [...newMessages, ...messages];
       });
@@ -272,7 +274,8 @@
                 }
               } else if (
                 eData.data.text === cur.text &&
-                (eData.data.images || []).length === (cur.images || []).length &&
+                (eData.data.images || []).length ===
+                  (cur.images || []).length &&
                 !!eData.data.video === !!cur.video
               ) {
                 match = true;

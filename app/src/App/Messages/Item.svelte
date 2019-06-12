@@ -208,8 +208,7 @@
   $: isChannel = message.$mode !== Conversation.MODE_CHAT;
   $: avatarSize = isChannel ? 24 : 18;
   $: isMessageUserReady =
-    pending ||
-    (message.user != null && message.user.username != null);
+    pending || (message.user != null && message.user.username != null);
   $: shouldEmbiggen = (() => {
     if (isChannel) {
       return false;

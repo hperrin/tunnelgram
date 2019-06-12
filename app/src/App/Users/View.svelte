@@ -238,10 +238,8 @@
   let destroyed = false;
   // let EXPERIMENT_WEB_PUSH = getCookieValue('EXPERIMENT_WEB_PUSH') === 'true';
 
-  $: shortLink =
-    'http://tngm.me/' + encodeURIComponent($viewUser.username);
-  $: shortLinkPreview =
-    'tngm.me/' + encodeURIComponent($viewUser.username);
+  $: shortLink = 'http://tngm.me/' + encodeURIComponent($viewUser.username);
+  $: shortLinkPreview = 'tngm.me/' + encodeURIComponent($viewUser.username);
 
   let previousViewUserGuid = -1;
   $: if ($viewUserIsSelf) {
@@ -348,10 +346,7 @@
 
   function shareShortLink() {
     const baseText =
-      'Message ' +
-      ($viewUserIsSelf ? 'me' : $viewUser.name) +
-      ' on ' +
-      $brand;
+      'Message ' + ($viewUserIsSelf ? 'me' : $viewUser.name) + ' on ' + $brand;
     if (navigator.share !== undefined) {
       navigator.share({
         text: baseText,

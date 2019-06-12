@@ -121,7 +121,9 @@
           }
           let name = searchUser.name.toLowerCase();
           if (searchUser.guid in $settings.$decrypted.nicknames) {
-            name = $settings.$decrypted.nicknames[searchUser.guid].toLowerCase();
+            name = $settings.$decrypted.nicknames[
+              searchUser.guid
+            ].toLowerCase();
           }
           if (
             name.startsWith(searchQuery) ||

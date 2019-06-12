@@ -169,16 +169,11 @@
   );
 
   let previousConversationAcFullLength = 0;
-  $: if (
-    $conversation.guid ||
-    $conversation.mode !== Conversation.MODE_CHAT
-  ) {
+  $: if ($conversation.guid || $conversation.mode !== Conversation.MODE_CHAT) {
     existingConversations = null;
     existingConversationsError = false;
     previousConversationAcFullLength = 0;
-  } else if (
-    previousConversationAcFullLength !== $conversation.acFull.length
-  ) {
+  } else if (previousConversationAcFullLength !== $conversation.acFull.length) {
     previousConversationAcFullLength = $conversation.acFull.length;
     existingConversations = null;
     existingConversationsError = false;
@@ -230,7 +225,9 @@
   }
 
   function removeUser(userToRemove) {
-    $conversation.acFull = $conversation.acFull.filter(user => !userToRemove.$is(user));
+    $conversation.acFull = $conversation.acFull.filter(
+      user => !userToRemove.$is(user),
+    );
     $conversation = $conversation;
   }
 
