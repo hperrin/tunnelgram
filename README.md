@@ -2,7 +2,7 @@
 
 <big>Easy, secure, end to end encrypted (E2EE) messenger.</big><br/>
 
-* Every message is encrypted from sender to recipient. There is no way to send an unencrypted message and Tunnelgram's servers cannot decrypt them.
+* Every message in a chat or private channel is encrypted from sender to recipient. There is no way to send an unencrypted message and Tunnelgram's servers cannot decrypt them.
 * You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
   * The original sign-up device is *not required*, and *not used as a proxy*.
 * Your account is not tied to a phone number or specific device. You log in with a username and password.
@@ -117,20 +117,20 @@ If you'd like to work on Tunnelgram, follow these steps to get it up and running
 
 1. Install [Docker](https://store.docker.com/search?type=edition&offering=community). You also need Docker Compose, which is included in the Community Edition.
 2. Run these commands to checkout the repo and start the containers:
-  ```sh
-  git clone https://github.com/hperrin/tunnelgram.git
-  cd tunnelgram
-  ./run.sh
-  ```
+   ```sh
+   git clone https://github.com/hperrin/tunnelgram.git
+   cd tunnelgram
+   ./run.sh
+   ```
 3. Run these commands to create the buckets in the blob store:
-  ```sh
-  docker ps
-  # Look for the FPM container's name (probably tunnelgram_fpm_1) and use it in the next command.
-  docker exec -it tunnelgram_fpm_1 /bin/bash
-  cd /maintenance/
-  php create-buckets.php
-  exit
-  ```
+   ```sh
+   docker ps
+   # Look for the FPM container's name (probably tunnelgram_fpm_1) and use it in the next command.
+   docker exec -it tunnelgram_fpm_1 /bin/bash
+   cd /maintenance/
+   php create-buckets.php
+   exit
+   ```
 4. You're ready! Go to http://localhost:8080/
 
 To rebuild on file changes, in the `app` directory:
