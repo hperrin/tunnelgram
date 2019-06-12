@@ -6,13 +6,15 @@ For development, it provides a Docker setup that runs a DB (MySQL, PostgreSQL, o
 
 ## Installation
 
-1. [Get Docker](https://docs.docker.com/install/#supported-platforms)
-2. [Get Docker Compose](https://docs.docker.com/compose/install/)
-3. Get degit:
+1. Get [Docker](https://docs.docker.com/install/#supported-platforms), [Docker Compose](https://docs.docker.com/compose/install/), and Degit
    ```shell
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sh get-docker.sh
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
    npm install -g degit
    ```
-4. Copy this template:
+2. Copy this template:
    * for MySQL
      ```shell
      degit hperrin/nymph-template nymph-app
@@ -25,12 +27,12 @@ For development, it provides a Docker setup that runs a DB (MySQL, PostgreSQL, o
      ```shell
      degit hperrin/nymph-template#sqlite3 nymph-app
      ```
-5. Run the app:
+3. Run the app:
    ```shell
    cd nymph-app
    ./run.sh
    ```
-6. Go to [http://localhost:8080/](http://localhost:8080/)
+4. Go to [http://localhost:8080/](http://localhost:8080/)
 
 <small>On SQLite3, the very first time you create an entity (when you register the first user/create the first todo), the DB will become locked. You'll need to refresh the page, but then on it will be fine.</small>
 
