@@ -6,23 +6,31 @@ For development, it provides a Docker setup that runs a DB (MySQL, PostgreSQL, o
 
 ## Installation
 
-1. [Get Docker](https://docs.docker.com/install/#supported-platforms).
-  * You can run the Docker install script on Linux with:
-    * `curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh`
-  * Or, from the repos on Ubuntu:
-    * `sudo apt-get install docker.io && sudo usermod -a -G docker $USER`
-    * Then log out and log back in.
+1. [Get Docker](https://docs.docker.com/install/#supported-platforms)
 2. [Get Docker Compose](https://docs.docker.com/compose/install/)
-  * From the repos on Ubuntu:
-    * `sudo apt-get install docker-compose`
-3. Copy this template:
-  * `npm install -g degit`
-  * `degit hperrin/nymph-template nymph-app` (for MySQL)
-    * `degit hperrin/nymph-template#postgres nymph-app` (for Postgres)
-    * `degit hperrin/nymph-template#sqlite3 nymph-app` (for SQLite3)
-  * `cd nymph-app`
-4. Run the app: `./run.sh`
-5. Go to [http://localhost:8080/](http://localhost:8080/)
+3. Get degit:
+   ```shell
+   npm install -g degit
+   ```
+4. Copy this template:
+   * for MySQL
+     ```shell
+     degit hperrin/nymph-template nymph-app
+     ```
+   * for Postgres
+     ```shell
+     degit hperrin/nymph-template#postgres nymph-app
+     ```
+   * for SQLite3
+     ```shell
+     degit hperrin/nymph-template#sqlite3 nymph-app
+     ```
+5. Run the app:
+   ```shell
+   cd nymph-app
+   ./run.sh
+   ```
+6. Go to [http://localhost:8080/](http://localhost:8080/)
 
 <small>On SQLite3, the very first time you create an entity (when you register the first user/create the first todo), the DB will become locked. You'll need to refresh the page, but then on it will be fine.</small>
 
@@ -32,7 +40,7 @@ If [NPM](https://nodejs.org/en/download/current/) and/or [Composer](https://getc
 
 You can run commands from the repository root (not the "app" directory) using `composer.sh` and `npm.sh`. For example:
 
-```sh
+```shell
 ./composer.sh require vendor/package
 ./npm.sh install --save package
 ./npm.sh run build
