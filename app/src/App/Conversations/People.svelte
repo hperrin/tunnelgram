@@ -3,9 +3,9 @@
     {#if currentUserIsAdmin}
       <h3 class="mt-3">Add Someone</h3>
       <p>
-        {#if $conversation.data.mode === Conversation.MODE_CHAT}
+        {#if $conversation.mode === Conversation.MODE_CHAT}
           New people can only see messages sent after you add them.
-        {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE}
+        {:else if $conversation.mode === Conversation.MODE_CHANNEL_PRIVATE}
           New members can see all past messages in this channel.
         {/if}
       </p>
@@ -22,23 +22,23 @@
       {/if}
     {/if}
     <h3 class="mt-3">
-      {#if $conversation.data.mode === Conversation.MODE_CHAT}
+      {#if $conversation.mode === Conversation.MODE_CHAT}
         People in this Chat
       {:else}Channel Admins{/if}
     </h3>
     <div class="list-group mt-3 text-body">
-      {#each $conversation.data.acFull as curUser (curUser.guid)}
+      {#each $conversation.acFull as curUser (curUser.guid)}
         <a
           class="list-group-item d-flex justify-content-between
           align-items-center"
-          href="#/u/{curUser.data.username}"
+          href="#/u/{curUser.username}"
         >
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
               <Avatar bind:user={curUser} />
             </span>
             <DisplayName bind:user={curUser} />
-            ({curUser.data.username})
+            ({curUser.username})
           </span>
           {#if $user.guid === curUser.guid}
             <span>(You)</span>
@@ -46,7 +46,7 @@
         </a>
       {/each}
     </div>
-    {#if $conversation.data.mode !== Conversation.MODE_CHAT}
+    {#if $conversation.mode !== Conversation.MODE_CHAT}
       <h3 class="mt-3">Channel Members</h3>
       <div class="list-group mt-3 text-body">
         {#each nonAdminChannelUsers as curUser (curUser.guid)}
@@ -56,13 +56,13 @@
           >
             <a
               class="d-flex align-items-center"
-              href="#/u/{curUser.data.username}"
+              href="#/u/{curUser.username}"
             >
               <span class="mr-2" style="line-height: 0;">
                 <Avatar bind:user={curUser} />
               </span>
               <DisplayName bind:user={curUser} />
-              ({curUser.data.username})
+              ({curUser.username})
             </a>
             {#if $user.guid === curUser.guid}
               <span>(You)</span>
@@ -128,22 +128,22 @@
   let channelUsersReachedEnd = false;
 
   $: currentUserIsAdmin =
-    $conversation.data.mode === Conversation.MODE_CHAT ||
-    $user.inArray($conversation.data.acFull);
+    $conversation.mode === Conversation.MODE_CHAT ||
+    $user.$inArray($conversation.acFull);
   $: nonAdminChannelUsers = channelUsers.filter(
-    user => !user.inArray($conversation.data.acFull),
+    user => !user.$inArray($conversation.acFull),
   );
 
   $: if (
     $conversation &&
-    $conversation.containsSleepingReference &&
-    !$conversation._tgCalledReadyAll
+    $conversation.$containsSleepingReference &&
+    !$conversation.$tgCalledReadyAll
   ) {
     // Ready the conversation's referenced entities.
-    $conversation._tgCalledReadyAll = true;
-    $conversation.readyAll(1).then(() => {
-      $conversation.containsSleepingReference = false;
-      $conversation._tgCalledReadyAll = false;
+    $conversation.$tgCalledReadyAll = true;
+    $conversation.$readyAll(1).then(() => {
+      $conversation.$containsSleepingReference = false;
+      $conversation.$tgCalledReadyAll = false;
       $conversation = $conversation;
     }, ErrHandler);
   }
@@ -158,13 +158,13 @@
   }
 
   async function addUser(user) {
-    if ($conversation.data.mode === Conversation.MODE_CHAT) {
+    if ($conversation.mode === Conversation.MODE_CHAT) {
       addAcFullUser(user);
     } else {
       try {
         addUserError = null;
         addingUser = true;
-        await $conversation.addChannelUser(user);
+        await $conversation.$addChannelUser(user);
         channelUsers = [...channelUsers, user];
         userSearchSelector.clear();
         userSearchSelector.focus();
@@ -178,8 +178,8 @@
   async function removeChannelUser(user) {
     try {
       removingChannelUser = true;
-      await $conversation.removeChannelUser(user);
-      channelUsers = channelUsers.filter(chUser => !user.is(chUser));
+      await $conversation.$removeChannelUser(user);
+      channelUsers = channelUsers.filter(chUser => !user.$is(chUser));
     } catch (errObj) {
       ErrHandler(errObj);
     }
@@ -190,23 +190,23 @@
     addUserError = null;
     addingUser = false;
 
-    if ($user.is(user)) {
+    if ($user.$is(user)) {
       addUserError = "You're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
 
-    if (user.inArray($conversation.data.acFull)) {
+    if (user.$inArray($conversation.acFull)) {
       addUserError = "They're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
 
-    $conversation.data.acFull.push(user);
+    $conversation.acFull.push(user);
     $conversation = $conversation;
     addingUser = true;
     $conversation
-      .save()
+      .$save()
       .then(() => {
         userSearchSelector.clear();
         userSearchSelector.focus();
@@ -216,7 +216,7 @@
 
   async function loadMoreChannelUsers() {
     if (
-      $conversation.data.mode === Conversation.MODE_CHAT ||
+      $conversation.mode === Conversation.MODE_CHAT ||
       channelUsersReachedEnd
     ) {
       return;
@@ -226,7 +226,7 @@
 
     let moreUsers;
     try {
-      moreUsers = await $conversation.getGroupUsers(
+      moreUsers = await $conversation.$getGroupUsers(
         CHANNEL_USERS_PAGE_SIZE,
         channelUsers.length,
       );

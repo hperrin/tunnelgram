@@ -2,12 +2,12 @@
   class="d-flex flex-column justify-content-center align-items-center"
   style="min-height: 150px;"
 >
-  <h1>{conversation && conversation.getName($settings)}</h1>
+  <h1>{conversation && conversation.$getName($settings)}</h1>
   <p>
     Started {new SimpleDateFormatter(conversation.cdate).format('wymdhms', 'long')}
   </p>
   <p>
-    {Conversation.MODE_NAME[conversation.data.mode]}
+    {Conversation.MODE_NAME[conversation.mode]}
     <button
       class="btn btn-sm btn-link"
       on:click={() => (showModeHelp = !showModeHelp)}
@@ -17,7 +17,7 @@
   </p>
   {#if showModeHelp}
     <p class="alert alert-info m-3">
-      {Conversation.MODE_DESCRIPTION[conversation.data.mode]}
+      {Conversation.MODE_DESCRIPTION[conversation.mode]}
     </p>
   {/if}
 </div>

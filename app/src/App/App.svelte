@@ -113,8 +113,8 @@
               class="dropdown-menu dropdown-menu-right"
               aria-labelledby="userDropdown"
             >
-              <h6 class="dropdown-header">{$user.data.name}</h6>
-              <a class="dropdown-item" href="#/u/{$user.data.username}">
+              <h6 class="dropdown-header">{$user.name}</h6>
+              <a class="dropdown-item" href="#/u/{$user.username}">
                 Your Account
               </a>
               <a class="dropdown-item" href="#/pushSubscriptions">
@@ -170,9 +170,9 @@
             {#if $view === 'pushSubscriptions'}
               Push Subscriptions
             {:else if $view === 'user'}
-              {$viewUser.data.name}
+              {$viewUser.name}
             {:else if $settings && $conversation.guid}
-              {$conversation.getName($settings)}
+              {$conversation.$getName($settings)}
             {:else}
               <span style="display: inline-block;" />
             {/if}
@@ -354,29 +354,29 @@
     }
 
     const conv = new Conversation();
-    conv.init(update.data);
+    conv.$init(update.data);
 
-    if (conv.data.lastMessage) {
-      if (conv.is($conversation) && !document.hidden) {
+    if (conv.lastMessage) {
+      if (conv.$is($conversation) && !document.hidden) {
         // Don't notify if the user is on the conversation and not hidden.
         return;
       }
-      await conv.data.lastMessage.ready();
-      if ($user.is(conv.data.lastMessage.data.user)) {
+      await conv.lastMessage.$ready();
+      if ($user.$is(conv.lastMessage.user)) {
         // Don't notify if the user made the message.
         return;
       }
-      if (conv.readline >= conv.data.lastMessage.cdate) {
+      if (conv.$readline >= conv.lastMessage.cdate) {
         // Don't notify when a user deletes a message (will result in earlier message becoming lastMessage).
         return;
       }
-      await conv.data.lastMessage.data.user.ready();
+      await conv.lastMessage.user.$ready();
     } else if (update.added) {
-      if ($user.is(conv.data.user)) {
+      if ($user.$is(conv.user)) {
         // Don't notify if the user made a new conversation.
         return;
       }
-      await conv.readyAll(1).catch(ErrHandler);
+      await conv.$readyAll(1).catch(ErrHandler);
     } else {
       return;
     }
@@ -394,20 +394,20 @@
         },
       });
     }
-    if (conv.data.lastMessage) {
+    if (conv.lastMessage) {
       // Notify the user of a new message.
       notice = PNotify.info(
         Object.assign(
           {
             title:
-              getDisplayName(conv.data.lastMessage.data.user, 'name') +
-              (conv.data.acFull.length > 2 || conv.data.name != null
-                ? ' - ' + conv.getName($settings)
+              getDisplayName(conv.lastMessage.user, 'name') +
+              (conv.acFull.length > 2 || conv.name != null
+                ? ' - ' + conv.$getName($settings)
                 : ''),
             text:
-              conv.data.lastMessage.decrypted.text.length > 40
-                ? conv.data.lastMessage.decrypted.text.substr(0, 40) + '...'
-                : conv.data.lastMessage.decrypted.text,
+              conv.lastMessage.$decrypted.text.length > 40
+                ? conv.lastMessage.$decrypted.text.substr(0, 40) + '...'
+                : conv.lastMessage.$decrypted.text,
           },
           options,
         ),
@@ -417,13 +417,13 @@
       notice = PNotify.info(
         Object.assign(
           {
-            title: 'New ' + Conversation.MODE_SHORT_NAME[conv.data.mode],
+            title: 'New ' + Conversation.MODE_SHORT_NAME[conv.mode],
             text:
-              getDisplayName(conv.data.user, 'name') +
+              getDisplayName(conv.user, 'name') +
               ' started ' +
-              (conv.data.acFull.length > 2 || conv.data.name != null
-                ? conv.getName($settings)
-                : 'a ' + Conversation.MODE_SHORT_NAME[conv.data.mode]) +
+              (conv.acFull.length > 2 || conv.name != null
+                ? conv.$getName($settings)
+                : 'a ' + Conversation.MODE_SHORT_NAME[conv.mode]) +
               '.',
           },
           options,

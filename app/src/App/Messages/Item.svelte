@@ -1,34 +1,34 @@
-{#if message.data.informational}
+{#if message.informational}
   <div class="d-flex align-items-center w-100 mb-2 text-muted">
     {#if isMessageUserReady}
       <a
         class="mx-2"
         style="line-height: 1;"
-        href="#/u/{messageUser.data.username}"
+        href="#/u/{messageUser.username}"
         title={displayName}
       >
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small title={createdDateLong}>
-        {#if message.data.text === 'joined'}
+        {#if message.text === 'joined'}
           <DisplayName bind:user={messageUser} />
           joined
-        {:else if message.data.text === 'left'}
+        {:else if message.text === 'left'}
           <DisplayName bind:user={messageUser} />
           left
-        {:else if message.data.text === 'added'}
+        {:else if message.text === 'added'}
           <DisplayName bind:user={messageUser} />
           added
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else if message.data.text === 'removed'}
+          <DisplayName bind:user={message.relatedUser} />
+        {:else if message.text === 'removed'}
           <DisplayName bind:user={messageUser} />
           removed
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else if message.data.text === 'promoted'}
+          <DisplayName bind:user={message.relatedUser} />
+        {:else if message.text === 'promoted'}
           <DisplayName bind:user={messageUser} />
           promoted
-          <DisplayName bind:user={message.data.relatedUser} />
-        {:else}{message.data.text}{/if}
+          <DisplayName bind:user={message.relatedUser} />
+        {:else}{message.text}{/if}
       </small>
     {/if}
   </div>
@@ -38,7 +38,7 @@
       <a
         class="mx-2"
         style="line-height: 1;"
-        href="#/u/{messageUser.data.username}"
+        href="#/u/{messageUser.username}"
         title={displayName}
       >
         <Avatar user={messageUser} size={avatarSize} />
@@ -56,7 +56,7 @@
       {#if nextMessageUserIsDifferent && isMessageUserReady}
         <a
           class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
-          href="#/u/{messageUser.data.username}"
+          href="#/u/{messageUser.username}"
           title={displayName}
         >
           <Avatar user={messageUser} size={avatarSize} />
@@ -94,28 +94,28 @@
             on:click={() => (flipFirst = !!flipper)}
             style="font-size: 1.1rem"
           >
-            {#if message.decrypted.text != null}
+            {#if message.$decrypted.text != null}
               <span class="h1">
-                {flipped ? message.decrypted.secretText : message.decrypted.text}
+                {flipped ? message.$decrypted.secretText : message.$decrypted.text}
               </span>
-            {:else if message.decrypted.images.length}
+            {:else if message.$decrypted.images.length}
               <div class={shadowClass}>
-                <ImageGrid resources={message.decrypted.images} />
+                <ImageGrid resources={message.$decrypted.images} />
               </div>
-            {:else if message.decrypted.video != null}
+            {:else if message.$decrypted.video != null}
               <div class={shadowClass}>
-                <Video resource={message.decrypted.video} />
+                <Video resource={message.$decrypted.video} />
               </div>
             {/if}
           </div>
         {:else}
-          {#if message.decrypted.images.length && (!flipper || flipped)}
+          {#if message.$decrypted.images.length && (!flipper || flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <ImageGrid resources={message.decrypted.images} />
+              <ImageGrid resources={message.$decrypted.images} />
             </div>
-          {:else if message.decrypted.video != null && (!flipper || flipped)}
+          {:else if message.$decrypted.video != null && (!flipper || flipped)}
             <div class="card-header p-0 w-100 d-flex justify-content-center">
-              <Video resource={message.decrypted.video} />
+              <Video resource={message.$decrypted.video} />
             </div>
           {/if}
           {#if flipped ? formattedSecretText != null : formattedText != null}
@@ -203,65 +203,65 @@
   let createdDateLong;
   let createdDateShort;
 
-  $: isOwner = pending || $user.is(message.data.user);
-  $: messageUser = pending ? $user : message.data.user;
-  $: isChannel = message.mode !== Conversation.MODE_CHAT;
+  $: isOwner = pending || $user.$is(message.user);
+  $: messageUser = pending ? $user : message.user;
+  $: isChannel = message.$mode !== Conversation.MODE_CHAT;
   $: avatarSize = isChannel ? 24 : 18;
   $: isMessageUserReady =
     pending ||
-    (message.data.user != null && message.data.user.data.username != null);
+    (message.user != null && message.user.username != null);
   $: shouldEmbiggen = (() => {
     if (isChannel) {
       return false;
     }
     // Bare emojis should be embiggened. https://mathiasbynens.be/notes/es-unicode-property-escapes#emoji
     if (
-      message.decrypted.text != null &&
-      !message.decrypted.images.length &&
-      message.decrypted.video == null &&
-      message.decrypted.text.match(bareEmojiRegex)
+      message.$decrypted.text != null &&
+      !message.$decrypted.images.length &&
+      message.$decrypted.video == null &&
+      message.$decrypted.text.match(bareEmojiRegex)
     ) {
       return (
-        message.decrypted.secretText == null ||
-        !!message.decrypted.secretText.match(bareEmojiRegex)
+        message.$decrypted.secretText == null ||
+        !!message.$decrypted.secretText.match(bareEmojiRegex)
       );
     }
     if (
-      message.decrypted.text == null &&
-      (message.decrypted.images.length || message.decrypted.video != null)
+      message.$decrypted.text == null &&
+      (message.$decrypted.images.length || message.$decrypted.video != null)
     ) {
       return true;
     }
     return false;
   })();
-  $: flipper = message.decrypted.secretText != null;
+  $: flipper = message.$decrypted.secretText != null;
   $: displayName =
     messageUser == null
       ? ''
-      : $settings != null && messageUser.guid in $settings.decrypted.nicknames
-      ? $settings.decrypted.nicknames[messageUser.guid]
-      : messageUser.data.name;
+      : $settings != null && messageUser.guid in $settings.$decrypted.nicknames
+      ? $settings.$decrypted.nicknames[messageUser.guid]
+      : messageUser.name;
   $: shadowClass = [
     'shadow-none elevate-0 perspective-stage',
     'shadow-sm',
     'shadow elevate-2 perspective-stage',
     'shadow-lg elevate-3 perspective-stage',
-  ][flipped ? message.secretTextElevation : message.textElevation];
+  ][flipped ? message.$secretTextElevation : message.$textElevation];
   $: stageClass = ['', '', 'p-1', 'p-2'][
-    flipped ? message.secretTextElevation : message.textElevation
+    flipped ? message.$secretTextElevation : message.$textElevation
   ];
 
   $: if (
     message &&
     !pending &&
-    message.containsSleepingReference &&
-    !message._tgCalledReadyAll
+    message.$containsSleepingReference &&
+    !message.$tgCalledReadyAll
   ) {
     // Ready the message's referenced entities.
-    message._tgCalledReadyAll = true;
-    message.readyAll(1).then(() => {
-      message.containsSleepingReference = false;
-      message._tgCalledReadyAll = false;
+    message.$tgCalledReadyAll = true;
+    message.$readyAll(1).then(() => {
+      message.$containsSleepingReference = false;
+      message.$tgCalledReadyAll = false;
       if (!destroyed) {
         message = message;
       }
@@ -315,10 +315,10 @@
 
   async function setFormattedText() {
     // Use showdown to convert the markdown to HTML.
-    const html = window.tgShowdownConverter.makeHtml(message.decrypted.text);
+    const html = window.tgShowdownConverter.makeHtml(message.$decrypted.text);
     const secretHtml =
-      message.decrypted.secretText != null
-        ? window.tgShowdownConverter.makeHtml(message.decrypted.secretText)
+      message.$decrypted.secretText != null
+        ? window.tgShowdownConverter.makeHtml(message.$decrypted.secretText)
         : null;
     formattedText = html == null ? null : html.replace(/\n$/, '');
     formattedSecretText =
@@ -329,18 +329,18 @@
 
   async function deleteMessage() {
     if (pending) {
-      message.cancelSave();
+      message.$cancelSave();
     } else {
-      if (await message.delete()) {
+      if (await message.$delete()) {
         dispatch('deleted');
       }
     }
   }
 
   function handlePending() {
-    if (message.savePromise) {
+    if (message.$savePromise) {
       const myMessage = message;
-      message.savePromise.catch(() => {
+      message.$savePromise.catch(() => {
         if (message !== myMessage) {
           return;
         }
@@ -351,7 +351,7 @@
   }
 
   function retrySave() {
-    message.retrySave();
+    message.$retrySave();
     saveFailed = null;
     showActions = false;
     handlePending();

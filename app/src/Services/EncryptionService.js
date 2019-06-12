@@ -56,7 +56,7 @@ class EncryptionService extends AESEncryptionService {
           // The user has been here before, so get the private key from the entity.
 
           // Decrypt the private key.
-          const encryptedPrivateKey = privateKey.get('text');
+          const encryptedPrivateKey = privateKey.text;
           const privateKeyString = await this.decrypt(
             encryptedPrivateKey,
             this.key + this.iv,
@@ -65,7 +65,7 @@ class EncryptionService extends AESEncryptionService {
           await this.setUserPrivateKey(privateKeyString);
 
           // And load the public key.
-          const publicKeyString = publicKey.get('text');
+          const publicKeyString = publicKey.text;
           await this.setUserPublicKey(publicKeyString);
         } else if (!privateKey && !publicKey) {
           // The user just registered, so save the new private key.
@@ -78,14 +78,14 @@ class EncryptionService extends AESEncryptionService {
             this.key + this.iv,
           );
 
-          privateKey.set({ text: encryptedPrivateKeyString });
-          const privateKeySave = privateKey.save();
+          privateKey.text = encryptedPrivateKeyString;
+          const privateKeySave = privateKey.$save();
 
           // And save the public key.
           const publicKey = new PublicKey();
           const publicKeyString = this.userPublicKey;
-          publicKey.set({ text: publicKeyString });
-          const publicKeySave = publicKey.save();
+          publicKey.text = publicKeyString;
+          const publicKeySave = publicKey.$save();
 
           try {
             await privateKeySave;
@@ -134,8 +134,8 @@ class EncryptionService extends AESEncryptionService {
     };
 
     // Override register to set up new user encryption.
-    const _register = User.prototype.register;
-    User.prototype.register = async function(creds) {
+    const _register = User.prototype.$register;
+    User.prototype.$register = async function(creds) {
       const { password } = creds;
       creds.password = await computeNewPassword(password);
 
@@ -159,8 +159,8 @@ class EncryptionService extends AESEncryptionService {
     };
 
     // Override changePassword to re-encrypt the key and change the password.
-    const _changePassword = User.prototype.changePassword;
-    User.prototype.changePassword = async function(creds) {
+    const _changePassword = User.prototype.$changePassword;
+    User.prototype.$changePassword = async function(creds) {
       const { password, oldPassword } = creds;
       // Compute the old password first.
       creds.oldPassword = await computeNewPassword(oldPassword);
@@ -169,12 +169,12 @@ class EncryptionService extends AESEncryptionService {
 
       // Re-encrypt the private key.
       const privateKeyString = that.userPrivateKey;
-      const privateKeyBytes = this.encodeUtf8(privateKeyString);
-      const encryptedPrivateKeyBytes = await this.encryptBytes(
+      const privateKeyBytes = that.encodeUtf8(privateKeyString);
+      const encryptedPrivateKeyBytes = await that.encryptBytes(
         privateKeyBytes,
         that.key + that.iv,
       );
-      const encryptedPrivateKeyString = this.encodeBase64(
+      const encryptedPrivateKeyString = that.encodeBase64(
         encryptedPrivateKeyBytes,
       );
 
@@ -264,7 +264,7 @@ class EncryptionService extends AESEncryptionService {
             ref: ['user', guid],
           },
         );
-        publicKey = publicKeyEntity.get('text');
+        publicKey = publicKeyEntity.text;
         this.userPublicKeys[guid] = publicKey;
       } catch (e) {
         return null;

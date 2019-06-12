@@ -50,13 +50,13 @@ export function refreshAll() {
 
   const settings = get(stores.settings);
   if (settings != null) {
-    settings.init(settings.toJSON());
+    settings.$init(settings.toJSON());
   }
 
   const conversation = get(stores.conversation);
   if (conversation.guid) {
     const newConv = new Conversation();
-    newConv.init(conversation.toJSON());
+    newConv.$init(conversation.toJSON());
     stores.conversation.set(new Conversation());
     stores.conversation.set(newConv);
   }
@@ -64,7 +64,7 @@ export function refreshAll() {
   const conversations = get(stores.conversations);
   for (let i in conversations) {
     const newConv = new Conversation();
-    newConv.init(conversations[i].toJSON());
+    newConv.$init(conversations[i].toJSON());
     conversations[i] = newConv;
   }
   stores.conversations.set(conversations);
@@ -161,7 +161,7 @@ window.addEventListener('beforeinstallprompt', e => {
     }
 
     stores.loadingUser.set(true);
-    if (user.data.username === username) {
+    if (user.username === username) {
       stores.viewUser.set(user);
       stores.viewUserIsSelf.set(true);
       stores.view.set('user');
@@ -233,7 +233,7 @@ window.addEventListener('beforeinstallprompt', e => {
       for (let i in conversations) {
         if (
           conversation === conversations[i] ||
-          conversation.is(conversations[i])
+          conversation.$is(conversations[i])
         ) {
           conversations[i] = conversation;
           stores.conversations.set(conversations);
@@ -306,10 +306,8 @@ window.addEventListener('beforeinstallprompt', e => {
       // Push the playerId up to the server. (It will be updated if it already
       // exists.)
       const appPushSubscription = new AppPushSubscription();
-      appPushSubscription.set({
-        playerId,
-      });
-      appPushSubscription.save().catch(ErrHandler);
+      appPushSubscription.playerId = playerId;
+      appPushSubscription.$save().catch(ErrHandler);
     } else {
       // Web Push Subscriptions
       if ((await swRegPromise) == null) {
@@ -438,14 +436,12 @@ window.addEventListener('beforeinstallprompt', e => {
           // And push it up to the server.
           const webPushSubscription = new WebPushSubscription();
           const subscriptionData = JSON.parse(JSON.stringify(subscription));
-          webPushSubscription.set({
-            endpoint: subscriptionData.endpoint,
-            keys: {
-              p256dh: subscriptionData.keys.p256dh,
-              auth: subscriptionData.keys.auth,
-            },
-          });
-          webPushSubscription.save().catch(ErrHandler);
+          webPushSubscription.endpoint = subscriptionData.endpoint;
+          webPushSubscription.keys = {
+            p256dh: subscriptionData.keys.p256dh,
+            auth: subscriptionData.keys.auth,
+          };
+          webPushSubscription.$save().catch(ErrHandler);
         };
 
         // Set notification permission asker.

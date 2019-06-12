@@ -35,9 +35,9 @@
         <canvas bind:this={code} />
       </div>
     </div>
-    <h2>{$viewUser.data.name}</h2>
+    <h2>{$viewUser.name}</h2>
     <div>
-      {$viewUser.data.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
+      {$viewUser.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
     </div>
     <div>
       <button class="btn btn-link" title="Share" on:click={shareShortLink}>
@@ -82,7 +82,7 @@
             type="text"
             class="form-control"
             id="accountDetailsUsername"
-            bind:value={$viewUser.data.username}
+            bind:value={$viewUser.username}
             placeholder="Enter username"
             autocomplete="username"
           />
@@ -93,7 +93,7 @@
             type="text"
             class="form-control"
             id="accountDetailsFirstName"
-            bind:value={$viewUser.data.nameFirst}
+            bind:value={$viewUser.nameFirst}
             placeholder="Enter name"
             autocomplete="given-name"
           />
@@ -104,7 +104,7 @@
             type="text"
             class="form-control"
             id="accountDetailsLastName"
-            bind:value={$viewUser.data.nameLast}
+            bind:value={$viewUser.nameLast}
             placeholder="Enter name"
             autocomplete="family-name"
           />
@@ -115,7 +115,7 @@
             type="tel"
             class="form-control"
             id="accountDetailsPhone"
-            bind:value={$viewUser.data.phone}
+            bind:value={$viewUser.phone}
             placeholder="Enter phone number"
             autocomplete="tel"
           />
@@ -179,7 +179,7 @@
               on:click={newConversation}
               disabled={startingConversation}
             >
-              Start a Chat with {$viewUser.data.nameFirst}
+              Start a Chat with {$viewUser.nameFirst}
             </button>
           {:else if existingConversationsError}
             <div class="alert alert-danger my-3" role="alert">
@@ -191,7 +191,7 @@
               on:click={newConversation}
               disabled={startingConversation}
             >
-              Start a Chat with {$viewUser.data.nameFirst}
+              Start a Chat with {$viewUser.nameFirst}
             </button>
           {:else}
             <div>One second...</div>
@@ -239,9 +239,9 @@
   // let EXPERIMENT_WEB_PUSH = getCookieValue('EXPERIMENT_WEB_PUSH') === 'true';
 
   $: shortLink =
-    'http://tngm.me/' + encodeURIComponent($viewUser.data.username);
+    'http://tngm.me/' + encodeURIComponent($viewUser.username);
   $: shortLinkPreview =
-    'tngm.me/' + encodeURIComponent($viewUser.data.username);
+    'tngm.me/' + encodeURIComponent($viewUser.username);
 
   let previousViewUserGuid = -1;
   $: if ($viewUserIsSelf) {
@@ -266,7 +266,7 @@
         );
         await Promise.all(
           conversations.map(conversation =>
-            conversation.readyAll(1).catch(ErrHandler),
+            conversation.$readyAll(1).catch(ErrHandler),
           ),
         );
         if (destroyed) {
@@ -286,9 +286,9 @@
   $: if (
     $settings &&
     $viewUser &&
-    $viewUser.guid in $settings.decrypted.nicknames
+    $viewUser.guid in $settings.$decrypted.nicknames
   ) {
-    nickname = $settings.decrypted.nicknames[$viewUser.guid];
+    nickname = $settings.$decrypted.nicknames[$viewUser.guid];
   }
 
   let experimentsDropdown;
@@ -323,7 +323,7 @@
   });
 
   function saveUser() {
-    $viewUser.save().then(userValue => {
+    $viewUser.$save().then(userValue => {
       $user = userValue;
       $viewUser = userValue;
     }, ErrHandler);
@@ -332,11 +332,11 @@
   function saveSettings() {
     if ($settings && $viewUser) {
       if (nickname.match(/^\s*$/)) {
-        delete $settings.decrypted.nicknames[$viewUser.guid];
+        delete $settings.$decrypted.nicknames[$viewUser.guid];
       } else {
-        $settings.decrypted.nicknames[$viewUser.guid] = nickname;
+        $settings.$decrypted.nicknames[$viewUser.guid] = nickname;
       }
-      $settings.save().then(settingsValue => {
+      $settings.$save().then(settingsValue => {
         $settings = settingsValue;
         $viewUser = $viewUser;
         $conversation = $conversation;
@@ -349,7 +349,7 @@
   function shareShortLink() {
     const baseText =
       'Message ' +
-      ($viewUserIsSelf ? 'me' : $viewUser.data.name) +
+      ($viewUserIsSelf ? 'me' : $viewUser.name) +
       ' on ' +
       $brand;
     if (navigator.share !== undefined) {
@@ -372,11 +372,11 @@
 
   function newConversation() {
     const conversation = new Conversation();
-    conversation.data.acFull.push($viewUser);
+    conversation.acFull.push($viewUser);
 
     startingConversation = true;
     conversation
-      .save()
+      .$save()
       .then(() => navigate('/c/' + conversation.guid), ErrHandler)
       .finally(() => {
         startingConversation = false;
@@ -413,9 +413,9 @@
     const avatarImg = await resizeImage.resizeCrop(500, 500);
     resizeImage.destroy();
 
-    $viewUser.data.avatar = avatarImg.data;
+    $viewUser.avatar = avatarImg.data;
 
-    await $viewUser.save();
+    await $viewUser.$save();
 
     $viewUser = $viewUser;
     avatarLoading = false;

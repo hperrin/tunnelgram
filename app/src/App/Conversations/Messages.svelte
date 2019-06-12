@@ -57,13 +57,13 @@
 
   $: showPostBar =
     $conversation.guid &&
-    $conversation.isUserJoined() &&
+    $conversation.$isUserJoined() &&
     postBarStorage &&
     $conversation.guid in postBarStorage;
 
   $: if (
     $conversation.guid &&
-    $conversation.isUserJoined() &&
+    $conversation.$isUserJoined() &&
     postBarStorage &&
     !($conversation.guid in postBarStorage)
   ) {

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.100.1",
+            "version": "3.100.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "0ae18bb40836e9599bdbd6a65b292329bc83df64"
+                "reference": "c08969c6bf828910fc868d882bcd55ea5d9f97f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0ae18bb40836e9599bdbd6a65b292329bc83df64",
-                "reference": "0ae18bb40836e9599bdbd6a65b292329bc83df64",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c08969c6bf828910fc868d882bcd55ea5d9f97f7",
+                "reference": "c08969c6bf828910fc868d882bcd55ea5d9f97f7",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-11T18:32:05+00:00"
+            "time": "2019-06-12T18:09:10+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -2212,16 +2212,16 @@
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9"
+                "reference": "8333a58000f1a3945e9d662799828155f7ee9f4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9",
-                "reference": "3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/8333a58000f1a3945e9d662799828155f7ee9f4d",
+                "reference": "8333a58000f1a3945e9d662799828155f7ee9f4d",
                 "shasum": ""
             },
             "require": {
@@ -2268,7 +2268,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2019-06-11T00:00:00+00:00"
+            "time": "2019-06-12T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",

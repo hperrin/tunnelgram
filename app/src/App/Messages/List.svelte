@@ -46,8 +46,8 @@
             bind:message
             on:rendered={rescrollToBottom}
             on:deleted={() => removeMessage(message)}
-            nextMessageUserIsDifferent={i === 0 || messages[i - 1].data.user.guid !== message.data.user.guid}
-            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].data.user.guid !== message.data.user.guid}
+            nextMessageUserIsDifferent={i === 0 || messages[i - 1].user.guid !== message.user.guid}
+            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].user.guid !== message.user.guid}
           />
           {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
             <div
@@ -63,8 +63,8 @@
       {/each}
     </div>
     <div class="d-flex flex-column align-items-start">
-      {#each conversation.pending as message, i}
-        {#if message.cryptReady}
+      {#each conversation.$pending as message, i}
+        {#if message.$cryptReady}
           {#if i === 0 && messages.length && showTime(messages[0].cdate)}
             <small class="d-flex justify-content-center w-100 mb-2 text-muted">
               <RelativeDate bind:message />
@@ -119,7 +119,7 @@
     previousConversationGuid = conversation.guid;
     messages = [];
     isAtBottom = true;
-    initialReadline = conversation.readline;
+    initialReadline = conversation.$readline;
     showReadline = null;
     loadingEarlierMessages = false;
     reachedEarliestMessage = false;
@@ -151,7 +151,7 @@
         },
       ).then(async newMessages => {
         await Promise.all(
-          newMessages.filter(m => !m.cryptReady).map(m => m.cryptReadyPromise),
+          newMessages.filter(m => !m.$cryptReady).map(m => m.$cryptReadyPromise),
         );
         messages = [...newMessages, ...messages];
       });
@@ -243,8 +243,8 @@
           PubSub.updateArray(newMessages, update);
           await Promise.all(
             newMessages
-              .filter(m => !m.cryptReady)
-              .map(m => m.cryptReadyPromise),
+              .filter(m => !m.$cryptReady)
+              .map(m => m.$cryptReadyPromise),
           );
           if (destroyed || queryConversationGuid !== conversation.guid) {
             return;
@@ -255,30 +255,30 @@
 
           if (update.added) {
             // Remove the message from pending messages.
-            const ent = update.data;
-            for (let i = 0; i < conversation.pending.length; i++) {
-              const cur = conversation.pending[i];
+            const eData = update.data;
+            for (let i = 0; i < conversation.$pending.length; i++) {
+              const cur = conversation.$pending[i];
               let match = false;
               if (cur.guid) {
-                if (ent.guid === cur.guid) {
+                if (eData.guid === cur.guid) {
                   match = true;
                 }
               } else if (
-                ent.encryption &&
-                ent.mode === Conversation.MODE_CHAT
+                eData.encryption &&
+                eData.mode === Conversation.MODE_CHAT
               ) {
-                if (ent.data.keys[$user.guid] === cur.data.keys[$user.guid]) {
+                if (eData.data.keys[$user.guid] === cur.keys[$user.guid]) {
                   match = true;
                 }
               } else if (
-                ent.decrypted.text === cur.decrypted.text &&
-                ent.decrypted.images.length === cur.decrypted.images.length &&
-                !!ent.decrypted.video === !!cur.decrypted.video
+                eData.data.text === cur.text &&
+                (eData.data.images || []).length === (cur.images || []).length &&
+                !!eData.data.video === !!cur.video
               ) {
                 match = true;
               }
               if (match) {
-                conversation.pending.splice(i, 1);
+                conversation.$pending.splice(i, 1);
                 conversation = conversation;
                 break;
               }
@@ -373,8 +373,8 @@
       if (earlierMessages && earlierMessages.length) {
         await Promise.all(
           earlierMessages
-            .filter(m => !m.cryptReady)
-            .map(m => m.cryptReadyPromise),
+            .filter(m => !m.$cryptReady)
+            .map(m => m.$cryptReadyPromise),
         );
         messages = [...messages, ...earlierMessages];
         if (container) {
@@ -405,7 +405,7 @@
       if (!messageContainer) {
         return;
       }
-      if (conversation.readline !== null && container) {
+      if (conversation.$readline !== null && container) {
         const messageBoxes = messageContainer.querySelectorAll(
           '.message-box[data-cdate]',
         );
@@ -420,8 +420,8 @@
         if (messageBoxesInViewport.length) {
           const latestReadMessageBox = messageBoxesInViewport[0];
           const updateReadline = JSON.parse(latestReadMessageBox.dataset.cdate);
-          if (updateReadline > conversation.readline) {
-            await conversation.saveReadline(updateReadline);
+          if (updateReadline > conversation.$readline) {
+            await conversation.$saveReadline(updateReadline);
             conversation = conversation;
           }
         }
@@ -430,10 +430,10 @@
   }
 
   async function createNewReadlineIfNeeded() {
-    if (conversation.readline == null && messages.length) {
+    if (conversation.$readline == null && messages.length) {
       const updateReadline = messages[0].cdate;
       initialReadline = updateReadline;
-      await conversation.saveReadline(updateReadline);
+      await conversation.$saveReadline(updateReadline);
       conversation = conversation;
     }
   }
@@ -465,7 +465,7 @@
   }
 
   function removeMessage(message) {
-    const idx = message.arraySearch(messages);
+    const idx = message.$arraySearch(messages);
     if (idx !== false) {
       messages.splice(idx, 1);
       messages = messages;

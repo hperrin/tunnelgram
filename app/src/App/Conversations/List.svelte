@@ -97,24 +97,24 @@
         return $conversations;
       }
       const searchLC = search.toLowerCase();
-      const nicknameUserGUIDs = Object.entries($settings.decrypted.nicknames)
+      const nicknameUserGUIDs = Object.entries($settings.$decrypted.nicknames)
         .filter(entry => {
           const [guid, nickname] = entry;
           return nickname.toLowerCase().indexOf(searchLC) !== -1;
         })
         .map(entry => parseFloat(entry[0]));
       return $conversations.filter(c => {
-        for (let user of c.data.acFull) {
+        for (let user of c.acFull) {
           if (
-            user.isASleepingReference ||
-            ($user.is(user) && c.data.acFull.length > 1)
+            user.$isASleepingReference ||
+            ($user.$is(user) && c.acFull.length > 1)
           ) {
             continue;
           } else if (nicknameUserGUIDs.indexOf(user.guid) !== -1) {
             return true;
           } else if (
-            !(user.guid in $settings.decrypted.nicknames) &&
-            user.data.name.toLowerCase().indexOf(searchLC) !== -1
+            !(user.guid in $settings.$decrypted.nicknames) &&
+            user.name.toLowerCase().indexOf(searchLC) !== -1
           ) {
             return true;
           }
@@ -138,7 +138,7 @@
           type: '|',
           ref: [
             ['acFull', $user.guid],
-            ...$user.data.groups.map(group => ['group', group.guid]),
+            ...$user.groups.map(group => ['group', group.guid]),
           ],
         },
         {
@@ -153,12 +153,12 @@
       ).then(async newConversations => {
         await Promise.all(
           newConversations
-            .filter(c => !c.cryptReady)
-            .map(c => c.cryptReadyPromise),
+            .filter(c => !c.$cryptReady)
+            .map(c => c.$cryptReadyPromise),
         );
         $conversations = [
           ...newConversations,
-          ...$conversations.filter(c => !c.inArray(newConversations)),
+          ...$conversations.filter(c => !c.$inArray(newConversations)),
         ];
       });
     }
@@ -168,12 +168,12 @@
   let previousUserGroupsLength = 0;
   $: if (
     $user &&
-    (!$user.is(previousUser) ||
-      $user.data.groups.length !== previousUserGroupsLength)
+    (!$user.$is(previousUser) ||
+      $user.groups.length !== previousUserGroupsLength)
   ) {
     subscribe();
     previousUser = $user;
-    previousUserGroupsLength = $user.data.groups.length;
+    previousUserGroupsLength = $user.groups.length;
   }
 
   let previousConversationsLength = $conversations.length;
@@ -211,7 +211,7 @@
         type: '|',
         ref: [
           ['acFull', $user.guid],
-          ...$user.data.groups.map(group => ['group', group.guid]),
+          ...$user.groups.map(group => ['group', group.guid]),
         ],
       },
     ).subscribe(update => {
@@ -269,7 +269,7 @@
           type: '|',
           ref: [
             ['acFull', $user.guid],
-            ...$user.data.groups.map(group => ['group', group.guid]),
+            ...$user.groups.map(group => ['group', group.guid]),
           ],
         },
         {

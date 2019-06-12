@@ -1,4 +1,4 @@
-{#if nickname != null}{nickname}{:else}{user.data[prop] || defaultValue}{/if}
+{#if nickname != null}{nickname}{:else}{user[prop] || defaultValue}{/if}
 
 <script>
   import { settings } from '../../stores';
@@ -8,7 +8,7 @@
   export let defaultValue = 'Loading...';
 
   $: nickname =
-    $settings != null && user.guid in $settings.decrypted.nicknames
-      ? $settings.decrypted.nicknames[user.guid]
+    $settings != null && user.guid in $settings.$decrypted.nicknames
+      ? $settings.$decrypted.nicknames[user.guid]
       : null;
 </script>

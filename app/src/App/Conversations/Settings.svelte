@@ -4,7 +4,7 @@
     on:submit|preventDefault={save}
   >
     <h3 class="mt-3">
-      {Conversation.MODE_SHORT_NAME[$conversation.data.mode]} Settings
+      {Conversation.MODE_SHORT_NAME[$conversation.mode]} Settings
     </h3>
     {#if currentUserIsAdmin}
       <div class="form-group">
@@ -22,7 +22,7 @@
           participants.
         </small>
       </div>
-      {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
+      {#if $conversation.mode === Conversation.MODE_CHANNEL_PUBLIC}
         <div class="form-group">
           <label for="openJoining">Open Joining</label>
           <div>
@@ -40,7 +40,7 @@
       <button type="submit" class="btn btn-primary">Save</button>
     {/if}
   </form>
-  {#if $conversation.isUserJoined()}
+  {#if $conversation.$isUserJoined()}
     <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
       <div class="alert alert-info">
         If you want to start fresh, you can clear your readline and notification
@@ -58,12 +58,12 @@
     </div>
     <div class="d-flex flex-column justify-content-start mt-3 w-std-page">
       {#if !confirmLeave}
-        {#if $conversation.data.mode === Conversation.MODE_CHAT}
+        {#if $conversation.mode === Conversation.MODE_CHAT}
           <div class="alert alert-danger">
             If you leave a chat, all of your messages in it will be deleted. It
             may take a while, so the chat will still be in your list for a bit.
           </div>
-        {:else if currentUserIsAdmin && $conversation.data.acFull.length === 1}
+        {:else if currentUserIsAdmin && $conversation.acFull.length === 1}
           <div class="alert alert-danger">
             You're the only admin in this channel. If you leave it, it will be
             permanently deleted.
@@ -75,7 +75,7 @@
           on:click={showConfirmLeave}
           disabled={leavingConversation}
         >
-          Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
+          Leave {Conversation.MODE_SHORT_NAME[$conversation.mode]}
         </button>
       {:else}
         <div class="alert alert-danger">Are you sure you want to leave?</div>
@@ -85,7 +85,7 @@
           on:click={leave}
           disabled={leavingConversation}
         >
-          Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.data.mode]}
+          Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.mode]}
         </button>
       {/if}
     </div>
@@ -104,34 +104,34 @@
   let leavingConversation = false;
 
   $: currentUserIsAdmin =
-    $conversation.data.mode === Conversation.MODE_CHAT ||
-    $user.inArray($conversation.data.acFull);
+    $conversation.mode === Conversation.MODE_CHAT ||
+    $user.$inArray($conversation.acFull);
 
   let previousConversation = null;
   $: if (previousConversation !== $conversation) {
-    name = $conversation.decrypted.name;
-    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
-      openJoining = $conversation.data.openJoining;
+    name = $conversation.$decrypted.name;
+    if ($conversation.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      openJoining = $conversation.openJoining;
     }
     previousConversation = $conversation;
   }
 
   function save() {
     if (name === '') {
-      $conversation.decrypted.name = null;
+      $conversation.$decrypted.name = null;
     } else {
-      $conversation.decrypted.name = name;
+      $conversation.$decrypted.name = name;
     }
-    if ($conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC) {
-      $conversation.data.openJoining = openJoining;
+    if ($conversation.mode === Conversation.MODE_CHANNEL_PUBLIC) {
+      $conversation.openJoining = openJoining;
     }
-    $conversation.save();
+    $conversation.$save();
     $conversation = $conversation;
   }
 
   async function clearReadline() {
     clearingReadline = true;
-    await $conversation.clearReadline();
+    await $conversation.$clearReadline();
     $conversation = $conversation;
     clearingReadline = false;
   }
@@ -143,6 +143,6 @@
   function leave() {
     leavingConversation = true;
     navigate('/c');
-    $conversation.leave();
+    $conversation.$leave();
   }
 </script>

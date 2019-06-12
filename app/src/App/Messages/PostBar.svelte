@@ -307,17 +307,17 @@
     }
 
     const message = new Message();
-    message.decrypted.text = text === '' || text.match(/^\s+$/) ? null : text;
-    message.decrypted.images = images;
-    message.decrypted.video = video;
-    message.set({ conversation });
+    message.$decrypted.text = text === '' || text.match(/^\s+$/) ? null : text;
+    message.$decrypted.images = images;
+    message.$decrypted.video = video;
+    message.conversation = conversation;
 
-    conversation.pending.push(message);
+    conversation.$pending.push(message);
 
     const removePending = () => {
-      const idx = message.arraySearch(conversation.pending);
+      const idx = message.$arraySearch(conversation.$pending);
       if (idx !== false) {
-        conversation.pending.splice(idx, 1);
+        conversation.$pending.splice(idx, 1);
 
         if (!destroyed) {
           conversation = conversation;
@@ -325,10 +325,10 @@
       }
     };
 
-    message.retrySave = () =>
-      message.save(true).then(removePending, ErrHandler);
-    message.cancelSave = removePending;
-    message.save().then(removePending, ErrHandler);
+    message.$retrySave = () =>
+      message.$save(true).then(removePending, ErrHandler);
+    message.$cancelSave = removePending;
+    message.$save().then(removePending, ErrHandler);
 
     conversation = conversation;
     text = '';

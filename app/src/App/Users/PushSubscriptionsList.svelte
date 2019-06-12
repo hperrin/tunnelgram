@@ -17,18 +17,18 @@
           <div class="d-flex w-100 justify-content-between align-items-start">
             <h5 class="mb-1">
               {#if showBrowser}
-                {subscription.agent.browser.name || ''}
-                {subscription.agent.browser.version || ''}
+                {subscription.$agent.browser.name || ''}
+                {subscription.$agent.browser.version || ''}
               {:else}
-                {subscription.agent.os.name || ''}
-                {subscription.agent.os.version || ''}
+                {subscription.$agent.os.name || ''}
+                {subscription.$agent.os.version || ''}
               {/if}
             </h5>
             <button
               type="button"
               class="btn btn-sm btn-danger rounded-circle"
               on:click={() => remove(subscription)}
-              disabled={subscription.deleting}
+              disabled={subscription.$deleting}
             >
               <i
                 class="fas fa-times text-white d-inline-block"
@@ -39,13 +39,13 @@
           <p class="mb-1 d-flex flex-column">
             {#if showBrowser}
               <span>
-                {subscription.agent.os.name || ''}
-                {subscription.agent.os.version || ''}
+                {subscription.$agent.os.name || ''}
+                {subscription.$agent.os.version || ''}
               </span>
             {/if}
             <span>
-              {subscription.agent.device.vendor || ''}
-              {subscription.agent.device.model || ''}
+              {subscription.$agent.device.vendor || ''}
+              {subscription.$agent.device.model || ''}
             </span>
           </p>
           <small
@@ -93,23 +93,23 @@
     .then(
       subs =>
         (subscriptions =
-          subs.forEach(s => (s.agent = UAParser(s.data.uaString))) || subs),
+          subs.forEach(s => (s.$agent = UAParser(s.uaString))) || subs),
     )
     .catch(ErrHandler);
 
   function remove(subscription) {
-    subscription.deleting = true;
+    subscription.$deleting = true;
     subscriptions = subscriptions;
-    subscription.delete().then(
+    subscription.$delete().then(
       () => {
-        const idx = subscription.arraySearch(subscriptions);
+        const idx = subscription.$arraySearch(subscriptions);
         if (idx !== false) {
           subscriptions.splice(idx, 1);
           subscriptions = subscriptions;
         }
       },
       err => {
-        subscription.deleting = false;
+        subscription.$deleting = false;
         subscriptions = subscriptions;
         ErrHandler(err);
       },

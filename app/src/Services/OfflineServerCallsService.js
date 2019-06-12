@@ -41,8 +41,8 @@ export class OfflineServerCallsService {
         );
       };
 
-      const _gatekeeper = User.prototype.gatekeeper;
-      User.prototype.gatekeeper = function(...args) {
+      const _gatekeeper = User.prototype.$gatekeeper;
+      User.prototype.$gatekeeper = function(...args) {
         // This one is more complicated, as it can be called with arguments.
         let user = this;
         return _gatekeeper.apply(this, args).then(

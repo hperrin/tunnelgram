@@ -98,12 +98,17 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.open(CACHE_STATIC).then(cache => {
         return cache.match(event.request).then(matching => {
+          const fetchPromise = fetchAndAddToCache(
+            'Static',
+            cache,
+            event.request,
+          );
           if (!matching) {
             console.log(
               '[Static Cache] Not found in cache. Requesting from network: ' +
                 event.request.url,
             );
-            return fetchAndAddToCache('Static', cache, event.request);
+            return fetchPromise;
           }
           console.log(
             '[Static Cache] Serving request from cache: ' + event.request.url,
