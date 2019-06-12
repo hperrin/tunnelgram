@@ -15,6 +15,7 @@ class PublicKey extends \Nymph\Entity {
 
   public function __construct($id = 0) {
     $this->text = '';
+    $this->textOaep = '';
     $this->acUser = \Tilmeld\Tilmeld::FULL_ACCESS;
     $this->acGroup = \Tilmeld\Tilmeld::READ_ACCESS;
     $this->acOther = \Tilmeld\Tilmeld::READ_ACCESS;
@@ -44,7 +45,18 @@ class PublicKey extends \Nymph\Entity {
     }
     try {
       v::notEmpty()
-        ->attribute('text', v::stringType()->notEmpty()->length(1, 2048))
+        ->attribute(
+          'text',
+          v::stringType()->notEmpty()->length(1, 2048),
+          false
+        )
+        ->attribute(
+          'textOaep',
+          v::stringType()->notEmpty()->length(
+            1,
+            ceil(4096 * 1.4) // Base64 of 4KiB
+          )
+        )
         ->setName('public key')
         ->assert($this->getValidatable());
     } catch (NestedValidationException $exception) {
