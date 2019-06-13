@@ -281,12 +281,15 @@
     })();
   }
 
+  let previousViewUserGuid2 = null;
   $: if (
     $settings &&
     $viewUser &&
-    $viewUser.guid in $settings.$decrypted.nicknames
+    $viewUser.guid in $settings.$decrypted.nicknames &&
+    previousViewUserGuid2 !== $viewUser.guid
   ) {
     nickname = $settings.$decrypted.nicknames[$viewUser.guid];
+    previousViewUserGuid2 = $viewUser.guid
   }
 
   let experimentsDropdown;
