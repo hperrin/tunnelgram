@@ -20,7 +20,7 @@ User.current().then(userValue => {
   }
   // PubSub subscription.
   if (userValue) {
-    subscription = userValue.subscribe(userValue => {
+    subscription = userValue.$subscribe(userValue => {
       user.set(userValue);
     });
   }
@@ -34,32 +34,32 @@ User.on('login', userValue => {
     subscription.unsubscribe();
   }
   // PubSub subscription.
-  subscription = userValue.subscribe(userValue => {
+  subscription = userValue.$subscribe(userValue => {
     user.set(userValue);
   });
 });
 User.on('logout', async () => {
+  if (subscription) {
+    subscription.unsubscribe();
+  }
   // Svelte freaks out if $user isn't available while it's destroying everything.
   user.set(new User());
   // Let Svelte update the DOM.
   await tick();
   // Now set user to it's appropriate value.
   user.set(null);
-  if (subscription) {
-    subscription.unsubscribe();
-  }
 });
 
 let previousUserValue = false;
 user.subscribe(userValue => {
-  if (userValue) {
-    if (!previousUserValue) {
+  if (userValue && userValue.guid) {
+    if (!userValue.$is(previousUserValue)) {
       // Get the user's avatar.
-      userValue.getAvatar().then(userAvatarValue => {
+      userValue.$getAvatar().then(userAvatarValue => {
         userAvatar.set(userAvatarValue);
       });
       // Is the user a Tilmeld admin?
-      userValue.gatekeeper('tilmeld/admin').then(userIsTilmeldAdminValue => {
+      userValue.$gatekeeper('tilmeld/admin').then(userIsTilmeldAdminValue => {
         userIsTilmeldAdmin.set(userIsTilmeldAdminValue);
       });
     }
@@ -72,6 +72,6 @@ user.subscribe(userValue => {
 
 export function logout() {
   if (get(user)) {
-    get(user).logout();
+    get(user).$logout();
   }
 }

@@ -28,7 +28,7 @@
               <Avatar bind:user />
             </span>
             <DisplayName bind:user />
-            ({user.data.username})
+            ({user.username})
           </span>
         </a>
       {/each}
@@ -53,7 +53,7 @@
                 <Avatar bind:user />
               </span>
               <DisplayName bind:user />
-              ({user.data.username})
+              ({user.username})
             </span>
           </a>
         {/each}
@@ -115,26 +115,28 @@
       let startsWithUsers = [];
       let containUsers = [];
       $conversations.map(conversation => {
-        conversation.data.acFull.map(searchUser => {
-          if ($user.is(searchUser) || searchUser.isASleepingReference) {
+        conversation.acFull.map(searchUser => {
+          if ($user.$is(searchUser) || searchUser.$isASleepingReference) {
             return;
           }
-          let name = searchUser.data.name.toLowerCase();
-          if (searchUser.guid in $settings.decrypted.nicknames) {
-            name = $settings.decrypted.nicknames[searchUser.guid].toLowerCase();
+          let name = searchUser.name.toLowerCase();
+          if (searchUser.guid in $settings.$decrypted.nicknames) {
+            name = $settings.$decrypted.nicknames[
+              searchUser.guid
+            ].toLowerCase();
           }
           if (
             name.startsWith(searchQuery) ||
-            searchUser.data.username.toLowerCase().startsWith(searchQuery)
+            searchUser.username.toLowerCase().startsWith(searchQuery)
           ) {
-            if (!searchUser.inArray(startsWithUsers)) {
+            if (!searchUser.$inArray(startsWithUsers)) {
               startsWithUsers.push(searchUser);
             }
           } else if (
             name.includes(searchQuery) ||
-            searchUser.data.username.toLowerCase().includes(searchQuery)
+            searchUser.username.toLowerCase().includes(searchQuery)
           ) {
-            if (!searchUser.inArray(containUsers)) {
+            if (!searchUser.$inArray(containUsers)) {
               containUsers.push(searchUser);
             }
           }
@@ -147,9 +149,9 @@
       }
       userSearchTimer = window.setTimeout(async () => {
         const guids = [];
-        for (let guid in $settings.decrypted.nicknames) {
+        for (let guid in $settings.$decrypted.nicknames) {
           if (
-            $settings.decrypted.nicknames[guid]
+            $settings.$decrypted.nicknames[guid]
               .toLowerCase()
               .includes(searchQuery)
           ) {
@@ -176,7 +178,7 @@
           {
             type: '&',
             '!guid': [
-              ...Object.keys($settings.decrypted.nicknames),
+              ...Object.keys($settings.$decrypted.nicknames),
               $user.guid,
               ...localUsers.map(user => user.guid),
             ],
@@ -200,12 +202,12 @@
         }
 
         for (let i = nickUsers.length - 1; i >= 0; i--) {
-          if (nickUsers[i].inArray(localUsers)) {
+          if (nickUsers[i].$inArray(localUsers)) {
             nickUsers.splice(i, 1);
           }
         }
         for (let i = nameUsers.length - 1; i >= 0; i--) {
-          if (nameUsers[i].inArray(unUsers)) {
+          if (nameUsers[i].$inArray(unUsers)) {
             nameUsers.splice(i, 1);
           }
         }

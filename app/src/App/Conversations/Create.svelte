@@ -2,23 +2,23 @@
   <h2 class="btn-group d-flex w-std-page">
     {#each [Conversation.MODE_CHAT, Conversation.MODE_CHANNEL_PRIVATE, Conversation.MODE_CHANNEL_PUBLIC] as mode}
       <button
-        class="btn btn-secondary flex-grow-1 {$conversation.data.mode === mode ? 'active' : ''}"
+        class="btn btn-secondary flex-grow-1 {$conversation.mode === mode ? 'active' : ''}"
         type="button"
-        on:click={() => ($conversation.data.mode = mode)}
-        aria-pressed={$conversation.data.mode === mode}
+        on:click={() => ($conversation.mode = mode)}
+        aria-pressed={$conversation.mode === mode}
       >
         {Conversation.MODE_NAME[mode]}
       </button>
     {/each}
   </h2>
-  {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PRIVATE}
+  {#if $conversation.mode === Conversation.MODE_CHANNEL_PRIVATE}
     <p class="alert alert-info m-3 w-std-page">
       Private channels have admins who can add new members and promote other
       members to admin. New members can see past messages. Private channels are
       still end to end encrypted, so only channel members can read what is sent
       in them.
     </p>
-  {:else if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
+  {:else if $conversation.mode === Conversation.MODE_CHANNEL_PUBLIC}
     <p class="alert alert-info m-3 w-std-page">
       Public channels have admins who can add new members and promote other
       members to admin. Everyone can search for and view public channels, and
@@ -29,26 +29,26 @@
     class="d-flex flex-column justify-content-start w-std-page"
     on:submit|preventDefault={save}
   >
-    {#if $conversation.data.mode !== Conversation.MODE_CHAT}
+    {#if $conversation.mode !== Conversation.MODE_CHAT}
       <div class="form-group">
         <label for="name">Name</label>
         <input
           type="text"
           class="form-control"
-          bind:value={$conversation.decrypted.name}
+          bind:value={$conversation.$decrypted.name}
           id="name"
           placeholder="Name"
         />
       </div>
     {/if}
-    {#if $conversation.data.mode === Conversation.MODE_CHANNEL_PUBLIC}
+    {#if $conversation.mode === Conversation.MODE_CHANNEL_PUBLIC}
       <div class="form-group">
         <label for="openJoining">Open Joining</label>
         <div>
           <label>
             <input
               type="checkbox"
-              bind:checked={$conversation.data.openJoining}
+              bind:checked={$conversation.openJoining}
               id="openJoining"
             />
             Allow anyone to join and send messages.
@@ -57,7 +57,7 @@
       </div>
     {/if}
     <h3 class="mt-3">
-      Add {$conversation.data.mode === Conversation.MODE_CHAT ? 'People' : 'Channel Admins'}
+      Add {$conversation.mode === Conversation.MODE_CHAT ? 'People' : 'Channel Admins'}
     </h3>
     <UserSearchSelector
       bind:this={userSearchSelector}
@@ -92,7 +92,7 @@
         </li>
       {/each}
     </ul>
-    {#if $conversation.data.mode === Conversation.MODE_CHAT}
+    {#if $conversation.mode === Conversation.MODE_CHAT}
       <div>
         {#if existingConversations}
           {#if existingConversations.length}
@@ -164,30 +164,25 @@
   let existingConversationsError = false;
   let destroyed = false;
 
-  $: usersOtherThanCurrent = ($conversation.data.acFull || []).filter(
-    u => !$user.is(u),
+  $: usersOtherThanCurrent = ($conversation.acFull || []).filter(
+    u => !$user.$is(u),
   );
 
   let previousConversationAcFullLength = 0;
-  $: if (
-    $conversation.guid ||
-    $conversation.data.mode !== Conversation.MODE_CHAT
-  ) {
+  $: if ($conversation.guid || $conversation.mode !== Conversation.MODE_CHAT) {
     existingConversations = null;
     existingConversationsError = false;
     previousConversationAcFullLength = 0;
-  } else if (
-    previousConversationAcFullLength !== $conversation.data.acFull.length
-  ) {
-    previousConversationAcFullLength = $conversation.data.acFull.length;
+  } else if (previousConversationAcFullLength !== $conversation.acFull.length) {
+    previousConversationAcFullLength = $conversation.acFull.length;
     existingConversations = null;
     existingConversationsError = false;
     (async () => {
       try {
-        const conversations = await $conversation.findMatchingConversations();
+        const conversations = await $conversation.$findMatchingConversations();
         await Promise.all(
           conversations.map(conversation =>
-            conversation.readyAll(1).catch(ErrHandler),
+            conversation.$readyAll(1).catch(ErrHandler),
           ),
         );
         if (destroyed) {
@@ -211,35 +206,35 @@
   function addUser(user) {
     addUserError = null;
 
-    if ($user.is(user)) {
+    if ($user.$is(user)) {
       addUserError = "You're already in conversations you start.";
       userSearchSelector.focus();
       return;
     }
 
-    if (user.inArray($conversation.data.acFull)) {
+    if (user.$inArray($conversation.acFull)) {
       addUserError = "Looks like you've already added them.";
       userSearchSelector.focus();
       return;
     }
 
-    $conversation.data.acFull.push(user);
+    $conversation.acFull.push(user);
     $conversation = $conversation;
     userSearchSelector.clear();
     userSearchSelector.focus();
   }
 
   function removeUser(userToRemove) {
-    $conversation.set({
-      acFull: $conversation.data.acFull.filter(user => !userToRemove.is(user)),
-    });
+    $conversation.acFull = $conversation.acFull.filter(
+      user => !userToRemove.$is(user),
+    );
     $conversation = $conversation;
   }
 
   function save() {
     startingConversation = true;
     $conversation
-      .save()
+      .$save()
       .then(() => navigate('/c/' + $conversation.guid), ErrHandler)
       .finally(() => {
         startingConversation = false;

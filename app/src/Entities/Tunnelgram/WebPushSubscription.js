@@ -3,8 +3,8 @@ import { Nymph, Entity } from 'nymph-client';
 export class WebPushSubscription extends Entity {
   constructor(id) {
     super(id);
-    this.data.endpoint = '';
-    this.data.keys = {};
+    this.endpoint = '';
+    this.keys = {};
   }
 
   static getVapidPublicKey(...args) {

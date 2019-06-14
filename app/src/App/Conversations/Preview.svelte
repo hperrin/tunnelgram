@@ -10,22 +10,22 @@
   <div class="pl-2" style="width: calc(100% - 60px);">
     <div class="d-flex w-100 justify-content-between align-items-start">
       <h5 class="mb-0" style="word-break: break-word;">
-        {conversation.getName($settings)}
+        {conversation.$getName($settings)}
       </h5>
       <small class="ml-1" title={longModifiedDate} style="white-space: nowrap;">
         {modifiedDate}
       </small>
     </div>
     <div class="d-flex w-100 justify-content-between align-items-end">
-      {#if conversation.data.lastMessage}
+      {#if conversation.lastMessage}
         <small class="last-message">
-          {#if conversation.data.lastMessage.decrypted.text != null}
-            {conversation.data.lastMessage.decrypted.text}
-          {:else if conversation.data.lastMessage.decrypted.images.length === 1}
+          {#if conversation.lastMessage.$decrypted.text != null}
+            {conversation.lastMessage.$decrypted.text}
+          {:else if conversation.lastMessage.$decrypted.images.length === 1}
             [A photo]
-          {:else if conversation.data.lastMessage.decrypted.images.length > 1}
+          {:else if conversation.lastMessage.$decrypted.images.length > 1}
             [Photos]
-          {:else if conversation.data.lastMessage.decrypted.video !== null}
+          {:else if conversation.lastMessage.$decrypted.video !== null}
             [A video]
           {/if}
         </small>
@@ -58,15 +58,15 @@
   let interval;
   let destroyed = false;
 
-  $: isOwner = $user.is(conversation.data.user);
+  $: isOwner = $user.$is(conversation.user);
   $: avatarUsersAndWidth = (() => {
     let users;
-    if (!conversation.data.acFull) {
+    if (!conversation.acFull) {
       users = [];
-    } else if (conversation.data.acFull.length === 1) {
-      users = conversation.data.acFull;
+    } else if (conversation.acFull.length === 1) {
+      users = conversation.acFull;
     } else {
-      users = conversation.data.acFull.filter(u => !$user.is(u));
+      users = conversation.acFull.filter(u => !$user.$is(u));
     }
     let i = 1;
     while (i ** 2 < users.length) {
@@ -79,24 +79,24 @@
   $: if (conversation) {
     updateTime();
     (async () => {
-      unreadCount = await conversation.unreadCount();
+      unreadCount = await conversation.$unreadCount();
     })();
   }
 
   $: if (
     conversation &&
-    conversation.containsSleepingReference &&
-    !conversation._tgCalledReadyAll
+    conversation.$containsSleepingReference &&
+    !conversation.$tgCalledReadyAll
   ) {
     // Ready the conversation's referenced entities.
     if (
-      conversation.containsSleepingReference &&
-      !conversation._tgCalledReadyAll
+      conversation.$containsSleepingReference &&
+      !conversation.$tgCalledReadyAll
     ) {
-      conversation._tgCalledReadyAll = true;
-      conversation.readyAll(1).then(() => {
-        conversation.containsSleepingReference = false;
-        conversation._tgCalledReadyAll = false;
+      conversation.$tgCalledReadyAll = true;
+      conversation.$readyAll(1).then(() => {
+        conversation.$containsSleepingReference = false;
+        conversation.$tgCalledReadyAll = false;
         if (!destroyed) {
           conversation = conversation;
         }
@@ -106,10 +106,10 @@
 
   $: if (
     conversation &&
-    conversation.data.lastMessage &&
-    !conversation.data.lastMessage.cryptReady
+    conversation.lastMessage &&
+    !conversation.lastMessage.$cryptReady
   ) {
-    conversation.data.lastMessage.cryptReadyPromise.then(
+    conversation.lastMessage.$cryptReadyPromise.then(
       () => (conversation = conversation),
     );
   }

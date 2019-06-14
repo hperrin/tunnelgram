@@ -11,59 +11,59 @@ User.on('logout', () => (currentUser = null));
 export class Settings extends Entity {
   constructor(id) {
     super(id);
-    this.decrypted = {
+    this.$decrypted = {
       nicknames: {},
     };
-    this.data.nicknames = {};
+    this.nicknames = {};
 
-    this.cryptReady = true;
-    this.cryptReadyPromise = Promise.resolve(true);
+    this.$cryptReady = true;
+    this.$cryptReadyPromise = Promise.resolve(true);
   }
 
-  init(entityData) {
-    super.init(entityData);
+  $init(entityData) {
+    super.$init(entityData);
 
     if (entityData == null) {
-      this.cryptReady = true;
+      this.$cryptReady = true;
       return this;
     }
 
-    this.cryptReady = false;
-    this.cryptReadyPromise = (async () => {
+    this.$cryptReady = false;
+    this.$cryptReadyPromise = (async () => {
       // Decrypt the nicknames.
-      if (currentUser && this.data.key) {
-        const key = await crypt.decryptRSA(this.data.key);
-        for (let id in this.data.nicknames) {
-          this.decrypted.nicknames[id] = await crypt.decrypt(
-            this.data.nicknames[id],
+      if (currentUser && this.key) {
+        const key = await crypt.decryptRSA(this.key);
+        for (let id in this.nicknames) {
+          this.$decrypted.nicknames[id] = await crypt.decrypt(
+            this.nicknames[id],
             key,
           );
         }
       }
 
-      this.cryptReady = true;
+      this.$cryptReady = true;
       return true;
     })();
 
     return this;
   }
 
-  async save() {
+  async $save() {
     // Encrypt the nicknames.
     const key = crypt.generateKey();
-    this.data.nicknames = {};
-    for (let id in this.decrypted.nicknames) {
-      this.data.nicknames[id] = await crypt.encrypt(
-        this.decrypted.nicknames[id],
+    this.nicknames = {};
+    for (let id in this.$decrypted.nicknames) {
+      this.nicknames[id] = await crypt.encrypt(
+        this.$decrypted.nicknames[id],
         key,
       );
     }
 
     const encryptPromise = crypt.encryptRSAForUser(key, currentUser);
 
-    this.data.key = await encryptPromise;
+    this.key = await encryptPromise;
 
-    return await super.save();
+    return await super.$save();
   }
 
   static async current() {

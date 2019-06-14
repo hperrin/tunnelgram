@@ -446,12 +446,28 @@ class Conversation extends \Nymph\Entity {
   }
 
   public function jsonAcceptData($data) {
+    $this->jsonAcceptSomething(
+      function () use ($data) {
+        parent::jsonAcceptData($data);
+      }
+    );
+  }
+
+  public function jsonAcceptPatch($patch) {
+    $this->jsonAcceptSomething(
+      function () use ($patch) {
+        parent::jsonAcceptPatch($patch);
+      }
+    );
+  }
+
+  private function jsonAcceptSomething($callback) {
     if ($this->mode === self::MODE_CHANNEL_PRIVATE) {
       // Save the current keys, cause they have all channel members.
       $oldKeys = $this->keys;
     }
 
-    parent::jsonAcceptData($data);
+    $callback();
 
     if ($this->mode === self::MODE_CHANNEL_PRIVATE
       && in_array('keys', $this->whitelistData)

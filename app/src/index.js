@@ -20,7 +20,7 @@ import Container from './Container';
 import ErrHandler from './ErrHandler';
 
 import { get } from 'svelte/store';
-import * as store from './stores';
+import * as stores from './stores';
 
 import './scss/styles.scss';
 
@@ -48,26 +48,26 @@ let setupSubscription;
 export function refreshAll() {
   cache.clear();
 
-  const settings = get(store.settings);
+  const settings = get(stores.settings);
   if (settings != null) {
-    settings.init(settings.toJSON());
+    settings.$init(settings.toJSON());
   }
 
-  const conversation = get(store.conversation);
+  const conversation = get(stores.conversation);
   if (conversation.guid) {
     const newConv = new Conversation();
-    newConv.init(conversation.toJSON());
-    store.conversation.set(new Conversation());
-    store.conversation.set(newConv);
+    newConv.$init(conversation.toJSON());
+    stores.conversation.set(new Conversation());
+    stores.conversation.set(newConv);
   }
 
-  const conversations = get(store.conversations);
+  const conversations = get(stores.conversations);
   for (let i in conversations) {
     const newConv = new Conversation();
-    newConv.init(conversations[i].toJSON());
+    newConv.$init(conversations[i].toJSON());
     conversations[i] = newConv;
   }
-  store.conversations.set(conversations);
+  stores.conversations.set(conversations);
 }
 
 let forwardCount = 0;
@@ -89,22 +89,22 @@ window.addEventListener('beforeinstallprompt', e => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // Stash the event so it can be triggered later.
-  store.beforeInstallPromptEvent.set(e);
+  stores.beforeInstallPromptEvent.set(e);
 });
 
 // Everything is this function requires the logged in user status to be known.
 (async () => {
-  await store.userReadyPromise;
+  await stores.userReadyPromise;
 
   const conversationHandler = params => {
-    if (!get(store.user)) {
+    if (!get(stores.user)) {
       return;
     }
 
     const guid = params && params.id ? parseFloat(params.id) : null;
     const view = (params && params.view) || 'conversation';
-    const conversation = get(store.conversation);
-    const conversations = get(store.conversations);
+    const conversation = get(stores.conversation);
+    const conversations = get(stores.conversations);
     let conv = null;
 
     if (guid === null) {
@@ -121,11 +121,11 @@ window.addEventListener('beforeinstallprompt', e => {
     }
 
     if (conv) {
-      store.conversation.set(conv);
-      store.view.set(view);
-      store.convosOut.set(false);
+      stores.conversation.set(conv);
+      stores.view.set(view);
+      stores.convosOut.set(false);
     } else {
-      store.loadingConversation.set(true);
+      stores.loadingConversation.set(true);
       crypt.ready.then(() => {
         Nymph.getEntity(
           {
@@ -137,14 +137,14 @@ window.addEventListener('beforeinstallprompt', e => {
           },
         ).then(
           conv => {
-            store.conversation.set(conv);
-            store.view.set(view);
-            store.convosOut.set(false);
-            store.loadingConversation.set(false);
+            stores.conversation.set(conv);
+            stores.view.set(view);
+            stores.convosOut.set(false);
+            stores.loadingConversation.set(false);
           },
           err => {
             ErrHandler(err);
-            store.loadingConversation.set(false);
+            stores.loadingConversation.set(false);
             router.navigate('/');
           },
         );
@@ -154,32 +154,32 @@ window.addEventListener('beforeinstallprompt', e => {
 
   const userHandler = params => {
     const { username } = params;
-    const user = get(store.user);
+    const user = get(stores.user);
 
     if (!user) {
       return;
     }
 
-    store.loadingUser.set(true);
-    if (user.data.username === username) {
-      store.viewUser.set(user);
-      store.viewUserIsSelf.set(true);
-      store.view.set('user');
-      store.convosOut.set(false);
-      store.loadingUser.set(false);
+    stores.loadingUser.set(true);
+    if (user.username === username) {
+      stores.viewUser.set(user);
+      stores.viewUserIsSelf.set(true);
+      stores.view.set('user');
+      stores.convosOut.set(false);
+      stores.loadingUser.set(false);
     } else {
       crypt.ready.then(() => {
         User.byUsername(username).then(
           viewUser => {
-            store.viewUser.set(viewUser);
-            store.viewUserIsSelf.set(false);
-            store.view.set('user');
-            store.convosOut.set(false);
-            store.loadingUser.set(false);
+            stores.viewUser.set(viewUser);
+            stores.viewUserIsSelf.set(false);
+            stores.view.set('user');
+            stores.convosOut.set(false);
+            stores.loadingUser.set(false);
           },
           err => {
             ErrHandler(err);
-            store.loadingUser.set(false);
+            stores.loadingUser.set(false);
             router.navigate('/');
           },
         );
@@ -189,7 +189,7 @@ window.addEventListener('beforeinstallprompt', e => {
 
   router.hooks({
     before: (done, params) => {
-      if (get(store.user) === null) {
+      if (get(stores.user) === null) {
         done();
         navigateToContinueUrl();
       } else {
@@ -200,7 +200,7 @@ window.addEventListener('beforeinstallprompt', e => {
 
   router
     .on(() => {
-      store.convosOut.set(true);
+      stores.convosOut.set(true);
     })
     .on({
       c: { uses: conversationHandler },
@@ -208,14 +208,14 @@ window.addEventListener('beforeinstallprompt', e => {
       'c/:id/:view': { uses: conversationHandler },
       'u/:username': { uses: userHandler },
       pushSubscriptions: () => {
-        if (!get(store.user)) {
+        if (!get(stores.user)) {
           return;
         }
 
-        store.view.set('pushSubscriptions');
-        store.convosOut.set(false);
-        store.loadingConversation.set(false);
-        store.loadingUser.set(false);
+        stores.view.set('pushSubscriptions');
+        stores.convosOut.set(false);
+        stores.loadingConversation.set(false);
+        stores.loadingUser.set(false);
       },
       'pwa-home': () => {
         router.navigate('/');
@@ -226,17 +226,17 @@ window.addEventListener('beforeinstallprompt', e => {
     })
     .resolve();
 
-  store.conversation.subscribe(conversation => {
+  stores.conversation.subscribe(conversation => {
     if (conversation && conversation.guid) {
-      const conversations = get(store.conversations);
+      const conversations = get(stores.conversations);
       // Refresh conversations' readlines when current conversation changes.
       for (let i in conversations) {
         if (
           conversation === conversations[i] ||
-          conversation.is(conversations[i])
+          conversation.$is(conversations[i])
         ) {
           conversations[i] = conversation;
-          store.conversations.set(conversations);
+          stores.conversations.set(conversations);
           break;
         }
       }
@@ -244,11 +244,11 @@ window.addEventListener('beforeinstallprompt', e => {
   });
 
   let previousUser = null;
-  store.user.subscribe(user => {
+  stores.user.subscribe(user => {
     if (previousUser !== user) {
       if (user != null) {
         // This is needed because the current user is added to acFull.
-        store.conversation.set(new Conversation());
+        stores.conversation.set(new Conversation());
 
         // Check for a continue route and navigate to it.
         const route = router.lastRouteResolved();
@@ -268,15 +268,15 @@ window.addEventListener('beforeinstallprompt', e => {
         // Get their settings.
         crypt.ready.then(() => {
           Settings.current().then(settings => {
-            store.settings.set(settings);
+            stores.settings.set(settings);
           });
         });
       } else if (previousUser != null && user == null) {
         // If the user logs out, clear everything.
         storage.clear();
-        store.conversations.set([]);
-        store.conversation.set(new Conversation());
-        store.settings.set(null);
+        stores.conversations.set([]);
+        stores.conversation.set(new Conversation());
+        stores.settings.set(null);
         refreshAll();
         // And navigate to a continue URL, since the user doesn't have access.
         navigateToContinueUrl();
@@ -291,7 +291,7 @@ window.addEventListener('beforeinstallprompt', e => {
       // Cordova OneSignal Push Subscriptions
 
       // When user consents to notifications, tell OneSignal.
-      store.requestNotificationPermission.set(() =>
+      stores.requestNotificationPermission.set(() =>
         window.plugins.OneSignal.provideUserConsent(true),
       );
 
@@ -306,10 +306,8 @@ window.addEventListener('beforeinstallprompt', e => {
       // Push the playerId up to the server. (It will be updated if it already
       // exists.)
       const appPushSubscription = new AppPushSubscription();
-      appPushSubscription.set({
-        playerId,
-      });
-      appPushSubscription.save().catch(ErrHandler);
+      appPushSubscription.playerId = playerId;
+      appPushSubscription.$save().catch(ErrHandler);
     } else {
       // Web Push Subscriptions
       if ((await swRegPromise) == null) {
@@ -390,7 +388,7 @@ window.addEventListener('beforeinstallprompt', e => {
           let subscription = await getSubscription();
 
           if (subscription) {
-            store.webPushSubscription.set(subscription);
+            stores.webPushSubscription.set(subscription);
 
             try {
               const webPushSubscriptionServerCheck = await Nymph.getEntity(
@@ -432,24 +430,22 @@ window.addEventListener('beforeinstallprompt', e => {
               return;
             }
 
-            store.webPushSubscription.set(subscription);
+            stores.webPushSubscription.set(subscription);
           }
 
           // And push it up to the server.
           const webPushSubscription = new WebPushSubscription();
           const subscriptionData = JSON.parse(JSON.stringify(subscription));
-          webPushSubscription.set({
-            endpoint: subscriptionData.endpoint,
-            keys: {
-              p256dh: subscriptionData.keys.p256dh,
-              auth: subscriptionData.keys.auth,
-            },
-          });
-          webPushSubscription.save().catch(ErrHandler);
+          webPushSubscription.endpoint = subscriptionData.endpoint;
+          webPushSubscription.keys = {
+            p256dh: subscriptionData.keys.p256dh,
+            auth: subscriptionData.keys.auth,
+          };
+          webPushSubscription.$save().catch(ErrHandler);
         };
 
         // Set notification permission asker.
-        store.requestNotificationPermission.set(async () => {
+        stores.requestNotificationPermission.set(async () => {
           const permissionResult = await new Promise(async resolve => {
             const promise = Notification.requestPermission(value =>
               resolve(value),
@@ -467,7 +463,7 @@ window.addEventListener('beforeinstallprompt', e => {
         });
 
         if (Notification.permission === 'granted') {
-          if (get(store.user)) {
+          if (get(stores.user)) {
             setupSubscription();
           }
         }
@@ -484,12 +480,14 @@ window.addEventListener('beforeinstallprompt', e => {
     target: document.querySelector('main'),
     props: {},
   });
+
+  window.app = app;
 })();
 
 // Required for Cordova.
 window.router = router;
 // Useful for debugging.
-window.store = store;
+window.stores = stores;
 window.storeGet = get;
 window.Nymph = Nymph;
 window.User = User;

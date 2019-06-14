@@ -15,9 +15,9 @@
     "remove this line and change versions in require to dev-master for testing"
   ],
   "require": {
-    "sciactive/nymph-server": "^3.0",
+    "sciactive/nymph-server": "^3.1",
     "sciactive/nymph-pubsub": "^3.0",
-    "sciactive/tilmeld-server": "^1.0",
+    "sciactive/tilmeld-server": "^1.1",
     "respect/validation": "^1.1",
     "aws/aws-sdk-php": "^3.61",
     "ramsey/uuid": "^3.7",

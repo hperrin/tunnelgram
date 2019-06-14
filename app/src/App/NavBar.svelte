@@ -1,5 +1,5 @@
 <ul class="navbar-nav ml-auto">
-  {#if $conversation.isUserJoined()}
+  {#if $conversation.$isUserJoined()}
     <li class="nav-item dropdown" bind:this={notificationsDropdown}>
       <a
         class="nav-link dropdown-toggle"
@@ -11,25 +11,25 @@
         aria-haspopup="true"
         aria-expanded="false"
       >
-        {#if $conversation.notifications === Conversation.NOTIFICATIONS_ALL}
+        {#if $conversation.$notifications === Conversation.NOTIFICATIONS_ALL}
           <span>
             <i class="fas fa-bell" />
           </span>
-        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_MENTIONS}
+        {:else if $conversation.$notifications === Conversation.NOTIFICATIONS_MENTIONS}
           <span>
             <i class="far fa-bell" />
           </span>
-        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_DIRECT}
+        {:else if $conversation.$notifications === Conversation.NOTIFICATIONS_DIRECT}
           <span>
             <i class="far fa-bell" />
           </span>
-        {:else if $conversation.notifications === Conversation.NOTIFICATIONS_NONE}
+        {:else if $conversation.$notifications === Conversation.NOTIFICATIONS_NONE}
           <span>
             <i class="fas fa-bell-slash" />
           </span>
         {/if}
         <span class="sr-only">
-          ({Conversation.NOTIFICATIONS_NAME[$conversation.notifications]})
+          ({Conversation.NOTIFICATIONS_NAME[$conversation.$notifications]})
         </span>
       </a>
       <div
@@ -39,7 +39,7 @@
         <h6 class="dropdown-header">Notification Setting</h6>
         {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
           <a
-            class="dropdown-item {$conversation.notifications === key ? 'active' : ''}"
+            class="dropdown-item {$conversation.$notifications === key ? 'active' : ''}"
             href="javascript:void(0)"
             on:click={() => setNotifications(key)}
           >
@@ -61,16 +61,16 @@
     <a
       class="nav-link"
       href="#/c/{$conversation.guid}/people"
-      title="People ({$conversation.data.acFull.length})"
+      title="People ({$conversation.acFull.length})"
     >
       <span class="fa-layers fa-fw">
         <i class="fas fa-users" />
-        {#if $conversation.data.mode === Conversation.MODE_CHAT}
+        {#if $conversation.mode === Conversation.MODE_CHAT}
           <span
             class="fa-layers-counter fa-layers-bottom-right bg-info"
             style="transform: scale(0.6); bottom: -.4em; right: -.4em;"
           >
-            {$conversation.data.acFull.length}
+            {$conversation.acFull.length}
           </span>
         {/if}
       </span>
@@ -79,7 +79,7 @@
       {/if}
     </a>
   </li>
-  {#if $conversation.isUserJoined()}
+  {#if $conversation.$isUserJoined()}
     <li class="nav-item {$view === 'settings' ? 'active' : ''}">
       <a
         class="nav-link"
@@ -110,7 +110,7 @@
   }
 
   async function setNotifications(key) {
-    const notif = $conversation.saveNotificationSetting(key);
+    const notif = $conversation.$saveNotificationSetting(key);
     $conversation = $conversation;
     await notif;
     $conversation = $conversation;

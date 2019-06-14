@@ -30,12 +30,12 @@
   export let conversation;
   let joining = false;
 
-  $: showJoin = conversation && conversation.canUserJoin();
+  $: showJoin = conversation && conversation.$canUserJoin();
 
   async function join() {
     joining = true;
     try {
-      await conversation.join();
+      await conversation.$join();
       conversation = conversation;
     } catch (errObj) {
       ErrHandler(errObj);

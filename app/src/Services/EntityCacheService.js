@@ -122,8 +122,8 @@ Nymph.getEntityData = async (...args) => {
 
   // Determine if this is a request for a single entity.
   // Nymph.getEntityData(
-  //   {'class': this.sleepingReference[2]},
-  //   {'type': '&', 'guid': this.sleepingReference[1]}
+  //   {'class': this.$sleepingReference[2]},
+  //   {'type': '&', 'guid': this.$sleepingReference[1]}
   // )
   if (
     !(
@@ -165,7 +165,7 @@ Nymph.serverCall = async (...args) => {
   const result = await _serverCall.apply(Nymph, args);
 
   if ('entity' in result && result.entity.guid) {
-    cache.setEntityData(result.entity.guid, result.entity.toJSON());
+    cache.setEntityData(result.entity.guid, result.entity);
   }
 
   return result;

@@ -12,8 +12,8 @@ conversations.subscribe(async convos => {
   if (convos) {
     let promises = [];
     for (let convo of convos) {
-      if (!convo.cryptReady) {
-        promises.push(convo.cryptReadyPromise);
+      if (!convo.$cryptReady) {
+        promises.push(convo.$cryptReadyPromise);
       }
     }
     if (promises.length) {
@@ -24,8 +24,8 @@ conversations.subscribe(async convos => {
 });
 export const conversation = writable(new Conversation());
 conversation.subscribe(async convo => {
-  if (convo && !convo.cryptReady) {
-    await convo.cryptReadyPromise;
+  if (convo && !convo.$cryptReady) {
+    await convo.$cryptReadyPromise;
     conversation.set(convo);
   }
 });
@@ -37,8 +37,8 @@ export const viewUserIsSelf = writable(null);
 export const convosOut = writable(true);
 export const settings = writable(null);
 settings.subscribe(async sett => {
-  if (sett && !sett.cryptReady) {
-    await sett.cryptReadyPromise;
+  if (sett && !sett.$cryptReady) {
+    await sett.$cryptReadyPromise;
     settings.set(sett);
   }
 });

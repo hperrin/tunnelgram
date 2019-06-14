@@ -2,7 +2,7 @@
   class="{className} rounded-circle d-inline-block"
   style="width: {size}px; height: {size}px;"
 >
-  {#if user.data.avatar}
+  {#if user.avatar}
     <span
       class="rounded-circle d-flex justify-content-center align-items-center
       bg-info text-white w-100 h-100"
@@ -28,15 +28,15 @@
   export let size = '40';
 
   $: avatarUrl =
-    user.data.avatar &&
-    user.data.avatar.replace(
+    user.avatar &&
+    user.avatar.replace(
       /^http:\/\/blob:9000\//,
       'http://' + window.location.host.replace(/:\d+$/, '') + ':8082/',
     );
   $: iconLetters = (() => {
     const nickname =
-      $settings != null && user.guid in $settings.decrypted.nicknames
-        ? $settings.decrypted.nicknames[user.guid]
+      $settings != null && user.guid in $settings.$decrypted.nicknames
+        ? $settings.$decrypted.nicknames[user.guid]
         : null;
     let letters = '';
     if (nickname) {
@@ -48,9 +48,13 @@
           .substr(0, 1)
           .toUpperCase();
       }
-    } else if (user.data.nameFirst || user.data.nameLast) {
-      letters += user.data.nameFirst.substr(0, 1).toUpperCase();
-      letters += user.data.nameLast.substr(0, 1).toUpperCase();
+    } else {
+      if (user.nameFirst) {
+        letters += user.nameFirst.substr(0, 1).toUpperCase();
+      }
+      if (user.nameLast) {
+        letters += user.nameLast.substr(0, 1).toUpperCase();
+      }
     }
     return letters;
   })();

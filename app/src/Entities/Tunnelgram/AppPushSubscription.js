@@ -3,7 +3,7 @@ import { Nymph, Entity } from 'nymph-client';
 export class AppPushSubscription extends Entity {
   constructor(id) {
     super(id);
-    this.data.playerId = '';
+    this.playerId = '';
   }
 }
 
