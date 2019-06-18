@@ -102,7 +102,6 @@
 
     let options = {
       index,
-      history: false,
       showHideOpacity: true,
       getThumbBoundsFn: index => {
         const rect = thumbnailContainer.children[index].getBoundingClientRect();

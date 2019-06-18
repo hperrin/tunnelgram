@@ -4,7 +4,7 @@
       <a
         class="mx-2"
         style="line-height: 1;"
-        href="#/u/{messageUser.username}"
+        href="/u/{messageUser.username}"
         title={displayName}
       >
         <Avatar user={messageUser} size={avatarSize} />
@@ -38,7 +38,7 @@
       <a
         class="mx-2"
         style="line-height: 1;"
-        href="#/u/{messageUser.username}"
+        href="/u/{messageUser.username}"
         title={displayName}
       >
         <Avatar user={messageUser} size={avatarSize} />
@@ -56,7 +56,7 @@
       {#if nextMessageUserIsDifferent && isMessageUserReady}
         <a
           class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
-          href="#/u/{messageUser.username}"
+          href="/u/{messageUser.username}"
           title={displayName}
         >
           <Avatar user={messageUser} size={avatarSize} />

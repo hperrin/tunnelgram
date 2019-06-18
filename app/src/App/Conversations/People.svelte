@@ -31,7 +31,7 @@
         <a
           class="list-group-item d-flex justify-content-between
           align-items-center"
-          href="#/u/{curUser.username}"
+          href="/u/{curUser.username}"
         >
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
@@ -54,7 +54,7 @@
             class="list-group-item d-flex justify-content-between
             align-items-center"
           >
-            <a class="d-flex align-items-center" href="#/u/{curUser.username}">
+            <a class="d-flex align-items-center" href="/u/{curUser.username}">
               <span class="mr-2" style="line-height: 0;">
                 <Avatar bind:user={curUser} />
               </span>

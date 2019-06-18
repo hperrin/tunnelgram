@@ -164,7 +164,7 @@
                 {#each existingConversations as conversation (conversation.guid)}
                   <a
                     class="list-group-item list-group-item-action"
-                    href="#/c/{conversation.guid}"
+                    href="/c/{conversation.guid}"
                   >
                     <Preview bind:conversation />
                   </a>
@@ -289,7 +289,7 @@
     previousViewUserGuid2 !== $viewUser.guid
   ) {
     nickname = $settings.$decrypted.nicknames[$viewUser.guid];
-    previousViewUserGuid2 = $viewUser.guid
+    previousViewUserGuid2 = $viewUser.guid;
   }
 
   let experimentsDropdown;

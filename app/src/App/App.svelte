@@ -114,10 +114,10 @@
               aria-labelledby="userDropdown"
             >
               <h6 class="dropdown-header">{$user.name}</h6>
-              <a class="dropdown-item" href="#/u/{$user.username}">
+              <a class="dropdown-item" href="/u/{$user.username}">
                 Your Account
               </a>
-              <a class="dropdown-item" href="#/pushSubscriptions">
+              <a class="dropdown-item" href="/pushSubscriptions">
                 Push Subscriptions
               </a>
               <div class="dropdown-divider" />
@@ -158,7 +158,7 @@
           <li class="nav-item">
             <a
               class="nav-link border-secondary rounded px-2"
-              href="#/"
+              href="/"
               title="Back to list"
             >
               <i class="fas fa-arrow-left" />

@@ -26,7 +26,7 @@ class EncryptionService extends AESEncryptionService {
 
     // Async encryption/decryption for PKCS1 is provided through a web worker.
     this.rsaEncryptionWorker = {
-      worker: new Worker('dist/Workers/RSAEncryption.js'),
+      worker: new Worker('/dist/Workers/RSAEncryption.js'),
       counter: 0,
       callbacks: {},
     };
