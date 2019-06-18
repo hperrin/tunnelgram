@@ -50,7 +50,7 @@
     </li>
   {/if}
   <li class="nav-item {$view === 'conversation' ? 'active' : ''}">
-    <a class="nav-link" href="#/c/{$conversation.guid}" title="Conversation">
+    <a class="nav-link" href="/c/{$conversation.guid}" title="Conversation">
       <i class="fas fa-comments" />
       {#if $view === 'conversation'}
         <span class="sr-only">(current)</span>
@@ -60,7 +60,7 @@
   <li class="nav-item {$view === 'people' ? 'active' : ''}">
     <a
       class="nav-link"
-      href="#/c/{$conversation.guid}/people"
+      href="/c/{$conversation.guid}/people"
       title="People ({$conversation.acFull.length})"
     >
       <span class="fa-layers fa-fw">
@@ -83,7 +83,7 @@
     <li class="nav-item {$view === 'settings' ? 'active' : ''}">
       <a
         class="nav-link"
-        href="#/c/{$conversation.guid}/settings"
+        href="/c/{$conversation.guid}/settings"
         title="Settings"
       >
         <i class="fas fa-cog" />

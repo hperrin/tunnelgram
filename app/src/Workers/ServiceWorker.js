@@ -329,8 +329,7 @@ function sendNotification(title, body, guid, timestamp) {
 }
 
 function openConversation(conversationId) {
-  const urlToOpen = new URL('/#/c/' + conversationId, self.location.origin)
-    .href;
+  const urlToOpen = new URL('/c/' + conversationId, self.location.origin).href;
 
   return clients
     .matchAll({

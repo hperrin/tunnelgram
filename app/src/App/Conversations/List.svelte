@@ -7,7 +7,7 @@
 >
   <div class="list-group">
     <a
-      href="#/c"
+      href="/c"
       on:click={() => (search = '')}
       class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}"
     >
@@ -30,7 +30,7 @@
     {/if}
     {#each $conversations as curConversation (curConversation.guid)}
       <a
-        href="#/c/{curConversation.guid}"
+        href="/c/{curConversation.guid}"
         on:click={() => (search = '')}
         class="list-group-item p-2 list-group-item-action rounded-0 flex-column
         align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''}
