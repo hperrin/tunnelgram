@@ -96,7 +96,27 @@
         {:then unused}
           <App />
         {:catch cryptError}
-          <div>Error during encryption setup: {cryptError}</div>
+          {#if cryptError.name === 'ReLogInNeededError'}
+            <div>
+              You've upgraded your encryption on another device, so you'll need
+              to log out here and log back in to enable the new encryption.
+            </div>
+          {:else if cryptError.name === 'EncryptionUpgradeNeededError'}
+            <div>
+              {$brand} has a new encryption method that makes your messages even
+              more secure. Please enter your password below.
+            </div>
+            <div>
+              If you don't remember your password, you can enter a new one, and
+              it will be changed.
+            </div>
+            <div>
+              This is a great time to try out a password manager, like
+              <a href="https://bitwarden.com/" target="_blank">BitWarden.</a>
+            </div>
+          {:else}
+            <div>Error during encryption setup: {cryptError}</div>
+          {/if}
           <div>
             <a href="javascript:void(0)" on:click={logout}>Log Out</a>
           </div>
