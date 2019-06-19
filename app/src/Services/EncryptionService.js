@@ -15,8 +15,13 @@ class EncryptionService extends AESEncryptionService {
     this.key = null;
     this.iv = null;
     this.userPublicKeys = {};
+    this.userPublicKeysPkcs1 = {};
     this.userPrivateKey = null;
     this.userPublicKey = null;
+    this.userPrivateKeyPem = null;
+    this.userPublicKeyPem = null;
+    this.userPrivateKeyPemPkcs1 = null;
+    this.userPublicKeyPemPkcs1 = null;
     this.resolve = null;
     this.reject = null;
     this.ready = new Promise((resolve, reject) => {
@@ -37,10 +42,39 @@ class EncryptionService extends AESEncryptionService {
     };
 
     (async () => {
-      await this.getUserPrivateKey();
-      await this.getUserPublicKey();
-      if (this.userPrivateKey != null && this.userPublicKey != null) {
-        this.resolve();
+      try {
+        await this.getUserPrivateKey();
+        await this.getUserPublicKey();
+        if (this.userPrivateKey != null && this.userPublicKey != null) {
+          this.resolve();
+        }
+      } catch (e) {
+        if (e.name === 'EncryptionUpgradeNeededError') {
+          // This process is only needed for as long as user tokens remain
+          // valid after new encryption is implemented. After that time, any
+          // user who hasn't upgraded their encryption will need to log in again
+          // anyway.
+          const privatePromise = PrivateKey.current();
+          const publicPromise = PublicKey.current();
+          let privateKey = await privatePromise;
+          let publicKey = await publicPromise;
+
+          if (privateKey.textOaep || publicKey.textOaep) {
+            // The user has already upgraded encryption on another device, so
+            // they need to log in again.
+            const err = new Error(
+              'Please log in again to enable new encryption.',
+            );
+            err.name = 'ReLogInNeededError';
+            this.reject(err);
+          } else {
+            // The user has not upgraded encryption yet, so they must re-enter
+            // their password (or create a new one) to upgrade.
+            this.reject(e);
+          }
+        } else {
+          this.reject(e);
+        }
       }
     })();
 
@@ -55,36 +89,81 @@ class EncryptionService extends AESEncryptionService {
         if (privateKey && publicKey) {
           // The user has been here before, so get the private key from the entity.
 
-          // Decrypt the private key.
-          const encryptedPrivateKey = privateKey.text;
-          const privateKeyString = await this.decrypt(
-            encryptedPrivateKey,
-            this.key + this.iv,
+          // Decrypt the PKCS1 private key.
+          let privateKeyPemPkcs1 = null;
+          if (privateKey.text) {
+            privateKeyPemPkcs1 = await this.decrypt(
+              privateKey.text,
+              this.key + this.iv,
+            );
+          }
+
+          // And load the PKCS1 public key.
+          let publicKeyPemPkcs1 = null;
+          if (publicKey.text) {
+            publicKeyPemPkcs1 = publicKey.text;
+          }
+
+          let privateKey;
+          let publicKey;
+          let privateKeyPem;
+          let publicKeyPem;
+
+          if (privateKey.textOaep && publicKey.textOaep) {
+            privateKeyPem = await this.decrypt(
+              privateKey.textOaep,
+              this.key + this.iv,
+            );
+            publicKeyPem = publicKey.textOaep;
+            privateKey = await this.importPrivateKey(privateKeyPem);
+            publicKey = await this.importPublicKey(publicKeyPem);
+          } else if (!privateKey.textOaep && !publicKey.textOaep) {
+            // The user needs to upgrade to the new encryption.
+            ({
+              privateKey,
+              publicKey,
+              privateKeyPem,
+              publicKeyPem,
+            } = await that.generateNewKeyPair());
+            privateKey.textOaep = await this.encrypt(
+              privateKeyPem,
+              this.key + this.iv,
+            );
+            publicKey.textOaep = publicKeyPem;
+            await Promise.all([privateKey.$save(), publicKey.$save()]);
+          } else {
+            this.reject(
+              'Server provided inconsistent OAEP keys. Please refresh the page.',
+            );
+            return;
+          }
+
+          await this.setUserPrivateKey(
+            privateKey,
+            privateKeyPem,
+            privateKeyPemPkcs1,
           );
-
-          await this.setUserPrivateKey(privateKeyString);
-
-          // And load the public key.
-          const publicKeyString = publicKey.text;
-          await this.setUserPublicKey(publicKeyString);
+          await this.setUserPublicKey(
+            publicKey,
+            publicKeyPem,
+            publicKeyPemPkcs1,
+          );
         } else if (!privateKey && !publicKey) {
           // The user just registered, so save the new private key.
           privateKey = new PrivateKey();
 
           // Encrypt the private key.
-          const privateKeyString = this.userPrivateKey;
-          const encryptedPrivateKeyString = await this.encrypt(
-            privateKeyString,
+          const encryptedPrivateKeyPem = await this.encrypt(
+            this.userPrivateKeyPem,
             this.key + this.iv,
           );
 
-          privateKey.text = encryptedPrivateKeyString;
+          privateKey.textOaep = encryptedPrivateKeyPem;
           const privateKeySave = privateKey.$save();
 
           // And save the public key.
           const publicKey = new PublicKey();
-          const publicKeyString = this.userPublicKey;
-          publicKey.text = publicKeyString;
+          publicKey.textOaep = this.userPublicKeyPem;
           const publicKeySave = publicKey.$save();
 
           try {
@@ -92,10 +171,10 @@ class EncryptionService extends AESEncryptionService {
             await publicKeySave;
           } catch (e) {
             this.reject(
-              'Error storing encryption keys! You need to manually store them. I will print them in the console.',
+              'Error storing encryption keys! You need to manually store them and contact an administrator. I will print them in the console, where you can copy them to somewhere safe.',
             );
-            console.log('Encrypted Private Key: ', encryptedPrivateKeyString);
-            console.log('Public Key: ', publicKeyString);
+            console.log('Encrypted Private Key: ', encryptedPrivateKeyPem);
+            console.log('Public Key: ', this.userPublicKeyPem);
             return;
           }
         } else {
@@ -140,13 +219,17 @@ class EncryptionService extends AESEncryptionService {
       creds.password = await computeNewPassword(password);
 
       // Generate a Public/Private key pair.
-      const keyPair = new JSEncrypt();
-      const privateKey = keyPair.getPrivateKeyB64();
-      await that.setUserPrivateKey(privateKey);
-      const publicKey = keyPair.getPublicKeyB64();
-      await that.setUserPublicKey(publicKey);
+      const {
+        privateKey,
+        publicKey,
+        privateKeyPem,
+        publicKeyPem,
+      } = await that.generateNewKeyPair();
 
-      return await _register.call(this, creds);
+      await that.setUserPrivateKey(privateKey, privateKeyPem, null);
+      await that.setUserPublicKey(publicKey, publicKeyPem, null);
+
+      await _register.call(this, creds);
     };
 
     // Override loginUser to retrieve the key and change the password.
@@ -168,8 +251,8 @@ class EncryptionService extends AESEncryptionService {
       creds.password = await computeNewPassword(password);
 
       // Re-encrypt the private key.
-      const privateKeyString = that.userPrivateKey;
-      const privateKeyBytes = that.encodeUtf8(privateKeyString);
+      const privateKeyPem = that.userPrivateKeyPem;
+      const privateKeyBytes = that.encodeUtf8(privateKeyPem);
       const encryptedPrivateKeyBytes = await that.encryptBytes(
         privateKeyBytes,
         that.key + that.iv,
@@ -184,30 +267,157 @@ class EncryptionService extends AESEncryptionService {
     };
   }
 
-  async setUserPrivateKey(privateKey) {
-    this.userPrivateKey = privateKey;
-    await this.storage.setItem('twPrivateKey', privateKey);
+  async generateNewKeyPair() {
+    // Generate a Public/Private key pair.
+    try {
+      const keyPair = await root.crypto.subtle.generateKey(
+        {
+          name: 'RSA-OAEP',
+          modulusLength: 4096,
+          publicExponent: new Uint8Array([1, 0, 1]),
+          hash: 'SHA-256',
+        },
+        true,
+        ['encrypt', 'decrypt'],
+      );
+
+      const exportedPrivateKey = new Uint8Array(
+        await root.crypto.subtle.exportKey('pkcs8', keyPair.privateKey),
+      );
+
+      const exportedPublicKey = new Uint8Array(
+        await root.crypto.subtle.exportKey('spki', keyPair.publicKey),
+      );
+
+      const privateKeyPem = `-----BEGIN PRIVATE KEY-----\n${that.encodeBase64(
+        exportedPrivateKey,
+      )}\n-----END PRIVATE KEY-----`;
+
+      const publicKeyPem = `-----BEGIN PUBLIC KEY-----\n${that.encodeBase64(
+        exportedPublicKey,
+      )}\n-----END PUBLIC KEY-----`;
+
+      return {
+        ...keyPair,
+        privateKeyPem,
+        publicKeyPem,
+      };
+    } catch (e) {
+      console.log('Error creating RSA key pair: ', e);
+      throw e;
+    }
   }
 
-  async setUserPublicKey(publicKey) {
+  async importPrivateKey(privateKeyPem) {
+    const privateKeyString = privateKeyPem
+      .replace(/^-----BEGIN PRIVATE KEY-----\n/, '')
+      .replace(/\n-----END PRIVATE KEY-----$/, '');
+    const privateKeyBytes = this.decodeBase64(privateKeyString);
+
+    return await root.crypto.subtle.importKey(
+      'pkcs8',
+      privateKeyBytes.buffer,
+      {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
+      },
+      false,
+      ['decrypt'],
+    );
+  }
+
+  async importPublicKey(publicKeyPem) {
+    const publicKeyString = publicKeyPem
+      .replace(/^-----BEGIN PUBLIC KEY-----\n/, '')
+      .replace(/\n-----END PUBLIC KEY-----$/, '');
+    const publicKeyBytes = this.decodeBase64(publicKeyString);
+
+    return await root.crypto.subtle.importKey(
+      'spki',
+      publicKeyBytes.buffer,
+      {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
+      },
+      false,
+      ['encrypt'],
+    );
+  }
+
+  async setUserPrivateKey(privateKey, privateKeyPem, privateKeyPemPkcs1) {
+    this.userPrivateKey = privateKey;
+    this.userPrivateKeyPem = privateKeyPem;
+    this.userPrivateKeyPemPkcs1 = privateKeyPemPkcs1;
+    await this.storage.setItem('twPrivateKeyPemOaep', privateKeyPem);
+    await this.storage.setItem('twPrivateKeyPemPkcs1', privateKeyPemPkcs1);
+  }
+
+  async setUserPublicKey(publicKey, publicKeyPem, publicKeyPemPkcs1) {
     this.userPublicKey = publicKey;
-    await this.storage.setItem('twPublicKey', publicKey);
+    this.userPublicKeyPem = publicKeyPem;
+    this.userPublicKeyPemPkcs1 = publicKeyPemPkcs1;
+    await this.storage.setItem('twPublicKeyPemOaep', publicKeyPem);
+    await this.storage.setItem('twPublicKeyPemPkcs1', publicKeyPemPkcs1);
   }
 
   async getUserPrivateKey() {
-    this.userPrivateKey = await this.storage.getItem('twPrivateKey');
+    const userPrivateKeyOld = await this.storage.getItem('twPrivateKey');
+    if (userPrivateKeyOld) {
+      const err = new Error('Please upgrade to the new encryption.');
+      err.name = 'EncryptionUpgradeNeededError';
+      throw err;
+    }
+
+    this.userPrivateKeyPem = await this.storage.getItem('twPrivateKeyPemOaep');
+
+    if (!this.userPrivateKeyPem) {
+      return null;
+    }
+
+    this.userPrivateKey = await this.importPrivateKey(this.userPrivateKeyPem);
+    this.userPrivateKeyPemPkcs1 = await this.storage.getItem(
+      'twPrivateKeyPemPkcs1',
+    );
+
     return this.userPrivateKey;
   }
 
   async getUserPublicKey() {
-    this.userPublicKey = await this.storage.getItem('twPublicKey');
+    const userPublicKeyOld = await this.storage.getItem('twPublicKey');
+    if (userPublicKeyOld) {
+      const err = new Error('Please upgrade to the new encryption.');
+      err.name = 'EncryptionUpgradeNeededError';
+      throw err;
+    }
+
+    this.userPublicKeyPem = await this.storage.getItem('twPublicKeyPemOaep');
+
+    if (!this.userPublicKeyPem) {
+      return null;
+    }
+
+    this.userPublicKey = await this.importPublicKey(this.userPublicKeyPem);
+    this.userPublicKeyPemPkcs1 = await this.storage.getItem(
+      'twPublicKeyPemPkcs1',
+    );
+
     return this.userPublicKey;
   }
 
   async unsetUserKeys() {
     await this.storage.removeItem('twPrivateKey');
     await this.storage.removeItem('twPublicKey');
+    await this.storage.removeItem('twPrivateKeyPemOaep');
+    await this.storage.removeItem('twPublicKeyPemOaep');
+    await this.storage.removeItem('twPrivateKeyPemPkcs1');
+    await this.storage.removeItem('twPublicKeyPemPkcs1');
     await this.callEncryptionWorker(this.rsaEncryptionWorker, 'resetRsa');
+    this.userPrivateKey = null;
+    this.userPublicKey = null;
+    this.userPrivateKeyPem = null;
+    this.userPublicKeyPem = null;
+    this.userPrivateKeyPemPkcs1 = null;
+    this.userPublicKeyPemPkcs1 = null;
     this.key = null;
     this.iv = null;
     this.resolve = null;
@@ -218,41 +428,76 @@ class EncryptionService extends AESEncryptionService {
     });
   }
 
-  async decryptRSA(text, privateKey) {
+  async decryptRSA(hex, privateKey) {
     if (privateKey == null) {
       if (!this.userPrivateKey) {
         throw new Error('Tried to decrypt RSA without private key!');
       }
       privateKey = this.userPrivateKey;
     }
-    const result = await this.callEncryptionWorker(
-      this.rsaEncryptionWorker,
-      'decryptRSA',
-      [text, privateKey],
+    const result = await root.crypto.subtle.decrypt(
+      {
+        name: 'RSA_OAEP',
+      },
+      publicKey,
+      this.decodeHex(hex),
     );
     return result;
   }
 
-  async encryptRSA(text, publicKey) {
+  async encryptRSA(hex, publicKey) {
     if (publicKey == null) {
       if (!this.userPublicKey) {
         throw new Error('Tried to encrypt RSA without public key!');
       }
       publicKey = this.userPublicKey;
     }
-    const result = await this.callEncryptionWorker(
-      this.rsaEncryptionWorker,
-      'encryptRSA',
-      [text, publicKey],
+    const result = await root.crypto.subtle.encrypt(
+      {
+        name: 'RSA_OAEP',
+      },
+      publicKey,
+      this.decodeHex(hex),
     );
     return result;
   }
 
-  async encryptRSAForUser(text, userOrGuid) {
-    let publicKey;
+  async decryptRSAPkcs1(hex, privateKey) {
+    if (privateKey == null) {
+      if (!this.userPrivateKeyPemPkcs1) {
+        throw new Error('Tried to decrypt RSA without private key!');
+      }
+      privateKey = this.userPrivateKeyPemPkcs1;
+    }
+    const result = await this.callEncryptionWorker(
+      this.rsaEncryptionWorker,
+      'decryptRSA',
+      [hex, privateKey],
+    );
+    return result;
+  }
+
+  async encryptRSAPkcs1(hex, publicKey) {
+    if (publicKey == null) {
+      if (!this.userPublicKeyPemPkcs1) {
+        throw new Error('Tried to encrypt RSA without public key!');
+      }
+      publicKey = this.userPublicKeyPemPkcs1;
+    }
+    const result = await this.callEncryptionWorker(
+      this.rsaEncryptionWorker,
+      'encryptRSA',
+      [hex, publicKey],
+    );
+    return result;
+  }
+
+  async encryptRSAForUser(hex, userOrGuid) {
     let guid = typeof userOrGuid === 'number' ? userOrGuid : userOrGuid.guid;
     if (guid in this.userPublicKeys) {
-      publicKey = this.userPublicKeys[guid];
+      return await this.encryptRSA(hex, this.userPublicKeys[guid]);
+    } else if (guid in this.userPublicKeysPkcs1) {
+      return await this.encryptRSAPkcs1(hex, this.userPublicKeysPkcs1[guid]);
     } else {
       try {
         const publicKeyEntity = await Nymph.getEntity(
@@ -264,13 +509,23 @@ class EncryptionService extends AESEncryptionService {
             ref: ['user', guid],
           },
         );
-        publicKey = publicKeyEntity.text;
-        this.userPublicKeys[guid] = publicKey;
+
+        if (publicKeyEntity.textOaep) {
+          const publicKey = await this.importPublicKey(
+            publicKeyEntity.textOaep,
+          );
+          this.userPublicKeys[guid] = publicKey;
+          return await this.encryptRSA(hex, publicKey);
+        } else if (publicKeyEntity.text) {
+          this.userPublicKeysPkcs1[guid] = publicKeyEntity.text;
+          return await this.encryptRSAPkcs1(hex, publicKeyEntity.text);
+        }
+
+        return null;
       } catch (e) {
         return null;
       }
     }
-    return await this.encryptRSA(text, publicKey);
   }
 
   callEncryptionWorker(worker, action, args, transferrables) {
