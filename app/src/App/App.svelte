@@ -84,11 +84,9 @@
     </a>
   </div>
 {/if}
-<div
-  class="app-container position-relative {$convosOut ? 'convos-out' : ''}"
->
+<div class="app-container {$convosOut ? 'convos-out' : ''}">
   <div
-    class="convos bg-dark text-light"
+    class="convos d-flex flex-column h-100 bg-dark text-light"
     bind:this={convos}
   >
     <nav class="navbar navbar-expand navbar-dark bg-dark">
@@ -140,7 +138,7 @@
         </ul>
       </div>
     </nav>
-    <div style="overflow-y: hidden; min-height: 0;">
+    <div class="conversation-list-container">
       <ConversationList
         on:tunnelgram-notification={event => notification(event.detail)}
       />
@@ -148,7 +146,7 @@
   </div>
   <!-- This needs the width:0 style, or it will offset the list during loading. -->
   <div
-    class="main-ui bg-light text-dark"
+    class="main-ui flex-grow-1 d-flex flex-column h-100 bg-light text-dark"
     style="width: 0;"
     bind:this={mainUi}
   >
@@ -183,10 +181,7 @@
         {/if}
       </div>
     </nav>
-    <div
-      style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain; min-height: 0;"
-    >
+    <div class="view-container">
       {#if $loadingConversation || $loadingUser}
         <div class="d-flex h-100 align-items-center justify-content-center">
           <div
@@ -455,35 +450,50 @@
 
 <style>
   .app-container {
-    display: grid;
-    flex-basis: 0;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
     height: 100%;
-    grid-template: 1fr / 100% 100%;
-    grid-template-areas: "convos main-ui";
+    position: relative;
   }
 
   .convos {
-    grid-area: convos;
-    display: grid;
-    grid-template: min-content 1fr / 1fr;
-    min-height: 0;
+    width: 100%;
   }
+
+  .conversation-list-container {
+    overflow-y: hidden;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
   .main-ui {
-    grid-area: main-ui;
-    display: grid;
-    grid-template: min-content 1fr / 1fr;
-    min-height: 0;
-    position: relative;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
     z-index: 2;
     transition: transform ease 0.1s;
     transform: translate3d(-100%, 0, 0);
   }
+
+  .view-container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
   .convos-out .main-ui {
     transform: translate3d(0, 0, 0);
   }
+
   @media (min-width: 767.98px) {
-    .app-container {
-      grid-template: 1fr / 330px auto;
+    .convos {
+      max-width: 330px;
     }
     .main-ui,
     .convos-out .main-ui {
