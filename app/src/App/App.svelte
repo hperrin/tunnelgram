@@ -84,9 +84,7 @@
     </a>
   </div>
 {/if}
-<div
-  class="d-flex flex-row flex-grow-1 h-100 position-relative {$convosOut ? 'convos-out' : ''}"
->
+<div class="app-container {$convosOut ? 'convos-out' : ''}">
   <div
     class="convos d-flex flex-column h-100 bg-dark text-light"
     bind:this={convos}
@@ -140,7 +138,7 @@
         </ul>
       </div>
     </nav>
-    <div style="overflow-y: hidden; height: 100%; flex-basis: 0; flex-grow: 1;">
+    <div class="conversation-list-container">
       <ConversationList
         on:tunnelgram-notification={event => notification(event.detail)}
       />
@@ -183,10 +181,7 @@
         {/if}
       </div>
     </nav>
-    <div
-      style="overflow-y: auto; -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain; height: 100%; flex-basis: 0; flex-grow: 1;"
-    >
+    <div class="view-container">
       {#if $loadingConversation || $loadingUser}
         <div class="d-flex h-100 align-items-center justify-content-center">
           <div
@@ -454,9 +449,25 @@
 </script>
 
 <style>
+  .app-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    height: 100%;
+    position: relative;
+  }
+
   .convos {
     width: 100%;
   }
+
+  .conversation-list-container {
+    overflow-y: hidden;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
   .main-ui {
     position: absolute;
     left: 100%;
@@ -466,9 +477,20 @@
     transition: transform ease 0.1s;
     transform: translate3d(-100%, 0, 0);
   }
+
+  .view-container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 1;
+  }
+
   .convos-out .main-ui {
     transform: translate3d(0, 0, 0);
   }
+
   @media (min-width: 767.98px) {
     .convos {
       max-width: 330px;

@@ -39,7 +39,7 @@
     "@babel/core": "^7.4.5",
     "@babel/plugin-transform-classes": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.0.2",
     "babel-loader": "^8.0.6",
     "base64-js": "^1.3.0",
     "bootstrap": "^4.3.1",
@@ -60,7 +60,7 @@
     "showdown": "^1.9.0",
     "showdown-xss-filter": "^0.2.0",
     "style-loader": "^0.23.1",
-    "svelte": "^3.5.1",
+    "svelte": "^3.5.2",
     "svelte-loader": "^2.13.4",
     "terser-webpack-plugin": "^1.3.0",
     "tilmeld-components": "^2.0.0",
@@ -68,9 +68,9 @@
     "tinygesture": "^1.1.4",
     "ua-parser-js": "^0.7.20",
     "val-loader": "^1.1.1",
-    "webpack": "^4.33.0",
+    "webpack": "^4.34.0",
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.4",
-    "webpack-dev-server": "^3.7.1"
+    "webpack-dev-server": "^3.7.2"
   }
 }
