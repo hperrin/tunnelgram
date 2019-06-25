@@ -49,7 +49,7 @@
         transfer anything from your old phone.
       </a>
 
-      <strong>Tunnelgram just works like a messenger should.</strong>
+      <strong>{$brand} just works like a messenger should.</strong>
     </p>
     <p class="card-text">
       {$brand} is

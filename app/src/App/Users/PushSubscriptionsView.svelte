@@ -14,7 +14,7 @@
       <h3 class="mt-3">Your App Push Subscriptions</h3>
       <p>
         An app push subscription is used to send you message notifications on a
-        mobile device through the Tunnelgram app installed from the app store.
+        mobile device through the {$brand} app installed from the app store.
       </p>
       <PushSubscriptionsList
         entity={AppPushSubscription}
@@ -42,4 +42,5 @@
   import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
   import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
   import PushSubscriptionsList from './PushSubscriptionsList';
+  import {brand} from '../../stores';
 </script>
