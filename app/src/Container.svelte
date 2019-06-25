@@ -77,7 +77,6 @@
     {#if $user && $user.guid}
       <div
         class="container-fluid d-flex flex-column flex-grow-1 p-0 m-0"
-        style="height: 0;"
       >
         {#await crypt.ready}
           <div
