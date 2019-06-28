@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "800187ca65c79f2adb69279e4856c8e0",
+    "content-hash": "af41fdaf9eab47dd2087ec3cbebd6c01",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -973,23 +973,23 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.1",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "3b7c4ca8e41e2502b6690c7248db30600e007a00"
+                "reference": "8aca7ff552324ce8e5f9804835cfd97b25036a3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/3b7c4ca8e41e2502b6690c7248db30600e007a00",
-                "reference": "3b7c4ca8e41e2502b6690c7248db30600e007a00",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/8aca7ff552324ce8e5f9804835cfd97b25036a3f",
+                "reference": "8aca7ff552324ce8e5f9804835cfd97b25036a3f",
                 "shasum": ""
             },
             "require": {
                 "cboden/ratchet": "0.4.*",
                 "ratchet/pawl": "^0.3.4",
                 "sciactive/hookphp": "^2.0",
-                "sciactive/nymph-server": "3.1.*",
+                "sciactive/nymph-server": "^3.2",
                 "zendframework/zend-log": "2.*"
             },
             "require-dev": {
@@ -1025,20 +1025,20 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2019-06-11T00:00:00+00:00"
+            "time": "2019-06-28T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.1.0",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "d027ed434f62b0cbfb0c90eabd1b191a968417bd"
+                "reference": "781d3a6831952051ff5e858c537c928e3ca87af3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/d027ed434f62b0cbfb0c90eabd1b191a968417bd",
-                "reference": "d027ed434f62b0cbfb0c90eabd1b191a968417bd",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/781d3a6831952051ff5e858c537c928e3ca87af3",
+                "reference": "781d3a6831952051ff5e858c537c928e3ca87af3",
                 "shasum": ""
             },
             "require-dev": {
@@ -1079,27 +1079,27 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2019-06-11T00:00:00+00:00"
+            "time": "2019-06-28T00:00:00+00:00"
         },
         {
             "name": "sciactive/tilmeld-server",
-            "version": "1.1.0",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/tilmeld-server.git",
-                "reference": "3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9"
+                "reference": "aaf42073bafe9af56f5e31167bbf77bba9762ba1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9",
-                "reference": "3fc7d9478cb7b3a7e00fe8f38a7d77d4f7eb23e9",
+                "url": "https://api.github.com/repos/sciactive/tilmeld-server/zipball/aaf42073bafe9af56f5e31167bbf77bba9762ba1",
+                "reference": "aaf42073bafe9af56f5e31167bbf77bba9762ba1",
                 "shasum": ""
             },
             "require": {
                 "lcobucci/jwt": "^3.2",
                 "respect/validation": "^1.1",
                 "sciactive/hookphp": "^2.0",
-                "sciactive/nymph-server": "3.1.*",
+                "sciactive/nymph-server": "^3.2",
                 "sciactive/umailphp": "^2.4"
             },
             "require-dev": {
@@ -1139,7 +1139,7 @@
                 "nymph",
                 "user manager"
             ],
-            "time": "2019-06-11T00:00:00+00:00"
+            "time": "2019-06-28T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -1189,16 +1189,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "b7e4945dd9b277cd24e93566e4da0a87956392a9"
+                "reference": "e1b507fcfa4e87d192281774b5ecd4265370180d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/b7e4945dd9b277cd24e93566e4da0a87956392a9",
-                "reference": "b7e4945dd9b277cd24e93566e4da0a87956392a9",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/e1b507fcfa4e87d192281774b5ecd4265370180d",
+                "reference": "e1b507fcfa4e87d192281774b5ecd4265370180d",
                 "shasum": ""
             },
             "require": {
@@ -1240,11 +1240,11 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-06-06T10:05:02+00:00"
+            "time": "2019-06-26T09:25:00+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
@@ -1479,16 +1479,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "9b31cd24f6ad2cebde6845f6daa9c6d69efe2465"
+                "reference": "2ef809021d72071c611b218c47a3bf3b17b7325e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/9b31cd24f6ad2cebde6845f6daa9c6d69efe2465",
-                "reference": "9b31cd24f6ad2cebde6845f6daa9c6d69efe2465",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/2ef809021d72071c611b218c47a3bf3b17b7325e",
+                "reference": "2ef809021d72071c611b218c47a3bf3b17b7325e",
                 "shasum": ""
             },
             "require": {
@@ -1551,7 +1551,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-06-05T09:16:20+00:00"
+            "time": "2019-06-26T13:54:39+00:00"
         },
         {
             "name": "zendframework/zend-log",
