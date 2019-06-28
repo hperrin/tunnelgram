@@ -1,4 +1,4 @@
-import './Services/XMLHttpRequestWrapper';
+import './setup/authTokenHandler';
 import './setup/icons';
 import './setup/pnotify';
 import { Nymph } from 'nymph-client';
