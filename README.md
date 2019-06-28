@@ -115,7 +115,13 @@ Using this strategy, Tunnelgram can send a video from any client device that can
 
 If you'd like to work on Tunnelgram, follow these steps to get it up and running on your system:
 
-1. Install [Docker](https://store.docker.com/search?type=edition&offering=community). You also need Docker Compose, which is included in the Community Edition.
+1. Get [Docker](https://docs.docker.com/install/#supported-platforms) and [Docker Compose](https://docs.docker.com/compose/install/)
+   ```shell
+   curl -fsSL https://get.docker.com -o get-docker.sh
+   sh get-docker.sh
+   sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   sudo chmod +x /usr/local/bin/docker-compose
+   ```
 2. Run these commands to checkout the repo and start the containers:
    ```sh
    git clone https://github.com/hperrin/tunnelgram.git
