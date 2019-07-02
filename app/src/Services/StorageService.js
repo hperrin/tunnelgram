@@ -7,7 +7,6 @@ export class StorageService {
       this.storage = NativeStorage;
     } else {
       this.cordovaAPI = false;
-      this.ready = Promise.resolve(true);
       localforage.config({
         name: 'Tunnelgram',
       });

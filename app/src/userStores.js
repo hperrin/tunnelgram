@@ -1,6 +1,7 @@
 import { tick } from 'svelte';
 import { writable, get } from 'svelte/store';
 import { User } from 'tilmeld-client';
+import { ready as authTokenHandlerReady } from './setup/authTokenHandler';
 import ErrHandler from './ErrHandler';
 
 let ready;
@@ -12,20 +13,23 @@ export const userReadyPromise = new Promise(resolve => (ready = resolve));
 
 let subscription;
 
-// Get the current user.
-User.current().then(userValue => {
-  user.set(userValue);
-  if (subscription) {
-    subscription.unsubscribe();
-  }
-  // PubSub subscription.
-  if (userValue) {
-    subscription = userValue.$subscribe(userValue => {
-      user.set(userValue);
-    });
-  }
-  ready();
-}, ErrHandler);
+// Wait for auth token to be ready.
+authTokenHandlerReady.then(() => {
+  // Get the current user.
+  User.current().then(userValue => {
+    user.set(userValue);
+    if (subscription) {
+      subscription.unsubscribe();
+    }
+    // PubSub subscription.
+    if (userValue) {
+      subscription = userValue.$subscribe(userValue => {
+        user.set(userValue);
+      });
+    }
+    ready();
+  }, ErrHandler);
+});
 
 // Handle logins and logouts.
 User.on('login', userValue => {

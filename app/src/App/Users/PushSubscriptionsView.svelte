@@ -42,5 +42,5 @@
   import AppPushSubscription from '../../Entities/Tunnelgram/AppPushSubscription';
   import WebPushSubscription from '../../Entities/Tunnelgram/WebPushSubscription';
   import PushSubscriptionsList from './PushSubscriptionsList';
-  import {brand} from '../../stores';
+  import { brand } from '../../stores';
 </script>
