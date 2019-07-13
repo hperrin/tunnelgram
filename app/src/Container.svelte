@@ -96,29 +96,34 @@
         {:then unused}
           <App />
         {:catch cryptError}
-          {#if cryptError.name === 'ReLogInNeededError'}
-            <div>
+          <div class="container alert alert-primary">
+            {#if cryptError.name === 'ReLogInNeededError'}
               You've upgraded your encryption on another device, so you'll need
               to log out here and log back in to enable the new encryption.
-            </div>
-          {:else if cryptError.name === 'EncryptionUpgradeNeededError'}
+            {:else if cryptError.name === 'EncryptionUpgradeNeededError'}
+              <div>
+                {$brand} has a new encryption method. In order to upgrade,
+                you'll need to log out and log back in. Your private key will be
+                printed below. If you don't remember your password, ask an
+                administrator how you can reset your account with this key. Copy
+                it verbatim from below to a safe place before logging out.
+              </div>
+              <div>
+                <textarea
+                  bind:this={privateKeyElem}
+                  on:click={copyPrivateKey}
+                  readonly
+                  style="width: 100%; height: 150px;"
+                >{cryptError.privateKey}</textarea>
+              </div>
+              <div>
+                This is a great time to try out a password manager, like
+                <a href="https://bitwarden.com/" target="_blank">BitWarden.</a>
+              </div>
+            {:else}Error during encryption setup: {cryptError}{/if}
             <div>
-              {$brand} has a new encryption method that makes your messages even
-              more secure. Please enter your password below.
+              <a href="javascript:void(0)" on:click={logout}>Log Out</a>
             </div>
-            <div>
-              If you don't remember your password, you can enter a new one, and
-              it will be changed.
-            </div>
-            <div>
-              This is a great time to try out a password manager, like
-              <a href="https://bitwarden.com/" target="_blank">BitWarden.</a>
-            </div>
-          {:else}
-            <div>Error during encryption setup: {cryptError}</div>
-          {/if}
-          <div>
-            <a href="javascript:void(0)" on:click={logout}>Log Out</a>
           </div>
         {/await}
       </div>
@@ -128,6 +133,7 @@
 
 <script>
   import { User } from 'tilmeld-client';
+  import PNotify from 'pnotify/dist/es/PNotify';
   import Login from 'tilmeld-components/src/Login';
   import LoadingIndicator from './App/LoadingIndicator';
   import FrontPage from './App/FrontPage';
@@ -135,9 +141,19 @@
   import { crypt } from './Services/EncryptionService';
   import { logout, brand, user } from './stores';
 
+  let privateKeyElem;
+
   const cryptoAvailable = (() => {
     return !!(window.crypto || window.msCrypto).getRandomValues;
   })();
+
+  function copyPrivateKey() {
+    privateKeyElem.select();
+    document.execCommand('copy');
+    PNotify.info({
+      text: 'Copied to Clipboard',
+    });
+  }
 </script>
 
 <style>

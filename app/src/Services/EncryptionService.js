@@ -365,6 +365,7 @@ class EncryptionService extends AESEncryptionService {
     if (userPrivateKeyOld) {
       const err = new Error('Please upgrade to the new encryption.');
       err.name = 'EncryptionUpgradeNeededError';
+      err.privateKey = userPrivateKeyOld;
       throw err;
     }
 
