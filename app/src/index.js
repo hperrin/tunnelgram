@@ -246,7 +246,7 @@ window.addEventListener('beforeinstallprompt', e => {
   let previousUser = null;
   stores.user.subscribe(user => {
     if (previousUser !== user) {
-      if (user != null) {
+      if (user != null && user.guid) {
         // This is needed because the current user is added to acFull.
         stores.conversation.set(new Conversation());
 
