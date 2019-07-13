@@ -9,7 +9,7 @@ class PrivateKey extends \Nymph\Entity {
   const ETYPE = 'private_key';
   protected $clientEnabledMethods = [];
   public static $clientEnabledStaticMethods = ['current'];
-  protected $whitelistData = ['text'];
+  protected $whitelistData = ['text', 'textOaep'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
 
@@ -54,7 +54,7 @@ class PrivateKey extends \Nymph\Entity {
           'textOaep',
           v::stringType()->notEmpty()->length(
             1,
-            ceil(4096 * 1.4) // Base64 of 4KiB
+            ceil(4096 * 1.4) + 54 // Base64 of 4KiB + RSA header/footer
           )
         )
         ->setName('private key')
