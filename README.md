@@ -14,6 +14,7 @@ It's as easy to use as any non-E2EE messenger.
 ## Support Tunnelgram
 
 [![Become a patron on Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/tunnelgram)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhperrin%2Ftunnelgram.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhperrin%2Ftunnelgram?ref=badge_shield)
 
 # The Tunnelwire Encryption Scheme
 
@@ -172,3 +173,7 @@ If you'd like to find me:
 * Email me at hunter@sciactive.com.
 * Find me on GitHub at https://github.com/hperrin and https://github.com/sciactive.
 * Or send me a message on Tunnelgram at http://tngm.me/hperrin.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhperrin%2Ftunnelgram.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhperrin%2Ftunnelgram?ref=badge_large)
