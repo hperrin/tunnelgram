@@ -2,12 +2,14 @@
 
 <big>Easy, secure, end to end encrypted (E2EE) messenger.</big><br/>
 
-* Every message in a chat or private channel is encrypted from sender to recipient. There is no way to send an unencrypted message and Tunnelgram's servers cannot decrypt them.
+* Every message in a *chat* or *private channel* is encrypted from sender to recipient. There is no way to send an unencrypted message in them and Tunnelgram's servers cannot decrypt them.
 * You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
   * The original sign-up device is *not required*, and *not used as a proxy*.
 * Your account is not tied to a phone number or specific device. You log in with a username and password.
   * Changing your phone doesn't require any [complicated](https://support.signal.org/hc/en-us/articles/360007062012) [steps](https://faq.whatsapp.com/en/android/28000018/?category=5245246). Just log in on your new phone.
 * If you lose your device, you **don't lose your messages, photos, videos, or conversations**. No backups necessary.
+* Unlike *chats* (and unlike group messages in any other E2EE messenger), new users in *private channels*, which are end to end encrypted, can see the entire message history of the channel.
+* Tunnelgram also has public channels, which are not end to end encrypted (since they are meant to be readable by everyone).
 
 It's as easy to use as any non-E2EE messenger.
 
@@ -19,9 +21,9 @@ It's as easy to use as any non-E2EE messenger.
 
 How is Tunnelgram able to show all your messages on multiple clients just like a regular messaging app if it's all end to end encrypted?
 
-It uses the **Tunnelwire Encryption Scheme**. I invented this scheme in 2013, and Tunnelgram is the first application to use it.
+It uses the **Tunnelwire Encryption Scheme**! I developed this scheme in 2013, and Tunnelgram is the first application to use it.
 
-The Tunnelwire Encryption Scheme has some requirements that can't be met by other messengers.
+The Tunnelwire Encryption Scheme has a couple key requirements that secure your data.
 
 1. The server must never know your password.
 2. The server must never know your private key.
@@ -40,7 +42,7 @@ When a user registers, the client must:
   * Use any portion of the hash as the key, then re-hash any portion of the hash to create the remainder.
   * Or use a combination of these techniques in any amount of iterations. This can add computational overhead which will make brute forcing a password harder, should the remainder become known to an attacker.
 3. Send the remainder to the server as the user's password.
-4. Generate a public/private key pair. *Tunnelgram generates a 1024 bit RSA key pair.*
+4. Generate a public/private key pair. *Tunnelgram generates a 4096 bit RSA-OAEP key pair.*
 5. Encrypt the private key with the encryption key it derived from the password hash using a symmetric encryption algorithm. *Tunnelgram uses AES-256 (14 rounds) in Output Feedback mode, with the additional bytes from the hash as the initialization vector.*
 6. Send the encrypted private key and clear text public key to the server.
 
@@ -55,7 +57,7 @@ When a user registers, the client must:
 When a user logs in, the client must:
 
 1. Complete steps 1-3 of the registration process in order to authenticate the user.
-2. Retrieve the user's encrypted private key and clear text public key.
+2. Retrieve the user's encrypted private key and clear text public key from the server.
 3. Use the key taken from the password hash to decrypt the private key.
 
 > :information_source: The server never knows their actual password, so it can't decrypt their private key. Therefore, the server also never knows their private key. Boom, Tunnelwire.
@@ -84,20 +86,33 @@ This software uses an encryption scheme based on the Tunnelwire Encryption Schem
 
 ## Upon Message Send
 
-The client:
+In a chat, the client:
 
 1. Generates a random, cryptographically secure 32 byte message key and 16 byte initialization vector, and encrypts the message with it using AES-256 (14 rounds) in Output Feedback mode.
 2. Retrieves the public keys of all of the recipients.
 3. Encrypts the message key and initialization vector with each of the recipients' public keys and the user's public key using RSA.
 4. Sends the encrypted message and all of the encrypted copies of the message key to the server.
 
+In a private channel, the client:
+
+1. Generates a random, cryptographically secure 32 byte message key and 16 byte initialization vector.
+2. XORs it with the channel key, which is already encrypted and sent to every channel member, and encrypts the message with the result using AES-256 (14 rounds) in Output Feedback mode.
+3. Sends the encrypted message and the plaintext message key and initialization vector to the server.
+
 ## Upon Message Receipt
 
-The client:
+In a chat, the client:
 
 1. Retrieves their copy of the encrypted message key and initialization vector.
 2. Uses the user's private key to decrypt the message key and initialization vector.
 3. Uses the message key and initialization vector to decrypt the message.
+
+In a private channel, the client:
+
+1. Retrieved the plaintext message key and initialization vector.
+2. Retrieves their copy of the encrypted channel key.
+3. Uses the user's private key to decrypt the channel key and initialization vector.
+4. XORs the channel key and message key, and uses the result to decrypt the message.
 
 # How Tunnelgram Sends Images
 
