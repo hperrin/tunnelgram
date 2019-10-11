@@ -8,7 +8,7 @@ use Respect\Validation\Exceptions\NestedValidationException;
 class PrivateKey extends \Nymph\Entity {
   const ETYPE = 'private_key';
   protected $clientEnabledMethods = [];
-  public static $clientEnabledStaticMethods = ['current'];
+  public static $clientEnabledStaticMethods = ['current', 'upgradeEncryption'];
   protected $whitelistData = ['text', 'textOaep'];
   protected $protectedTags = [];
   protected $whitelistTags = [];
@@ -36,6 +36,31 @@ class PrivateKey extends \Nymph\Entity {
       return false;
     }
     return $key;
+  }
+
+  public static function upgradeEncryption($textPrivateKey, $textPublicKey) {
+    $privateKey = PrivateKey::current();
+    $publicKey = PublicKey::current();
+
+    if (!$privateKey || !$publicKey) {
+      throw new \Exception('Key pair can\'t be found.');
+    }
+
+    if ($privateKey->textOaep ?? null && $publicKey->textOaep ?? null) {
+      throw new \Exception('Key pair already contains OAEP keys.');
+    }
+
+    $privateKey->textOaep = $textPrivateKey;
+    $publicKey->textOaep = $textPublicKey;
+
+    if ($privateKey->save() && $publicKey->save()) {
+      return [
+        'private' => $privateKey,
+        'public' => $publicKey
+      ];
+    } else {
+      return false;
+    }
   }
 
   public function save() {

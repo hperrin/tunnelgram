@@ -9,6 +9,10 @@ export class PrivateKey extends Entity {
   static current(...args) {
     return PrivateKey.serverCallStatic('current', args);
   }
+
+  static upgradeEncryption(...args) {
+    return PrivateKey.serverCallStatic('upgradeEncryption', args);
+  }
 }
 
 // The name of the server class

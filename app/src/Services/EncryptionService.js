@@ -118,7 +118,7 @@ class EncryptionService extends AESEncryptionService {
             publicKeyPem = publicEnt.textOaep;
             privateKey = await this.importPrivateKey(privateKeyPem);
             publicKey = await this.importPublicKey(publicKeyPem);
-          } else if (!privateEnt.textOaep && !publicEnt.textOaep) {
+          } else {
             // The user needs to upgrade to the new encryption.
             ({
               privateKey,
@@ -126,17 +126,16 @@ class EncryptionService extends AESEncryptionService {
               privateKeyPem,
               publicKeyPem,
             } = await that.generateNewKeyPair());
-            privateKey.textOaep = await this.encrypt(
+            privateEnt.textOaep = await this.encrypt(
               privateKeyPem,
               this.key + this.iv,
             );
             publicEnt.textOaep = publicKeyPem;
-            await Promise.all([privateEnt.$save(), publicEnt.$save()]);
-          } else {
-            this.reject(
-              'Server provided inconsistent OAEP keys. Please refresh the page.',
-            );
-            return;
+            const keys = await PrivateKey.upgradeEncryption(privateEnt.textOaep, publicEnt.textOaep);
+            if (keys) {
+              privateEnt = keys.private;
+              publicEnt = keys.public;
+            }
           }
 
           await this.setUserPrivateKey(
@@ -438,13 +437,14 @@ class EncryptionService extends AESEncryptionService {
       privateKey = this.userPrivateKey;
     }
     try {
-      const result = await root.crypto.subtle.decrypt(
+      const buffer = await root.crypto.subtle.decrypt(
         {
           name: 'RSA-OAEP',
         },
         privateKey,
         this.decodeHex(hex),
       );
+      const result = this.encodeHex(new Uint8Array(buffer));
       return result;
     } catch (e) {
       if (e.code === 0) {
@@ -461,13 +461,14 @@ class EncryptionService extends AESEncryptionService {
       }
       publicKey = this.userPublicKey;
     }
-    const result = await root.crypto.subtle.encrypt(
+    const buffer = await root.crypto.subtle.encrypt(
       {
         name: 'RSA-OAEP',
       },
       publicKey,
       this.decodeHex(hex),
     );
+    const result = this.encodeHex(new Uint8Array(buffer));
     return result;
   }
 
