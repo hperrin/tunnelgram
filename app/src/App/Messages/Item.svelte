@@ -182,6 +182,7 @@
   import DisplayName from '../Users/DisplayName';
   import { navigate } from '../../Services/router';
   import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
+  import ShowdownPromise from '../../Services/ShowdownPromise';
   import ErrHandler from '../../ErrHandler';
   import { user, settings } from '../../stores';
 
@@ -283,7 +284,7 @@
   let previousMessageGuid = -1;
   $: if (previousMessageGuid !== message.guid) {
     previousMessageGuid = message.guid;
-    waitForShowdown();
+    setFormattedText();
 
     createdDateLong =
       message.cdate == null
@@ -303,21 +304,14 @@
     destroyed = true;
   });
 
-  // If showdown isn't available, wait until it is.
-  function waitForShowdown() {
-    if (window.tgShowdownConverter) {
-      setFormattedText();
-    } else {
-      window.setTimeout(waitForShowdown, 500);
-    }
-  }
-
   async function setFormattedText() {
+    // If showdown isn't available, wait until it is.
+    const showdown = await ShowdownPromise;
     // Use showdown to convert the markdown to HTML.
-    const html = window.tgShowdownConverter.makeHtml(message.$decrypted.text);
+    const html = showdown.makeHtml(message.$decrypted.text);
     const secretHtml =
       message.$decrypted.secretText != null
-        ? window.tgShowdownConverter.makeHtml(message.$decrypted.secretText)
+        ? showdown.makeHtml(message.$decrypted.secretText)
         : null;
     formattedText = html == null ? null : html.replace(/\n$/, '');
     formattedSecretText =

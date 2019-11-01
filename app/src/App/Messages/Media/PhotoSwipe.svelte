@@ -55,8 +55,6 @@
 
 <script>
   import { onMount } from 'svelte';
-  import PhotoSwipe from 'photoswipe/dist/photoswipe.min';
-  import PhotoSwipeUI_Default from 'photoswipe/dist/photoswipe-ui-default.min';
 
   export let items = [];
   export let options = {};
@@ -75,27 +73,35 @@
       ],
     };
 
-    pswp = new PhotoSwipe(
-      photoswipe,
-      PhotoSwipeUI_Default,
-      items,
-      Object.assign({}, defaultOptions, options),
-    );
+    pswp = new Promise(async resolve => {
+      const PhotoSwipeImport = import(/* webpackChunkName: "photoswipe" */ 'photoswipe/dist/photoswipe.min');
+      const PhotoSwipeUI_DefaultImport = import(/* webpackChunkName: "photoswipe-ui-default" */ 'photoswipe/dist/photoswipe-ui-default.min');
+
+      const PhotoSwipe = (await PhotoSwipeImport).default;
+      const PhotoSwipeUI_Default = (await PhotoSwipeUI_DefaultImport).default;
+
+      resolve(new PhotoSwipe(
+        photoswipe,
+        PhotoSwipeUI_Default,
+        items,
+        Object.assign({}, defaultOptions, options),
+      ));
+    });
   });
 
-  export function listen(event, callback) {
-    pswp.listen(event, callback);
+  export async function listen(event, callback) {
+    (await pswp).listen(event, callback);
   }
 
-  export function invalidateCurrItems() {
-    pswp.invalidateCurrItems();
+  export async function invalidateCurrItems() {
+    (await pswp).invalidateCurrItems();
   }
 
-  export function updateSize(value) {
-    pswp.updateSize(value);
+  export async function updateSize(value) {
+    (await pswp).updateSize(value);
   }
 
-  export function init() {
-    pswp.init();
+  export async function init() {
+    (await pswp).init();
   }
 </script>

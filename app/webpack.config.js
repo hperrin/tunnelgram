@@ -30,16 +30,18 @@ const common = {
   // devtool: devMode && 'source-map',
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname),
-    filename: 'dist/[name].js',
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    chunkFilename: '[name].js',
+    publicPath: '/dist/',
   },
   plugins: [
     ...(devMode
       ? []
       : [
           new MiniCssExtractPlugin({
-            filename: 'dist/[name].css',
-            chunkFilename: 'dist/[id].css',
+            filename: '[name].css',
+            chunkFilename: '[name].css',
           }),
         ]),
     ...(analyze ? [new BundleAnalyzerPlugin()] : []),
@@ -114,6 +116,12 @@ module.exports = [
       main: path.resolve(__dirname, 'src', 'index.js'),
     },
     ...common,
+    optimization: {
+      ...common.optimization,
+      splitChunks: {
+        chunks: 'all',
+      },
+    },
     plugins: [
       ...common.plugins,
       ...(hotMode ? [new HotModuleReplacementPlugin()] : []),
@@ -130,7 +138,6 @@ module.exports = [
   },
   {
     entry: {
-      showdown: path.resolve(__dirname, 'src', 'index.showdown.js'),
       '../ServiceWorker': path.resolve(
         __dirname,
         'src',

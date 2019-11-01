@@ -223,7 +223,6 @@
 
 <script>
   import { onDestroy, createEventDispatcher } from 'svelte';
-  import emoji from 'node-emoji';
   import PNotify from 'pnotify/dist/es/PNotify';
   import Message from '../../Entities/Tunnelgram/Message';
   import LoadingIndicator from '../LoadingIndicator';
@@ -280,6 +279,12 @@
     addMediaDropdownComponent = null;
   }
 
+  let emoji = null;
+  import(/* webpackChunkName: "node-emoji" */ 'node-emoji').then(module => {
+    emoji = module.default;
+  });
+
+
   onDestroy(() => {
     destroyed = true;
     if (transcoder != null) {
@@ -295,9 +300,11 @@
   }
 
   function handleKeyUp(event) {
-    const emojied = emoji.emojify(text);
-    if (emojied !== text) {
-      text = emojied;
+    if (emoji) {
+      const emojied = emoji.emojify(text);
+      if (emojied !== text) {
+        text = emojied;
+      }
     }
   }
 

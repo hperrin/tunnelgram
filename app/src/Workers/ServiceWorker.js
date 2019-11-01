@@ -14,13 +14,13 @@ self.addEventListener('install', event => {
           cache.add('/').catch(() => {
             // Ignore errors.
           }),
+          cache.add('/dist/vendors~main.js').catch(() => {
+            // Ignore errors.
+          }),
           cache.add('/dist/main.js').catch(() => {
             // Ignore errors.
           }),
           cache.add('/dist/main.css').catch(() => {
-            // Ignore errors.
-          }),
-          cache.add('/dist/showdown.js').catch(() => {
             // Ignore errors.
           }),
         ]);
