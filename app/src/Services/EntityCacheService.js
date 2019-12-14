@@ -30,6 +30,7 @@ class EntityCacheService {
     return await storage.setItem('tgEntityCache', this.cache);
   }
 
+  // TODO: Is this causing the permanent unread problem.
   async getEntityData(guid) {
     await this.ready;
 
