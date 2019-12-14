@@ -9,6 +9,7 @@ let ready;
 export const user = writable(false);
 export const userAvatar = writable(null);
 export const userIsTilmeldAdmin = writable(false);
+export const userIsSponsor = writable(false);
 export const userReadyPromise = new Promise(resolve => (ready = resolve));
 
 let subscription;
@@ -66,10 +67,15 @@ user.subscribe(userValue => {
       userValue.$gatekeeper('tilmeld/admin').then(userIsTilmeldAdminValue => {
         userIsTilmeldAdmin.set(userIsTilmeldAdminValue);
       });
+      // Is the user a sponsor?
+      userValue.$gatekeeper('tunnelgram/sponsor').then(userIsSponsorValue => {
+        userIsSponsor.set(userIsSponsorValue);
+      });
     }
   } else {
     userAvatar.set(null);
     userIsTilmeldAdmin.set(false);
+    userIsSponsor.set(false);
   }
   previousUserValue = userValue;
 });

@@ -45,6 +45,9 @@
         <i class="fas fa-share" />
       </button>
     </div>
+    {#if $viewUserIsSelf && $userIsSponsor}
+      <h3>You're a Sponsor!</h3>
+    {/if}
 
     <div class="d-flex flex-column justify-content-start w-std-page">
       {#if !$viewUserIsSelf}
@@ -222,6 +225,7 @@
     viewUserIsSelf,
     viewUser,
     user,
+    userIsSponsor,
     settings,
     conversation,
     conversations,
