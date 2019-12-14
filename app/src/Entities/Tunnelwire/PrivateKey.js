@@ -3,7 +3,6 @@ import { Nymph, Entity } from 'nymph-client';
 export class PrivateKey extends Entity {
   constructor(id) {
     super(id);
-    this.text = '';
   }
 
   static current(...args) {
