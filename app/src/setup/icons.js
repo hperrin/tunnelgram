@@ -22,6 +22,7 @@ import fasCog from '@fortawesome/fontawesome-free-solid/faCog';
 import fasBell from '@fortawesome/fontawesome-free-solid/faBell';
 import fasBellSlash from '@fortawesome/fontawesome-free-solid/faBellSlash';
 import farBell from '@fortawesome/fontawesome-free-regular/faBell';
+import fasCrown from '@fortawesome/fontawesome-free-solid/faCrown';
 
 // For PNotify
 import fasExclamationCircle from '@fortawesome/fontawesome-free-solid/faExclamationCircle';
@@ -53,6 +54,7 @@ fontawesome.library.add(
   fasBell,
   fasBellSlash,
   farBell,
+  fasCrown,
 
   // For PNotify
   fasExclamationCircle,

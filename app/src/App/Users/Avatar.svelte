@@ -1,5 +1,5 @@
 <span
-  class="{className} rounded-circle d-inline-block"
+  class="{className} rounded-circle d-inline-block position-relative"
   style="width: {size}px; height: {size}px;"
 >
   {#if user.avatar}
@@ -17,6 +17,11 @@
     >
       {iconLetters}
     </span>
+  {/if}
+  {#if user.sponsor}
+    <div class="position-absolute" style="right: {size * .02}px; bottom: {size * .02}px; transform: scale({(size / 40) * .8}); color: gold;">
+      <i class="fas fa-crown" />
+    </div>
   {/if}
 </span>
 

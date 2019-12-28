@@ -16,7 +16,7 @@
           <button
             class="position-absolute btn btn-primary btn-sm rounded"
             on:click={() => avatarInput.click()}
-            style="right: 0; bottom: 0;"
+            style="left: 0; bottom: 0; z-index: 1;"
           >
             <i class="fas fa-upload fa-2x" />
           </button>
@@ -45,8 +45,8 @@
         <i class="fas fa-share" />
       </button>
     </div>
-    {#if $viewUserIsSelf && $userIsSponsor}
-      <h3>You're a Sponsor!</h3>
+    {#if $viewUser.sponsor}
+      <h3>{$viewUserIsSelf ? "You're a Sponsor!" : "They're a sponsor!"}</h3>
     {/if}
 
     <div class="d-flex flex-column justify-content-start w-std-page">

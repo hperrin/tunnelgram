@@ -154,4 +154,15 @@ use SciActive\Hook;
     $AvatarUpdateHookBefore
   );
   Hook::addCallback('Tilmeld\Entities\User->save', 50, $AvatarUpdateHookAfter);
+
+  // Add sponsor flag to user JSON.
+  Hook::addCallback(
+    'Tilmeld\Entities\User->jsonSerialize',
+    10,
+    function (&$return, $name, &$object, &$function, &$data) {
+      if (is_object($return[0]) && $return[0]->guid) {
+        $return[0]->sponsor = $object->gatekeeper('tunnelgram/sponsor');
+      }
+    }
+  );
 })();
