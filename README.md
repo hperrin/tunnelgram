@@ -19,7 +19,7 @@ It's as easy to use as any non-E2EE messenger.
 
 ### Sponsor(s)!
 
-<img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" alt="Morgan Williams avatar" />
+<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" alt="Morgan Williams avatar" />
 
 # The Tunnelwire Encryption Scheme
 
