@@ -17,6 +17,10 @@ It's as easy to use as any non-E2EE messenger.
 
 [![Become a patron on Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/tunnelgram)
 
+### Sponsor(s)!
+
+<img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" alt="Morgan Williams avatar" />
+
 # The Tunnelwire Encryption Scheme
 
 How is Tunnelgram able to show all your messages on multiple clients just like a regular messaging app if it's all end to end encrypted?

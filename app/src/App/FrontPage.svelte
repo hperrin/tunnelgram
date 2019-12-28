@@ -95,6 +95,14 @@
 </div>
 <div class="card mt-3" style="width: 100%;">
   <div class="card-body">
+    <h1 class="card-title display-5">Sponsor(s)!</h1>
+    <p class="card-text">
+      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" alt="Morgan Williams avatar" />
+    </p>
+  </div>
+</div>
+<div class="card mt-3" style="width: 100%;">
+  <div class="card-body">
     <h1 class="card-title display-5">Stay Safe, Be Secure</h1>
     <hr class="my-4" />
     <p class="card-text">
