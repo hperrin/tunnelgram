@@ -90,4 +90,4 @@ if (getenv('MYSQL_CA_CERT')) {
   ]
 );
 
-require __DIR__.'/src/HookMethods.php';
+require_once __DIR__.'/src/HookMethods.php';
