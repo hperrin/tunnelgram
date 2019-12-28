@@ -620,6 +620,7 @@ class Conversation extends \Nymph\Entity {
       $removedCount = count($removedUsers);
 
       if ($removedCount
+        && !Tilmeld::gatekeeper('system/admin')
         && (
           $removedCount > 1 ||
           !Tilmeld::$currentUser->is($removedUsers[0])
