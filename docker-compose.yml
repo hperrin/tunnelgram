@@ -47,14 +47,14 @@ services:
       - db_root_password
       - db_password
 
-  mta:
-    build:
-      context: ./config
-      dockerfile: Dockerfile-mta
-    volumes:
-      - ./mail:/var/spool/postfix
-    networks:
-      - app-network
+  # mta:
+  #   build:
+  #     context: ./config
+  #     dockerfile: Dockerfile-mta
+  #   volumes:
+  #     - ./mail:/var/spool/postfix
+  #   networks:
+  #     - app-network
 
   pubsub:
     depends_on:
@@ -82,7 +82,7 @@ services:
   fpm:
     depends_on:
       - db
-      - mta
+      # - mta
       - pubsub
     build:
       context: ./config
