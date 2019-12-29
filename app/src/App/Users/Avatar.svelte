@@ -19,9 +19,9 @@
     </span>
   {/if}
   {#if user.sponsor}
-    <div class="position-absolute" style="right: {size * .02}px; bottom: {size * .02}px; transform: scale({(size / 40) * .8}); color: gold;">
+    <span class="position-absolute d-inline-block" style="right: 0; bottom: 0; transform: scale({(size / 40) * .8}); transform-origin: bottom right; color: gold;">
       <i class="fas fa-crown" />
-    </div>
+    </span>
   {/if}
 </span>
 
