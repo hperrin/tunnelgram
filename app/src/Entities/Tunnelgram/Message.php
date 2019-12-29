@@ -177,6 +177,10 @@ class Message extends \Nymph\Entity {
       unset($this->video);
     }
 
+    $userIsSponsor = Tilmeld::gatekeeper('tunnelgram/sponsor');
+    $IMAGE_SIZE_LIMIT = $userIsSponsor ? 10485760 : 2097152;
+    $VIDEO_SIZE_LIMIT = $userIsSponsor ? 62914560 : 20971520;
+
     try {
       // Validate.
       v::notEmpty()
@@ -266,7 +270,7 @@ class Message extends \Nymph\Entity {
                 'data',
                 v::stringType()->notEmpty()->prnt()->length(
                   1,
-                  ceil(2097152 * 1.4) // Base64 of 2MiB
+                  ceil($IMAGE_SIZE_LIMIT * 1.4) // Base64 of image size limit
                 )
               ),
               v::key(
@@ -322,7 +326,7 @@ class Message extends \Nymph\Entity {
               'data',
               v::stringType()->notEmpty()->prnt()->length(
                 1,
-                ceil(20971520 * 1.4) // Base64 of 20MiB
+                ceil($VIDEO_SIZE_LIMIT * 1.4) // Base64 of video size limit
               )
             ),
             v::key(

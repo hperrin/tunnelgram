@@ -231,7 +231,7 @@
   import { EditImageService } from '../../Services/EditImageService';
   import { VideoService } from '../../Services/VideoService';
   import ErrHandler from '../../ErrHandler';
-  import { brand } from '../../stores';
+  import { brand, userIsSponsor } from '../../stores';
 
   const dispatch = createEventDispatcher();
   const mobile = (() => {
@@ -284,6 +284,10 @@
     emoji = module.default;
   });
 
+  const IMAGE_SIZE_LIMIT = $userIsSponsor ? 10485760 : 2097152;
+  const VIDEO_SIZE_LIMIT = $userIsSponsor ? 62914560 : 20971520;
+  const IMAGE_BASE_ESTIMATE = $userIsSponsor ? 6700 : 3000;
+  const IMAGE_ESTIMATE_STEP = $userIsSponsor ? 500 : 200;
 
   onDestroy(() => {
     destroyed = true;
@@ -552,19 +556,36 @@
 
         // Does the video need to be transcoded?
         let transcoded = false;
-        if (file.type === 'video/mp4' && file.size < 20971520) {
+        if (file.type === 'video/mp4' && file.size < VIDEO_SIZE_LIMIT) {
           data = new Uint8Array(result);
         } else {
           transcoded = true;
           PNotify.info({
             title: 'Transcoding',
             text:
-              file.size < 20971520
+              file.size < VIDEO_SIZE_LIMIT
                 ? 'Your video is formatted as ' +
                   file.type +
                   '. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
-                : "Your video is over 20MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it's too big.",
+                : "Your video is over "+(VIDEO_SIZE_LIMIT / (1024 * 1024))+"MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it's too big.",
           });
+          if (file.size >= VIDEO_SIZE_LIMIT && !$userIsSponsor) {
+            PNotify.info({
+              title: 'Wanna send bigger videos?',
+              text: 'Sponsors can send 60MB videos!',
+              delay: 30000,
+              modules: {
+                Confirm: {
+                  confirm: true,
+                  buttons: [{
+                    text: 'Become a Sponsor',
+                    primary: true,
+                    click: () => window.open('https://www.patreon.com/tunnelgram'),
+                  }],
+                },
+              },
+            });
+          }
           try {
             transcoder = new VideoService();
             data = await transcoder.transcode(
@@ -584,43 +605,60 @@
           }
         }
 
-        const blob = new Blob([data], { type: 'video/mp4' });
-        const objectURL = URL.createObjectURL(blob);
+        try {
+          if (!data.length) {
+            throw new Error('Web worker returned 0 bytes of data. This probably means the video\'s codec is not supported.');
+          }
 
-        if (transcoded) {
-          // Reload the transcoded video to get a proper thumbnail.
-          let resolve;
-          const p = new Promise(r => (resolve = r));
-          videoElem.onloadeddata = () => resolve();
-          videoElem.src = objectURL;
-          await p;
+          const blob = new Blob([data], { type: 'video/mp4' });
+
+          if (!blob) {
+            throw new Error('Video blob could not be retrieved from web worker.');
+          }
+
+          const objectURL = URL.createObjectURL(blob);
+
+          if (transcoded) {
+            // Reload the transcoded video to get a proper thumbnail.
+            let resolve;
+            const p = new Promise(r => (resolve = r));
+            videoElem.onloadeddata = () => resolve();
+            videoElem.src = objectURL;
+            await p;
+          }
+
+          let dataType = 'video/mp4';
+          let resizeImage = new EditImageService(videoElem, 'image/jpeg');
+          const thumbnailImg = await resizeImage.resizeContain(300, 300);
+          resizeImage.destroy();
+          const thumbnailMatch = thumbnailImg.data.match(
+            /^data:(image\/\w+);base64,(.*)$/,
+          );
+          const thumbnailType = thumbnailMatch[1];
+          const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
+
+          video = {
+            name: file.name + (transcoded ? '-transcoded.mp4' : ''),
+            dataType,
+            dataWidth: '' + videoElem.videoWidth,
+            dataHeight: '' + videoElem.videoHeight,
+            dataDuration: '' + videoElem.duration,
+            data,
+            thumbnailType,
+            thumbnailWidth: '' + thumbnailImg.width,
+            thumbnailHeight: '' + thumbnailImg.height,
+            thumbnail,
+            thumbnailImg: thumbnailImg.data,
+            objectURL,
+          };
+          images = [];
+        } catch (err) {
+          PNotify.error({
+            title: 'Video Loading Failed',
+            text: err,
+          });
         }
 
-        let dataType = 'video/mp4';
-        let resizeImage = new EditImageService(videoElem, 'image/jpeg');
-        const thumbnailImg = await resizeImage.resizeContain(300, 300);
-        resizeImage.destroy();
-        const thumbnailMatch = thumbnailImg.data.match(
-          /^data:(image\/\w+);base64,(.*)$/,
-        );
-        const thumbnailType = thumbnailMatch[1];
-        const thumbnail = crypt.decodeBase64(thumbnailMatch[2]);
-
-        video = {
-          name: file.name + (transcoded ? '-transcoded.mp4' : ''),
-          dataType,
-          dataWidth: '' + videoElem.videoWidth,
-          dataHeight: '' + videoElem.videoHeight,
-          dataDuration: '' + videoElem.duration,
-          data,
-          thumbnailType,
-          thumbnailWidth: '' + thumbnailImg.width,
-          thumbnailHeight: '' + thumbnailImg.height,
-          thumbnail,
-          thumbnailImg: thumbnailImg.data,
-          objectURL,
-        };
-        images = [];
         mediaLoading = false;
         transcoder = null;
         transcodeProgress = null;
@@ -641,10 +679,10 @@
           text: 'You can put up to 9 images into a message.',
         });
         break;
-      } else if (file.type === 'image/gif' && file.size > 2097152) {
+      } else if (file.type === 'image/gif' && file.size > IMAGE_SIZE_LIMIT) {
         PNotify.notice({
           title: 'GIF is Too Big',
-          text: 'Sorry, but GIFs can only be up to 2 MB.',
+          text: 'Sorry, but GIFs can only be up to '+(IMAGE_SIZE_LIMIT / (1024 * 1024))+' MB.',
         });
       } else {
         mediaLoading = 'image';
@@ -693,7 +731,7 @@
           thumbnailType = file.type;
           thumbnailImg.data = dataImg.data;
         } else {
-          let size = 3000;
+          let size = IMAGE_BASE_ESTIMATE;
           let dataMatch;
           do {
             // Resize the image repeatedly down until the size is under 2MiB.
@@ -701,8 +739,8 @@
             dataMatch = dataImg.data.match(/^data:(image\/\w+);base64,(.*)$/);
             dataType = dataMatch[1];
             data = crypt.decodeBase64(dataMatch[2]);
-            size -= 200;
-          } while (data.length >= 2097152);
+            size -= IMAGE_ESTIMATE_STEP;
+          } while (data.length >= IMAGE_SIZE_LIMIT);
           const thumbnailMatch = thumbnailImg.data.match(
             /^data:(image\/\w+);base64,(.*)$/,
           );
