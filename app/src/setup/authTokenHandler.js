@@ -6,12 +6,10 @@ import { storage } from '../Services/StorageService';
 // instead, and persist it in local storage.
 
 let authToken = null;
-let xsrfToken = null;
 
 function setToken(token) {
   if (token === '' || token == null) {
     authToken = null;
-    xsrfToken = null;
 
     Nymph.setXsrfToken(null);
     if (PubSub.pubsubURL != null) {
@@ -23,7 +21,6 @@ function setToken(token) {
     const jwt = JSON.parse(atob(base64));
 
     authToken = token;
-    xsrfToken = jwt.xsrfToken;
 
     Nymph.setXsrfToken(jwt.xsrfToken);
     if (PubSub.pubsubURL != null) {

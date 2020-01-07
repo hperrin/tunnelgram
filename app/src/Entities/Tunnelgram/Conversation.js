@@ -3,11 +3,14 @@ import { User } from 'tilmeld-client';
 import { Message } from './Message';
 import { saveEntities, restoreEntities } from '../../Services/entityRefresh';
 import { crypt } from '../../Services/EncryptionService';
+import { ready as authTokenHandlerReady } from '../../setup/authTokenHandler';
 import * as ConversationConstants from './ConversationConstants';
 
 let currentUser = null;
 
-User.current().then(user => (currentUser = user));
+authTokenHandlerReady.then(() => {
+  User.current().then(user => (currentUser = user));
+});
 User.on('login', user => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 

@@ -9,7 +9,7 @@ export class EditImageService {
       false && !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
-      this.resizeImageWorker = new Worker('/dist/Workers/ResizeImage.js');
+      this.resizeImageWorker = new Worker((window.inCordova ? '' : '/')+'dist/Workers/ResizeImage.js');
       this.resizeImageWorkerCounter = 0;
       this.resizeImageWorkerCallbacks = {};
       this.resizeImageWorker.onmessage = e => {

@@ -30,12 +30,21 @@ class CordovaApp {
     this.initDeferredStyles();
     this.initKeyboardHandling();
 
-    const script = document.createElement('script');
-    script.src = 'dist/main.js';
-    document.getElementsByTagName('head')[0].appendChild(script);
-    const script2 = document.createElement('script');
-    script2.src = 'dist/showdown.js';
-    document.getElementsByTagName('head')[0].appendChild(script2);
+    const scripts = [
+      'dist/vendors~main.js',
+      'dist/vendors~node-emoji.js',
+      'dist/vendors~photoswipe-ui-default.js',
+      'dist/vendors~photoswipe.js',
+      'dist/vendors~showdown-xss-filter.js',
+      'dist/vendors~showdown.js',
+      'dist/main.js',
+    ];
+
+    for (let script of scripts) {
+      const el = document.createElement('script');
+      el.src = script;
+      document.getElementsByTagName('head')[0].appendChild(el);
+    }
   }
 
   initOneSignal () {

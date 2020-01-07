@@ -1,9 +1,14 @@
 import Navigo from 'navigo';
 
 export const router = new Navigo(
-  window.location.hostname === 'tunnelgram.com'
-    ? 'https://tunnelgram.com/'
-    : 'http://' + window.location.hostname + ':8080/',
+  window.inCordova
+    ? location.href
+    : (
+      window.location.hostname === 'tunnelgram.com'
+        ? 'https://tunnelgram.com/'
+        : 'http://' + window.location.hostname + ':8080/'
+    ),
+  window.inCordova // Use hash when in Cordova.
 );
 export const navigate = (...args) => {
   router.navigate(...args);

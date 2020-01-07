@@ -1,10 +1,13 @@
 import { Nymph, Entity } from 'nymph-client';
 import { User } from 'tilmeld-client';
 import { crypt } from '../../Services/EncryptionService';
+import { ready as authTokenHandlerReady } from '../../setup/authTokenHandler';
 
 let currentUser = null;
 
-User.current().then(user => (currentUser = user));
+authTokenHandlerReady.then(() => {
+  User.current().then(user => (currentUser = user));
+});
 User.on('login', user => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
