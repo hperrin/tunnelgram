@@ -11,7 +11,7 @@
     autocomplete="off"
     on:focus={() => (showUserSearchDropdown = true)}
   />
-  {#if !disabled && (localUsers.length || serverUsersLoading)}
+  {#if !disabled && (localUsers.length || serverUsersLoading || serverUsers.length)}
     <div
       class="dropdown-menu mt-0 {showUserSearchDropdown ? 'show' : ''}"
       bind:this={userSearchDropdown}
@@ -37,9 +37,11 @@
           <LoadingIndicator width="18" height="18" />
         </span>
       {:else if serverUsers.length}
-        <span class="dropdown-item-text d-flex justify-content-center my-2">
-          Others
-        </span>
+        {#if localUsers.length}
+          <span class="dropdown-item-text d-flex justify-content-center my-2">
+            Others
+          </span>
+        {/if}
         {#each serverUsers as user (user.guid)}
           <a
             class="d-flex justify-content-between align-items-center
