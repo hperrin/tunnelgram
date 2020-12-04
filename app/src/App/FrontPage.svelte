@@ -2,7 +2,7 @@
   <img
     class="card-img-top"
     src="og-image.png"
-    alt="Media image: Easy, secure messaging on all your devices."
+    alt="Easy, secure messaging on all your devices."
   />
   <div class="card-body">
     <h1 class="card-title display-5">{$brand}!</h1>
