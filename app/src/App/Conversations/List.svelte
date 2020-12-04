@@ -104,17 +104,17 @@
         })
         .map(entry => parseFloat(entry[0]));
       return $conversations.filter(c => {
-        for (let user of c.acFull) {
+        for (let acUser of c.acFull) {
           if (
-            user.$isASleepingReference ||
-            ($user.$is(user) && c.acFull.length > 1)
+            acUser.$isASleepingReference ||
+            ($user.$is(acUser) && c.acFull.length > 1)
           ) {
             continue;
-          } else if (nicknameUserGUIDs.indexOf(user.guid) !== -1) {
+          } else if (nicknameUserGUIDs.indexOf(acUser.guid) !== -1) {
             return true;
           } else if (
-            !(user.guid in $settings.$decrypted.nicknames) &&
-            user.name.toLowerCase().indexOf(searchLC) !== -1
+            !(acUser.guid in $settings.$decrypted.nicknames) &&
+            acUser.name.toLowerCase().indexOf(searchLC) !== -1
           ) {
             return true;
           }

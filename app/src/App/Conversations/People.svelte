@@ -172,34 +172,34 @@
     }
   }
 
-  async function removeChannelUser(user) {
+  async function removeChannelUser(acUser) {
     try {
       removingChannelUser = true;
-      await $conversation.$removeChannelUser(user);
-      channelUsers = channelUsers.filter(chUser => !user.$is(chUser));
+      await $conversation.$removeChannelUser(acUser);
+      channelUsers = channelUsers.filter(chUser => !acUser.$is(chUser));
     } catch (errObj) {
       ErrHandler(errObj);
     }
     removingChannelUser = false;
   }
 
-  function addAcFullUser(user) {
+  function addAcFullUser(acUser) {
     addUserError = null;
     addingUser = false;
 
-    if ($user.$is(user)) {
+    if ($user.$is(acUser)) {
       addUserError = "You're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
 
-    if (user.$inArray($conversation.acFull)) {
+    if (acUser.$inArray($conversation.acFull)) {
       addUserError = "They're already in this conversation.";
       userSearchSelector.focus();
       return;
     }
 
-    $conversation.acFull.push(user);
+    $conversation.acFull.push(acUser);
     $conversation = $conversation;
     addingUser = true;
     $conversation

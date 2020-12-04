@@ -203,22 +203,22 @@
     destroyed = true;
   });
 
-  function addUser(user) {
+  function addUser(acUser) {
     addUserError = null;
 
-    if ($user.$is(user)) {
+    if ($user.$is(acUser)) {
       addUserError = "You're already in conversations you start.";
       userSearchSelector.focus();
       return;
     }
 
-    if (user.$inArray($conversation.acFull)) {
+    if (acUser.$inArray($conversation.acFull)) {
       addUserError = "Looks like you've already added them.";
       userSearchSelector.focus();
       return;
     }
 
-    $conversation.acFull.push(user);
+    $conversation.acFull.push(acUser);
     $conversation = $conversation;
     userSearchSelector.clear();
     userSearchSelector.focus();
