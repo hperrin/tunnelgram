@@ -19,6 +19,7 @@
 class CordovaApp {
   initialize () {
     document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+    this.initOneSignal();
   }
 
   // deviceready Event Handler
@@ -26,7 +27,8 @@ class CordovaApp {
   // Bind any cordova events here. Common events are:
   // 'pause', 'resume', etc.
   onDeviceReady () {
-    this.initOneSignal();
+    window.plugins.webviewcolor.change('#031926');
+
     this.initDeferredStyles();
     this.initKeyboardHandling();
 
@@ -45,11 +47,15 @@ class CordovaApp {
       el.src = script;
       document.getElementsByTagName('head')[0].appendChild(el);
     }
+
+    // this.fixWindowSize();
   }
 
   initOneSignal () {
     // Enable to debug issues.
-    // window.plugins.OneSignal.setLogLevel({logLevel: 4, visualLevel: 4});
+    window.plugins.OneSignal.setLogLevel({logLevel: 6, visualLevel: 4});
+
+    window.plugins.OneSignal.startInit('113ebc97-79d7-4f63-9f20-045913af0a49');
 
     window.plugins.OneSignal.setRequiresUserPrivacyConsent(true);
 
@@ -62,6 +68,11 @@ class CordovaApp {
     const notificationOpenedCallback = openedResult => {
       window.router.navigate('/c/'+openedResult.notification.payload.additionalData.conversationGuid);
     };
+
+    // Set your iOS Settings
+    var iosSettings = {};
+    iosSettings["kOSSettingsKeyAutoPrompt"] = false;
+    iosSettings["kOSSettingsKeyInAppLaunchURL"] = false;
 
     const checkState = () => {
       window.plugins.OneSignal.getPermissionSubscriptionState(status => {
@@ -83,24 +94,17 @@ class CordovaApp {
     });
 
     window.plugins.OneSignal
-      .startInit('113ebc97-79d7-4f63-9f20-045913af0a49')
       .handleNotificationReceived(notificationReceivedCallback)
       .handleNotificationOpened(notificationOpenedCallback)
+      .iOSSettings(iosSettings)
       .inFocusDisplaying(window.plugins.OneSignal.OSInFocusDisplayOption.None) // Change to '.InAppAlert' for testing.
       .endInit();
   }
 
   initKeyboardHandling () {
-    Keyboard.shrinkView(false);
+    Keyboard.shrinkView(true);
     Keyboard.hideFormAccessoryBar(true);
-    window.addEventListener('keyboardHeightWillChange', function (event) {
-      document.body.style.paddingBottom = event.keyboardHeight+'px';
-      document.body.scrollTop = 0;
-
-      // Fire a resize event.
-      let resize = new UIEvent('resize');
-      window.dispatchEvent(resize);
-    });
+    // window.addEventListener('keyboardHeightWillChange', this.fixWindowSize.bind(this));
   }
 
   initDeferredStyles () {
@@ -122,6 +126,15 @@ class CordovaApp {
     // PhotoSwipe
     include('dist/node_modules/photoswipe/dist/photoswipe.css');
     include('dist/node_modules/photoswipe/dist/default-skin/default-skin.css');
+  }
+
+  fixWindowSize(event) {
+    document.body.style.paddingBottom = event ? event.keyboardHeight+'px' : '0';
+    document.body.scrollTop = 0;
+
+    // Fire a resize event.
+    let resize = new UIEvent('resize');
+    window.dispatchEvent(resize);
   }
 }
 

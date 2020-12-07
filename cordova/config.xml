@@ -21,6 +21,7 @@
     <access origin="https://tunnelgram.blob.core.windows.net" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <preference name="resizeOnFullScreen" value="true" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
@@ -38,6 +39,10 @@
         <config-file parent="NSPhotoLibraryAddUsageDescription" target="*-Info.plist">
             <string>Photos that you take must be added to your library to attach to messages.</string>
         </config-file>
+        <preference name="StatusBarOverlaysWebView" value="true" />
+        <preference name="StatusBarBackgroundColor" value="#031926" />
+        <preference name="StatusBarStyle" value="lightcontent" />
+        <preference name="StatusBarDefaultScrollToTop" value="true" />
     </platform>
     <hook src="hook-icon.js" type="after_platform_add" />
     <hook src="hook-splash.js" type="after_platform_add" />
@@ -47,14 +52,11 @@
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackgroundColor" value="FF031926" />
-    <preference name="StatusBarBackgroundColor" value="#031926" />
-    <preference name="StatusBarStyle" value="lightcontent" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
     <plugin name="onesignal-cordova-plugin" spec="~2.4.1" />
     <plugin name="cordova-plugin-statusbar" spec="~2.4.2" />
     <plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
     <plugin name="cordova-plugin-media-capture-mp4video" spec="^1.0.5" />
-    <plugin name="cordova-plugin-keyboard" spec="^1.2.0" />
     <plugin name="cordova-plugin-camera" spec="^4.0.3" />
     <engine name="android" spec="^8.0.0" />
     <engine name="ios" spec="^5.0.1" />
