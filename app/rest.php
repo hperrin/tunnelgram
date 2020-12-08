@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Max-Age: 86400');
+header('Access-Control-Expose-Headers: X-TILMELDAUTH');
 
 // Access-Control headers are received during OPTIONS requests.
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
