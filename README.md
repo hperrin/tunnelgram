@@ -19,12 +19,7 @@ It's as easy to use as any non-E2EE messenger.
 
 ### Sponsor(s)!
 
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" />
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/PinakyBhattacharyya.jpg" title="Pinaky Bhattacharyya" />
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/davidhalvorsen.png" title="David Halvorsen" />
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/MatthewCourtney.jpg" title="Matthew Courtney" />
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/JennaGreshik.jpg" title="Jenna Greshik" />
-<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/MohamedJebali.jpg" title="Mohamed Jebali" />
+<img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" /> <img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/PinakyBhattacharyya.jpg" title="Pinaky Bhattacharyya" /> <img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/davidhalvorsen.png" title="David Halvorsen" /> <img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/MatthewCourtney.jpg" title="Matthew Courtney" /> <img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/JennaGreshik.jpg" title="Jenna Greshik" /> <img style="border-radius: 50%;" width="75" height="75" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/MohamedJebali.jpg" title="Mohamed Jebali" />
 
 # The Tunnelwire Encryption Scheme
 
