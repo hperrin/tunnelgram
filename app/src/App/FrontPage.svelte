@@ -97,7 +97,10 @@
   <div class="card-body">
     <h1 class="card-title display-5">Sponsor(s)!</h1>
     <p class="card-text">
-      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" alt="Morgan Williams avatar" />
+      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams" />
+      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/davidhalvorsen.png" title="David Halvorsen" />
+      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/MatthewCourtney.jpg" title="Matthew Courtney" />
+      <img style="border-radius: 50%; width: 75px; height: 75px;" src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/JennaGreshik.jpg" title="Jenna Greshik" />
     </p>
   </div>
 </div>
