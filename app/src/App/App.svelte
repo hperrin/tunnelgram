@@ -204,9 +204,10 @@
 
 <script>
   import { onMount } from 'svelte';
-  import PNotify from 'pnotify/dist/es/PNotify';
-  import 'pnotify/dist/es/PNotifyDesktop';
+  import { info, defaultModules } from '@pnotify/core';
+  import * as PNotifyDesktop from '@pnotify/desktop';
   import TinyGesture from 'tinygesture';
+  import Dropdown from 'bootstrap.native/dist/components/dropdown-native.esm.js';
   import Conversation from '../Entities/Tunnelgram/Conversation';
   import LoadingIndicator from './LoadingIndicator';
   import ConversationList from './Conversations/List';
@@ -218,7 +219,6 @@
   import { router, navigate } from '../Services/router';
   import { getCookieValue } from '../Services/getCookieValue';
   import { getDisplayName } from '../Services/getDisplayName';
-  import { Dropdown } from '../Services/Val/BSN';
   import ErrHandler from '../ErrHandler';
   import {
     logout,
@@ -391,7 +391,7 @@
     }
     if (conv.lastMessage) {
       // Notify the user of a new message.
-      notice = PNotify.info(
+      notice = info(
         Object.assign(
           {
             title:
@@ -403,13 +403,14 @@
               conv.lastMessage.$decrypted.text.length > 40
                 ? conv.lastMessage.$decrypted.text.substr(0, 40) + '...'
                 : conv.lastMessage.$decrypted.text,
+            modules: new Map([...defaultModules, [PNotifyDesktop, {}]])
           },
           options,
         ),
       );
     } else if (update.added) {
       // Notify the user of a new conversation.
-      notice = PNotify.info(
+      notice = info(
         Object.assign(
           {
             title: 'New ' + Conversation.MODE_SHORT_NAME[conv.mode],
@@ -420,6 +421,7 @@
                 ? conv.$getName($settings)
                 : 'a ' + Conversation.MODE_SHORT_NAME[conv.mode]) +
               '.',
+            modules: new Map([...defaultModules, [PNotifyDesktop, {}]])
           },
           options,
         ),
@@ -431,7 +433,7 @@
       while (target.parentNode) {
         if (
           target.classList &&
-          target.classList.contains('ui-pnotify-closer')
+          target.classList.contains('pnotify-closer')
         ) {
           return;
         }

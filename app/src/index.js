@@ -72,7 +72,7 @@ export function refreshAll() {
 
 let forwardCount = 0;
 function navigateToContinueUrl() {
-  const route = router.lastRouteResolved();
+  const route = router.lastResolved()?.[0];
   if (route && route.url !== '/' && route.url !== '') {
     forwardCount++;
     if (forwardCount > 15) {
@@ -80,7 +80,7 @@ function navigateToContinueUrl() {
       debugger;
       return;
     }
-    const url = route.url + (route.query !== '' ? '?' + route.query : '');
+    const url = route.url + (route.queryString !== '' ? '?' + route.queryString : '');
     router.navigate('/?continue=' + encodeURIComponent(url));
   }
 }
@@ -96,13 +96,13 @@ window.addEventListener('beforeinstallprompt', e => {
 (async () => {
   await stores.userReadyPromise;
 
-  const conversationHandler = params => {
+  const conversationHandler = ({ data }) => {
     if (!get(stores.user)) {
       return;
     }
 
-    const guid = params && params.id ? parseFloat(params.id) : null;
-    const view = (params && params.view) || 'conversation';
+    const guid = data && data.id ? parseFloat(data.id) : null;
+    const view = (data && data.view) || 'conversation';
     const conversation = get(stores.conversation);
     const conversations = get(stores.conversations);
     let conv = null;
@@ -152,8 +152,8 @@ window.addEventListener('beforeinstallprompt', e => {
     }
   };
 
-  const userHandler = params => {
-    const { username } = params;
+  const userHandler = ({ data }) => {
+    const { username } = data;
     const user = get(stores.user);
 
     if (!user) {
@@ -188,7 +188,7 @@ window.addEventListener('beforeinstallprompt', e => {
   };
 
   router.hooks({
-    before: (done, params) => {
+    before: (done) => {
       if (get(stores.user) === null) {
         done();
         navigateToContinueUrl();
@@ -198,33 +198,32 @@ window.addEventListener('beforeinstallprompt', e => {
     },
   });
 
-  router
-    .on(() => {
-      stores.convosOut.set(true);
-    })
-    .on({
-      c: { uses: conversationHandler },
-      'c/:id': { uses: conversationHandler },
-      'c/:id/:view': { uses: conversationHandler },
-      'u/:username': { uses: userHandler },
-      pushSubscriptions: () => {
-        if (!get(stores.user)) {
-          return;
-        }
+  router.on(() => {
+    stores.convosOut.set(true);
+  });
+  router.on({
+    c: { uses: conversationHandler },
+    'c/:id': { uses: conversationHandler },
+    'c/:id/:view': { uses: conversationHandler },
+    'u/:username': { uses: userHandler },
+    pushSubscriptions: () => {
+      if (!get(stores.user)) {
+        return;
+      }
 
-        stores.view.set('pushSubscriptions');
-        stores.convosOut.set(false);
-        stores.loadingConversation.set(false);
-        stores.loadingUser.set(false);
-      },
-      'pwa-home': () => {
-        router.navigate('/');
-      },
-    })
-    .notFound(() => {
+      stores.view.set('pushSubscriptions');
+      stores.convosOut.set(false);
+      stores.loadingConversation.set(false);
+      stores.loadingUser.set(false);
+    },
+    'pwa-home': () => {
       router.navigate('/');
-    })
-    .resolve();
+    },
+  });
+  router.notFound(() => {
+    router.navigate('/');
+  });
+  router.resolve();
 
   stores.conversation.subscribe(conversation => {
     if (conversation && conversation.guid) {
@@ -251,9 +250,9 @@ window.addEventListener('beforeinstallprompt', e => {
         stores.conversation.set(new Conversation());
 
         // Check for a continue route and navigate to it.
-        const route = router.lastRouteResolved();
+        const route = router.lastResolved()?.[0];
         if (route) {
-          const queryMatch = route.query.match(
+          const queryMatch = route.queryString.match(
             /(?:^|&)continue=([^&]+)(?:&|$)/,
           );
           if (queryMatch) {

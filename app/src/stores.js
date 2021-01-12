@@ -1,6 +1,6 @@
 import { writable, readable } from 'svelte/store';
 import { PubSub } from 'nymph-client';
-import PNotify from 'pnotify/dist/es/PNotify';
+import * as PNotifyDesktop from '@pnotify/desktop';
 import Conversation from './Entities/Tunnelgram/Conversation';
 
 export * from './userStores';
@@ -50,7 +50,7 @@ export const disconnected = readable(true, set => {
 export const requestNotificationPermission = writable(() => {
   // This is the deault permission asker for sending desktop notifications
   // when the page is open in the browser.
-  PNotify.modules.Desktop.permission();
+  PNotifyDesktop.permission();
 });
 export const requestPersistentStorage = writable(() => {
   navigator.storage.persist();

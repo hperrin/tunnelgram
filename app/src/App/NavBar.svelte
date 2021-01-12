@@ -96,9 +96,9 @@
 </ul>
 
 <script>
+  import Dropdown from 'bootstrap.native/dist/components/dropdown-native.esm.js';
   import { navigate } from '../Services/router';
   import Conversation from '../Entities/Tunnelgram/Conversation';
-  import { Dropdown } from '../Services/Val/BSN';
   import { conversation, view } from '../stores';
 
   let notificationsDropdown;

@@ -43,8 +43,7 @@ class EncryptionService extends AESEncryptionService {
 
     (async () => {
       try {
-        await this.getUserPrivateKey();
-        await this.getUserPublicKey();
+        await Promise.all([this.getUserPrivateKey(), this.getUserPublicKey()]);
         if (this.userPrivateKey != null && this.userPublicKey != null) {
           this.resolve();
         }

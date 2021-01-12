@@ -10,9 +10,10 @@ const hotMode = process.env.WEBPACK_HOT === 'true';
 const common = {
   mode: devMode ? 'development' : 'production',
   optimization: {
+    minimize: !devMode,
     minimizer: [
       new TerserPlugin({
-        sourceMap: true,
+        test: /\.js(\?.*)?$/i,
         extractComments: 'some',
         terserOptions: {
           ecma: 8,
@@ -30,8 +31,6 @@ const common = {
   // devtool: devMode && 'source-map',
   devtool: 'source-map',
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js',
     chunkFilename: '[name].js',
     publicPath: '/dist/',
   },
@@ -62,21 +61,22 @@ const common = {
   },
   module: {
     rules: [
-      {
-        test: /\/src\/Services\/Val\/.+\.js$/,
-        use: {
-          loader: 'val-loader',
-        },
-      },
+      // {
+      //   test: /\/src\/Services\/Val\/.+\.js$/,
+      //   use: {
+      //     loader: 'val-loader',
+      //   },
+      // },
       {
         test: /\.(html|svelte)$/,
         use: {
           loader: 'svelte-loader',
           options: {
             dev: devMode,
-            emitCss: true,
+            emitCss: false,
+            css: true,
             // This will be enabled as soon as svelte-loader supports HMR for Svelte 3.
-            hotReload: devMode && false,
+            hotReload: hotMode && false,
           },
         },
       },
@@ -116,25 +116,19 @@ module.exports = [
       main: path.resolve(__dirname, 'src', 'index.js'),
     },
     ...common,
-    optimization: {
-      ...common.optimization,
-      splitChunks: {
-        chunks: 'all',
-      },
-    },
     plugins: [
       ...common.plugins,
       ...(hotMode ? [new HotModuleReplacementPlugin()] : []),
     ],
-    devServer: {
-      open: true,
-      compress: true,
-      port: 8083,
-      proxy: {
-        '/rest.php': 'http://localhost:8080',
-        '/user/': 'http://localhost:8080',
-      },
-    },
+    // devServer: {
+    //   open: true,
+    //   compress: true,
+    //   port: 8083,
+    //   proxy: {
+    //     '/rest.php': 'http://localhost:8080',
+    //     '/user/': 'http://localhost:8080',
+    //   },
+    // },
   },
   {
     entry: {

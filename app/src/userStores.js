@@ -1,4 +1,3 @@
-import { tick } from 'svelte';
 import { writable, get } from 'svelte/store';
 import { User } from 'tilmeld-client';
 import { ready as authTokenHandlerReady } from './setup/authTokenHandler';
@@ -47,11 +46,6 @@ User.on('logout', async () => {
   if (subscription) {
     subscription.unsubscribe();
   }
-  // Svelte freaks out if $user isn't available while it's destroying everything.
-  user.set(new User());
-  // Let Svelte update the DOM.
-  await tick();
-  // Now set user to it's appropriate value.
   user.set(null);
 });
 

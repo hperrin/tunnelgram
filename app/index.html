@@ -85,15 +85,6 @@
         (typeof Promise !== 'undefined' && typeof Promise.all === 'function') ||
           document.getElementsByTagName('head')[0].appendChild(s);
       })();
-      (function() {
-        var s = document.createElement('script');
-        s.setAttribute(
-          'src',
-          'https://cdn.jsdelivr.net/npm/whatwg-fetch@2.0.4/fetch.min.js',
-        );
-        typeof fetch !== 'undefined' ||
-          document.getElementsByTagName('head')[0].appendChild(s);
-      })();
       NymphOptions = {
         restURL: '/rest.php',
         pubsubURL:
@@ -107,7 +98,6 @@
     <link rel="dns-prefetch" href="https://tunnelgram.blob.core.windows.net" />
 
     <!-- Bundled Styles -->
-    <link rel="stylesheet" href="/dist/vendors~main.css" />
     <link rel="stylesheet" href="/dist/main.css" />
     <link rel="preload" href="/node_modules/pform/css/pform.css" as="style" />
     <link
@@ -224,7 +214,6 @@
       })();
     </script>
     <!-- Bundled JS -->
-    <script src="/dist/vendors~main.js"></script>
     <script src="/dist/main.js"></script>
     <noscript>
       Looks like you don't have JavaScript enabled. I like you. You care about

@@ -133,7 +133,7 @@
 
 <script>
   import { User } from 'tilmeld-client';
-  import PNotify from 'pnotify/dist/es/PNotify';
+  import { info } from '@pnotify/core';
   import Login from 'tilmeld-components/src/Login';
   import LoadingIndicator from './App/LoadingIndicator';
   import FrontPage from './App/FrontPage';
@@ -150,7 +150,7 @@
   function copyPrivateKey() {
     privateKeyElem.select();
     document.execCommand('copy');
-    PNotify.info({
+    info({
       text: 'Copied to Clipboard',
     });
   }

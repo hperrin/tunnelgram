@@ -210,13 +210,13 @@
   import { Nymph } from 'nymph-client';
   import ChangePassword from 'tilmeld-components/src/ChangePassword';
   import QRCode from 'qrcode';
-  import PNotify from 'pnotify/dist/es/PNotify';
+  import { info, notice } from '@pnotify/core';
+  import Dropdown from 'bootstrap.native/dist/components/dropdown-native.esm.js';
   import Conversation from '../../Entities/Tunnelgram/Conversation';
   import Avatar from './Avatar';
   import Preview from '../Conversations/Preview';
   import LoadingIndicator from '../LoadingIndicator';
   import { navigate } from '../../Services/router';
-  import { Dropdown } from '../../Services/Val/BSN';
   import { EditImageService } from '../../Services/EditImageService';
   import { getCookieValue } from '../../Services/getCookieValue';
   import { SimpleDateFormatter } from '../../Services/SimpleDateFormatter';
@@ -366,7 +366,7 @@
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      PNotify.info({
+      info({
         text: 'Copied to Clipboard',
       });
     }
@@ -393,7 +393,7 @@
     const file = files[0];
 
     if (!file.type.startsWith('image/')) {
-      PNotify.notice({
+      notice({
         title: 'Only Image',
         text: 'What are you doing? You can only use an image as an avatar.',
       });

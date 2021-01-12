@@ -223,10 +223,11 @@
 
 <script>
   import { onDestroy, createEventDispatcher } from 'svelte';
-  import PNotify from 'pnotify/dist/es/PNotify';
+  import { notice, error, info, defaultModules } from '@pnotify/core';
+  import * as PNotifyConfirm from '@pnotify/confirm';
+  import Dropdown from 'bootstrap.native/dist/components/dropdown-native.esm.js';
   import Message from '../../Entities/Tunnelgram/Message';
   import LoadingIndicator from '../LoadingIndicator';
-  import { Dropdown } from '../../Services/Val/BSN';
   import { crypt } from '../../Services/EncryptionService';
   import { EditImageService } from '../../Services/EditImageService';
   import { VideoService } from '../../Services/VideoService';
@@ -485,7 +486,7 @@
     const currentImageCount = images.length;
 
     if (video) {
-      PNotify.notice({
+      notice({
         title: 'Whoa There',
         text:
           "You've already got a video pending. Send it or delete it before you add something else.",
@@ -498,7 +499,7 @@
 
       if (file.type.startsWith('video/')) {
         if (currentImageCount + imageCount > 0) {
-          PNotify.notice({
+          notice({
             title: 'Images or Video',
             text: 'You gotta pick one.',
           });
@@ -560,7 +561,7 @@
           data = new Uint8Array(result);
         } else {
           transcoded = true;
-          PNotify.info({
+          info({
             title: 'Transcoding',
             text:
               file.size < VIDEO_SIZE_LIMIT
@@ -570,20 +571,21 @@
                 : "Your video is over "+(VIDEO_SIZE_LIMIT / (1024 * 1024))+"MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it's too big.",
           });
           if (file.size >= VIDEO_SIZE_LIMIT && !$userIsSponsor) {
-            PNotify.info({
+            info({
               title: 'Wanna send bigger videos?',
               text: 'Sponsors can send 60MB videos!',
               delay: 30000,
-              modules: {
-                Confirm: {
+              modules: new Map([
+                ...defaultModules,
+                [PNotifyConfirm, {
                   confirm: true,
                   buttons: [{
                     text: 'Become a Sponsor',
                     primary: true,
                     click: () => window.open('https://www.patreon.com/tunnelgram'),
-                  }],
-                },
-              },
+                  }]
+                }],
+              ]),
             });
           }
           try {
@@ -594,7 +596,7 @@
               progress => (transcodeProgress = progress),
             );
           } catch (err) {
-            PNotify.error({
+            error({
               title: 'Transcoding Failed',
               text: err,
             });
@@ -653,7 +655,7 @@
           };
           images = [];
         } catch (err) {
-          PNotify.error({
+          error({
             title: 'Video Loading Failed',
             text: err,
           });
@@ -665,7 +667,7 @@
 
         break;
       } else if (!file.type.startsWith('image/')) {
-        PNotify.notice({
+        notice({
           title: 'Only Images/Video',
           text:
             'Right now, ' +
@@ -674,13 +676,13 @@
             file.type,
         });
       } else if (currentImageCount + imageCount === 9) {
-        PNotify.notice({
+        notice({
           title: 'Max Images Reached',
           text: 'You can put up to 9 images into a message.',
         });
         break;
       } else if (file.type === 'image/gif' && file.size > IMAGE_SIZE_LIMIT) {
-        PNotify.notice({
+        notice({
           title: 'GIF is Too Big',
           text: 'Sorry, but GIFs can only be up to '+(IMAGE_SIZE_LIMIT / (1024 * 1024))+' MB.',
         });

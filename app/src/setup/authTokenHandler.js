@@ -1,4 +1,5 @@
 import { Nymph, PubSub } from 'nymph-client';
+import { User } from 'tilmeld-client';
 import { urlBase64ToBase64 } from '../Services/urlBase64';
 import { storage } from '../Services/StorageService';
 

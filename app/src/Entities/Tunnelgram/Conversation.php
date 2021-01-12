@@ -445,18 +445,18 @@ class Conversation extends \Nymph\Entity {
     return $object;
   }
 
-  public function jsonAcceptData($data) {
+  public function jsonAcceptData($data, $allowConflict = false) {
     $this->jsonAcceptSomething(
-      function () use ($data) {
+      function () use ($data, $allowConflict) {
         parent::jsonAcceptData($data);
       }
     );
   }
 
-  public function jsonAcceptPatch($patch) {
+  public function jsonAcceptPatch($patch, $allowConflict = false) {
     $this->jsonAcceptSomething(
-      function () use ($patch) {
-        parent::jsonAcceptPatch($patch);
+      function () use ($patch, $allowConflict) {
+        parent::jsonAcceptPatch($patch, $allowConflict);
       }
     );
   }
