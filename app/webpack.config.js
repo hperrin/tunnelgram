@@ -61,12 +61,6 @@ const common = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\/src\/Services\/Val\/.+\.js$/,
-      //   use: {
-      //     loader: 'val-loader',
-      //   },
-      // },
       {
         test: /\.(html|svelte)$/,
         use: {

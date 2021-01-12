@@ -73,7 +73,6 @@
     "timeago.js": "^4.0.2",
     "tinygesture": "^1.1.4",
     "ua-parser-js": "^0.7.23",
-    "val-loader": "^3.0.0",
     "webpack": "^5.12.3",
     "webpack-bundle-analyzer": "^4.3.0",
     "webpack-cli": "^4.3.1",
