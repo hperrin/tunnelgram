@@ -5,8 +5,7 @@
         class="mx-2"
         style="line-height: 1;"
         href="/u/{messageUser.username}"
-        title={displayName}
-      >
+        title={displayName}>
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small title={createdDateLong}>
@@ -39,8 +38,7 @@
         class="mx-2"
         style="line-height: 1;"
         href="/u/{messageUser.username}"
-        title={displayName}
-      >
+        title={displayName}>
         <Avatar user={messageUser} size={avatarSize} />
       </a>
       <small>
@@ -49,7 +47,9 @@
     </div>
   {/if}
   <div
-    class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel ? 'flex-row-reverse' : ''}"
+    class="d-flex align-items-center w-100 mb-2 {isOwner && !isChannel
+      ? 'flex-row-reverse'
+      : ''}"
     style="opacity: {pending ? '.6' : '1'};"
   >
     {#if !isOwner && !isChannel}
@@ -57,8 +57,7 @@
         <a
           class="d-inline-flex ml-2 my-0 align-items-center align-self-end"
           href="/u/{messageUser.username}"
-          title={displayName}
-        >
+          title={displayName}>
           <Avatar user={messageUser} size={avatarSize} />
         </a>
       {:else}
@@ -72,14 +71,30 @@
     {/if}
     <div
       class="{stageClass}
-      {flipFirst || flipSecond ? 'raise-to-top perspective-stage' : ''}"
+      {flipFirst || flipSecond
+        ? 'raise-to-top perspective-stage'
+        : ''}"
       style={shouldEmbiggen ? 'max-width: 100%;' : 'max-width: 85%;'}
     >
       <div
-        class="{isChannel ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' + (isOwner ? 'border-primary' : 'border-info') : shouldEmbiggen ? '' : 'card rounded ' + (isOwner ? 'align-self-end border-primary bg-primary-light' : 'border-info bg-info-light') + ' ' + shadowClass}
-        mx-2 my-0 {flipper ? 'flipper' : ''}
+        class="{isChannel
+          ? 'card border-left border-right-0 border-top-0 border-bottom-0 bg-transparent ' +
+            (isOwner ? 'border-primary' : 'border-info')
+          : shouldEmbiggen
+          ? ''
+          : 'card rounded ' +
+            (isOwner
+              ? 'align-self-end border-primary bg-primary-light'
+              : 'border-info bg-info-light') +
+            ' ' +
+            shadowClass}
+        mx-2 my-0 {flipper
+          ? 'flipper'
+          : ''}
         {flipFirst ? 'flip-first' : ''}
-        {flipSecond ? 'flip-second' : ''}"
+        {flipSecond
+          ? 'flip-second'
+          : ''}"
         style={shouldEmbiggen ? 'font-size: 0;' : 'min-width: 10rem;'}
         tabindex="0"
         role="button"
@@ -96,7 +111,9 @@
           >
             {#if message.$decrypted.text != null}
               <span class="h1">
-                {flipped ? message.$decrypted.secretText : message.$decrypted.text}
+                {flipped
+                  ? message.$decrypted.secretText
+                  : message.$decrypted.text}
               </span>
             {:else if message.$decrypted.images.length}
               <div class={shadowClass}>
@@ -136,8 +153,7 @@
         type="button"
         class="btn btn-sm btn-danger mx-2"
         on:click={deleteMessage}
-        title="Delete message"
-      >
+        title="Delete message">
         <i class="fas fa-trash-alt" />
       </button>
       {#if pending && saveFailed}
@@ -145,8 +161,7 @@
           type="button"
           class="btn btn-sm btn-success mx-2"
           on:click={retrySave}
-          title="Retry sending"
-        >
+          title="Retry sending">
           <i class="fas fa-sync" />
         </button>
       {/if}

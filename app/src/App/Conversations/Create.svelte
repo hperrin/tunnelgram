@@ -2,11 +2,12 @@
   <h2 class="btn-group d-flex w-std-page">
     {#each [Conversation.MODE_CHAT, Conversation.MODE_CHANNEL_PRIVATE, Conversation.MODE_CHANNEL_PUBLIC] as mode}
       <button
-        class="btn btn-secondary flex-grow-1 {$conversation.mode === mode ? 'active' : ''}"
+        class="btn btn-secondary flex-grow-1 {$conversation.mode === mode
+          ? 'active'
+          : ''}"
         type="button"
         on:click={() => ($conversation.mode = mode)}
-        aria-pressed={$conversation.mode === mode}
-      >
+        aria-pressed={$conversation.mode === mode}>
         {Conversation.MODE_NAME[mode]}
       </button>
     {/each}
@@ -57,13 +58,15 @@
       </div>
     {/if}
     <h3 class="mt-3">
-      Add {$conversation.mode === Conversation.MODE_CHAT ? 'People' : 'Channel Admins'}
+      Add {$conversation.mode === Conversation.MODE_CHAT
+        ? 'People'
+        : 'Channel Admins'}
     </h3>
     <UserSearchSelector
       bind:this={userSearchSelector}
       className="d-block"
       disabled={startingConversation}
-      on:user-selected={event => addUser(event.detail)}
+      on:user-selected={(event) => addUser(event.detail)}
     />
     {#if addUserError != null}
       <div class="alert alert-danger mt-3 mb-0" role="alert">
@@ -85,8 +88,7 @@
           <button
             class="btn btn-danger btn-sm"
             title="Remove user"
-            on:click={() => removeUser(user)}
-          >
+            on:click={() => removeUser(user)}>
             <i class="fas fa-minus" />
           </button>
         </li>
@@ -101,8 +103,7 @@
               {#each existingConversations as conversation (conversation.guid)}
                 <a
                   class="list-group-item list-group-item-action"
-                  href="/c/{conversation.guid}"
-                >
+                  href="/c/{conversation.guid}">
                   <Preview bind:conversation />
                 </a>
               {/each}
@@ -111,10 +112,11 @@
           {/if}
           <button
             type="submit"
-            class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
+            class="btn {existingConversations.length
+              ? 'btn-light'
+              : 'btn-primary'}
             mt-3 w-100"
-            disabled={startingConversation}
-          >
+            disabled={startingConversation}>
             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else if existingConversationsError}
@@ -124,8 +126,7 @@
           <button
             type="submit"
             class="btn btn-light mt-3 w-100"
-            disabled={startingConversation}
-          >
+            disabled={startingConversation}>
             {usersOtherThanCurrent.length ? 'Start a Chat' : 'Talk to Yourself'}
           </button>
         {:else}
@@ -136,10 +137,7 @@
       <button
         type="submit"
         class="btn btn-primary mt-3 w-100"
-        disabled={startingConversation}
-      >
-        Start the Channel
-      </button>
+        disabled={startingConversation}> Start the Channel </button>
     {/if}
   </form>
 </div>
@@ -165,7 +163,7 @@
   let destroyed = false;
 
   $: usersOtherThanCurrent = ($conversation.acFull || []).filter(
-    u => !$user.$is(u),
+    (u) => !$user.$is(u),
   );
 
   let previousConversationAcFullLength = 0;
@@ -181,7 +179,7 @@
       try {
         const conversations = await $conversation.$findMatchingConversations();
         await Promise.all(
-          conversations.map(conversation =>
+          conversations.map((conversation) =>
             conversation.$readyAll(1).catch(ErrHandler),
           ),
         );
@@ -226,7 +224,7 @@
 
   function removeUser(userToRemove) {
     $conversation.acFull = $conversation.acFull.filter(
-      user => !userToRemove.$is(user),
+      (user) => !userToRemove.$is(user),
     );
     $conversation = $conversation;
   }

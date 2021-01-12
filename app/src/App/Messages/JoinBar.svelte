@@ -12,10 +12,7 @@
         style="width: 60px; min-width: 60px;"
         type="submit"
         disabled={joining}
-        title="Join channel"
-      >
-        Join
-      </button>
+        title="Join channel"> Join </button>
     {:else}
       <div class="alert alert-info m-0" style="flex-grow: 1;">
         You can't post in this channel unless you are added by an admin.

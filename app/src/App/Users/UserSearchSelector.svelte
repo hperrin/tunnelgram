@@ -5,7 +5,7 @@
     id="username"
     bind:this={usernameElem}
     placeholder="Username or name"
-    on:keydown={event => handleUserSearchKeyDown(event)}
+    on:keydown={(event) => handleUserSearchKeyDown(event)}
     bind:value={username}
     {disabled}
     autocomplete="off"
@@ -21,8 +21,7 @@
           class="d-flex justify-content-between align-items-center dropdown-item"
           href="javascript:void(0)"
           on:click={() => dispatch('user-selected', user)}
-          on:keydown={event => handleUserSearchResultKeyDown(event)}
-        >
+          on:keydown={(event) => handleUserSearchResultKeyDown(event)}>
           <span>
             <span class="mr-2">
               <Avatar bind:user />
@@ -48,8 +47,7 @@
             dropdown-item"
             href="javascript:void(0)"
             on:click={() => dispatch('user-selected', user)}
-            on:keydown={event => handleUserSearchResultKeyDown(event)}
-          >
+            on:keydown={(event) => handleUserSearchResultKeyDown(event)}>
             <span>
               <span class="mr-2">
                 <Avatar bind:user />
@@ -87,7 +85,7 @@
   let userSearchTimer = null;
   let container;
   let destroyed = false;
-  let bodyClickHandler = event => {
+  let bodyClickHandler = (event) => {
     let hide = false;
     let target = event.target;
     while (target.parentNode) {
@@ -116,8 +114,8 @@
       // Search for users in the conversations in cache.
       let startsWithUsers = [];
       let containUsers = [];
-      $conversations.map(conversation => {
-        conversation.acFull.map(searchUser => {
+      $conversations.map((conversation) => {
+        conversation.acFull.map((searchUser) => {
           if ($user.$is(searchUser) || searchUser.$isASleepingReference) {
             return;
           }
@@ -182,7 +180,7 @@
             '!guid': [
               ...Object.keys($settings.$decrypted.nicknames),
               $user.guid,
-              ...localUsers.map(user => user.guid),
+              ...localUsers.map((user) => user.guid),
             ],
           },
         ];

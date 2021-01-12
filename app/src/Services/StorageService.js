@@ -38,7 +38,12 @@ export class StorageService {
   async setItem(name, value) {
     if (this.cordovaAPI) {
       return await new Promise((resolve, reject) =>
-        this.storage.setItem(name, value, () => resolve(value), e => reject(e)),
+        this.storage.setItem(
+          name,
+          value,
+          () => resolve(value),
+          (e) => reject(e),
+        ),
       );
     } else {
       return await this.storage.setItem(name, value);
@@ -50,8 +55,8 @@ export class StorageService {
       return await new Promise((resolve, reject) =>
         this.storage.getItem(
           name,
-          value => resolve(value),
-          e => (e.code === 2 ? resolve(undefined) : reject(e)),
+          (value) => resolve(value),
+          (e) => (e.code === 2 ? resolve(undefined) : reject(e)),
         ),
       );
     } else {
@@ -62,7 +67,11 @@ export class StorageService {
   async removeItem(name) {
     if (this.cordovaAPI) {
       return await new Promise((resolve, reject) =>
-        this.storage.remove(name, () => resolve(), () => resolve()),
+        this.storage.remove(
+          name,
+          () => resolve(),
+          () => resolve(),
+        ),
       );
     } else {
       return await this.storage.removeItem(name);
@@ -72,7 +81,10 @@ export class StorageService {
   async clear() {
     if (this.cordovaAPI) {
       return await new Promise((resolve, reject) =>
-        this.storage.clear(() => resolve(), e => reject(e)),
+        this.storage.clear(
+          () => resolve(),
+          (e) => reject(e),
+        ),
       );
     } else {
       return await this.storage.clear();

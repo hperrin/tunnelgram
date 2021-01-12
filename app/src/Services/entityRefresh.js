@@ -19,7 +19,7 @@ const addEntitiesToObject = (item, entitiesObject) => {
     entitiesObject[item.guid] = item;
   } else if (Array.isArray(item)) {
     // Recurse into lower arrays.
-    item.forEach(item => addEntitiesToObject(item, entitiesObject));
+    item.forEach((item) => addEntitiesToObject(item, entitiesObject));
   } else if (item instanceof Object) {
     for (let k in item) {
       if (item.hasOwnProperty(k)) {
@@ -64,7 +64,7 @@ const retoreEntitiesFromObject = (item, entitiesObject, data) => {
     }
   } else if (Array.isArray(item)) {
     // Recurse into lower arrays.
-    return item.map(item =>
+    return item.map((item) =>
       retoreEntitiesFromObject(item, entitiesObject, data),
     );
   } else if (item instanceof Object) {

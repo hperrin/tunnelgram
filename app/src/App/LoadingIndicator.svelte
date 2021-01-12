@@ -22,8 +22,7 @@
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 100 100"
     preserveAspectRatio="xMidYMid"
-    style="position: absolute; background: none;"
-  >
+    style="position: absolute; background: none;">
     <circle
       cx="50"
       cy="50"
@@ -32,9 +31,10 @@
       r="48"
       stroke-width="4"
       stroke="#337ab7"
-      stroke-dasharray={progress != null ? progress * 301.593 + ' ' + (301.593 - progress * 301.593) : '75.398 75.398'}
-      transform="rotate(99 50 50)"
-    >
+      stroke-dasharray={progress != null
+        ? progress * 301.593 + ' ' + (301.593 - progress * 301.593)
+        : '75.398 75.398'}
+      transform="rotate(99 50 50)">
       <animateTransform
         attributeName="transform"
         type="rotate"

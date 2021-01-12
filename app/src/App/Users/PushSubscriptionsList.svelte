@@ -28,8 +28,7 @@
               type="button"
               class="btn btn-sm btn-danger rounded-circle"
               on:click={() => remove(subscription)}
-              disabled={subscription.$deleting}
-            >
+              disabled={subscription.$deleting}>
               <i
                 class="fas fa-times text-white d-inline-block"
                 style="width: 1em; height: 1em;"
@@ -49,15 +48,25 @@
             </span>
           </p>
           <small
-            title={new SimpleDateFormatter(subscription.cdate).format('wymdhms', 'short')}
-          >
-            Created: {new SimpleDateFormatter(subscription.cdate).format('ago', 'long')}
+            title={new SimpleDateFormatter(subscription.cdate).format(
+              'wymdhms',
+              'short',
+            )}>
+            Created: {new SimpleDateFormatter(subscription.cdate).format(
+              'ago',
+              'long',
+            )}
           </small>
           /
           <small
-            title={new SimpleDateFormatter(subscription.mdate).format('wymdhms', 'short')}
-          >
-            Last used: {new SimpleDateFormatter(subscription.mdate).format('ago', 'long')}
+            title={new SimpleDateFormatter(subscription.mdate).format(
+              'wymdhms',
+              'short',
+            )}>
+            Last used: {new SimpleDateFormatter(subscription.mdate).format(
+              'ago',
+              'long',
+            )}
           </small>
         </div>
       {/each}
@@ -91,9 +100,9 @@
     },
   )
     .then(
-      subs =>
+      (subs) =>
         (subscriptions =
-          subs.forEach(s => (s.$agent = UAParser(s.uaString))) || subs),
+          subs.forEach((s) => (s.$agent = UAParser(s.uaString))) || subs),
     )
     .catch(ErrHandler);
 
@@ -108,7 +117,7 @@
           subscriptions = subscriptions;
         }
       },
-      err => {
+      (err) => {
         subscription.$deleting = false;
         subscriptions = subscriptions;
         ErrHandler(err);

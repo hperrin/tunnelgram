@@ -4,7 +4,7 @@ import { Nymph } from 'nymph-client';
 class EntityCacheService {
   constructor() {
     this.resolve;
-    this.ready = new Promise(resolve => (this.resolve = resolve));
+    this.ready = new Promise((resolve) => (this.resolve = resolve));
     this.loadCache().then(() => {
       this.resolve();
       window.setTimeout(this.cleanup(), 5000);
@@ -88,7 +88,7 @@ class EntityCacheService {
 
   setPendingData(guid) {
     let resolve;
-    const promise = new Promise(res => (resolve = res));
+    const promise = new Promise((res) => (resolve = res));
     promise.resolve = resolve;
     this.pendingCache[guid] = promise;
   }
@@ -183,7 +183,7 @@ Nymph.getEntities = (...args) => {
   const _subscribe = promise.subscribe;
 
   // Have to use a promise, because of PubSub.
-  promise.then(result => {
+  promise.then((result) => {
     if (result && result.length) {
       for (let i = 0; i < result.length; i++) {
         const entity = result[i];
@@ -194,7 +194,7 @@ Nymph.getEntities = (...args) => {
   });
 
   promise.subscribe = (callback, error) => {
-    return _subscribe(update => {
+    return _subscribe((update) => {
       if (Array.isArray(update)) {
         for (let i = 0; i < update.length; i++) {
           const entity = update[i];

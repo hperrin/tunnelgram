@@ -31,11 +31,13 @@ class EncryptionService extends AESEncryptionService {
 
     // Async encryption/decryption for PKCS1 is provided through a web worker.
     this.rsaEncryptionWorker = {
-      worker: new Worker((window.inCordova ? '' : '/')+'dist/Workers/RSAEncryption.js'),
+      worker: new Worker(
+        (window.inCordova ? '' : '/') + 'dist/Workers/RSAEncryption.js',
+      ),
       counter: 0,
       callbacks: {},
     };
-    this.rsaEncryptionWorker.worker.onmessage = e => {
+    this.rsaEncryptionWorker.worker.onmessage = (e) => {
       const { counter, result } = e.data;
       this.rsaEncryptionWorker.callbacks[counter](result);
       delete this.rsaEncryptionWorker.callbacks[counter];
@@ -130,7 +132,10 @@ class EncryptionService extends AESEncryptionService {
               this.key + this.iv,
             );
             publicEnt.textOaep = publicKeyPem;
-            const keys = await PrivateKey.upgradeEncryption(privateEnt.textOaep, publicEnt.textOaep);
+            const keys = await PrivateKey.upgradeEncryption(
+              privateEnt.textOaep,
+              publicEnt.textOaep,
+            );
             if (keys) {
               privateEnt = keys.private;
               publicEnt = keys.public;
@@ -196,7 +201,7 @@ class EncryptionService extends AESEncryptionService {
       this.unsetUserKeys();
     });
 
-    const computeNewPassword = async password => {
+    const computeNewPassword = async (password) => {
       // Generate a hash of the password.
       const passwordBytes = this.encodeUtf8(password);
       const hashBytes = new Uint8Array(
@@ -213,7 +218,7 @@ class EncryptionService extends AESEncryptionService {
 
     // Override register to set up new user encryption.
     const _register = User.prototype.$register;
-    User.prototype.$register = async function(creds) {
+    User.prototype.$register = async function (creds) {
       const { password } = creds;
       creds.password = await computeNewPassword(password);
 
@@ -233,7 +238,7 @@ class EncryptionService extends AESEncryptionService {
 
     // Override loginUser to retrieve the key and change the password.
     const _loginUser = User.loginUser;
-    User.loginUser = async function(creds) {
+    User.loginUser = async function (creds) {
       const { password } = creds;
       creds.password = await computeNewPassword(password);
 
@@ -242,7 +247,7 @@ class EncryptionService extends AESEncryptionService {
 
     // Override changePassword to re-encrypt the key and change the password.
     const _changePassword = User.prototype.$changePassword;
-    User.prototype.$changePassword = async function(creds) {
+    User.prototype.$changePassword = async function (creds) {
       const { password, oldPassword } = creds;
       // Compute the old password first.
       creds.oldPassword = await computeNewPassword(oldPassword);
@@ -541,9 +546,9 @@ class EncryptionService extends AESEncryptionService {
     const counter = worker.counter++;
 
     let resolve;
-    const promise = new Promise(r => (resolve = r));
+    const promise = new Promise((r) => (resolve = r));
 
-    worker.callbacks[counter] = result => {
+    worker.callbacks[counter] = (result) => {
       resolve(result);
     };
 

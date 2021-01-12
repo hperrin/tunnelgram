@@ -20,8 +20,8 @@
       Wanna install {$brandWeb} to your device for a native app experience?
       <a
         href="javascript:void(0)"
-        on:click={() => (hideInstallPrompt = true) && $beforeInstallPromptEvent.prompt()}
-      >
+        on:click={() =>
+          (hideInstallPrompt = true) && $beforeInstallPromptEvent.prompt()}>
         Yeah
       </a>
     </div>
@@ -30,8 +30,7 @@
       class="ml-2"
       href="javascript:void(0)"
       on:click={() => (hideInstallPrompt = true)}
-      title="Close"
-    >
+      title="Close">
       <i class="fas fa-times" />
     </a>
   </div>
@@ -44,8 +43,8 @@
       Do you want notifications for new messages?
       <a
         href="javascript:void(0)"
-        on:click={() => (hideNotificationPrompt = true) && $requestNotificationPermission()}
-      >
+        on:click={() =>
+          (hideNotificationPrompt = true) && $requestNotificationPermission()}>
         Yeah
       </a>
     </div>
@@ -54,8 +53,7 @@
       class="ml-2"
       href="javascript:void(0)"
       on:click={() => (hideNotificationPrompt = true)}
-      title="Close"
-    >
+      title="Close">
       <i class="fas fa-times" />
     </a>
   </div>
@@ -68,8 +66,8 @@
       Do you want to stay logged in when your device runs low on space?
       <a
         href="javascript:void(0)"
-        on:click={() => (hidePersistentStoragePrompt = true) && $requestPersistentStorage()}
-      >
+        on:click={() =>
+          (hidePersistentStoragePrompt = true) && $requestPersistentStorage()}>
         Yeah
       </a>
     </div>
@@ -78,8 +76,7 @@
       class="ml-2"
       href="javascript:void(0)"
       on:click={() => (hidePersistentStoragePrompt = true)}
-      title="Close"
-    >
+      title="Close">
       <i class="fas fa-times" />
     </a>
   </div>
@@ -103,8 +100,7 @@
               role="button"
               data-toggle="dropdown"
               aria-haspopup="true"
-              aria-expanded="false"
-            >
+              aria-expanded="false">
               <Avatar bind:user={$user} size={32} />
             </a>
             <div
@@ -122,10 +118,7 @@
               <a
                 class="dropdown-item"
                 href="javascript:void(0)"
-                on:click={logout}
-              >
-                Log Out
-              </a>
+                on:click={logout}> Log Out </a>
               {#if $userIsTilmeldAdmin}
                 <div class="dropdown-divider" />
                 <h6 class="dropdown-header">Admin</h6>
@@ -140,7 +133,7 @@
     </nav>
     <div class="conversation-list-container">
       <ConversationList
-        on:tunnelgram-notification={event => notification(event.detail)}
+        on:tunnelgram-notification={(event) => notification(event.detail)}
       />
     </div>
   </div>
@@ -157,8 +150,7 @@
             <a
               class="nav-link border-secondary rounded px-2"
               href="/"
-              title="Back to list"
-            >
+              title="Back to list">
               <i class="fas fa-arrow-left" />
             </a>
           </li>
@@ -274,7 +266,7 @@
       gesture.animationFrame = null;
     });
   };
-  const onPanEnd = gesture => {
+  const onPanEnd = (gesture) => {
     window.cancelAnimationFrame(gesture.animationFrame);
     gesture.animationFrame = null;
     mainUi.style.transition = null;
@@ -326,7 +318,7 @@
 
   onMount(() => {
     if (window.inCordova) {
-      window.plugins.OneSignal.userProvidedPrivacyConsent(consent => {
+      window.plugins.OneSignal.userProvidedPrivacyConsent((consent) => {
         hideNotificationPrompt = consent;
       });
     }
@@ -403,7 +395,7 @@
               conv.lastMessage.$decrypted.text.length > 40
                 ? conv.lastMessage.$decrypted.text.substr(0, 40) + '...'
                 : conv.lastMessage.$decrypted.text,
-            modules: new Map([...defaultModules, [PNotifyDesktop, {}]])
+            modules: new Map([...defaultModules, [PNotifyDesktop, {}]]),
           },
           options,
         ),
@@ -421,20 +413,17 @@
                 ? conv.$getName($settings)
                 : 'a ' + Conversation.MODE_SHORT_NAME[conv.mode]) +
               '.',
-            modules: new Map([...defaultModules, [PNotifyDesktop, {}]])
+            modules: new Map([...defaultModules, [PNotifyDesktop, {}]]),
           },
           options,
         ),
       );
     }
 
-    notice.on('click', e => {
+    notice.on('click', (e) => {
       let target = e.target;
       while (target.parentNode) {
-        if (
-          target.classList &&
-          target.classList.contains('pnotify-closer')
-        ) {
+        if (target.classList && target.classList.contains('pnotify-closer')) {
           return;
         }
         target = target.parentNode;

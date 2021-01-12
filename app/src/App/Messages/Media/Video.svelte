@@ -25,8 +25,7 @@
             title={resource.name}
             controls
             autoplay
-            playsinline
-          >
+            playsinline>
             <source src={source} type={resource.dataType} />
           </video>
         {:else}
@@ -40,7 +39,8 @@
             <i class="fas fa-play-circle position-absolute h1 text-white" />
             <div
               class="imageThumbnail"
-              style="background-image: url({resource.thumbnailSrc || ''});
+              style="background-image: url({resource.thumbnailSrc ||
+                ''});
               width: {resource.thumbnailWidth}px; height: {resource.thumbnailHeight}px;"
               title={resource.name}
             />
@@ -74,7 +74,7 @@
       const source = URL.createObjectURL(blob);
       resource.thumbnailSrc = source;
     } else {
-      resource.thumbnailSrcPromise = resource.thumbnail.then(data => {
+      resource.thumbnailSrcPromise = resource.thumbnail.then((data) => {
         const blob = new Blob([data], { type: resource.thumbnailType });
         const source = URL.createObjectURL(blob);
         resource.thumbnailSrc = source;
@@ -88,7 +88,7 @@
       'promise' in resource.data
         ? resource.data.promise()
         : Promise.resolve(resource.data);
-    resourcePromise.then(data => {
+    resourcePromise.then((data) => {
       const blob = new Blob([data], { type: resource.dataType });
       source = URL.createObjectURL(blob);
       loading = false;

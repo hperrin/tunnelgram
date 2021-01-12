@@ -14,11 +14,13 @@ export class VideoService {
       this.reject = reject;
     });
     this._readyResolve = null;
-    this._readyPromise = new Promise(resolve => (this._readyResolve = resolve));
+    this._readyPromise = new Promise(
+      (resolve) => (this._readyResolve = resolve),
+    );
     this.worker = new Worker(
       '/node_modules/ffmpeg.js-hperrin/ffmpeg-worker-mp4.js',
     );
-    this.worker.onmessage = e => {
+    this.worker.onmessage = (e) => {
       const msg = e.data;
       switch (msg.type) {
         case 'ready':
@@ -100,7 +102,7 @@ export class VideoService {
     await this._readyPromise;
     // The worker is ready.
     let information = '';
-    this.stderrCallback = line => {
+    this.stderrCallback = (line) => {
       if (information !== '' || line.startsWith('Input #0,')) {
         information += line + '\n';
       }
@@ -266,7 +268,7 @@ export class VideoService {
       await this._readyPromise;
       // The worker is ready.
       if (progressCallback) {
-        this.stderrCallback = line => {
+        this.stderrCallback = (line) => {
           const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
           if (match) {
             let seconds = this.convertFfmpegTimeToSeconds(match[1]);
@@ -305,7 +307,7 @@ export class VideoService {
     await this._readyPromise;
     // The worker is ready.
     if (progressCallback) {
-      this.stderrCallback = line => {
+      this.stderrCallback = (line) => {
         const match = line.match(/frame=\s*\d+\s+.*time=([\d:.]+)/);
         if (match) {
           let seconds = this.convertFfmpegTimeToSeconds(match[1]);
@@ -345,14 +347,11 @@ export class VideoService {
     let data;
     data = await this.promise;
 
-    return data.MEMFS.find(file => file.name === 'output.mp4').data;
+    return data.MEMFS.find((file) => file.name === 'output.mp4').data;
   }
 
   convertFfmpegTimeToSeconds(ffmpegTime) {
-    const times = ffmpegTime
-      .split(':')
-      .reverse()
-      .map(parseFloat);
+    const times = ffmpegTime.split(':').reverse().map(parseFloat);
     let seconds = 0;
     for (let i = 0; i < times.length; i++) {
       seconds += times[i] * 60 ** i;

@@ -1,7 +1,8 @@
 <div
   bind:this={thumbnailContainer}
   class="d-flex flex-wrap justify-content-center bg-secondary text-white"
-  style="max-width: {thumbnailDimension * thumbnailContainerMaxWidthMultiplier}px;
+  style="max-width: {thumbnailDimension *
+    thumbnailContainerMaxWidthMultiplier}px;
   font-size: 1em;"
 >
   {#each resources as resource, index (resource.name)}
@@ -16,13 +17,20 @@
         <a
           href="javascript:void(0)"
           on:click={() => showBigImage(index)}
-          style="font-size: 0;"
-        >
+          style="font-size: 0;">
           <div
             class="imageThumbnail"
-            style="background-image: url({resource.thumbnailSrc || ''});
-            background-size: {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).width}px
-            {getThumbnailDimensions(resource.thumbnailWidth, resource.thumbnailHeight).height}px;
+            style="background-image: url({resource.thumbnailSrc ||
+              ''});
+            background-size: {getThumbnailDimensions(
+              resource.thumbnailWidth,
+              resource.thumbnailHeight,
+            ).width}px
+            {getThumbnailDimensions(
+              resource.thumbnailWidth,
+              resource.thumbnailHeight,
+            )
+              .height}px;
             width: {thumbnailDimension}px; height: {thumbnailDimension}px;"
             title={resource.name}
           />
@@ -43,7 +51,7 @@
   let thumbnailContainer;
 
   $: thumbnailDimension = Math.min(
-    ...resources.map(resource =>
+    ...resources.map((resource) =>
       Math.min(
         parseFloat(resource.thumbnailWidth),
         parseFloat(resource.thumbnailHeight),
@@ -51,7 +59,7 @@
     ),
   );
   $: thumbnailContainerMaxWidthMultiplier = resources.length === 4 ? 2 : 3;
-  $: thumbnailPromises = resources.map(resource =>
+  $: thumbnailPromises = resources.map((resource) =>
     resource.thumbnail instanceof Uint8Array
       ? Promise.resolve(resource.thumbnail)
       : resource.thumbnail,
@@ -68,7 +76,7 @@
           resources[i].thumbnailSrc = _source;
         } else {
           resources[i].thumbnailSrcPromise = resources[i].thumbnail.then(
-            data => {
+            (data) => {
               const blob = new Blob([data], {
                 type: resources[i].thumbnailType,
               });
@@ -90,7 +98,7 @@
   }
 
   function showBigImage(index) {
-    let items = resources.map(resource => {
+    let items = resources.map((resource) => {
       return {
         w: resource.dataWidth,
         h: resource.dataHeight,
@@ -103,7 +111,7 @@
     let options = {
       index,
       showHideOpacity: true,
-      getThumbBoundsFn: index => {
+      getThumbBoundsFn: (index) => {
         const rect = thumbnailContainer.children[index].getBoundingClientRect();
         return { x: rect.x, y: rect.y, w: rect.width };
       },
@@ -115,7 +123,7 @@
       props: { items, options },
     });
 
-    pswp.listen('gettingData', function(index, item) {
+    pswp.listen('gettingData', function (index, item) {
       if (item._loading) {
         return;
       }
@@ -124,7 +132,7 @@
         'promise' in item._resource.data
           ? item._resource.data.promise()
           : Promise.resolve(item._resource.data);
-      resourcePromise.then(data => {
+      resourcePromise.then((data) => {
         const blob = new Blob([data], { type: item._resource.dataType });
         const _source = URL.createObjectURL(blob);
         item.src = _source;
@@ -135,7 +143,7 @@
       });
     });
 
-    pswp.listen('destroy', function() {
+    pswp.listen('destroy', function () {
       pswp.$destroy();
     });
 

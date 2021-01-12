@@ -1,13 +1,13 @@
 <div
   class="d-flex flex-column h-100 position-relative"
-  on:dragover={event => handleDrag(event, true)}
+  on:dragover={(event) => handleDrag(event, true)}
 >
   {#if showDropbox}
     <div
       class="position-absolute w-100 h-100"
       style="z-index: 200;"
-      on:dragleave={event => handleDrag(event, false)}
-      on:drop={event => handleDrop(event)}
+      on:dragleave={(event) => handleDrag(event, false)}
+      on:drop={(event) => handleDrop(event)}
     />
     <div
       class="d-flex justify-content-center align-items-center position-absolute

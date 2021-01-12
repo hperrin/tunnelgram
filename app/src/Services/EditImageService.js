@@ -9,10 +9,12 @@ export class EditImageService {
       false && !!this.canvas.transferControlToOffscreen;
 
     if (this.offscreenCanvasSupport) {
-      this.resizeImageWorker = new Worker((window.inCordova ? '' : '/')+'dist/Workers/ResizeImage.js');
+      this.resizeImageWorker = new Worker(
+        (window.inCordova ? '' : '/') + 'dist/Workers/ResizeImage.js',
+      );
       this.resizeImageWorkerCounter = 0;
       this.resizeImageWorkerCallbacks = {};
-      this.resizeImageWorker.onmessage = e => {
+      this.resizeImageWorker.onmessage = (e) => {
         const { counter, result } = e.data;
         this.resizeImageWorkerCallbacks[counter](result);
         delete this.resizeImageWorkerCallbacks[counter];
@@ -57,9 +59,9 @@ export class EditImageService {
       const counter = this.resizeImageWorkerCounter;
 
       let resolve;
-      const promise = new Promise(r => (resolve = r));
+      const promise = new Promise((r) => (resolve = r));
 
-      this.resizeImageWorkerCallbacks[counter] = result => {
+      this.resizeImageWorkerCallbacks[counter] = (result) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = result.width;

@@ -53,7 +53,7 @@ if (window.inCordova) {
       options.headers['X-TILMELDAUTH'] = authToken;
     }
   });
-  Nymph.on('response', response => {
+  Nymph.on('response', (response) => {
     if (response.headers.has('X-TILMELDAUTH')) {
       saveToken(response.headers.get('X-TILMELDAUTH'));
     }

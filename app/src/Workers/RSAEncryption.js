@@ -3,7 +3,7 @@ import { RSAEncryptionService } from '../Services/RSAEncryptionService';
 
 const crypt = new RSAEncryptionService();
 
-onmessage = e => {
+onmessage = (e) => {
   const { counter, action, args } = e.data;
   if (!(action in crypt)) {
     return;

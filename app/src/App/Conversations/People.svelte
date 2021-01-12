@@ -13,7 +13,7 @@
         bind:this={userSearchSelector}
         className="d-block"
         disabled={addingUser}
-        on:user-selected={event => addUser(event.detail)}
+        on:user-selected={(event) => addUser(event.detail)}
       />
       {#if addUserError != null}
         <div class="alert alert-danger mt-3 mb-0" role="alert">
@@ -31,8 +31,7 @@
         <a
           class="list-group-item d-flex justify-content-between
           align-items-center"
-          href="/u/{curUser.username}"
-        >
+          href="/u/{curUser.username}">
           <span class="d-flex align-items-center">
             <span class="mr-2" style="line-height: 0;">
               <Avatar bind:user={curUser} />
@@ -52,8 +51,7 @@
         {#each nonAdminChannelUsers as curUser (curUser.guid)}
           <span
             class="list-group-item d-flex justify-content-between
-            align-items-center"
-          >
+            align-items-center">
             <a class="d-flex align-items-center" href="/u/{curUser.username}">
               <span class="mr-2" style="line-height: 0;">
                 <Avatar bind:user={curUser} />
@@ -68,16 +66,15 @@
                 <button
                   class="btn btn-primary btn-sm"
                   disabled={addingUser || removingChannelUser}
-                  on:click|preventDefault={() => confirm('Are you sure you want to promote this member to admin?') && addAcFullUser(curUser)}
-                >
-                  Make Admin
-                </button>
+                  on:click|preventDefault={() =>
+                    confirm(
+                      'Are you sure you want to promote this member to admin?',
+                    ) && addAcFullUser(curUser)}> Make Admin </button>
                 <button
                   class="btn btn-danger btn-sm"
                   title="Remove user"
                   disabled={removingChannelUser}
-                  on:click|preventDefault={() => removeChannelUser(curUser)}
-                >
+                  on:click|preventDefault={() => removeChannelUser(curUser)}>
                   <i class="fas fa-minus" />
                 </button>
               </span>
@@ -96,10 +93,7 @@
           type="button"
           class="btn btn-light mt-3 w-100"
           disabled={channelUsersLoading}
-          on:click={loadMoreChannelUsers}
-        >
-          Show More
-        </button>
+          on:click={loadMoreChannelUsers}> Show More </button>
       {/if}
     {/if}
   </div>
@@ -128,7 +122,7 @@
     $conversation.mode === Conversation.MODE_CHAT ||
     $user.$inArray($conversation.acFull);
   $: nonAdminChannelUsers = channelUsers.filter(
-    user => !user.$inArray($conversation.acFull),
+    (user) => !user.$inArray($conversation.acFull),
   );
 
   $: if (
@@ -176,7 +170,7 @@
     try {
       removingChannelUser = true;
       await $conversation.$removeChannelUser(acUser);
-      channelUsers = channelUsers.filter(chUser => !acUser.$is(chUser));
+      channelUsers = channelUsers.filter((chUser) => !acUser.$is(chUser));
     } catch (errObj) {
       ErrHandler(errObj);
     }

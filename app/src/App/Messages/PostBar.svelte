@@ -24,8 +24,7 @@
               thumbnailButton"
               style="left: 4px; top: 4px;"
               on:click={() => rotateImage(i)}
-              title="Rotate"
-            >
+              title="Rotate">
               <i
                 class="fas fa-undo fa-flip-horizontal text-white d-inline-block"
                 style="width: 1em; height: 1em;"
@@ -38,8 +37,7 @@
             thumbnailButton"
             style="right: 4px; top: 4px;"
             on:click={() => (images = removeIndex(images, i))}
-            title="Remove"
-          >
+            title="Remove">
             <i
               class="fas fa-times text-white d-inline-block"
               style="width: 1em; height: 1em;"
@@ -47,14 +45,12 @@
           </button>
           <span
             class="badge badge-light thumbnailOverlay"
-            style="left: 4px; bottom: 4px; pointer-events: none;"
-          >
+            style="left: 4px; bottom: 4px; pointer-events: none;">
             {image.dataWidth}x{image.dataHeight}
           </span>
           <span
             class="badge badge-light thumbnailOverlay"
-            style="right: 4px; bottom: 4px; pointer-events: none;"
-          >
+            style="right: 4px; bottom: 4px; pointer-events: none;">
             {round(image.data.length / 1024 / 1024, 1)}MB
           </span>
         </div>
@@ -70,16 +66,14 @@
             width={video.thumbnailWidth}
             height={video.thumbnailHeight}
             title={video.name}
-            controls
-          >
+            controls>
             <source src={video.objectURL} type={video.dataType} />
           </video>
           <button
             type="button"
             class="btn btn-sm btn-danger rounded-circle position-absolute"
             style="opacity: .8; right: 4px; top: 4px;"
-            on:click={() => (video = null)}
-          >
+            on:click={() => (video = null)}>
             <i
               class="fas fa-times text-white d-inline-block"
               style="width: 1em; height: 1em;"
@@ -87,14 +81,14 @@
           </button>
           <span
             class="badge badge-light position-absolute"
-            style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;"
-          >
-            {video.dataWidth}x{video.dataHeight} - {Math.floor(video.dataDuration / 60)}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
+            style="opacity: .8; left: 4px; bottom: 4px; pointer-events: none;">
+            {video.dataWidth}x{video.dataHeight} - {Math.floor(
+              video.dataDuration / 60,
+            )}:{padSingleDigits(Math.floor(video.dataDuration % 60))}
           </span>
           <span
             class="badge badge-light position-absolute"
-            style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;"
-          >
+            style="opacity: .8; right: 4px; bottom: 4px; pointer-events: none;">
             {round(video.data.length / 1024 / 1024, 1)}MB
           </span>
         </div>
@@ -117,7 +111,14 @@
           <LoadingIndicator
             width="150"
             height="150"
-            text={transcoder == null ? 'Loading...' : transcodeProgress == null ? 'Preparing...' : 'Transcoding...' + '\n' + Math.floor(transcodeProgress * 100) + '%'}
+            text={transcoder == null
+              ? 'Loading...'
+              : transcodeProgress == null
+              ? 'Preparing...'
+              : 'Transcoding...' +
+                '\n' +
+                Math.floor(transcodeProgress * 100) +
+                '%'}
             progress={transcodeProgress}
           />
         </div>
@@ -126,10 +127,7 @@
             type="button"
             class="btn btn-sm btn-danger position-absolute"
             style="opacity: .8; right: 4px; top: 4px;"
-            on:click={cancelVideoTranscode}
-          >
-            Cancel
-          </button>
+            on:click={cancelVideoTranscode}> Cancel </button>
         {/if}
       {/if}
     </div>
@@ -139,7 +137,7 @@
       class="d-none"
       type="file"
       bind:this={fileInput}
-      on:change={event => handleFiles(event.target.files)}
+      on:change={(event) => handleFiles(event.target.files)}
       accept="image/*, video/*"
       multiple
     />
@@ -156,8 +154,7 @@
           title="Add picture/video"
           data-toggle="dropdown"
           aria-haspopup="true"
-          aria-expanded="false"
-        >
+          aria-expanded="false">
           <i class="fas fa-camera" />
            / 
           <i class="fas fa-video" />
@@ -166,25 +163,16 @@
           <button
             class="dropdown-item p-3"
             type="button"
-            on:click={cordovaCapturePhoto}
-          >
-            Take a photo
-          </button>
+            on:click={cordovaCapturePhoto}> Take a photo </button>
           <button
             class="dropdown-item p-3"
             type="button"
-            on:click={cordovaCaptureVideo}
-          >
-            Take a video
-          </button>
+            on:click={cordovaCaptureVideo}> Take a video </button>
           <div class="dropdown-divider" />
           <button
             class="dropdown-item p-3"
             type="button"
-            on:click={() => fileInput.click()}
-          >
-            Browse library
-          </button>
+            on:click={() => fileInput.click()}> Browse library </button>
         </div>
       </div>
     {:else}
@@ -194,8 +182,7 @@
         style="width: 60px; min-width: 60px; font-size: .8em;"
         type="button"
         on:click={() => fileInput.click()}
-        title="Add picture/video"
-      >
+        title="Add picture/video">
         <i class="fas fa-camera" />
          / 
         <i class="fas fa-video" />
@@ -205,7 +192,7 @@
       class="text-editor form-control border-0 text-dark"
       bind:value={text}
       placeholder="New message"
-      on:keydown={event => handleKeyDown(event)}
+      on:keydown={(event) => handleKeyDown(event)}
       on:keyup={handleKeyUp}
       bind:this={textEditor}
     />
@@ -214,8 +201,7 @@
       style="width: 60px; min-width: 60px;"
       type="submit"
       disabled={messageIsEmpty || mediaLoading}
-      title="Send message"
-    >
+      title="Send message">
       <i class="fas fa-comment" />
     </button>
   </div>
@@ -237,7 +223,7 @@
   const dispatch = createEventDispatcher();
   const mobile = (() => {
     let check = false;
-    (function(a) {
+    (function (a) {
       if (
         /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(
           a,
@@ -256,7 +242,7 @@
   };
   const round = (value, precision) =>
     Number.parseFloat(value.toFixed(precision));
-  const padSingleDigits = digits => (digits < 10 ? '0' + digits : digits);
+  const padSingleDigits = (digits) => (digits < 10 ? '0' + digits : digits);
 
   export let conversation;
   export let text = '';
@@ -281,7 +267,7 @@
   }
 
   let emoji = null;
-  import(/* webpackChunkName: "node-emoji" */ 'node-emoji').then(module => {
+  import(/* webpackChunkName: "node-emoji" */ 'node-emoji').then((module) => {
     emoji = module.default;
   });
 
@@ -361,12 +347,12 @@
     // Read the image and thumbnail into Images to rotate them.
     const imageData = new Image();
     let resolveData;
-    const pData = new Promise(r => (resolveData = r));
+    const pData = new Promise((r) => (resolveData = r));
     imageData.onload = () => resolveData();
     imageData.src = images[index].dataImg;
     const imageThumbnail = new Image();
     let resolveThumbnail;
-    const pThumbnail = new Promise(r => (resolveThumbnail = r));
+    const pThumbnail = new Promise((r) => (resolveThumbnail = r));
     imageThumbnail.onload = () => resolveThumbnail();
     imageThumbnail.src = images[index].thumbnailImg;
 
@@ -405,9 +391,9 @@
 
   function cordovaCapturePhoto() {
     navigator.camera.getPicture(
-      imageURI => {
-        window.resolveLocalFileSystemURL(imageURI, entry => {
-          entry.file(async file => {
+      (imageURI) => {
+        window.resolveLocalFileSystemURL(imageURI, (entry) => {
+          entry.file(async (file) => {
             file.localURL = imageURI;
             const lfile = imageURI.toLowerCase();
             if (lfile.endsWith('.png')) {
@@ -424,7 +410,7 @@
           });
         });
       },
-      err => {
+      (err) => {
         // TODO: Error handling.
       },
       {
@@ -436,16 +422,16 @@
 
   function cordovaCaptureVideo() {
     navigator.device.capture.captureVideo(
-      mediaFiles => {
-        window.resolveLocalFileSystemURL(mediaFiles[0].localURL, entry => {
-          entry.file(file => {
+      (mediaFiles) => {
+        window.resolveLocalFileSystemURL(mediaFiles[0].localURL, (entry) => {
+          entry.file((file) => {
             file.type = mediaFiles[0].type;
             file.localURL = entry.toURL();
             handleFiles([file]);
           });
         });
       },
-      err => {
+      (err) => {
         const errObj = {
           textStatus: '',
         };
@@ -515,7 +501,7 @@
         const videoElem = document.createElement('video');
         const tempObjectURL = file.localURL || URL.createObjectURL(file);
         let resolve;
-        let p = new Promise(r => (resolve = r));
+        let p = new Promise((r) => (resolve = r));
         videoElem.onloadeddata = () => resolve();
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
           videoElem.autoplay = true;
@@ -544,11 +530,11 @@
 
         // Now read the video fully into memory.
         const reader = new FileReader();
-        p = new Promise(r => (resolve = r));
+        p = new Promise((r) => (resolve = r));
         if (window.inCordova) {
           reader.onloadend = () => resolve(reader.result);
         } else {
-          reader.onload = e => resolve(e.target.result);
+          reader.onload = (e) => resolve(e.target.result);
         }
         reader.readAsArrayBuffer(file);
 
@@ -568,7 +554,9 @@
                 ? 'Your video is formatted as ' +
                   file.type +
                   '. It needs to be transcoded to video/mp4 to work on all devices. This may take a while.'
-                : "Your video is over "+(VIDEO_SIZE_LIMIT / (1024 * 1024))+"MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it's too big.",
+                : 'Your video is over ' +
+                  VIDEO_SIZE_LIMIT / (1024 * 1024) +
+                  "MB (MiB). It needs to be transcoded to a smaller size. This will take over an hour, and it may be clipped if it's too big.",
           });
           if (file.size >= VIDEO_SIZE_LIMIT && !$userIsSponsor) {
             info({
@@ -577,14 +565,20 @@
               delay: 30000,
               modules: new Map([
                 ...defaultModules,
-                [PNotifyConfirm, {
-                  confirm: true,
-                  buttons: [{
-                    text: 'Become a Sponsor',
-                    primary: true,
-                    click: () => window.open('https://www.patreon.com/tunnelgram'),
-                  }]
-                }],
+                [
+                  PNotifyConfirm,
+                  {
+                    confirm: true,
+                    buttons: [
+                      {
+                        text: 'Become a Sponsor',
+                        primary: true,
+                        click: () =>
+                          window.open('https://www.patreon.com/tunnelgram'),
+                      },
+                    ],
+                  },
+                ],
               ]),
             });
           }
@@ -593,7 +587,7 @@
             data = await transcoder.transcode(
               new Uint8Array(result),
               videoElem.duration,
-              progress => (transcodeProgress = progress),
+              (progress) => (transcodeProgress = progress),
             );
           } catch (err) {
             error({
@@ -609,13 +603,17 @@
 
         try {
           if (!data.length) {
-            throw new Error('Web worker returned 0 bytes of data. This probably means the video\'s codec is not supported.');
+            throw new Error(
+              "Web worker returned 0 bytes of data. This probably means the video's codec is not supported.",
+            );
           }
 
           const blob = new Blob([data], { type: 'video/mp4' });
 
           if (!blob) {
-            throw new Error('Video blob could not be retrieved from web worker.');
+            throw new Error(
+              'Video blob could not be retrieved from web worker.',
+            );
           }
 
           const objectURL = URL.createObjectURL(blob);
@@ -623,7 +621,7 @@
           if (transcoded) {
             // Reload the transcoded video to get a proper thumbnail.
             let resolve;
-            const p = new Promise(r => (resolve = r));
+            const p = new Promise((r) => (resolve = r));
             videoElem.onloadeddata = () => resolve();
             videoElem.src = objectURL;
             await p;
@@ -684,7 +682,10 @@
       } else if (file.type === 'image/gif' && file.size > IMAGE_SIZE_LIMIT) {
         notice({
           title: 'GIF is Too Big',
-          text: 'Sorry, but GIFs can only be up to '+(IMAGE_SIZE_LIMIT / (1024 * 1024))+' MB.',
+          text:
+            'Sorry, but GIFs can only be up to ' +
+            IMAGE_SIZE_LIMIT / (1024 * 1024) +
+            ' MB.',
         });
       } else {
         mediaLoading = 'image';
@@ -695,7 +696,7 @@
         const imageElem = new Image();
         const tempObjectURL = file.localURL || URL.createObjectURL(file);
         let resolve;
-        let p = new Promise(r => (resolve = r));
+        let p = new Promise((r) => (resolve = r));
         imageElem.onload = () => resolve();
         imageElem.src = tempObjectURL;
         await p;
@@ -710,11 +711,11 @@
         if (file.type === 'image/gif') {
           // Read the gif into memory.
           const reader = new FileReader();
-          p = new Promise(r => (resolve = r));
+          p = new Promise((r) => (resolve = r));
           if (window.inCordova) {
             reader.onloadend = () => resolve(reader.result);
           } else {
-            reader.onload = e => resolve(e.target.result);
+            reader.onload = (e) => resolve(e.target.result);
           }
           reader.readAsArrayBuffer(file);
 

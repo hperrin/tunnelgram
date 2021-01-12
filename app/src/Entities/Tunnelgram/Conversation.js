@@ -9,9 +9,9 @@ import * as ConversationConstants from './ConversationConstants';
 let currentUser = null;
 
 authTokenHandlerReady.then(() => {
-  User.current().then(user => (currentUser = user));
+  User.current().then((user) => (currentUser = user));
 });
-User.on('login', user => (currentUser = user));
+User.on('login', (user) => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
 export class Conversation extends Entity {
@@ -67,7 +67,7 @@ export class Conversation extends Entity {
     this.$cryptReadyPromise = (async () => {
       // Decrypt the conversation name.
       if (this.name != null) {
-        let decrypt = async input => input;
+        let decrypt = async (input) => input;
         if (
           this.mode !== Conversation.MODE_CHANNEL_PUBLIC &&
           currentUser &&
@@ -78,7 +78,7 @@ export class Conversation extends Entity {
             this.keys[currentUser.guid],
           );
           const key = decryptedKey.slice(0, 96);
-          decrypt = input => crypt.decrypt(input, key);
+          decrypt = (input) => crypt.decrypt(input, key);
         }
 
         this.$decrypted.name = await decrypt(this.name);
@@ -276,7 +276,7 @@ export class Conversation extends Entity {
         return true;
       }
       return !!currentUser.groups.filter(
-        group => group.guid === this.group.guid,
+        (group) => group.guid === this.group.guid,
       ).length;
     }
     return true;

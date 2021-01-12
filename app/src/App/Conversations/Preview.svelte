@@ -66,7 +66,7 @@
     } else if (conversation.acFull.length === 1) {
       users = conversation.acFull;
     } else {
-      users = conversation.acFull.filter(u => !$user.$is(u));
+      users = conversation.acFull.filter((u) => !$user.$is(u));
     }
     let i = 1;
     while (i ** 2 < users.length) {

@@ -4,16 +4,16 @@
 >
   <h1>{conversation && conversation.$getName($settings)}</h1>
   <p>
-    Started {new SimpleDateFormatter(conversation.cdate).format('wymdhms', 'long')}
+    Started {new SimpleDateFormatter(conversation.cdate).format(
+      'wymdhms',
+      'long',
+    )}
   </p>
   <p>
     {Conversation.MODE_NAME[conversation.mode]}
     <button
       class="btn btn-sm btn-link"
-      on:click={() => (showModeHelp = !showModeHelp)}
-    >
-      (?)
-    </button>
+      on:click={() => (showModeHelp = !showModeHelp)}> (?) </button>
   </p>
   {#if showModeHelp}
     <p class="alert alert-info m-3">

@@ -6,9 +6,9 @@ import { ready as authTokenHandlerReady } from '../../setup/authTokenHandler';
 let currentUser = null;
 
 authTokenHandlerReady.then(() => {
-  User.current().then(user => (currentUser = user));
+  User.current().then((user) => (currentUser = user));
 });
-User.on('login', user => (currentUser = user));
+User.on('login', (user) => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
 export class Settings extends Entity {

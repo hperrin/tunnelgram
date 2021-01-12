@@ -51,8 +51,7 @@
         type="button"
         class="btn btn-info"
         on:click={clearReadline}
-        disabled={clearingReadline}
-      >
+        disabled={clearingReadline}>
         Clear my Readline/Notification Settings
       </button>
     </div>
@@ -73,8 +72,7 @@
           type="button"
           class="btn btn-danger"
           on:click={showConfirmLeave}
-          disabled={leavingConversation}
-        >
+          disabled={leavingConversation}>
           Leave {Conversation.MODE_SHORT_NAME[$conversation.mode]}
         </button>
       {:else}
@@ -83,8 +81,7 @@
           type="button"
           class="btn btn-danger"
           on:click={leave}
-          disabled={leavingConversation}
-        >
+          disabled={leavingConversation}>
           Yes, Leave {Conversation.MODE_SHORT_NAME[$conversation.mode]}
         </button>
       {/if}

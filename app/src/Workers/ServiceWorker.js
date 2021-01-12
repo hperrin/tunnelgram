@@ -6,10 +6,10 @@ const CACHE_STATIC = 'tunnelgram-static-v2';
 const CACHE_CONTENT = 'tunnelgram-content-v2';
 
 // Open new caches.
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
-      caches.open(CACHE_STATIC).then(cache => {
+      caches.open(CACHE_STATIC).then((cache) => {
         return Promise.all([
           cache.add('/').catch(() => {
             // Ignore errors.
@@ -26,20 +26,23 @@ self.addEventListener('install', event => {
         ]);
       }),
       caches.open(CACHE_CONTENT),
-    ]).then(() => self.skipWaiting(), () => self.skipWaiting()),
+    ]).then(
+      () => self.skipWaiting(),
+      () => self.skipWaiting(),
+    ),
   );
 });
 
 // Remove old caches.
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   var cacheKeeplist = [CACHE_STATIC, CACHE_CONTENT];
 
   event.waitUntil(
     caches
       .keys()
-      .then(keyList =>
+      .then((keyList) =>
         Promise.all(
-          keyList.map(key => {
+          keyList.map((key) => {
             if (cacheKeeplist.indexOf(key) === -1) {
               return caches.delete(key);
             }
@@ -50,13 +53,13 @@ self.addEventListener('activate', event => {
   );
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
 
   function fetchAndAddToCache(cacheType, cache, request) {
-    return fetch(request).then(response => {
+    return fetch(request).then((response) => {
       console.log(
         '[' + cacheType + ' Cache] add item to offline: ' + response.url,
       );
@@ -74,14 +77,14 @@ self.addEventListener('fetch', event => {
     // Check in the cache second, return response.
     // If not in the cache, return error page.
     event.respondWith(
-      caches.open(CACHE_CONTENT).then(cache => {
+      caches.open(CACHE_CONTENT).then((cache) => {
         return fetchAndAddToCache('Content', cache, event.request).catch(
-          error => {
+          (error) => {
             console.log(
               '[Content Cache] Network request Failed. Serving content from cache: ' +
                 error,
             );
-            return cache.match(event.request).then(matching => {
+            return cache.match(event.request).then((matching) => {
               const report =
                 !matching || matching.status == 404
                   ? Promise.reject('no-match')
@@ -96,8 +99,8 @@ self.addEventListener('fetch', event => {
     // Check in the cache first, return response.
     // If not in the cache, return error page.
     event.respondWith(
-      caches.open(CACHE_STATIC).then(cache => {
-        return cache.match(event.request).then(matching => {
+      caches.open(CACHE_STATIC).then((cache) => {
+        return cache.match(event.request).then((matching) => {
           const fetchPromise = fetchAndAddToCache(
             'Static',
             cache,
@@ -129,14 +132,14 @@ self.addEventListener('fetch', event => {
 
 // Distributes a message to all window clients controlled by the current Service Worker.
 function sendMessageToAllClients(command, message) {
-  clients.matchAll({ type: 'window' }).then(windowClients => {
-    windowClients.forEach(windowClient => {
+  clients.matchAll({ type: 'window' }).then((windowClients) => {
+    windowClients.forEach((windowClient) => {
       windowClient.postMessage({ command: command, message: message || '' });
     });
   });
 }
 
-self.addEventListener('message', event => {
+self.addEventListener('message', (event) => {
   switch (event.data.command) {
     case 'subscribe':
       const subscriptionOptions = event.data.subscriptionOptions;
@@ -151,7 +154,7 @@ self.addEventListener('message', event => {
         .then(() => {
           sendMessageToAllClients('subscribe-success');
         })
-        .catch(error => {
+        .catch((error) => {
           sendMessageToAllClients('subscribe-failure', '' + error);
         });
 
@@ -160,7 +163,7 @@ self.addEventListener('message', event => {
     case 'unsubscribe':
       registration.pushManager
         .getSubscription()
-        .then(subscription => {
+        .then((subscription) => {
           if (subscription) {
             return subscription.unsubscribe();
           }
@@ -168,26 +171,26 @@ self.addEventListener('message', event => {
         .then(() => {
           sendMessageToAllClients('unsubscribe-success');
         })
-        .catch(error => {
+        .catch((error) => {
           sendMessageToAllClients('unsubscribe-failure', '' + error);
         });
   }
 });
 
-self.addEventListener('push', event => {
+self.addEventListener('push', (event) => {
   console.log('Push Event: ', event);
 
   if (!(self.Notification && self.Notification.permission === 'granted')) {
     return;
   }
 
-  const promiseChain = isClientFocused().then(clientIsFocused => {
+  const promiseChain = isClientFocused().then((clientIsFocused) => {
     if (clientIsFocused) {
       // No need to show a notification.
       return;
     }
     return getEndpoint()
-      .then(endpoint =>
+      .then((endpoint) =>
         fetch('./user/pull.php', {
           body: 'endpoint=' + encodeURIComponent(endpoint),
           cache: 'no-cache',
@@ -197,9 +200,9 @@ self.addEventListener('push', event => {
           method: 'POST',
         }),
       )
-      .then(response => response.json())
-      .then(payload => {
-        let promises = payload.data.map(entry => {
+      .then((response) => response.json())
+      .then((payload) => {
+        let promises = payload.data.map((entry) => {
           const showNameProp =
             entry.conversation.data.acFull.length > 2 ? 'nameFirst' : 'name';
           const title =
@@ -215,17 +218,17 @@ self.addEventListener('push', event => {
                   ? ''
                   : MODE_SHORT_NAME[entry.conversation.data.mode] + ' with ') +
                 entry.conversation.data.acFull
-                  .filter(user => user[1] !== payload.currentUserGuid)
-                  .map(user => payload.users[user[1]].data[showNameProp])
+                  .filter((user) => user[1] !== payload.currentUserGuid)
+                  .map((user) => payload.users[user[1]].data[showNameProp])
                   .join(', ');
 
           let users = [];
-          entry.messages.map(message => {
+          entry.messages.map((message) => {
             if (users.indexOf(message.data.user[1]) === -1) {
               users.push(message.data.user[1]);
             }
           });
-          users = users.map(guid => payload.users[guid].data.name);
+          users = users.map((guid) => payload.users[guid].data.name);
 
           // Build a message for the notification.
           let message;
@@ -276,7 +279,7 @@ self.addEventListener('push', event => {
   event.waitUntil(promiseChain);
 });
 
-self.addEventListener('notificationclick', event => {
+self.addEventListener('notificationclick', (event) => {
   const clickedNotification = event.notification;
   clickedNotification.close();
 
@@ -286,13 +289,15 @@ self.addEventListener('notificationclick', event => {
 // Utility functions
 
 function getEndpoint() {
-  return self.registration.pushManager.getSubscription().then(subscription => {
-    if (subscription) {
-      return subscription.endpoint;
-    }
+  return self.registration.pushManager
+    .getSubscription()
+    .then((subscription) => {
+      if (subscription) {
+        return subscription.endpoint;
+      }
 
-    throw new Error('User not subscribed');
-  });
+      throw new Error('User not subscribed');
+    });
 }
 
 function isClientFocused() {
@@ -301,7 +306,7 @@ function isClientFocused() {
       type: 'window',
       includeUncontrolled: true,
     })
-    .then(windowClients => {
+    .then((windowClients) => {
       let clientIsFocused = false;
 
       for (let i = 0; i < windowClients.length; i++) {
@@ -336,7 +341,7 @@ function openConversation(conversationId) {
       type: 'window',
       includeUncontrolled: true,
     })
-    .then(windowClients => {
+    .then((windowClients) => {
       let matchingClient = null;
 
       for (let i = 0; i < windowClients.length; i++) {

@@ -23,7 +23,9 @@
       <ConversationHeader bind:conversation />
     {:else}
       <div
-        class="d-flex align-items-center justify-content-center {loadingEarlierMessages ? '' : 'visibility-hidden'}"
+        class="d-flex align-items-center justify-content-center {loadingEarlierMessages
+          ? ''
+          : 'visibility-hidden'}"
         style="height: 150px;"
       >
         <div class="col-auto">
@@ -46,8 +48,10 @@
             bind:message
             on:rendered={rescrollToBottom}
             on:deleted={() => removeMessage(message)}
-            nextMessageUserIsDifferent={i === 0 || messages[i - 1].user.guid !== message.user.guid}
-            prevMessageUserIsDifferent={i === messages.length - 1 || messages[i + 1].user.guid !== message.user.guid}
+            nextMessageUserIsDifferent={i === 0 ||
+              messages[i - 1].user.guid !== message.user.guid}
+            prevMessageUserIsDifferent={i === messages.length - 1 ||
+              messages[i + 1].user.guid !== message.user.guid}
           />
           {#if showReadline && i !== 0 && messages[i - 1].cdate > initialReadline && message.cdate <= initialReadline}
             <div
@@ -149,11 +153,11 @@
           ref: ['conversation', conversation.guid],
           gt: ['cdate', messages.length ? messages[0].cdate : 0],
         },
-      ).then(async newMessages => {
+      ).then(async (newMessages) => {
         await Promise.all(
           newMessages
-            .filter(m => !m.$cryptReady)
-            .map(m => m.$cryptReadyPromise),
+            .filter((m) => !m.$cryptReady)
+            .map((m) => m.$cryptReadyPromise),
         );
         messages = [...newMessages, ...messages];
       });
@@ -231,7 +235,7 @@
         ref: ['conversation', conversation.guid],
       },
     ).subscribe(
-      async update => {
+      async (update) => {
         if (destroyed || queryConversationGuid !== conversation.guid) {
           return;
         }
@@ -245,8 +249,8 @@
           PubSub.updateArray(newMessages, update);
           await Promise.all(
             newMessages
-              .filter(m => !m.$cryptReady)
-              .map(m => m.$cryptReadyPromise),
+              .filter((m) => !m.$cryptReady)
+              .map((m) => m.$cryptReadyPromise),
           );
           if (destroyed || queryConversationGuid !== conversation.guid) {
             return;
@@ -294,7 +298,7 @@
           loading = false;
         }
       },
-      err => {
+      (err) => {
         ErrHandler(err);
         loading = false;
       },
@@ -376,8 +380,8 @@
       if (earlierMessages && earlierMessages.length) {
         await Promise.all(
           earlierMessages
-            .filter(m => !m.$cryptReady)
-            .map(m => m.$cryptReadyPromise),
+            .filter((m) => !m.$cryptReady)
+            .map((m) => m.$cryptReadyPromise),
         );
         messages = [...messages, ...earlierMessages];
         if (container) {
@@ -412,7 +416,7 @@
         const messageBoxes = messageContainer.querySelectorAll(
           '.message-box[data-cdate]',
         );
-        const messageBoxesInViewport = Array.from(messageBoxes).filter(el => {
+        const messageBoxesInViewport = Array.from(messageBoxes).filter((el) => {
           const containerTop = container.scrollTop;
           const containerBottom = containerTop + container.clientHeight;
           const elBottom = el.offsetTop + el.offsetHeight;

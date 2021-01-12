@@ -2,7 +2,7 @@ import { AESEncryptionService } from '../Services/AESEncryptionService';
 
 const crypt = new AESEncryptionService();
 
-onmessage = async e => {
+onmessage = async (e) => {
   const { counter, action, args } = e.data;
   if (!(action in crypt)) {
     return;

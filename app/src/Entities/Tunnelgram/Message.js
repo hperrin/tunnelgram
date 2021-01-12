@@ -8,9 +8,9 @@ import { ready as authTokenHandlerReady } from '../../setup/authTokenHandler';
 let currentUser = null;
 
 authTokenHandlerReady.then(() => {
-  User.current().then(user => (currentUser = user));
+  User.current().then((user) => (currentUser = user));
 });
-User.on('login', user => (currentUser = user));
+User.on('login', (user) => (currentUser = user));
 User.on('logout', () => (currentUser = null));
 
 export class Message extends Entity {
@@ -50,8 +50,8 @@ export class Message extends Entity {
 
     this.$cryptReady = false;
     this.$cryptReadyPromise = (async () => {
-      let decrypt = async input => input;
-      let decryptBytes = async input => input;
+      let decrypt = async (input) => input;
+      let decryptBytes = async (input) => input;
       if (
         entityData.encryption &&
         currentUser &&
@@ -72,8 +72,8 @@ export class Message extends Entity {
             key = crypt.xorHex(key, this.key);
           }
         }
-        decrypt = input => crypt.decrypt(input, key);
-        decryptBytes = input => crypt.decryptBytes(input, key);
+        decrypt = (input) => crypt.decrypt(input, key);
+        decryptBytes = (input) => crypt.decryptBytes(input, key);
       }
 
       // Decrypt the message text, images, and/or video.
@@ -111,25 +111,25 @@ export class Message extends Entity {
       ];
       if (this.images && this.images.length) {
         this.$decrypted.images = await Promise.all(
-          this.images.map(async image => {
+          this.images.map(async (image) => {
             // Don't fetch the full image until the user requests it.
             let fullSizePromise;
             const data = {
               promise: () => {
                 if (!fullSizePromise) {
-                  fullSizePromise = new Promise(resolve => {
+                  fullSizePromise = new Promise((resolve) => {
                     window
                       .fetch(image.data.replace(...blobReplace), {
                         mode: 'cors',
                       })
-                      .then(response => {
+                      .then((response) => {
                         return response.arrayBuffer();
                       })
-                      .then(arrayBuffer => {
+                      .then((arrayBuffer) => {
                         // This is purposefully returned as Uint8Array, not Base64.
                         return decryptBytes(new Uint8Array(arrayBuffer));
                       })
-                      .then(result => {
+                      .then((result) => {
                         resolve(result);
                       });
                   });
@@ -140,19 +140,19 @@ export class Message extends Entity {
             const thumbnail =
               image.thumbnail === null
                 ? data.promise()
-                : new Promise(resolve => {
+                : new Promise((resolve) => {
                     window
                       .fetch(image.thumbnail.replace(...blobReplace), {
                         mode: 'cors',
                       })
-                      .then(response => {
+                      .then((response) => {
                         return response.arrayBuffer();
                       })
-                      .then(arrayBuffer => {
+                      .then((arrayBuffer) => {
                         // This is purposefully returned as Uint8Array, not Base64.
                         return decryptBytes(new Uint8Array(arrayBuffer));
                       })
-                      .then(result => {
+                      .then((result) => {
                         resolve(result);
                       });
                   });
@@ -175,19 +175,19 @@ export class Message extends Entity {
         const data = {
           promise: () => {
             if (!fullSizePromise) {
-              fullSizePromise = new Promise(resolve => {
+              fullSizePromise = new Promise((resolve) => {
                 window
                   .fetch(this.video.data.replace(...blobReplace), {
                     mode: 'cors',
                   })
-                  .then(response => {
+                  .then((response) => {
                     return response.arrayBuffer();
                   })
-                  .then(arrayBuffer => {
+                  .then((arrayBuffer) => {
                     // This is purposefully returned as Uint8Array, not Base64.
                     return decryptBytes(new Uint8Array(arrayBuffer));
                   })
-                  .then(result => {
+                  .then((result) => {
                     resolve(result);
                   });
               });
@@ -195,19 +195,19 @@ export class Message extends Entity {
             return fullSizePromise;
           },
         };
-        const thumbnail = new Promise(resolve => {
+        const thumbnail = new Promise((resolve) => {
           window
             .fetch(this.video.thumbnail.replace(...blobReplace), {
               mode: 'cors',
             })
-            .then(response => {
+            .then((response) => {
               return response.arrayBuffer();
             })
-            .then(arrayBuffer => {
+            .then((arrayBuffer) => {
               // This is purposefully returned as Uint8Array, not Base64.
               return decryptBytes(new Uint8Array(arrayBuffer));
             })
-            .then(result => {
+            .then((result) => {
               resolve(result);
             });
         });
@@ -285,7 +285,7 @@ export class Message extends Entity {
         }
         if (this.$decrypted.images && this.$decrypted.images.length) {
           this.images = await Promise.all(
-            this.$decrypted.images.map(async image => ({
+            this.$decrypted.images.map(async (image) => ({
               name: await encrypt(image.name, key),
               dataType: await encrypt(image.dataType, key),
               dataWidth: await encrypt(image.dataWidth, key),

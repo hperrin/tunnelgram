@@ -29,14 +29,14 @@ let swRegPromise = Promise.resolve(null);
 if ('serviceWorker' in navigator) {
   if (navigator.serviceWorker.controller) {
     swRegPromise = navigator.serviceWorker.getRegistration('/');
-    swRegPromise.then(reg => {
+    swRegPromise.then((reg) => {
       console.log('Service worker has been retrieved for scope: ' + reg.scope);
     });
   } else {
     swRegPromise = navigator.serviceWorker.register('/ServiceWorker.js', {
       scope: '/',
     });
-    swRegPromise.then(reg => {
+    swRegPromise.then((reg) => {
       console.log('Service worker has been registered for scope: ' + reg.scope);
     });
   }
@@ -80,12 +80,13 @@ function navigateToContinueUrl() {
       debugger;
       return;
     }
-    const url = route.url + (route.queryString !== '' ? '?' + route.queryString : '');
+    const url =
+      route.url + (route.queryString !== '' ? '?' + route.queryString : '');
     router.navigate('/?continue=' + encodeURIComponent(url));
   }
 }
 
-window.addEventListener('beforeinstallprompt', e => {
+window.addEventListener('beforeinstallprompt', (e) => {
   // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
   // Stash the event so it can be triggered later.
@@ -136,13 +137,13 @@ window.addEventListener('beforeinstallprompt', e => {
             guid: guid,
           },
         ).then(
-          conv => {
+          (conv) => {
             stores.conversation.set(conv);
             stores.view.set(view);
             stores.convosOut.set(false);
             stores.loadingConversation.set(false);
           },
-          err => {
+          (err) => {
             ErrHandler(err);
             stores.loadingConversation.set(false);
             router.navigate('/');
@@ -170,14 +171,14 @@ window.addEventListener('beforeinstallprompt', e => {
     } else {
       crypt.ready.then(() => {
         User.byUsername(username).then(
-          viewUser => {
+          (viewUser) => {
             stores.viewUser.set(viewUser);
             stores.viewUserIsSelf.set(false);
             stores.view.set('user');
             stores.convosOut.set(false);
             stores.loadingUser.set(false);
           },
-          err => {
+          (err) => {
             ErrHandler(err);
             stores.loadingUser.set(false);
             router.navigate('/');
@@ -225,7 +226,7 @@ window.addEventListener('beforeinstallprompt', e => {
   });
   router.resolve();
 
-  stores.conversation.subscribe(conversation => {
+  stores.conversation.subscribe((conversation) => {
     if (conversation && conversation.guid) {
       const conversations = get(stores.conversations);
       // Refresh conversations' readlines when current conversation changes.
@@ -243,7 +244,7 @@ window.addEventListener('beforeinstallprompt', e => {
   });
 
   let previousUser = null;
-  stores.user.subscribe(user => {
+  stores.user.subscribe((user) => {
     if (previousUser !== user) {
       if (user != null && user.guid) {
         // This is needed because the current user is added to acFull.
@@ -266,7 +267,7 @@ window.addEventListener('beforeinstallprompt', e => {
 
         // Get their settings.
         crypt.ready.then(() => {
-          Settings.current().then(settings => {
+          Settings.current().then((settings) => {
             stores.settings.set(settings);
           });
         });
@@ -329,7 +330,7 @@ window.addEventListener('beforeinstallprompt', e => {
             return registration.pushManager.getSubscription();
           };
 
-          const subscribeFromWorkerOrSelf = subscriptionOptions => {
+          const subscribeFromWorkerOrSelf = (subscriptionOptions) => {
             return new Promise((resolve, reject) => {
               if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
@@ -337,7 +338,7 @@ window.addEventListener('beforeinstallprompt', e => {
                   subscriptionOptions: subscriptionOptions,
                 });
 
-                const messageListenerFunction = event => {
+                const messageListenerFunction = (event) => {
                   navigator.serviceWorker.removeEventListener(
                     'message',
                     messageListenerFunction,
@@ -373,10 +374,10 @@ window.addEventListener('beforeinstallprompt', e => {
 
                 registration.pushManager
                   .subscribe(subscriptionOptions)
-                  .then(subscription => {
+                  .then((subscription) => {
                     resolve(subscription);
                   })
-                  .catch(error => {
+                  .catch((error) => {
                     reject('Subscription from self failed: ' + error.message);
                   });
               }
@@ -445,8 +446,8 @@ window.addEventListener('beforeinstallprompt', e => {
 
         // Set notification permission asker.
         stores.requestNotificationPermission.set(async () => {
-          const permissionResult = await new Promise(async resolve => {
-            const promise = Notification.requestPermission(value =>
+          const permissionResult = await new Promise(async (resolve) => {
+            const promise = Notification.requestPermission((value) =>
               resolve(value),
             );
             if (promise) {

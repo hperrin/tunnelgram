@@ -1,19 +1,14 @@
 import Navigo from 'navigo';
 
-export const router = new Navigo(
-  window.inCordova
-    ? location.href
-    : '/',
-  {
-    hash: window.inCordova // Use hash when in Cordova.
-  }
-);
+export const router = new Navigo(window.inCordova ? location.href : '/', {
+  hash: window.inCordova, // Use hash when in Cordova.
+});
 export const navigate = (...args) => {
   router.navigate(...args);
 };
 
 // Navigate links.
-document.body.addEventListener('click', e => {
+document.body.addEventListener('click', (e) => {
   if (!e.defaultPrevented) {
     let el = e.target;
     while (el) {

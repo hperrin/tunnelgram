@@ -73,19 +73,25 @@
       ],
     };
 
-    pswp = new Promise(async resolve => {
-      const PhotoSwipeImport = import(/* webpackChunkName: "photoswipe" */ 'photoswipe/dist/photoswipe.min');
-      const PhotoSwipeUI_DefaultImport = import(/* webpackChunkName: "photoswipe-ui-default" */ 'photoswipe/dist/photoswipe-ui-default.min');
+    pswp = new Promise(async (resolve) => {
+      const PhotoSwipeImport = import(
+        /* webpackChunkName: "photoswipe" */ 'photoswipe/dist/photoswipe.min'
+      );
+      const PhotoSwipeUI_DefaultImport = import(
+        /* webpackChunkName: "photoswipe-ui-default" */ 'photoswipe/dist/photoswipe-ui-default.min'
+      );
 
       const PhotoSwipe = (await PhotoSwipeImport).default;
       const PhotoSwipeUI_Default = (await PhotoSwipeUI_DefaultImport).default;
 
-      resolve(new PhotoSwipe(
-        photoswipe,
-        PhotoSwipeUI_Default,
-        items,
-        Object.assign({}, defaultOptions, options),
-      ));
+      resolve(
+        new PhotoSwipe(
+          photoswipe,
+          PhotoSwipeUI_Default,
+          items,
+          Object.assign({}, defaultOptions, options),
+        ),
+      );
     });
   });
 

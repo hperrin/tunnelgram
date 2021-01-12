@@ -7,7 +7,6 @@ import * as PNotifyFontAwesome5Fix from '@pnotify/font-awesome5-fix';
 import * as PNotifyMobile from '@pnotify/mobile';
 import '@pnotify/mobile/dist/PNotifyMobile.css';
 
-
 // PNotify defaults.
 defaults.styling = 'bootstrap4';
 defaults.icons = 'fontawesome5';

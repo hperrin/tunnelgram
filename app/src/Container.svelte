@@ -2,8 +2,7 @@
   <div class="container">
     <div class="lead py-3">
       Your browser doesn't support the Crypto API, and therefore can't do secure
-      encryption. Unfortunately, this means {$brand} will not work on this
-      browser.
+      encryption. Unfortunately, this means {$brand} will not work on this browser.
     </div>
     <div class="lead py-3">
       You should update your browser to the latest version in order to use {$brand}.
@@ -66,8 +65,7 @@
           <div class="text-center mb-3">
             &copy; Copyright 2018-2019 Hunter Perrin. All rights reserved.
             <a
-              href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da"
-            >
+              href="https://privacypolicies.com/privacy/view/9a6babae40ff5a59c22da2ce37c7f2da">
               Privacy Policy
             </a>
           </div>
@@ -102,25 +100,27 @@
               to log out here and log back in to enable the new encryption.
             {:else if cryptError.name === 'EncryptionUpgradeNeededError'}
               <div>
-                {$brand} has a new encryption method. In order to upgrade,
-                you'll need to log out and log back in. Your private key will be
-                printed below. If you don't remember your password, ask an
-                administrator how you can reset your account with this key. Copy
-                it verbatim from below to a safe place before logging out.
+                {$brand} has a new encryption method. In order to upgrade, you'll
+                need to log out and log back in. Your private key will be printed
+                below. If you don't remember your password, ask an administrator
+                how you can reset your account with this key. Copy it verbatim from
+                below to a safe place before logging out.
               </div>
               <div>
                 <textarea
                   bind:this={privateKeyElem}
                   on:click={copyPrivateKey}
                   readonly
-                  style="width: 100%; height: 150px;"
-                >{cryptError.privateKey}</textarea>
+                  style="width: 100%; height: 150px;">{cryptError.privateKey}
+                </textarea>
               </div>
               <div>
                 This is a great time to try out a password manager, like
                 <a href="https://bitwarden.com/" target="_blank">BitWarden.</a>
               </div>
-            {:else}Error during encryption setup: {cryptError}{/if}
+            {:else}
+              Error during encryption setup: {cryptError}
+            {/if}
             <div>
               <a href="javascript:void(0)" on:click={logout}>Log Out</a>
             </div>

@@ -9,8 +9,7 @@
         role="button"
         data-toggle="dropdown"
         aria-haspopup="true"
-        aria-expanded="false"
-      >
+        aria-expanded="false">
         {#if $conversation.$notifications === Conversation.NOTIFICATIONS_ALL}
           <span>
             <i class="fas fa-bell" />
@@ -39,10 +38,11 @@
         <h6 class="dropdown-header">Notification Setting</h6>
         {#each Object.keys(Conversation.NOTIFICATIONS_NAME).map(parseFloat) as key}
           <a
-            class="dropdown-item {$conversation.$notifications === key ? 'active' : ''}"
+            class="dropdown-item {$conversation.$notifications === key
+              ? 'active'
+              : ''}"
             href="javascript:void(0)"
-            on:click={() => setNotifications(key)}
-          >
+            on:click={() => setNotifications(key)}>
             {Conversation.NOTIFICATIONS_NAME[key]}
           </a>
         {/each}
@@ -61,15 +61,13 @@
     <a
       class="nav-link"
       href="/c/{$conversation.guid}/people"
-      title="People ({$conversation.acFull.length})"
-    >
+      title="People ({$conversation.acFull.length})">
       <span class="fa-layers fa-fw">
         <i class="fas fa-users" />
         {#if $conversation.mode === Conversation.MODE_CHAT}
           <span
             class="fa-layers-counter fa-layers-bottom-right bg-info"
-            style="transform: scale(0.6); bottom: -.4em; right: -.4em;"
-          >
+            style="transform: scale(0.6); bottom: -.4em; right: -.4em;">
             {$conversation.acFull.length}
           </span>
         {/if}
@@ -84,8 +82,7 @@
       <a
         class="nav-link"
         href="/c/{$conversation.guid}/settings"
-        title="Settings"
-      >
+        title="Settings">
         <i class="fas fa-cog" />
         {#if $view === 'settings'}
           <span class="sr-only">(current)</span>

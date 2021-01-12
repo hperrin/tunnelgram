@@ -8,7 +8,7 @@ export * from './userStores';
 export const brand = readable('Tunnelgram');
 export const brandWeb = readable('Tunnelgram.com');
 export const conversations = writable([]);
-conversations.subscribe(async convos => {
+conversations.subscribe(async (convos) => {
   if (convos) {
     let promises = [];
     for (let convo of convos) {
@@ -23,7 +23,7 @@ conversations.subscribe(async convos => {
   }
 });
 export const conversation = writable(new Conversation());
-conversation.subscribe(async convo => {
+conversation.subscribe(async (convo) => {
   if (convo && !convo.$cryptReady) {
     await convo.$cryptReadyPromise;
     conversation.set(convo);
@@ -36,13 +36,13 @@ export const viewUser = writable(null);
 export const viewUserIsSelf = writable(null);
 export const convosOut = writable(true);
 export const settings = writable(null);
-settings.subscribe(async sett => {
+settings.subscribe(async (sett) => {
   if (sett && !sett.$cryptReady) {
     await sett.$cryptReadyPromise;
     settings.set(sett);
   }
 });
-export const disconnected = readable(true, set => {
+export const disconnected = readable(true, (set) => {
   PubSub.on('connect', () => set(false));
   PubSub.on('disconnect', () => set(true));
   set(!PubSub.isConnectionOpen());

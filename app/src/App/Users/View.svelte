@@ -11,13 +11,12 @@
             class="d-none"
             type="file"
             bind:this={avatarInput}
-            on:change={event => handleAvatar(event.target.files)}
+            on:change={(event) => handleAvatar(event.target.files)}
           />
           <button
             class="position-absolute btn btn-primary btn-sm rounded"
             on:click={() => avatarInput.click()}
-            style="left: 0; bottom: 0; z-index: 1;"
-          >
+            style="left: 0; bottom: 0; z-index: 1;">
             <i class="fas fa-upload fa-2x" />
           </button>
         {/if}
@@ -37,7 +36,9 @@
     </div>
     <h2>{$viewUser.name}</h2>
     <div>
-      {$viewUser.username}, member since {new SimpleDateFormatter($viewUser.cdate).format('ymd', 'short')}
+      {$viewUser.username}, member since {new SimpleDateFormatter(
+        $viewUser.cdate,
+      ).format('ymd', 'short')}
     </div>
     <div>
       <button class="btn btn-link" title="Share" on:click={shareShortLink}>
@@ -67,10 +68,7 @@
               type="button"
               class="btn btn-primary ml-2"
               style="width: 100px;"
-              on:click={saveSettings}
-            >
-              Save
-            </button>
+              on:click={saveSettings}> Save </button>
           </div>
           <small id="viewUserNicknameHelp" class="form-text text-muted">
             Only visible to you.
@@ -139,10 +137,7 @@
             id="experimentsButton"
             data-toggle="dropdown"
             aria-haspopup="true"
-            aria-expanded="false"
-          >
-            Experiments
-          </button>
+            aria-expanded="false"> Experiments </button>
           <div class="dropdown-menu" aria-labelledby="experimentsButton">
             <!-- <a class="dropdown-item" href="javascript:void(0)" on:click={() => setExperiment('EXPERIMENT_WEB_PUSH', EXPERIMENT_WEB_PUSH = !EXPERIMENT_WEB_PUSH)}><input type="checkbox" checked={EXPERIMENT_WEB_PUSH}> Web Push Notifications</a> -->
             <span class="dropdown-item">No experiments right now.</span>
@@ -153,10 +148,7 @@
           <button
             type="button"
             class="btn btn-primary w-100"
-            on:click={saveUser}
-          >
-            Save changes
-          </button>
+            on:click={saveUser}> Save changes </button>
         </div>
       {:else}
         <div>
@@ -167,8 +159,7 @@
                 {#each existingConversations as conversation (conversation.guid)}
                   <a
                     class="list-group-item list-group-item-action"
-                    href="/c/{conversation.guid}"
-                  >
+                    href="/c/{conversation.guid}">
                     <Preview bind:conversation />
                   </a>
                 {/each}
@@ -177,11 +168,12 @@
             {/if}
             <button
               type="button"
-              class="btn {existingConversations.length ? 'btn-light' : 'btn-primary'}
+              class="btn {existingConversations.length
+                ? 'btn-light'
+                : 'btn-primary'}
               mt-3 w-100"
               on:click={newConversation}
-              disabled={startingConversation}
-            >
+              disabled={startingConversation}>
               Start a Chat with {$viewUser.nameFirst}
             </button>
           {:else if existingConversationsError}
@@ -192,8 +184,7 @@
               type="button"
               class="btn btn-light mt-3 w-100"
               on:click={newConversation}
-              disabled={startingConversation}
-            >
+              disabled={startingConversation}>
               Start a Chat with {$viewUser.nameFirst}
             </button>
           {:else}
@@ -267,7 +258,7 @@
           },
         );
         await Promise.all(
-          conversations.map(conversation =>
+          conversations.map((conversation) =>
             conversation.$readyAll(1).catch(ErrHandler),
           ),
         );
@@ -317,7 +308,7 @@
           light: '#F7F9F9',
         },
       },
-      error => {
+      (error) => {
         if (error) console.error(error);
       },
     );
@@ -328,7 +319,7 @@
   });
 
   function saveUser() {
-    $viewUser.$save().then(userValue => {
+    $viewUser.$save().then((userValue) => {
       $user = userValue;
       $viewUser = userValue;
     }, ErrHandler);
@@ -341,7 +332,7 @@
       } else {
         $settings.$decrypted.nicknames[$viewUser.guid] = nickname;
       }
-      $settings.$save().then(settingsValue => {
+      $settings.$save().then((settingsValue) => {
         $settings = settingsValue;
         $viewUser = $viewUser;
         $conversation = $conversation;
@@ -406,7 +397,7 @@
     const image = new Image();
     const tempObjectURL = URL.createObjectURL(file);
     let resolve;
-    const p = new Promise(r => (resolve = r));
+    const p = new Promise((r) => (resolve = r));
     image.onload = () => resolve();
     image.src = tempObjectURL;
     await p;

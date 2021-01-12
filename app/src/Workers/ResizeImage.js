@@ -4,7 +4,7 @@ let canvas;
 let canvas2;
 let img;
 
-onmessage = e => {
+onmessage = (e) => {
   const { counter, args } = e.data;
   canvas = e.data.canvas;
   canvas2 = e.data.canvas2;

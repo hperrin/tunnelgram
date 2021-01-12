@@ -9,8 +9,10 @@
     <a
       href="/c"
       on:click={() => (search = '')}
-      class="list-group-item list-group-item-action rounded-0 {$conversation.guid == null ? 'active' : ''}"
-    >
+      class="list-group-item list-group-item-action rounded-0 {$conversation.guid ==
+      null
+        ? 'active'
+        : ''}">
       <h5 class="mb-0 d-flex w-100 align-items-center">
         <i class="fas fa-plus-circle mr-1" />
         New Conversation
@@ -33,10 +35,14 @@
         href="/c/{curConversation.guid}"
         on:click={() => (search = '')}
         class="list-group-item p-2 list-group-item-action rounded-0 flex-column
-        align-items-start {curConversation.guid === $conversation.guid ? 'active' : ''}
-        {filteredConversations[curConversation.guid] ? '' : 'd-none'}"
-        style="cursor: pointer;"
-      >
+        align-items-start {curConversation.guid ===
+        $conversation.guid
+          ? 'active'
+          : ''}
+        {filteredConversations[curConversation.guid]
+          ? ''
+          : 'd-none'}"
+        style="cursor: pointer;">
         <Preview bind:conversation={curConversation} />
       </a>
     {/each}
@@ -53,7 +59,9 @@
     {#if loading || !reachedEarliestConversation}
       <div
         class="list-group-item p-2 rounded-0 d-flex align-items-center
-        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations ? '' : 'visibility-hidden'}"
+        justify-content-center align-self-stretch bg-transparent border-0 {loadingEarlierConversations
+          ? ''
+          : 'visibility-hidden'}"
       >
         <div class="col-auto">
           <LoadingIndicator width="50" height="50" />
@@ -98,12 +106,12 @@
       }
       const searchLC = search.toLowerCase();
       const nicknameUserGUIDs = Object.entries($settings.$decrypted.nicknames)
-        .filter(entry => {
+        .filter((entry) => {
           const [guid, nickname] = entry;
           return nickname.toLowerCase().indexOf(searchLC) !== -1;
         })
-        .map(entry => parseFloat(entry[0]));
-      return $conversations.filter(c => {
+        .map((entry) => parseFloat(entry[0]));
+      return $conversations.filter((c) => {
         for (let acUser of c.acFull) {
           if (
             acUser.$isASleepingReference ||
@@ -121,7 +129,7 @@
         }
         return false;
       });
-    })().map(conv => [conv.guid, true]),
+    })().map((conv) => [conv.guid, true]),
   );
 
   let previousDisconnected = $disconnected;
@@ -138,7 +146,7 @@
           type: '|',
           ref: [
             ['acFull', $user.guid],
-            ...$user.groups.map(group => ['group', group.guid]),
+            ...$user.groups.map((group) => ['group', group.guid]),
           ],
         },
         {
@@ -146,19 +154,19 @@
           gt: [
             'mdate',
             $conversations.length
-              ? Math.max(...$conversations.map(c => c.mdate))
+              ? Math.max(...$conversations.map((c) => c.mdate))
               : 0,
           ],
         },
-      ).then(async newConversations => {
+      ).then(async (newConversations) => {
         await Promise.all(
           newConversations
-            .filter(c => !c.$cryptReady)
-            .map(c => c.$cryptReadyPromise),
+            .filter((c) => !c.$cryptReady)
+            .map((c) => c.$cryptReadyPromise),
         );
         $conversations = [
           ...newConversations,
-          ...$conversations.filter(c => !c.$inArray(newConversations)),
+          ...$conversations.filter((c) => !c.$inArray(newConversations)),
         ];
       });
     }
@@ -211,10 +219,10 @@
         type: '|',
         ref: [
           ['acFull', $user.guid],
-          ...$user.groups.map(group => ['group', group.guid]),
+          ...$user.groups.map((group) => ['group', group.guid]),
         ],
       },
-    ).subscribe(update => {
+    ).subscribe((update) => {
       if (destroyed) {
         return;
       }
@@ -269,12 +277,12 @@
           type: '|',
           ref: [
             ['acFull', $user.guid],
-            ...$user.groups.map(group => ['group', group.guid]),
+            ...$user.groups.map((group) => ['group', group.guid]),
           ],
         },
         {
           type: '&',
-          lt: ['mdate', Math.min(...$conversations.map(c => c.mdate))],
+          lt: ['mdate', Math.min(...$conversations.map((c) => c.mdate))],
         },
       );
 
