@@ -13,10 +13,6 @@
 
 It's as easy to use as any non-E2EE messenger.
 
-## Support Tunnelgram
-
-[![Become a patron on Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/tunnelgram)
-
 ### Sponsor(s)!
 
 Note: Tunnelgram is no longer accepting sponsors.
