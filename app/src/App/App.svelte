@@ -1,3 +1,10 @@
+<div
+  class="alert alert-warning d-flex justify-content-center align-items-center
+m-0"
+>
+  Tunnelgram.com will be shut down on July 31, 2021. Please download any data
+  you would like to keep before then.
+</div>
 {#if $disconnected}
   <div
     class="alert alert-warning d-flex justify-content-center align-items-center

@@ -2,14 +2,14 @@
 
 <big>Easy, secure, end to end encrypted (E2EE) messenger.</big><br/>
 
-* Every message in a *chat* or *private channel* is encrypted from sender to recipient. There is no way to send an unencrypted message in them and Tunnelgram's servers cannot decrypt them.
-* You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
-  * The original sign-up device is *not required*, and *not used as a proxy*.
-* Your account is not tied to a phone number or specific device. You log in with a username and password.
-  * Changing your phone doesn't require any [complicated](https://support.signal.org/hc/en-us/articles/360007062012) [steps](https://faq.whatsapp.com/en/android/28000018/?category=5245246). Just log in on your new phone.
-* If you lose your device, you **don't lose your messages, photos, videos, or conversations**. No backups necessary.
-* Unlike *chats* (and unlike group messages in any other E2EE messenger), new users in *private channels*, which are end to end encrypted, can see the entire message history of the channel.
-* Tunnelgram also has public channels, which are not end to end encrypted (since they are meant to be readable by everyone).
+- Every message in a _chat_ or _private channel_ is encrypted from sender to recipient. There is no way to send an unencrypted message in them and Tunnelgram's servers cannot decrypt them.
+- You can log in on **multiple clients** at the same time, read all of your conversations and messages, and send new messages.
+  - The original sign-up device is _not required_, and _not used as a proxy_.
+- Your account is not tied to a phone number or specific device. You log in with a username and password.
+  - Changing your phone doesn't require any [complicated](https://support.signal.org/hc/en-us/articles/360007062012) [steps](https://faq.whatsapp.com/en/android/28000018/?category=5245246). Just log in on your new phone.
+- If you lose your device, you **don't lose your messages, photos, videos, or conversations**. No backups necessary.
+- Unlike _chats_ (and unlike group messages in any other E2EE messenger), new users in _private channels_, which are end to end encrypted, can see the entire message history of the channel.
+- Tunnelgram also has public channels, which are not end to end encrypted (since they are meant to be readable by everyone).
 
 It's as easy to use as any non-E2EE messenger.
 
@@ -18,6 +18,8 @@ It's as easy to use as any non-E2EE messenger.
 [![Become a patron on Patreon](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/tunnelgram)
 
 ### Sponsor(s)!
+
+Note: Tunnelgram is no longer accepting sponsors.
 
 <img style="border-radius: 50%;" width="75" height="75"
   src="https://github.com/hperrin/tunnelgram/raw/master/sponsors/mrgnw.jpg" title="Morgan Williams"
@@ -52,21 +54,24 @@ With these two principles, Tunnelgram uses the Tunnelwire Encryption Scheme to t
 
 When a user registers, the client must:
 
-1. Hash the password that the user entered, using a cryptographically secure, one way hashing algorithm. *Tunnelgram uses one iteration of SHA-512.*
+1. Hash the password that the user entered, using a cryptographically secure, one way hashing algorithm. _Tunnelgram uses one iteration of SHA-512._
 2. Derive an encryption key and a remainder from the hash. Neither the key nor the password should be practically derivable from just the remainder. There are multiple ways to do this:
-  * Remove some portion from the hash as the key. The remaining portion becomes the remainder. *Tunnelgram removes the first 32 bytes for a key and the next 16 bytes for an initialization vector.*
-  * Use any portion of the hash as the key, then re-hash any portion of the hash to create the remainder.
-  * Or use a combination of these techniques in any amount of iterations. This can add computational overhead which will make brute forcing a password harder, should the remainder become known to an attacker.
+
+- Remove some portion from the hash as the key. The remaining portion becomes the remainder. _Tunnelgram removes the first 32 bytes for a key and the next 16 bytes for an initialization vector._
+- Use any portion of the hash as the key, then re-hash any portion of the hash to create the remainder.
+- Or use a combination of these techniques in any amount of iterations. This can add computational overhead which will make brute forcing a password harder, should the remainder become known to an attacker.
+
 3. Send the remainder to the server as the user's password.
-4. Generate a public/private key pair. *Tunnelgram generates a 4096 bit RSA-OAEP key pair.*
-5. Encrypt the private key with the encryption key it derived from the password hash using a symmetric encryption algorithm. *Tunnelgram uses AES-256 (14 rounds) in Output Feedback mode, with the additional bytes from the hash as the initialization vector.*
+4. Generate a public/private key pair. _Tunnelgram generates a 4096 bit RSA-OAEP key pair._
+5. Encrypt the private key with the encryption key it derived from the password hash using a symmetric encryption algorithm. _Tunnelgram uses AES-256 (14 rounds) in Output Feedback mode, with the additional bytes from the hash as the initialization vector._
 6. Send the encrypted private key and clear text public key to the server.
 
 > :information_source: Some notes:
-> * If you allow your users to use a weak password, then you might as well not encrypt anything, cause it's not secure.
-> * Even though the password your server receives is already hashed, you should still hash it before you store it. Be overly cautious and keep your users secure.
-> * If you just split apart your users' passwords and use one portion to encrypt and the other to authenticate, then you might as well just have them enter two passwords, cause that's essentially what you're doing. (Yeah, there are products that do this.)
-> * Provide 2 factor auth. It is way more secure than just a password, and you can use it along with Tunnelwire.
+>
+> - If you allow your users to use a weak password, then you might as well not encrypt anything, cause it's not secure.
+> - Even though the password your server receives is already hashed, you should still hash it before you store it. Be overly cautious and keep your users secure.
+> - If you just split apart your users' passwords and use one portion to encrypt and the other to authenticate, then you might as well just have them enter two passwords, cause that's essentially what you're doing. (Yeah, there are products that do this.)
+> - Provide 2 factor auth. It is way more secure than just a password, and you can use it along with Tunnelwire.
 
 ### Upon Login
 
@@ -138,7 +143,7 @@ Images are fairly easy. An HTML canvas element is used to size the image down un
 
 Videos are much harder. The closest thing to a universal format is H.264 video and AAC or MP3 audio in an MP4 container. VP9 and Vorbis in a WebM container would be perfect, if Apple supported it. Since many people use iPhones, that won't work. Android will record an MP4, so it can just be encrypted and sent, as long as it's under the arbitrary 20MB limit. I've found this limit is a good tradeoff in video quality/length to decryption time. But iPhones record H.264/AAC in a QuickTime container that can't be played on Android devices. Other devices may record in completely different formats/containers. Or the user may add a video well above the 20MB limit.
 
-A normal messenger app handles this easily. It remuxes or transcodes the video on the server side. Bing bang boom, super compatible video, easy peasy. Tunnelgram can't do that, because *the video is encrypted before it's sent to the server*. The video needs to be made compatible before it's encrypted on the client. So Tunnelgram uses a custom version of FFMPEG compiled to WebAssembly called [FFMPEG.js](https://github.com/hperrin/ffmpeg.js). It loads the video into an ArrayBuffer and passes it to a Web Worker, which downloads and compiles the FFMPEG code in the browser then uses it to remux/transcode the video. For transcoding, it will use 1.5x the original bitrate or the maximum bitrate it can to get a video under 20MB. It uses a two pass transcoding strategy to get the best quality it can at this small file size.
+A normal messenger app handles this easily. It remuxes or transcodes the video on the server side. Bing bang boom, super compatible video, easy peasy. Tunnelgram can't do that, because _the video is encrypted before it's sent to the server_. The video needs to be made compatible before it's encrypted on the client. So Tunnelgram uses a custom version of FFMPEG compiled to WebAssembly called [FFMPEG.js](https://github.com/hperrin/ffmpeg.js). It loads the video into an ArrayBuffer and passes it to a Web Worker, which downloads and compiles the FFMPEG code in the browser then uses it to remux/transcode the video. For transcoding, it will use 1.5x the original bitrate or the maximum bitrate it can to get a video under 20MB. It uses a two pass transcoding strategy to get the best quality it can at this small file size.
 
 Using this strategy, Tunnelgram can send a video from any client device that can be viewed on any other device, regardless of the type or size of the original video.
 
@@ -180,12 +185,12 @@ npm run watch
 
 Some other things I'd like to do to make Tunnelgram even more secure:
 
-* Digital signatures.
-  * Sign messages on send.
-  * Save other user's public keys, and verify signatures with the stored keys.
-* Key fingerprints.
-  * Provide key fingerprints so user's can verify another user's public key when starting a conversation for the first time.
-* User blocking.
+- Digital signatures.
+  - Sign messages on send.
+  - Save other user's public keys, and verify signatures with the stored keys.
+- Key fingerprints.
+  - Provide key fingerprints so user's can verify another user's public key when starting a conversation for the first time.
+- User blocking.
 
 # About Tunnelgram
 
@@ -199,7 +204,6 @@ This is a huge barrier to average users adopting an encrypted messenger. The goa
 
 If you'd like to find me:
 
-* Follow me on Twitter at https://twitter.com/SciActive
-* Email me at hunter@sciactive.com.
-* Find me on GitHub at https://github.com/hperrin and https://github.com/sciactive.
-* Or send me a message on Tunnelgram at http://tngm.me/hperrin.
+- Follow me on Twitter at https://twitter.com/SciActive
+- Email me at hunter@sciactive.com.
+- Find me on GitHub at https://github.com/hperrin and https://github.com/sciactive.

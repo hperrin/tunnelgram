@@ -1,4 +1,18 @@
 <div class="card" style="width: 100%;">
+  <div class="card-body">
+    <h1 class="card-title display-5">Tunnelgram.com is shutting down.</h1>
+    <p class="card-text">
+      Unfortunately, Tunnelgram.com will be shutting down at the end of July,
+      2021. If you have any data you would like to keep, please download it
+      before this time. All of <a
+        href="https://github.com/hperrin/tunnelgram"
+        target="_blank">the code for Tunnelgram</a
+      > will continue to be hosted on GitHub. You are free to fork this code and
+      modify it, and even run your own instance of Tunnelgram.
+    </p>
+  </div>
+</div>
+<div class="card mt-3" style="width: 100%;">
   <img
     class="card-img-top"
     src="og-image.png"
@@ -68,18 +82,6 @@
       It's scary. It took me 5 years of weekends and spare time to develop the technologies,
       and it's now the most convenient end to end encrypted messenger.
     </p>
-    <p class="card-text">
-      {$brand} is hosted at my expense, so I hope to offset the cost through
-      <a href="https://www.patreon.com/tunnelgram" target="_blank">Patreon.</a>
-      Basically, the more I make through Patreon, the more time and resources I can
-      devote to {$brand}. If I make enough to hire more people, we can make {$brand}
-      a world scale messenger!
-    </p>
-    <a
-      class="btn btn-primary btn-lg lead"
-      href="https://www.patreon.com/tunnelgram"
-      target="_blank"
-      role="button"> Support on Patreon </a>
   </div>
 </div>
 <div class="card mt-3" style="width: 100%;">
