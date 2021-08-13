@@ -10,9 +10,6 @@ html, body {
   overflow-x: hidden;
   overscroll-behavior: none;
   -webkit-transform: translate3d(0,0,0);
-
-  background-color: #031926;
-  color: #fff;
 }
 html, body, div.markdown-body {
   font-family: sans-serif;

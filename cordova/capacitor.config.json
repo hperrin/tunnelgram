@@ -1,0 +1,21 @@
+{
+  "appId": "com.tunnelwire.gram",
+  "appName": "Tunnelgram",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {
+    "preferences": {
+      "AllowInlineMediaPlayback": "true",
+      "AppendUserAgent": " CapacitorApp",
+      "BackupWebStorage": "none",
+      "DisallowOverscroll": "true",
+      "BackgroundColor": "FF031926"
+    }
+  }
+}

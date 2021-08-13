@@ -4,7 +4,6 @@
   <title>Tunnelgram</title>
   <meta charset="utf-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://tunnelgram.com https://pubsub.tunnelgram.com wss://pubsub.tunnelgram.com https://tunnelgram.blob.core.windows.net data: gap: blob: file: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src * data: blob: file:; img-src * data: blob: file:;">
-  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" /> -->
   <meta name="viewport" content="minimal-ui, user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=320, height=device-height, viewport-fit=cover">
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
@@ -15,9 +14,8 @@
   <link rel="stylesheet" href="dist/vendors~main.css" />
   <link rel="stylesheet" href="dist/main.css" />
 
-  <!-- Cordova JS -->
-  <script type="text/javascript" src="cordova.js"></script>
-  <script type="text/javascript" src="js/index.js"></script>
+  <!-- Capacitor API JS -->
+  <script type="text/javascript" type="module" src="dist/capload/main.js"></script>
 </head>
 <body style="background-color: #031926; color: #fff;">
   <div id="initialLoader" style="display: flex; justify-content: center; align-items: center; position: absolute; width: 100%; height: 100%;">

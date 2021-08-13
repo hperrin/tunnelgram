@@ -52,12 +52,6 @@
     <preference name="BackupWebStorage" value="none" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="BackgroundColor" value="FF031926" />
-    <plugin name="cordova-plugin-whitelist" spec="1" />
     <plugin name="onesignal-cordova-plugin" spec="~2.4.1" />
-    <plugin name="cordova-plugin-statusbar" spec="~2.4.2" />
-    <plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
     <plugin name="cordova-plugin-media-capture-mp4video" spec="^1.0.5" />
-    <plugin name="cordova-plugin-camera" spec="^4.0.3" />
-    <engine name="android" spec="^8.0.0" />
-    <engine name="ios" spec="^5.0.1" />
 </widget>

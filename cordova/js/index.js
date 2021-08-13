@@ -1,24 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-class CordovaApp {
+// import '@capacitor/core';
+import CapStorage from './CapStorage';
+import CapCamera from './CapCamera';
+
+class MobileApp {
   initialize () {
-    document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+    document.addEventListener('DOMContentLoaded', this.onDeviceReady.bind(this), false);
     this.initOneSignal();
   }
 
@@ -27,10 +13,7 @@ class CordovaApp {
   // Bind any cordova events here. Common events are:
   // 'pause', 'resume', etc.
   onDeviceReady () {
-    window.plugins.webviewcolor.change('#031926');
-
     this.initDeferredStyles();
-    this.initKeyboardHandling();
 
     const scripts = [
       'dist/vendors~main.js',
@@ -47,8 +30,6 @@ class CordovaApp {
       el.src = script;
       document.getElementsByTagName('head')[0].appendChild(el);
     }
-
-    // this.fixWindowSize();
   }
 
   initOneSignal () {
@@ -101,12 +82,6 @@ class CordovaApp {
       .endInit();
   }
 
-  initKeyboardHandling () {
-    Keyboard.shrinkView(true);
-    Keyboard.hideFormAccessoryBar(true);
-    // window.addEventListener('keyboardHeightWillChange', this.fixWindowSize.bind(this));
-  }
-
   initDeferredStyles () {
     function include(href) {
       var link = document.createElement('link');
@@ -127,24 +102,17 @@ class CordovaApp {
     include('dist/node_modules/photoswipe/dist/photoswipe.css');
     include('dist/node_modules/photoswipe/dist/default-skin/default-skin.css');
   }
-
-  fixWindowSize(event) {
-    document.body.style.paddingBottom = event ? event.keyboardHeight+'px' : '0';
-    document.body.scrollTop = 0;
-
-    // Fire a resize event.
-    let resize = new UIEvent('resize');
-    window.dispatchEvent(resize);
-  }
 }
 
 // Nymph Config
-NymphOptions = {
+window.NymphOptions = {
   restURL: 'https://tunnelgram.com/rest.php',
   pubsubURL: 'wss://pubsub.tunnelgram.com'
 };
 
-inCordova = true;
+window.inCordova = true;
+window.CapStorage = CapStorage;
+window.CapCamera = CapCamera;
 
-const app = new CordovaApp();
+const app = new MobileApp();
 app.initialize();

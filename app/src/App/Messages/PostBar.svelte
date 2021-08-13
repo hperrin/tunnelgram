@@ -166,24 +166,16 @@
           <button
             class="dropdown-item p-3"
             type="button"
-            on:click={cordovaCapturePhoto}
+            on:click={capCapturePhoto}
           >
-            Take a photo
+            Photo
           </button>
           <button
             class="dropdown-item p-3"
             type="button"
-            on:click={cordovaCaptureVideo}
+            on:click={capCaptureVideo}
           >
-            Take a video
-          </button>
-          <div class="dropdown-divider" />
-          <button
-            class="dropdown-item p-3"
-            type="button"
-            on:click={() => fileInput.click()}
-          >
-            Browse library
+            Video
           </button>
         </div>
       </div>
@@ -402,82 +394,24 @@
     });
   }
 
-  function cordovaCapturePhoto() {
-    navigator.camera.getPicture(
-      imageURI => {
-        window.resolveLocalFileSystemURL(imageURI, entry => {
-          entry.file(async file => {
-            file.localURL = imageURI;
-            const lfile = imageURI.toLowerCase();
-            if (lfile.endsWith('.png')) {
-              file.type = 'image/png';
-            } else if (lfile.endsWith('.gif')) {
-              file.type = 'image/gif';
-            } else if (lfile.endsWith('.jpeg') || lfile.endsWith('.jpg')) {
-              file.type = 'image/jpeg';
-            } else {
-              file.type = '';
-            }
-            await handleFiles([file]);
-            navigator.camera.cleanup();
-          });
-        });
-      },
-      err => {
-        // TODO: Error handling.
-      },
-      {
-        correctOrientation: true,
-        saveToPhotoAlbum: false,
-      },
-    );
+  async function capCapturePhoto() {
+    const camera = new CapCamera();
+    try {
+      const image = await camera.takePicture();
+      await handleFiles([image]);
+    } catch (e) {
+      ErrHandler(e);
+    }
   }
 
-  function cordovaCaptureVideo() {
-    navigator.device.capture.captureVideo(
-      mediaFiles => {
-        window.resolveLocalFileSystemURL(mediaFiles[0].localURL, entry => {
-          entry.file(file => {
-            file.type = mediaFiles[0].type;
-            file.localURL = entry.toURL();
-            handleFiles([file]);
-          });
-        });
-      },
-      err => {
-        const errObj = {
-          textStatus: '',
-        };
-        switch (err.code) {
-          case CaptureError.CAPTURE_INTERNAL_ERR:
-            errObj.textStatus =
-              'The camera or microphone failed to capture image or sound.';
-            break;
-          case CaptureError.CAPTURE_APPLICATION_BUSY:
-            errObj.textStatus =
-              'The camera or audio capture application is currently serving another capture request.';
-            break;
-          case CaptureError.CAPTURE_INVALID_ARGUMENT:
-            errObj.textStatus =
-              'Invalid use of the API (e.g., the value of limit is less than one).';
-            break;
-          case CaptureError.CAPTURE_NO_MEDIA_FILES:
-            // errObj.textStatus = 'The user exits the camera or audio capture application before capturing anything.';
-            return;
-          case CaptureError.CAPTURE_PERMISSION_DENIED:
-            // errObj.textStatus = 'The user denied a permission required to perform the given capture request.';
-            return;
-          case CaptureError.CAPTURE_NOT_SUPPORTED:
-            errObj.textStatus =
-              'The requested capture operation is not supported.';
-            break;
-        }
-        ErrHandler(errObj);
-      },
-      {
-        quality: 0,
-      },
-    );
+  async function capCaptureVideo() {
+    const camera = new CapCamera();
+    try {
+      const video = await camera.takeVideo();
+      await handleFiles([video]);
+    } catch (e) {
+      ErrHandler(e);
+    }
   }
 
   export async function handleFiles(files) {
@@ -522,6 +456,7 @@
         videoElem.setAttribute('playsinline', '');
         videoElem.setAttribute('webkit-playsinline', '');
         videoElem.src = tempObjectURL;
+        console.log('here 0');
         await p;
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
           videoElem.pause();
@@ -542,18 +477,20 @@
         }
 
         // Now read the video fully into memory.
-        const reader = new FileReader();
-        p = new Promise(r => (resolve = r));
-        if (window.inCordova) {
-          reader.onloadend = () => resolve(reader.result);
-        } else {
-          reader.onload = e => resolve(e.target.result);
+        let reader = new FileReader();
+        if (window.inCordova && reader._realReader && file instanceof Blob) {
+          reader = reader._realReader;
         }
+        p = new Promise(r => (resolve = r));
+        console.log('here 1');
+        reader.onloadend = e => resolve(e.target.result);
+        reader.onload = e => resolve(e.target.result);
         reader.readAsArrayBuffer(file);
 
         let data;
         const result = await p;
 
+        console.log('here 2');
         // Does the video need to be transcoded?
         let transcoded = false;
         if (file.type === 'video/mp4' && file.size < VIDEO_SIZE_LIMIT) {
@@ -706,30 +643,45 @@
         let thumbnailType;
         let thumbnail;
         if (file.type === 'image/gif') {
-          // Read the gif into memory.
-          const reader = new FileReader();
-          p = new Promise(r => (resolve = r));
-          if (window.inCordova) {
-            reader.onloadend = () => resolve(reader.result);
+          if (file.isDataURL) {
+            // The file is a data URL (from Capacitor).
+            data = crypt.decodeBase64(file.base64);
+            dataType = file.type;
+            dataImg = {
+              data: file.localURL,
+              width: imageElem.naturalWidth,
+              height: imageElem.naturalHeight,
+            };
+            // The thumbnail should be the same as the image, just with a scaled
+            // down width and height.
+            thumbnail = crypt.decodeBase64(file.base64);
+            thumbnailType = file.type;
+            thumbnailImg.data = dataImg.data;
           } else {
+            // Read the gif into memory.
+            let reader = new FileReader();
+            if (window.inCordova && reader._realReader) {
+              reader = reader._realReader;
+            }
+            p = new Promise(r => (resolve = r));
             reader.onload = e => resolve(e.target.result);
+            reader.readAsArrayBuffer(file);
+
+            const result = await p;
+
+            data = new Uint8Array(result.slice(0));
+            dataType = file.type;
+            dataImg = {
+              data: 'data:' + file.type + ';base64,' + crypt.encodeBase64(data),
+              width: imageElem.naturalWidth,
+              height: imageElem.naturalHeight,
+            };
+            // The thumbnail should be the same as the image, just with a scaled
+            // down width and height.
+            thumbnail = new Uint8Array(result.slice(0));
+            thumbnailType = file.type;
+            thumbnailImg.data = dataImg.data;
           }
-          reader.readAsArrayBuffer(file);
-
-          const result = await p;
-
-          data = new Uint8Array(result.slice(0));
-          dataType = file.type;
-          dataImg = {
-            data: 'data:' + file.type + ';base64,' + crypt.encodeBase64(data),
-            width: imageElem.naturalWidth,
-            height: imageElem.naturalHeight,
-          };
-          // The thumbnail should be the same as the image, just with a scaled
-          // down width and height.
-          thumbnail = new Uint8Array(result.slice(0));
-          thumbnailType = file.type;
-          thumbnailImg.data = dataImg.data;
         } else {
           let size = IMAGE_BASE_ESTIMATE;
           let dataMatch;
